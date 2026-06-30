@@ -853,6 +853,7 @@
     const el=document.getElementById(pkg+'Price');
     if(el)buildReel(el,fmt(total));
   }
+  const SPIN_DURATION=1.6;
   function spinReel(pkg){
     if(reelActive[pkg])return;
     const el=document.getElementById(pkg+'Price');
@@ -860,6 +861,8 @@
     buildReel(el,fmt(currentPrices[pkg]||0));
     reelActive[pkg]=true;
     (el._reelStrips||[]).forEach(item=>{
+      const pos=parseInt(item.strip.dataset.pos,10)||0;
+      item.strip.style.animationDelay='-'+(pos/10*SPIN_DURATION)+'s';
       item.strip.classList.add('spinning');
     });
   }
@@ -873,7 +876,7 @@
       buildReel(el,finalStr);
       return;
     }
-    const STAGGER=180,SETTLE_MS=900;
+    const STAGGER=70,SETTLE_MS=340;
     items.forEach((item,i)=>{
       setTimeout(()=>{
         const strip=item.strip;
