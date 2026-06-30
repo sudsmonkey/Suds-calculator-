@@ -325,6 +325,19 @@
   .checkout-btn.secondary { background: transparent; color: var(--orange); border: 2px solid var(--orange); margin-top: 10px; }
   .checkout-btn.secondary:hover { background: rgba(245,110,100,0.08); opacity: 1; }
   .waitlist-msg { margin-top: 12px; text-align: center; font-size: 13px; font-weight: 600; color: var(--orange); }
+  .note-wrap { width: 100%; max-width: 500px; margin-top: 12px; }
+
+  @media (min-width: 900px) {
+    body { padding: 56px 32px 90px; }
+    .packages {
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: start;
+      gap: 20px;
+    }
+    .checkout-card, .note-wrap { max-width: 600px; }
+  }
 </style>
 </head>
 <body>
@@ -556,7 +569,7 @@
   </div>
 </div>
 
-<div style="width:100%;max-width:500px;margin-top:12px;">
+<div class="note-wrap">
   <p class="note" style="text-align:left;font-size:12px;color:#8A6A52;line-height:1.9;">
     <strong style="display:block;margin-bottom:6px;font-size:13px;color:#A6382E;">Disclaimers</strong>
   </p>
