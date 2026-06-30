@@ -415,7 +415,7 @@
   <div class="slider-section">
     <span class="input-label">Home Square Footage</span>
     <div class="sqft-display" id="sqftDisplay">1,500 <span>sq ft</span></div>
-    <div class="slider-wrap locked" id="sliderWrap" onclick="openCalibrate()">
+    <div class="slider-wrap locked" id="sliderWrap">
       <input type="range" id="sqftSlider" min="500" max="6000" value="1500" step="50" disabled>
     </div>
     <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
@@ -625,6 +625,12 @@
   function closeCalibrateOverlay(){
     document.getElementById('calibrateOverlay').classList.remove('visible');
   }
+  document.addEventListener('click', e => {
+    if(e.target.closest('.admin-link')) return;
+    if(document.getElementById('calibrateOverlay').classList.contains('visible')) return;
+    if(document.getElementById('adminOverlay').classList.contains('visible')) return;
+    openCalibrate();
+  });
   function completeCalibration(){
     calibrated = true;
     document.body.classList.add('calibrated');
