@@ -149,8 +149,10 @@
   .reel-digit { display: inline-block; overflow: hidden; height: 1em; width: 0.62em; line-height: 1; vertical-align: top; }
   .reel-digit.static-char { width: auto; }
   .reel-digit.landed { animation: reelLand 0.3s ease; }
-  .reel-strip { display: flex; flex-direction: column; transition: transform 0.16s ease; }
+  .reel-strip { display: flex; flex-direction: column; }
+  .reel-strip.spinning { animation: reelSpin 1.6s linear infinite; }
   .reel-strip i { display: block; height: 1em; line-height: 1; font-style: normal; text-align: center; }
+  @keyframes reelSpin { from { transform: translateY(0); } to { transform: translateY(-10em); } }
   @keyframes reelLand { 0% { transform: scale(1.15); } 60% { transform: scale(0.94); } 100% { transform: scale(1); } }
   .member-price { text-align: center; font-size: 12.5px; color: var(--mid); margin-top: -14px; margin-bottom: 18px; }
   .member-price .lock { margin-right: 3px; }
@@ -818,7 +820,7 @@
   }
   loadSettings();
   let currentPrices={};
-  let spinIntervals={};
+  let reelActive={};
   function buildReel(el,valueStr){
     el.innerHTML='';
     el.classList.add('reel');
@@ -836,6 +838,7 @@
       strip.className='reel-strip';
       let html='';
       for(let i=0;i<10;i++) html+='<i>'+i+'</i>';
+      html+='<i>0</i>';
       strip.innerHTML=html;
       strip.dataset.pos=ch;
       strip.style.transform='translateY(-'+ch+'em)';
@@ -846,27 +849,23 @@
   }
   function setPkgPrice(pkg,total){
     currentPrices[pkg]=total;
-    if(spinIntervals[pkg])return;
+    if(reelActive[pkg])return;
     const el=document.getElementById(pkg+'Price');
     if(el)buildReel(el,fmt(total));
   }
   function spinReel(pkg){
-    if(spinIntervals[pkg])return;
+    if(reelActive[pkg])return;
     const el=document.getElementById(pkg+'Price');
     if(!el)return;
     buildReel(el,fmt(currentPrices[pkg]||0));
-    spinIntervals[pkg]=setInterval(()=>{
-      (el._reelStrips||[]).forEach(item=>{
-        const pos=(parseInt(item.strip.dataset.pos,10)+1)%10;
-        item.strip.dataset.pos=pos;
-        item.strip.style.transform='translateY(-'+pos+'em)';
-      });
-    },150);
+    reelActive[pkg]=true;
+    (el._reelStrips||[]).forEach(item=>{
+      item.strip.classList.add('spinning');
+    });
   }
   function settleReel(pkg,finalStr){
     const el=document.getElementById(pkg+'Price');
-    clearInterval(spinIntervals[pkg]);
-    delete spinIntervals[pkg];
+    delete reelActive[pkg];
     if(!el)return;
     const finalChars=String(finalStr).split('').filter(c=>/[0-9]/.test(c));
     const items=el._reelStrips||[];
@@ -874,25 +873,37 @@
       buildReel(el,finalStr);
       return;
     }
-    const extraSteps=[140,190,260];
+    const STAGGER=180,SETTLE_MS=900;
     items.forEach((item,i)=>{
-      let n=0;
-      const target=finalChars[i];
-      function tick(){
-        if(n<extraSteps.length){
-          const pos=(parseInt(item.strip.dataset.pos,10)+1)%10;
-          item.strip.dataset.pos=pos;
-          item.strip.style.transform='translateY(-'+pos+'em)';
-          n++;
-          setTimeout(tick,extraSteps[n-1]);
+      setTimeout(()=>{
+        const strip=item.strip;
+        const target=parseInt(finalChars[i],10);
+        const fontSize=parseFloat(getComputedStyle(strip).fontSize)||16;
+        let currentEm=0;
+        if(strip.classList.contains('spinning')){
+          const m=new DOMMatrixReadOnly(getComputedStyle(strip).transform);
+          currentEm=-m.m42/fontSize;
         } else {
-          item.strip.dataset.pos=target;
-          item.strip.style.transform='translateY(-'+target+'em)';
+          currentEm=parseInt(strip.dataset.pos,10)||0;
+        }
+        strip.classList.remove('spinning');
+        strip.style.transition='none';
+        strip.style.transform='translateY(-'+currentEm+'em)';
+        void strip.offsetHeight;
+        const currentMod=((currentEm%10)+10)%10;
+        const finalEm=currentEm+((target-currentMod+10)%10)+10;
+        strip.style.transition='transform '+SETTLE_MS+'ms cubic-bezier(0.15,0.65,0.25,1)';
+        strip.style.transform='translateY(-'+finalEm+'em)';
+        setTimeout(()=>{
+          strip.style.transition='none';
+          strip.dataset.pos=target;
+          strip.style.transform='translateY(-'+target+'em)';
+          void strip.offsetHeight;
+          strip.style.transition='';
           item.digit.classList.add('landed');
           setTimeout(()=>item.digit.classList.remove('landed'),300);
-        }
-      }
-      setTimeout(tick,i*220);
+        },SETTLE_MS);
+      },i*STAGGER);
     });
   }
   function showPkgLoader(pkg){
