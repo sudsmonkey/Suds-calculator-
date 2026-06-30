@@ -145,15 +145,6 @@
   .pkg-starting { font-size: 13px; color: var(--mid); text-align: center; margin-bottom: 2px; }
   .pkg-amount { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 52px; color: var(--dark); text-align: center; line-height: 1; margin-bottom: 20px; position: relative; }
   .pkg-amount .dollar { font-size: 28px; vertical-align: super; }
-  .pkg-amount .reel { display: inline-flex; vertical-align: top; }
-  .reel-digit { display: inline-block; overflow: hidden; height: 1em; width: 0.62em; line-height: 1; vertical-align: top; }
-  .reel-digit.static-char { width: auto; }
-  .reel-digit.landed { animation: reelLand 0.3s ease; }
-  .reel-strip { display: flex; flex-direction: column; }
-  .reel-strip.spinning { animation: reelSpin 1.6s linear infinite; }
-  .reel-strip i { display: block; height: 1em; line-height: 1; font-style: normal; text-align: center; }
-  @keyframes reelSpin { from { transform: translateY(0); } to { transform: translateY(-10em); } }
-  @keyframes reelLand { 0% { transform: scale(1.15); } 60% { transform: scale(0.94); } 100% { transform: scale(1); } }
   .member-price { text-align: center; font-size: 12.5px; color: var(--mid); margin-top: -14px; margin-bottom: 18px; }
   .member-price .lock { margin-right: 3px; }
   .member-price .member-amt { font-weight: 700; color: #B5AC9E; }
@@ -819,151 +810,12 @@
     if(m) m.style.display = 'block';
   }
   loadSettings();
-  let currentPrices={};
-  let reelActive={};
-  function buildReel(el,valueStr){
-    el.innerHTML='';
-    el.classList.add('reel');
-    el._reelStrips=[];
-    String(valueStr).split('').forEach(ch=>{
-      const digit=document.createElement('span');
-      digit.className='reel-digit';
-      if(!/[0-9]/.test(ch)){
-        digit.classList.add('static-char');
-        digit.textContent=ch;
-        el.appendChild(digit);
-        return;
-      }
-      const strip=document.createElement('span');
-      strip.className='reel-strip';
-      let html='';
-      for(let i=0;i<10;i++) html+='<i>'+i+'</i>';
-      html+='<i>0</i>';
-      strip.innerHTML=html;
-      strip.dataset.pos=ch;
-      strip.style.transform='translateY(-'+ch+'em)';
-      digit.appendChild(strip);
-      el.appendChild(digit);
-      el._reelStrips.push({digit:digit,strip:strip});
-    });
-  }
   function setPkgPrice(pkg,total){
-    currentPrices[pkg]=total;
-    if(reelActive[pkg])return;
     const el=document.getElementById(pkg+'Price');
-    if(el)buildReel(el,fmt(total));
+    if(el)el.textContent=fmt(total);
   }
-  const SPIN_DURATION=1.6;
-  function spinReel(pkg){
-    if(reelActive[pkg])return;
-    const el=document.getElementById(pkg+'Price');
-    if(!el)return;
-    buildReel(el,fmt(currentPrices[pkg]||0));
-    reelActive[pkg]=true;
-    (el._reelStrips||[]).forEach(item=>{
-      const pos=parseInt(item.strip.dataset.pos,10)||0;
-      item.strip.style.animationDelay='-'+(pos/10*SPIN_DURATION)+'s';
-      item.strip.classList.add('spinning');
-    });
-  }
-  function settleReel(pkg,finalStr){
-    const el=document.getElementById(pkg+'Price');
-    delete reelActive[pkg];
-    if(!el)return;
-    const finalChars=String(finalStr).split('').filter(c=>/[0-9]/.test(c));
-    const items=el._reelStrips||[];
-    if(items.length!==finalChars.length){
-      buildReel(el,finalStr);
-      return;
-    }
-    const STAGGER=70,SETTLE_MS=340;
-    items.forEach((item,i)=>{
-      setTimeout(()=>{
-        const strip=item.strip;
-        const target=parseInt(finalChars[i],10);
-        const fontSize=parseFloat(getComputedStyle(strip).fontSize)||16;
-        let currentEm=0;
-        if(strip.classList.contains('spinning')){
-          const m=new DOMMatrixReadOnly(getComputedStyle(strip).transform);
-          currentEm=-m.m42/fontSize;
-        } else {
-          currentEm=parseInt(strip.dataset.pos,10)||0;
-        }
-        strip.classList.remove('spinning');
-        strip.style.transition='none';
-        strip.style.transform='translateY(-'+currentEm+'em)';
-        void strip.offsetHeight;
-        const currentMod=((currentEm%10)+10)%10;
-        const finalEm=currentEm+((target-currentMod+10)%10)+10;
-        strip.style.transition='transform '+SETTLE_MS+'ms cubic-bezier(0.15,0.65,0.25,1)';
-        strip.style.transform='translateY(-'+finalEm+'em)';
-        setTimeout(()=>{
-          strip.style.transition='none';
-          strip.dataset.pos=target;
-          strip.style.transform='translateY(-'+target+'em)';
-          void strip.offsetHeight;
-          strip.style.transition='';
-          item.digit.classList.add('landed');
-          setTimeout(()=>item.digit.classList.remove('landed'),300);
-        },SETTLE_MS);
-      },i*STAGGER);
-    });
-  }
-  function showPkgLoader(pkg){
-    const amt=document.getElementById('amount-'+pkg);
-    if(!amt||amt.classList.contains('loading'))return;
-    amt.classList.add('loading');
-    spinReel(pkg);
-  }
-  function revealPkg(pkg){
-    const amt=document.getElementById('amount-'+pkg);
-    if(!amt)return;
-    settleReel(pkg,fmt(currentPrices[pkg]||0));
-    amt.classList.remove('loading');
-  }
-  function updateSqftDisplay(){
-    const sqft=parseInt(document.getElementById('sqftSlider').value);
-    const pct=((sqft-500)/(6000-500))*100;
-    document.getElementById('sqftSlider').style.setProperty('--pct',pct+'%');
-    document.getElementById('sqftDisplay').innerHTML=sqft.toLocaleString()+' <span>sq ft</span>';
-  }
-  let priceSpinTimer=null;
-  let priceObserver=null;
-  function armPriceReveal(){
-    if(priceObserver)priceObserver.disconnect();
-    const HOLD={lemur:0,gorilla:1500,silver:2800};
-    priceObserver=new IntersectionObserver((entries)=>{
-      entries.forEach(en=>{
-        if(en.isIntersecting){
-          const pkg=en.target.dataset.pkg;
-          priceObserver.unobserve(en.target);
-          const h=HOLD[pkg]||0;
-          if(h>0)setTimeout(()=>revealPkg(pkg),h);
-          else revealPkg(pkg);
-        }
-      });
-    },{threshold:0.45});
-    ['lemur','gorilla','silver'].forEach(pkg=>{
-      const card=document.getElementById('pkg-'+pkg);
-      if(card){card.dataset.pkg=pkg;priceObserver.observe(card);}
-    });
-  }
-  function onSliderInput(){
-    updateSqftDisplay();
-    ['lemur','gorilla','silver'].forEach(showPkgLoader);
-    clearTimeout(priceSpinTimer);
-    priceSpinTimer=setTimeout(()=>{
-      updatePrices();
-      armPriceReveal();
-    },2800);
-  }
-  function runPriceLoaders(){
-    ['lemur','gorilla','silver'].forEach(showPkgLoader);
-    priceSpinTimer=setTimeout(armPriceReveal,2800);
-  }
-  document.getElementById('sqftSlider').addEventListener('input',onSliderInput);
+  document.getElementById('sqftSlider').addEventListener('input',updatePrices);
   updatePrices();
-  runPriceLoaders();
 </script>
 </body>
 </html>
