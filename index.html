@@ -112,8 +112,6 @@
   .quick-q select:focus { border-color: var(--orange); }
   .slider-wrap { position: relative; }
   .slider-wrap.locked input[type="range"] { opacity: 0.35; pointer-events: none; }
-  .slider-lock-hint { display: none; text-align: center; margin-top: 14px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px; color: var(--orange); cursor: pointer; }
-  .slider-wrap.locked .slider-lock-hint { display: block; }
   #calibrateOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
   #calibrateOverlay.visible { display: flex; }
   .calibrate-box { background: var(--white); border-radius: var(--radius); padding: 32px 28px; width: 100%; max-width: 380px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
@@ -125,9 +123,7 @@
   .calibrate-step-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); }
   .calibrate-step { display: none; }
   .calibrate-step.active { display: block; }
-  .pkg-locked-msg { display: none; text-align: center; font-size: 13px; font-weight: 600; color: var(--orange); margin-bottom: 20px; cursor: pointer; }
   body:not(.calibrated) .pkg-amount, body:not(.calibrated) .member-price { display: none; }
-  body:not(.calibrated) .pkg-locked-msg { display: block; }
 
   /* Package cards */
   .packages { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 500px; }
@@ -427,7 +423,6 @@
     <div class="sqft-display" id="sqftDisplay">1,500 <span>sq ft</span></div>
     <div class="slider-wrap locked" id="sliderWrap" onclick="openCalibrate()">
       <input type="range" id="sqftSlider" min="500" max="6000" value="1500" step="50" disabled>
-      <div class="slider-lock-hint">🎚️ Let's Calibrate — tap to answer 2 quick questions</div>
     </div>
     <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
   </div>
@@ -446,7 +441,6 @@
       <div class="pkg-starting">Starting at</div>
       <div class="pkg-amount" id="amount-lemur"><span class="dollar">$</span><span id="lemurPrice">120</span></div>
       <div class="member-price"><span class="lock">🔒</span>Member price: <span class="member-amt">$<span id="lemurMemberPrice">96</span></span> — unlocks after your first service</div>
-      <div class="pkg-locked-msg" onclick="openCalibrate()">🔒 Calibrate to see your price</div>
       <ul class="pkg-features">
         <li>A clean swing through the outside</li>
         <li>Exterior glass only</li>
@@ -480,7 +474,6 @@
       <div class="pkg-starting">Starting at</div>
       <div class="pkg-amount" id="amount-gorilla"><span class="dollar">$</span><span id="gorillaPrice">150</span></div>
       <div class="member-price"><span class="lock">🔒</span>Member price: <span class="member-amt">$<span id="gorillaMemberPrice">120</span></span> — unlocks after your first service</div>
-      <div class="pkg-locked-msg" onclick="openCalibrate()">🔒 Calibrate to see your price</div>
       <ul class="pkg-features">
         <li>Strength meets sparkle</li>
         <li>Interior &amp; exterior glass</li>
@@ -527,7 +520,6 @@
       <div class="pkg-starting">Starting at</div>
       <div class="pkg-amount" id="amount-silver"><span class="dollar">$</span><span id="silverPrice">210</span></div>
       <div class="member-price"><span class="lock">🔒</span>Member price: <span class="member-amt">$<span id="silverMemberPrice">168</span></span> — unlocks after your first service</div>
-      <div class="pkg-locked-msg" onclick="openCalibrate()">🔒 Calibrate to see your price</div>
       <ul class="pkg-features">
         <li>The alpha clean. Period.</li>
         <li>Interior &amp; exterior glass</li>
