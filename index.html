@@ -714,7 +714,7 @@
     document.querySelectorAll('#calibrateStep1 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     updatePrices();
-    setTimeout(() => showCalibrateStep('2'), 900);
+    setTimeout(() => showCalibrateStep('2'), 2200);
   }
   function selectFrenchPane(value, btn) {
     document.querySelectorAll('#calibrateStep2 .story-btn').forEach(b => b.classList.remove('active'));
@@ -792,7 +792,7 @@
         specs.push({ bx: Math.random()*w, by: Math.random()*h, size: bubbleSize*(0.4+Math.random()*0.6) });
       }
 
-      const maxStagger = 260;
+      const maxStagger = 500;
       specs.forEach((s, i) => {
         const b = document.createElement('div');
         b.className = 'suds-particle';
@@ -806,7 +806,7 @@
         const dist = 12 + Math.random() * 12;
         b.style.setProperty('--sx', (Math.cos(angle) * dist).toFixed(1) + 'px');
         b.style.setProperty('--sy', (Math.sin(angle) * dist).toFixed(1) + 'px');
-        b.style.animationDuration = (1.1 + Math.random() * 0.5) + 's';
+        b.style.animationDuration = (1.6 + Math.random() * 0.6) + 's';
         b.style.animationDelay = ((i / specs.length) * maxStagger) + 'ms';
         clip.appendChild(b);
       });
@@ -817,7 +817,7 @@
       });
 
       // small outburst from center after fill has held
-      const burstDelay = maxStagger + 900;
+      const burstDelay = maxStagger + 1400;
       setTimeout(() => {
         const cx = rect.left + w / 2, cy = rect.top + h / 2;
         for (let i = 0; i < 10; i++) {
