@@ -93,12 +93,13 @@
   .story-btn.active { background: var(--orange); border-color: var(--orange); color: var(--white); }
   @keyframes btnBounce {
     0%   { transform: scale(1); }
-    25%  { transform: scale(0.91); }
-    55%  { transform: scale(1.07); }
-    75%  { transform: scale(0.97); }
+    20%  { transform: scale(0.87); }
+    50%  { transform: scale(1.13); }
+    70%  { transform: scale(0.95); }
+    85%  { transform: scale(1.04); }
     100% { transform: scale(1); }
   }
-  .story-btn.bouncing { animation: btnBounce 0.38s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+  .story-btn.bouncing { animation: btnBounce 0.45s ease both; }
   .quick-q { margin-top: 22px; }
   .quick-q select { width: 100%; padding: 10px 12px; border: 1.5px solid #DDD3C4; border-radius: 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--dark); background: var(--white); outline: none; }
   .quick-q select:focus { border-color: var(--orange); }
