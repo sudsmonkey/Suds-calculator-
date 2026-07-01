@@ -91,15 +91,7 @@
   .story-btns { display: flex; gap: 8px; }
   .story-btn { flex: 1; padding: 10px 0; border-radius: 12px; border: 1.5px solid #DDD3C4; background: var(--white); font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; color: var(--dark); cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; }
   .story-btn.active { background: var(--orange); border-color: var(--orange); color: var(--white); }
-  @keyframes btnBounce {
-    0%   { transform: scale(1); }
-    20%  { transform: scale(0.87); }
-    50%  { transform: scale(1.13); }
-    70%  { transform: scale(0.95); }
-    85%  { transform: scale(1.04); }
-    100% { transform: scale(1); }
-  }
-  .story-btn.bouncing { animation: btnBounce 0.45s ease both; }
+  .story-btn.bouncing { animation: selectFlip 1.0s ease both; }
   .quick-q { margin-top: 22px; }
   .quick-q select { width: 100%; padding: 10px 12px; border: 1.5px solid #DDD3C4; border-radius: 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--dark); background: var(--white); outline: none; }
   .quick-q select:focus { border-color: var(--orange); }
@@ -651,33 +643,33 @@
     document.querySelectorAll('#calibrateStep1 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     updatePrices();
-    setTimeout(() => showCalibrateStep('2'), 750);
+    setTimeout(() => showCalibrateStep('2'), 1100);
   }
   function selectFrenchPane(value, btn) {
     document.querySelectorAll('#calibrateStep2 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(() => showCalibrateStep('3'), 750);
+    setTimeout(() => showCalibrateStep('3'), 1100);
   }
   function selectFreq(value, btn) {
     document.getElementById('cleanFreq').value = value;
     document.querySelectorAll('#calibrateStep3 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(() => showCalibrateStep('4'), 750);
+    setTimeout(() => showCalibrateStep('4'), 1100);
   }
   function selectHistoric(value, btn) {
     document.querySelectorAll('#calibrateStep4 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(() => showCalibrateStep(value === 'yes' ? '4b' : '5'), 750);
+    setTimeout(() => showCalibrateStep(value === 'yes' ? '4b' : '5'), 1100);
   }
   function selectStormWindows(value, btn) {
     document.querySelectorAll('#calibrateStep4b .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(() => showCalibrateStep(value === 'yes' ? 'Storm' : 'Quote'), 750);
+    setTimeout(() => showCalibrateStep(value === 'yes' ? 'Storm' : 'Quote'), 1100);
   }
   function selectUncommonFeatures(value, btn) {
     document.querySelectorAll('#calibrateStep5 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(completeCalibration, 750);
+    setTimeout(completeCalibration, 1100);
   }
   let calibrated = false;
   function openCalibrate(){
