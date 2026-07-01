@@ -21,21 +21,6 @@
     padding: 32px 16px 60px;
   }
 
-  /* Admin */
-  #adminOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 100; justify-content: center; align-items: center; }
-  #adminOverlay.visible { display: flex; }
-  .admin-box { background: var(--white); border-radius: var(--radius); padding: 32px 28px; width: 100%; max-width: 380px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
-  .admin-box h2 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 20px; color: var(--orange); margin-bottom: 18px; }
-  .field-row { margin-bottom: 14px; }
-  .field-row label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); margin-bottom: 5px; }
-  .field-row input { width: 100%; padding: 9px 12px; border: 1.5px solid #DDD3C4; border-radius: 10px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--dark); outline: none; }
-  .field-row input:focus { border-color: var(--orange); }
-  .admin-btn { display: inline-block; padding: 10px 24px; border-radius: 50px; border: none; background: var(--orange); color: var(--white); font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 6px; transition: opacity 0.15s; }
-  .admin-btn:hover { opacity: 0.88; }
-  .admin-btn.outline { background: transparent; border: 1.5px solid var(--orange); color: var(--orange); margin-left: 10px; }
-  .error-msg { color: #e53e3e; font-size: 13px; margin-top: 8px; display: none; }
-  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); margin: 18px 0 10px; border-top: 1px solid #EBE1D2; padding-top: 14px; }
-  .save-msg { color: #2e7d32; font-size: 13px; font-weight: 600; margin-top: 10px; display: none; }
 
   /* Header */
   header { text-align: center; margin-bottom: 12px; display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 500px; }
@@ -44,7 +29,6 @@
   .brand-tagline { font-family: 'DM Sans', sans-serif; font-size: 18px; font-style: italic; color: var(--mid); margin-top: 4px; }
   .brand-tagline-small { font-family: 'DM Sans', sans-serif; font-size: 13px; font-style: italic; color: var(--mid); margin-top: 2px; opacity: 0.7; }
   .brand-sub { font-size: 13px; color: var(--mid); margin-top: 2px; }
-  .admin-link { margin-top: 12px; font-size: 11px; color: #CFC6B8; cursor: pointer; text-decoration: underline; user-select: none; }
   .header-card {
     background: var(--white);
     border: 1.5px solid var(--orangeborder);
@@ -339,30 +323,6 @@
 </head>
 <body>
 
-<div id="adminOverlay">
-  <div class="admin-box" id="loginBox">
-    <h2>🐒 Admin Login</h2>
-    <div class="field-row"><label>Password</label><input type="password" id="adminPassword" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPassword()"></div>
-    <button class="admin-btn" onclick="checkPassword()">Log In</button>
-    <div class="error-msg" id="loginError">Incorrect password. Try again.</div>
-  </div>
-  <div class="admin-box" id="adminPanel" style="display:none; max-width:420px;">
-    <h2>🐒 Pricing Admin</h2>
-    <div class="section-title">Base Rates (per sq ft)</div>
-    <div class="field-row"><label>Light Lemur — rate ($)</label><input type="number" id="a-lemur" step="0.01" min="0"></div>
-    <div class="field-row"><label>Gorilla Grande — rate ($)</label><input type="number" id="a-gorilla" step="0.01" min="0"></div>
-    <div class="field-row"><label>Silverback Supreme — rate ($)</label><input type="number" id="a-silver" step="0.01" min="0"></div>
-    <div class="section-title">Add-On Prices</div>
-    <div class="field-row"><label>Screen brushing — per screen ($)</label><input type="number" id="a-screen" step="0.50" min="0"></div>
-    <div class="field-row"><label>Deep clean tracks — flat ($)</label><input type="number" id="a-tracks" step="1" min="0"></div>
-    <div class="field-row"><label>Mirror cleaning — per mirror ($)</label><input type="number" id="a-mirror" step="0.50" min="0"></div>
-    <div style="margin-top:18px;">
-      <button class="admin-btn" onclick="saveSettings()">Save &amp; Go Live</button>
-      <button class="admin-btn outline" onclick="closeAdmin()">Close</button>
-    </div>
-    <div class="save-msg" id="saveMsg">✓ Prices updated and live!</div>
-  </div>
-</div>
 
 <div id="calibrateOverlay">
   <div class="calibrate-box">
@@ -479,7 +439,6 @@
   <div class="brand-tagline">for monkey business</div>
   <div class="brand-tagline-small">(but no monkey business)</div>
   
-  <span class="admin-link" onclick="openAdmin()">Admin</span>
   </div>
   <div class="slider-section">
     <span class="input-label">Home Square Footage</span>
@@ -721,9 +680,7 @@
     document.getElementById('calibrateOverlay').classList.remove('visible');
   }
   document.addEventListener('click', e => {
-    if(e.target.closest('.admin-link')) return;
     if(document.getElementById('calibrateOverlay').classList.contains('visible')) return;
-    if(document.getElementById('adminOverlay').classList.contains('visible')) return;
     openCalibrate();
   });
 
@@ -734,35 +691,6 @@
     document.getElementById('sliderWrap').classList.remove('locked');
     closeCalibrateOverlay();
     updatePrices();
-  }
-  const ADMIN_PASSWORD = 'Sudscal';
-  function loadSettings() {
-    try { const s=JSON.parse(localStorage.getItem('sudsAdminSettings')||'{}');
-      if(s.lemur)RATES.lemur=s.lemur; if(s.gorilla)RATES.gorilla=s.gorilla;
-      if(s.silver)RATES.silver=s.silver; if(s.screen)SCREEN_PRICE=s.screen; if(s.tracks)TRACKS_PRICE=s.tracks; if(s.mirror)MIRROR_PRICE=s.mirror;
-    } catch(e) {}
-  }
-  function openAdmin(){document.getElementById('adminOverlay').classList.add('visible');document.getElementById('loginBox').style.display='';document.getElementById('adminPanel').style.display='none';}
-  function closeAdmin(){document.getElementById('adminOverlay').classList.remove('visible');}
-  function checkPassword(){
-    if(document.getElementById('adminPassword').value===ADMIN_PASSWORD){
-      document.getElementById('loginBox').style.display='none';document.getElementById('adminPanel').style.display='';
-      document.getElementById('adminPassword').value='';document.getElementById('loginError').style.display='none';
-      document.getElementById('a-lemur').value=RATES.lemur;document.getElementById('a-gorilla').value=RATES.gorilla;
-      document.getElementById('a-silver').value=RATES.silver;document.getElementById('a-screen').value=SCREEN_PRICE;document.getElementById('a-tracks').value=TRACKS_PRICE;document.getElementById('a-mirror').value=MIRROR_PRICE;
-    } else {document.getElementById('loginError').style.display='block';}
-  }
-  function saveSettings(){
-    RATES.lemur=parseFloat(document.getElementById('a-lemur').value)||RATES.lemur;
-    RATES.gorilla=parseFloat(document.getElementById('a-gorilla').value)||RATES.gorilla;
-    RATES.silver=parseFloat(document.getElementById('a-silver').value)||RATES.silver;
-    SCREEN_PRICE=parseFloat(document.getElementById('a-screen').value)||SCREEN_PRICE;
-    TRACKS_PRICE=parseFloat(document.getElementById('a-tracks').value)||TRACKS_PRICE;
-    MIRROR_PRICE=parseFloat(document.getElementById('a-mirror').value)||MIRROR_PRICE;
-    try{localStorage.setItem('sudsAdminSettings',JSON.stringify({lemur:RATES.lemur,gorilla:RATES.gorilla,silver:RATES.silver,screen:SCREEN_PRICE,tracks:TRACKS_PRICE,mirror:MIRROR_PRICE}));}catch(e){}
-    updatePrices();
-    document.getElementById('saveMsg').style.display='block';
-    setTimeout(()=>document.getElementById('saveMsg').style.display='none',3000);
   }
   function fmt(n){return Math.round(n).toLocaleString();}
   function updatePrices(){
@@ -911,7 +839,6 @@
     const m = document.getElementById('saveMsg');
     if(m) m.style.display = 'block';
   }
-  loadSettings();
   function setPkgPrice(pkg,total){
     const el=document.getElementById(pkg+'Price');
     if(el)el.textContent=fmt(total);
