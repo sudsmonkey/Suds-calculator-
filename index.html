@@ -123,8 +123,12 @@
   .calibrate-step-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); }
   .calibrate-step { display: none; }
   .calibrate-step.active { display: block; }
-  .btn-bubble { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; animation: bubblePop var(--dur, 0.9s) cubic-bezier(0.22,1,0.36,1) forwards; }
-  @keyframes bubblePop { 0% { transform: translate(-50%,-50%) scale(0); opacity: 1; } 60% { opacity: 0.85; } 100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity: 0; } }
+  .btn-bubble { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; animation: sudsRise var(--dur, 1s) ease-out forwards; }
+  @keyframes sudsRise {
+    0%   { transform: translate(-50%,-50%) scale(0); opacity: 1; }
+    55%  { transform: translate(calc(-50% + var(--dx)), calc(-50% - var(--rise))); opacity: 0.85; }
+    100% { transform: translate(calc(-50% + var(--dx) + var(--drift)), calc(-50% - var(--rise) + var(--fall))); opacity: 0; }
+  }
   body:not(.calibrated) .pkg-amount, body:not(.calibrated) .member-price { display: none; }
 
   /* Package cards */
@@ -728,38 +732,31 @@
     openCalibrate();
   });
   (function(){
-    const C=['rgba(245,110,100,0.9)','rgba(158,217,192,0.9)','rgba(244,170,140,0.9)','rgba(251,205,190,0.9)','rgba(255,255,255,0.95)','rgba(166,56,46,0.75)','rgba(255,200,150,0.88)','rgba(200,240,220,0.88)'];
-    function spawnBubble(x,y,i,total){
+    // Brand suds palette — soft, soapy, no harsh colours
+    const C=['rgba(245,110,100,0.82)','rgba(158,217,192,0.82)','rgba(246,236,222,0.9)','rgba(255,255,255,0.92)','rgba(244,170,140,0.8)','rgba(251,205,190,0.85)'];
+    function spawnSud(x,y){
       const b=document.createElement('div');
       b.className='btn-bubble';
-      const size=6+Math.random()*22;
-      const angle=(360/total)*i+Math.random()*22-11;
-      const dist=55+Math.random()*110;
-      const dx=Math.cos(angle*Math.PI/180)*dist;
-      const dy=Math.sin(angle*Math.PI/180)*dist;
-      const dur=(0.7+Math.random()*0.4).toFixed(2);
-      b.style.cssText='left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;--dx:'+dx+'px;--dy:'+dy+'px;--dur:'+dur+'s;background:'+C[i%C.length]+';box-shadow:inset -1px -2px 3px rgba(0,0,0,0.07),inset 2px 3px 5px rgba(255,255,255,0.55);';
+      const size=4+Math.random()*13;          // small — suds are tiny
+      const rise=(80+Math.random()*120)+'px'; // float up 80–200px
+      const fall=(35+Math.random()*55)+'px';  // then sink back 35–90px
+      const dx=((Math.random()-0.5)*50)+'px'; // tight horizontal cluster ±25px
+      const drift=((Math.random()-0.5)*28)+'px'; // lazy sideways drift on the way down
+      const dur=(0.95+Math.random()*0.65).toFixed(2);
+      b.style.cssText='left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;'
+        +'--rise:'+rise+';--fall:'+fall+';--dx:'+dx+';--drift:'+drift+';--dur:'+dur+'s;'
+        +'background:'+C[Math.floor(Math.random()*C.length)]+';'
+        +'box-shadow:inset -1px -2px 3px rgba(0,0,0,0.05),inset 2px 3px 5px rgba(255,255,255,0.65);';
       document.body.appendChild(b);
-      setTimeout(()=>b.remove(),(+dur*1000)+120);
+      setTimeout(()=>b.remove(),(+dur*1000)+150);
     }
     function burstAt(x,y){
-      const total=40;
-      // wave 1 — immediate (24 bubbles)
-      for(let i=0;i<24;i++) spawnBubble(x,y,i,24);
-      // wave 2 — slight delay, denser centre (10 bubbles, short dist)
-      setTimeout(()=>{ for(let i=0;i<10;i++){
-        const b=document.createElement('div'); b.className='btn-bubble';
-        const size=5+Math.random()*12;
-        const angle=Math.random()*360; const dist=20+Math.random()*55;
-        const dx=Math.cos(angle*Math.PI/180)*dist; const dy=Math.sin(angle*Math.PI/180)*dist;
-        const dur=(0.55+Math.random()*0.3).toFixed(2);
-        b.style.cssText='left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;--dx:'+dx+'px;--dy:'+dy+'px;--dur:'+dur+'s;background:'+C[Math.floor(Math.random()*C.length)]+';box-shadow:inset -1px -2px 3px rgba(0,0,0,0.07),inset 2px 3px 5px rgba(255,255,255,0.55);opacity:0.8;';
-        document.body.appendChild(b); setTimeout(()=>b.remove(),(+dur*1000)+120);
-      }},80);
-      // wave 3 — trailing sparkle (6 bubbles)
-      setTimeout(()=>{ for(let i=0;i<6;i++) spawnBubble(x,y,i*4,24); },180);
+      // Dense: 75 suds total across 3 loose waves
+      for(let i=0;i<45;i++) setTimeout(()=>spawnSud(x,y), Math.random()*50);
+      setTimeout(()=>{ for(let i=0;i<20;i++) setTimeout(()=>spawnSud(x,y), Math.random()*70); }, 60);
+      setTimeout(()=>{ for(let i=0;i<10;i++) setTimeout(()=>spawnSud(x,y), Math.random()*80); }, 150);
     }
-    // SANDBOX: bubbles only on Step 1 buttons for now
+    // SANDBOX: Step 1 only while dialling in feel
     document.getElementById('calibrateStep1').addEventListener('click',e=>{
       const btn=e.target.closest('.story-btn');
       if(!btn)return;
