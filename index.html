@@ -89,8 +89,16 @@
   .range-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--mid); }
   .story-row { margin-top: 22px; }
   .story-btns { display: flex; gap: 8px; }
-  .story-btn { flex: 1; padding: 10px 0; border-radius: 12px; border: 1.5px solid #DDD3C4; background: var(--white); font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; color: var(--dark); cursor: pointer; transition: all 0.15s; }
+  .story-btn { flex: 1; padding: 10px 0; border-radius: 12px; border: 1.5px solid #DDD3C4; background: var(--white); font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; color: var(--dark); cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; }
   .story-btn.active { background: var(--orange); border-color: var(--orange); color: var(--white); }
+  @keyframes btnBounce {
+    0%   { transform: scale(1); }
+    25%  { transform: scale(0.91); }
+    55%  { transform: scale(1.07); }
+    75%  { transform: scale(0.97); }
+    100% { transform: scale(1); }
+  }
+  .story-btn.bouncing { animation: btnBounce 0.38s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
   .quick-q { margin-top: 22px; }
   .quick-q select { width: 100%; padding: 10px 12px; border: 1.5px solid #DDD3C4; border-radius: 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--dark); background: var(--white); outline: none; }
   .quick-q select:focus { border-color: var(--orange); }
@@ -680,6 +688,13 @@
     document.getElementById('calibrateOverlay').classList.remove('visible');
   }
   document.addEventListener('click', e => {
+    const btn = e.target.closest('.story-btn');
+    if (btn) {
+      btn.classList.remove('bouncing');
+      void btn.offsetWidth;
+      btn.classList.add('bouncing');
+      btn.addEventListener('animationend', () => btn.classList.remove('bouncing'), { once: true });
+    }
     if(document.getElementById('calibrateOverlay').classList.contains('visible')) return;
     openCalibrate();
   });
