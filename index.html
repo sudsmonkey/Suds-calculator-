@@ -125,12 +125,13 @@
   .calibrate-step { display: none; }
   .calibrate-step.active { display: block; }
   .story-btn { position: relative; }
-  .bubble-particle {
+  .cal-bubble {
     position: absolute;
     background-image: var(--bubble-img);
     background-size: contain;
     background-repeat: no-repeat;
     pointer-events: none;
+    animation: burstRadial ease-out forwards;
   }
   @keyframes burstRadial {
     0%   { transform: scale(0) translate(0,0); opacity: 0; }
@@ -138,7 +139,6 @@
     50%  { transform: scale(1) translate(0,0); opacity: 0.95; }
     100% { transform: scale(0.85) translate(var(--sx,0px), var(--sy,-14px)); opacity: 0; }
   }
-  .anim-radial { animation: burstRadial ease-out forwards; }
   body:not(.calibrated) .pkg-amount, body:not(.calibrated) .member-price { display: none; }
 
   /* Package cards */
@@ -746,7 +746,7 @@
       const rect = btn.getBoundingClientRect();
       const w = rect.width, h = rect.height;
 
-      btn.querySelectorAll('.bubble-particle, .radial-clip').forEach(el => el.remove());
+      btn.querySelectorAll('.cal-bubble, .radial-clip').forEach(el => el.remove());
       btn.style.visibility = 'hidden';
 
       const clip = document.createElement('div');
@@ -780,7 +780,7 @@
       const maxStaggerMs = 260;
       specs.forEach((s, i) => {
         const b = document.createElement('div');
-        b.className = 'bubble-particle anim-radial';
+        b.className = 'cal-bubble';
         b.style.width = s.size + 'px'; b.style.height = s.size + 'px';
         b.style.left = s.bx + 'px'; b.style.top = s.by + 'px';
         b.style.marginLeft = -(s.size / 2) + 'px';
@@ -800,7 +800,7 @@
         const cx = w / 2, cy = h / 2;
         for (let i = 0; i < 10; i++) {
           const b = document.createElement('div');
-          b.className = 'bubble-particle anim-radial';
+          b.className = 'cal-bubble';
           const size = 5 + Math.random() * 7;
           b.style.width = size + 'px'; b.style.height = size + 'px';
           b.style.left = cx + 'px'; b.style.top = cy + 'px';
