@@ -367,27 +367,40 @@
   <div class="calibrate-box">
     <div class="calibrate-progress">
       <button type="button" class="calibrate-back" id="calibrateBack" onclick="calibrateGoBack()">←</button>
-      <span class="calibrate-step-label" id="calibrateStepLabel">Question 1 of 2</span>
+      <span class="calibrate-step-label" id="calibrateStepLabel">Question 1 of 5</span>
     </div>
 
     <div class="calibrate-step active" id="calibrateStep1">
       <h2><span class="calibrate-icon"></span>Let's Calibrate</h2>
-      <p>Answer two quick questions to unlock your real-time quote.</p>
-      <div class="story-row" style="margin-top:18px;">
-        <span class="input-label">How Many Stories?</span>
+      <p>A few quick questions to get you an accurate quote.</p>
+      <div class="quick-q" style="margin-top:18px;">
+        <span class="input-label">How many stories is your home?</span>
         <div class="story-btns">
           <button type="button" class="story-btn active" data-stories="1" onclick="selectStories(1,this)">1 Story</button>
-          <button type="button" class="story-btn" data-stories="2" onclick="selectStories(2,this)">2 Story</button>
-          <button type="button" class="story-btn" data-stories="3" onclick="selectStories(3,this)">3+ Story</button>
+          <button type="button" class="story-btn" data-stories="2" onclick="selectStories(2,this)">2 Stories</button>
+          <button type="button" class="story-btn" data-stories="3" onclick="selectStories(3,this)">3+ Stories</button>
         </div>
       </div>
     </div>
 
     <div class="calibrate-step" id="calibrateStep2">
-      <h2><span class="calibrate-icon"></span>Almost there</h2>
-      <p>One more quick question.</p>
+      <h2><span class="calibrate-icon"></span>Window Type</h2>
+      <p>French pane windows have multiple small panes divided by grids or muntins.</p>
       <div class="quick-q" style="margin-top:18px;">
-        <span class="input-label">How Often Are Your Windows Cleaned?</span>
+        <span class="input-label">Do you have French pane windows?</span>
+        <div class="story-btns" style="flex-direction:column;gap:8px;">
+          <button type="button" class="story-btn" onclick="selectFrenchPane('none',this)">None</button>
+          <button type="button" class="story-btn" onclick="selectFrenchPane('some-front',this)">Some in the front, none in the back</button>
+          <button type="button" class="story-btn" onclick="selectFrenchPane('other',this)">Other</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="calibrate-step" id="calibrateStep3">
+      <h2><span class="calibrate-icon"></span>Cleaning History</h2>
+      <p>This helps us know what to expect when we arrive.</p>
+      <div class="quick-q" style="margin-top:18px;">
+        <span class="input-label">How often are your windows cleaned?</span>
         <div class="story-btns" style="flex-direction:column;gap:8px;">
           <button type="button" class="story-btn" data-freq="while" onclick="selectFreq('while',this)">It's been a while</button>
           <button type="button" class="story-btn" data-freq="once-or-more" onclick="selectFreq('once-or-more',this)">Once a year or more</button>
@@ -395,6 +408,61 @@
       </div>
       <input type="hidden" id="cleanFreq" value="">
     </div>
+
+    <div class="calibrate-step" id="calibrateStep4">
+      <h2><span class="calibrate-icon"></span>Your Neighborhood</h2>
+      <p>Some historic homes have special window types that can affect pricing.</p>
+      <div class="quick-q" style="margin-top:18px;">
+        <span class="input-label">Is your home in a historic neighborhood?</span>
+        <div class="story-btns" style="flex-direction:column;gap:8px;">
+          <button type="button" class="story-btn" onclick="selectHistoric('yes',this)">Yes</button>
+          <button type="button" class="story-btn" onclick="selectHistoric('no',this)">No</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="calibrate-step" id="calibrateStep4b">
+      <h2><span class="calibrate-icon"></span>Storm Windows</h2>
+      <p>Storm windows are a secondary window installed over the original for insulation.</p>
+      <div class="quick-q" style="margin-top:18px;">
+        <span class="input-label">Do you have storm windows?</span>
+        <div class="story-btns" style="flex-direction:column;gap:8px;">
+          <button type="button" class="story-btn" onclick="selectStormWindows('yes',this)">Yes</button>
+          <button type="button" class="story-btn" onclick="selectStormWindows('no',this)">No</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="calibrate-step" id="calibrateStep5">
+      <h2><span class="calibrate-icon"></span>Anything Unusual?</h2>
+      <p>These features can affect access and pricing.</p>
+      <div class="quick-q" style="margin-top:18px;">
+        <span class="input-label">Do you have clerestory windows, skylights, or other less common features?</span>
+        <div class="story-btns" style="flex-direction:column;gap:8px;">
+          <button type="button" class="story-btn" onclick="selectUncommonFeatures('none',this)">No, nothing unusual</button>
+          <button type="button" class="story-btn" onclick="selectUncommonFeatures('some',this)">Yes, I have some</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="calibrate-step" id="calibrateStepStorm">
+      <h2><span class="calibrate-icon"></span>Storm Window Package</h2>
+      <p>We specialize in historic homes with storm windows — pricing for this package is coming soon.</p>
+      <p style="margin-top:10px;color:var(--mid);">We'll reach out to schedule a free estimate tailored to your home.</p>
+      <div class="story-btns" style="flex-direction:column;gap:8px;margin-top:24px;">
+        <button type="button" class="story-btn" onclick="closeCalibrateOverlay()">Got it</button>
+      </div>
+    </div>
+
+    <div class="calibrate-step" id="calibrateStepQuote">
+      <h2><span class="calibrate-icon"></span>Let's Talk In Person</h2>
+      <p>Historic homes without storm windows often have unique configurations we'd love to see firsthand.</p>
+      <p style="margin-top:10px;color:var(--mid);">We'll reach out to schedule a free in-person estimate!</p>
+      <div class="story-btns" style="flex-direction:column;gap:8px;margin-top:24px;">
+        <button type="button" class="story-btn" onclick="closeCalibrateOverlay()">Got it</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -594,32 +662,58 @@
   const STORY_SURCHARGE = { 1: 0, 2: 25, 3: 50 };
   const MEMBER_DISCOUNT = 0.20;
   let selectedStories = 1;
+  let calibrateCurrentStep = '1';
+  function showCalibrateStep(id) {
+    document.querySelectorAll('.calibrate-step').forEach(el => el.classList.remove('active'));
+    const el = document.getElementById('calibrateStep' + id);
+    if(el) el.classList.add('active');
+    const LABELS = {'1':'Question 1 of 5','2':'Question 2 of 5','3':'Question 3 of 5','4':'Question 4 of 5','4b':'Question 4 of 5','5':'Question 5 of 5'};
+    document.getElementById('calibrateStepLabel').textContent = LABELS[id] || '';
+    document.getElementById('calibrateBack').classList.toggle('visible', id !== '1');
+    calibrateCurrentStep = id;
+  }
+  function calibrateGoBack() {
+    const PREV = {'2':'1','3':'2','4':'3','4b':'4','5':'4','Storm':'4b','Quote':'4b'};
+    const prev = PREV[calibrateCurrentStep];
+    if(prev) showCalibrateStep(prev);
+  }
   function selectStories(n, btn) {
     selectedStories = n;
     document.querySelectorAll('#calibrateStep1 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     updatePrices();
-    setTimeout(() => showCalibrateStep(2), 250);
+    setTimeout(() => showCalibrateStep('2'), 250);
+  }
+  function selectFrenchPane(value, btn) {
+    document.querySelectorAll('#calibrateStep2 .story-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    setTimeout(() => showCalibrateStep('3'), 250);
   }
   function selectFreq(value, btn) {
     document.getElementById('cleanFreq').value = value;
-    document.querySelectorAll('#calibrateStep2 .story-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#calibrateStep3 .story-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    setTimeout(() => showCalibrateStep('4'), 250);
+  }
+  function selectHistoric(value, btn) {
+    document.querySelectorAll('#calibrateStep4 .story-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    setTimeout(() => showCalibrateStep(value === 'yes' ? '4b' : '5'), 250);
+  }
+  function selectStormWindows(value, btn) {
+    document.querySelectorAll('#calibrateStep4b .story-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    setTimeout(() => showCalibrateStep(value === 'yes' ? 'Storm' : 'Quote'), 250);
+  }
+  function selectUncommonFeatures(value, btn) {
+    document.querySelectorAll('#calibrateStep5 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     setTimeout(completeCalibration, 250);
-  }
-  function showCalibrateStep(n) {
-    document.getElementById('calibrateStep1').classList.toggle('active', n === 1);
-    document.getElementById('calibrateStep2').classList.toggle('active', n === 2);
-    document.getElementById('calibrateStepLabel').textContent = 'Question ' + n + ' of 2';
-    document.getElementById('calibrateBack').classList.toggle('visible', n === 2);
-  }
-  function calibrateGoBack() {
-    showCalibrateStep(1);
   }
   let calibrated = false;
   function openCalibrate(){
     if(calibrated) return;
-    showCalibrateStep(1);
+    showCalibrateStep('1');
     document.getElementById('calibrateOverlay').classList.add('visible');
   }
   function closeCalibrateOverlay(){
