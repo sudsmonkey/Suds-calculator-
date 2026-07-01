@@ -110,6 +110,9 @@
   .calibrate-step.active { display: flex; flex-direction: column; flex: 1; }
 
   body:not(.calibrated) .pkg-amount, body:not(.calibrated) .member-price { display: none; }
+  .recalibrate-link { display: none; margin-top: 10px; text-align: center; font-size: 12px; color: var(--mid); cursor: pointer; }
+  .recalibrate-link span { color: var(--orange); text-decoration: underline; }
+  body.calibrated .recalibrate-link { display: block; }
 
   /* Package cards */
   .packages { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 500px; }
@@ -448,6 +451,7 @@
       <input type="range" id="sqftSlider" min="500" max="6000" value="1500" step="50" disabled>
     </div>
     <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
+    <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
   </div>
   </div>
 </header>
@@ -699,6 +703,16 @@
     document.getElementById('sliderWrap').classList.remove('locked');
     closeCalibrateOverlay();
     updatePrices();
+  }
+  function reCalibrate(){
+    calibrated = false;
+    document.body.classList.remove('calibrated');
+    document.getElementById('sqftSlider').disabled = true;
+    document.getElementById('sliderWrap').classList.add('locked');
+    document.querySelectorAll('.story-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('cleanFreq').value = '';
+    showCalibrateStep('1');
+    document.getElementById('calibrateOverlay').classList.add('visible');
   }
   function fmt(n){return Math.round(n).toLocaleString();}
   function updatePrices(){
