@@ -123,6 +123,8 @@
   .calibrate-step-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); }
   .calibrate-step { display: none; }
   .calibrate-step.active { display: block; }
+  .btn-bubble { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; animation: bubblePop var(--dur, 0.6s) ease-out forwards; }
+  @keyframes bubblePop { 0% { transform: translate(-50%,-50%) scale(0); opacity: 1; } 100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity: 0; } }
   body:not(.calibrated) .pkg-amount, body:not(.calibrated) .member-price { display: none; }
 
   /* Package cards */
@@ -725,6 +727,30 @@
     if(document.getElementById('adminOverlay').classList.contains('visible')) return;
     openCalibrate();
   });
+  (function(){
+    const C=['rgba(245,110,100,0.88)','rgba(158,217,192,0.88)','rgba(244,170,140,0.88)','rgba(251,205,190,0.88)','rgba(255,255,255,0.92)','rgba(166,56,46,0.7)'];
+    function spawnBubbles(x,y){
+      for(let i=0;i<15;i++){
+        const b=document.createElement('div');
+        b.className='btn-bubble';
+        const size=7+Math.random()*18;
+        const angle=(360/15)*i+Math.random()*18;
+        const dist=45+Math.random()*75;
+        const dx=Math.cos(angle*Math.PI/180)*dist;
+        const dy=Math.sin(angle*Math.PI/180)*dist;
+        const dur=(0.45+Math.random()*0.3).toFixed(2);
+        b.style.cssText='left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;--dx:'+dx+'px;--dy:'+dy+'px;--dur:'+dur+'s;background:'+C[i%C.length]+';box-shadow:inset -1px -1px 2px rgba(0,0,0,0.08),inset 2px 2px 4px rgba(255,255,255,0.5);';
+        document.body.appendChild(b);
+        setTimeout(()=>b.remove(),(+dur*1000)+100);
+      }
+    }
+    document.getElementById('calibrateOverlay').addEventListener('click',e=>{
+      const btn=e.target.closest('.story-btn');
+      if(!btn)return;
+      const r=btn.getBoundingClientRect();
+      spawnBubbles(r.left+r.width/2,r.top+r.height/2);
+    });
+  })();
   function completeCalibration(){
     calibrated = true;
     document.body.classList.add('calibrated');
