@@ -137,8 +137,8 @@
   .suds-particle.playing { animation-name: sudsRadial; animation-timing-function: ease-out; animation-fill-mode: forwards; }
   @keyframes sudsRadial {
     0%   { transform: scale(0) translate(0,0); opacity: 0; }
-    18%  { transform: scale(1.08) translate(0,0); opacity: 1; }
-    50%  { transform: scale(1) translate(0,0); opacity: 0.95; }
+    12%  { transform: scale(1.1) translate(0,0); opacity: 1; }
+    72%  { transform: scale(1) translate(0,0); opacity: 0.95; }
     100% { transform: scale(0.85) translate(var(--sx,0px), var(--sy,-14px)); opacity: 0; }
   }
   .suds-burst {
@@ -773,7 +773,7 @@
       clip.className = 'suds-clip';
       btn.appendChild(clip);
 
-      const bubbleSize = h * 0.3;
+      const bubbleSize = h * 0.52;
       const spacing = bubbleSize * 0.85;
       const cols = Math.max(2, Math.ceil(w / spacing));
       const rows = Math.max(2, Math.ceil(h / spacing));
@@ -806,7 +806,7 @@
         const dist = 12 + Math.random() * 12;
         b.style.setProperty('--sx', (Math.cos(angle) * dist).toFixed(1) + 'px');
         b.style.setProperty('--sy', (Math.sin(angle) * dist).toFixed(1) + 'px');
-        b.style.animationDuration = (1.6 + Math.random() * 0.6) + 's';
+        b.style.animationDuration = (2.2 + Math.random() * 0.6) + 's';
         b.style.animationDelay = ((i / specs.length) * maxStagger) + 'ms';
         clip.appendChild(b);
       });
