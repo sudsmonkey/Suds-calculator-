@@ -123,11 +123,12 @@
   .calibrate-step-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); }
   .calibrate-step { display: none; }
   .calibrate-step.active { display: block; }
-  .btn-bubble { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; animation: sudsRise var(--dur, 1s) ease-out forwards; }
-  @keyframes sudsRise {
-    0%   { transform: translate(-50%,-50%) scale(0); opacity: 1; }
-    55%  { transform: translate(calc(-50% + var(--dx)), calc(-50% - var(--rise))); opacity: 0.85; }
-    100% { transform: translate(calc(-50% + var(--dx) + var(--drift)), calc(-50% - var(--rise) + var(--fall))); opacity: 0; }
+  .btn-bubble { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; animation: morphBurst var(--dur, 0.85s) ease-out forwards; }
+  @keyframes morphBurst {
+    0%   { transform: translate(-50%,-50%) scale(0);   opacity: 0; }
+    18%  { transform: translate(-50%,-50%) scale(1.08); opacity: 1; }
+    50%  { transform: translate(-50%,-50%) scale(1);   opacity: 0.95; }
+    100% { transform: translate(calc(-50% + var(--ox)), calc(-50% + var(--oy))) scale(0.65); opacity: 0; }
   }
   body:not(.calibrated) .pkg-amount, body:not(.calibrated) .member-price { display: none; }
 
@@ -732,36 +733,46 @@
     openCalibrate();
   });
   (function(){
-    // Brand suds palette — soft, soapy, no harsh colours
-    const C=['rgba(245,110,100,0.82)','rgba(158,217,192,0.82)','rgba(246,236,222,0.9)','rgba(255,255,255,0.92)','rgba(244,170,140,0.8)','rgba(251,205,190,0.85)'];
-    function spawnSud(x,y){
-      const b=document.createElement('div');
-      b.className='btn-bubble';
-      const size=4+Math.random()*13;          // small — suds are tiny
-      const rise=(80+Math.random()*120)+'px'; // float up 80–200px
-      const fall=(35+Math.random()*55)+'px';  // then sink back 35–90px
-      const dx=((Math.random()-0.5)*50)+'px'; // tight horizontal cluster ±25px
-      const drift=((Math.random()-0.5)*28)+'px'; // lazy sideways drift on the way down
-      const dur=(0.95+Math.random()*0.65).toFixed(2);
-      b.style.cssText='left:'+x+'px;top:'+y+'px;width:'+size+'px;height:'+size+'px;'
-        +'--rise:'+rise+';--fall:'+fall+';--dx:'+dx+';--drift:'+drift+';--dur:'+dur+'s;'
-        +'background:'+C[Math.floor(Math.random()*C.length)]+';'
-        +'box-shadow:inset -1px -2px 3px rgba(0,0,0,0.05),inset 2px 3px 5px rgba(255,255,255,0.65);';
-      document.body.appendChild(b);
-      setTimeout(()=>b.remove(),(+dur*1000)+150);
-    }
-    function burstAt(x,y){
-      // Dense: 75 suds total across 3 loose waves
-      for(let i=0;i<45;i++) setTimeout(()=>spawnSud(x,y), Math.random()*50);
-      setTimeout(()=>{ for(let i=0;i<20;i++) setTimeout(()=>spawnSud(x,y), Math.random()*70); }, 60);
-      setTimeout(()=>{ for(let i=0;i<10;i++) setTimeout(()=>spawnSud(x,y), Math.random()*80); }, 150);
+    const C=['rgba(245,110,100,0.88)','rgba(158,217,192,0.88)','rgba(246,236,222,0.94)','rgba(255,255,255,0.96)','rgba(244,170,140,0.85)','rgba(251,205,190,0.9)'];
+    function morphBurst(btn){
+      const r=btn.getBoundingClientRect();
+      const pad=5;
+      const iw=r.width-pad*2, ih=r.height-pad*2;
+      // Bubble size: pack as many as fit, targeting ~10px suds
+      const sud=Math.max(7,Math.min(13,Math.round(Math.sqrt((iw*ih)/60))));
+      const gap=Math.max(2,Math.round(sud*0.28));
+      const step=sud+gap;
+      const cols=Math.floor(iw/step), rows=Math.floor(ih/step);
+      if(!cols||!rows) return;
+      const gridW=cols*step-gap, gridH=rows*step-gap;
+      const sx=r.left+pad+(iw-gridW)/2+sud/2;
+      const sy=r.top+pad+(ih-gridH)/2+sud/2;
+      const cx=r.left+r.width/2, cy=r.top+r.height/2;
+      for(let row=0;row<rows;row++){
+        for(let col=0;col<cols;col++){
+          const x=sx+col*step, y=sy+row*step;
+          // Outburst: radiate outward from button centre, small distance
+          const dx=x-cx, dy=y-cy;
+          const len=Math.sqrt(dx*dx+dy*dy)||1;
+          const out=10+Math.random()*18;
+          const ox=(dx/len)*out+(Math.random()-0.5)*8;
+          const oy=(dy/len)*out+(Math.random()-0.5)*8-6;
+          const b=document.createElement('div');
+          b.className='btn-bubble';
+          const dur=(0.7+Math.random()*0.35).toFixed(2);
+          b.style.cssText='left:'+x+'px;top:'+y+'px;width:'+sud+'px;height:'+sud+'px;'
+            +'--ox:'+ox+'px;--oy:'+oy+'px;--dur:'+dur+'s;'
+            +'background:'+C[Math.floor(Math.random()*C.length)]+';'
+            +'box-shadow:inset -1px -2px 2px rgba(0,0,0,0.05),inset 1px 2px 3px rgba(255,255,255,0.65);';
+          document.body.appendChild(b);
+          setTimeout(()=>b.remove(),(+dur*1000)+200);
+        }
+      }
     }
     // SANDBOX: Step 1 only while dialling in feel
     document.getElementById('calibrateStep1').addEventListener('click',e=>{
       const btn=e.target.closest('.story-btn');
-      if(!btn)return;
-      const r=btn.getBoundingClientRect();
-      burstAt(r.left+r.width/2,r.top+r.height/2);
+      if(btn) morphBurst(btn);
     });
   })();
   function completeCalibration(){
