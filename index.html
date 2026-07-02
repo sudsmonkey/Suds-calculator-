@@ -646,6 +646,7 @@
       </div>
       <div class="discount-sub">Share the Suds Calculator with a friend to save 10% — and your friend saves 5% automatically!</div>
     </div>
+    <div id="co-screen-unsure-note" style="display:none;margin-bottom:14px;padding:10px 14px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:10px;font-size:12px;color:#78350F;line-height:1.5;">The $50 screen charge will be removed from your onsite invoice if screens are removable from outside.</div>
     <button class="checkout-btn" onclick="goToCalendar()">Book Now — Monkey Calendar 🗓️</button>
     <button class="checkout-btn secondary" onclick="saveQuote()">Save My Quote</button>
     <div class="waitlist-msg" id="saveMsg" style="display:none;">🫧 Quote saved! It'll be here when you come back.</div>
@@ -897,6 +898,8 @@
     document.getElementById('co-discount').textContent = '−$' + fmt(total * 0.10);
 
     document.getElementById('co-screens-row').style.display = sc ? 'flex' : 'none';
+    const coUnsureNote = document.getElementById('co-screen-unsure-note');
+    if(coUnsureNote) coUnsureNote.style.display = (hasScreens && screenLocation === 'unsure') ? 'block' : 'none';
     document.getElementById('co-tracks-row').style.display = (tracksEl && tracksEl.checked) ? 'flex' : 'none';
     const showMirrors = mirrorsEl && mirrorsEl.checked;
     document.getElementById('co-mirrors-row').style.display = showMirrors ? 'flex' : 'none';
