@@ -851,7 +851,7 @@
   function selectStormWindows(value, btn) {
     document.querySelectorAll('#calibrateStep5b .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(() => showCalibrateStep(value === 'yes' ? 'Storm' : 'Quote'), 1100);
+    setTimeout(() => value === 'yes' ? enterStormMode() : showCalibrateStep('Quote'), 1100);
   }
   function selectUncommonFeatures(value, btn) {
     document.querySelectorAll('#calibrateStep6 .story-btn').forEach(b => b.classList.remove('active'));
@@ -943,9 +943,10 @@
   function enterStormMode(){
     document.body.classList.add('storm-mode');
     closeCalibrateOverlay();
+    window.scrollTo({ top: 0, behavior: 'instant' });
     setTimeout(() => {
       document.getElementById('pkg-storm').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 350);
+    }, 400);
   }
   function reCalibrate(){
     calibrated = false;
