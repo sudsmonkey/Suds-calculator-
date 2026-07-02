@@ -551,7 +551,6 @@
     </div>
     <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
     <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
-    <div class="screen-disclaimer" id="screenDisclaimer">A $50 charge has been added. If your screens are removable from outside, this will be removed from your onsite invoice.</div>
   </div>
   </div>
 </header>
@@ -894,8 +893,6 @@
       const memberEl=document.getElementById(pkg+'MemberPrice');
       if(memberEl)memberEl.textContent=fmt(total*(1-MEMBER_DISCOUNT));
     });
-    const disc=document.getElementById('screenDisclaimer');
-    if(disc)disc.classList.toggle('visible',hasScreens&&screenLocation==='unsure');
   }
   function toggleScreens(pkg,cb){updatePrices();}
   function stepQty(id,delta){
