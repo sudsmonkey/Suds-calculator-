@@ -110,6 +110,18 @@
   .calibrate-step.active { display: flex; flex-direction: column; flex: 1; }
 
   body:not(.calibrated) .pkg-amount, body:not(.calibrated) .member-price { display: none; }
+  .screen-disclaimer {
+    display: none;
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #78350F;
+    line-height: 1.5;
+  }
+  .screen-disclaimer.visible { display: block; }
   .recalibrate-link { display: none; margin-top: 10px; text-align: center; font-size: 12px; color: var(--mid); cursor: pointer; }
   .recalibrate-link span { color: var(--orange); text-decoration: underline; }
   body.calibrated .recalibrate-link { display: block; }
@@ -486,6 +498,7 @@
     </div>
     <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
     <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
+    <div class="screen-disclaimer" id="screenDisclaimer">A $50 screen removal fee has been added. If your screens are removed from the outside, this charge will be removed from your invoice at checkout.</div>
   </div>
   </div>
 </header>
@@ -796,11 +809,14 @@
       if(mpe)mpe.textContent=me&&me.checked?'+ $'+fmt(mt):'+ $0';
       const storySurcharge=STORY_SURCHARGE[selectedStories]||0;
       const frenchSurcharge=frenchPaneMajority?(FRENCH_PANE_SURCHARGE[pkg]||0):frenchPaneFlatSurcharge;
-      const total=base+st+tt+mt+storySurcharge+frenchSurcharge;
+      const screenSurcharge=(hasScreens&&screenLocation!=='outside')?50:0;
+      const total=base+st+tt+mt+storySurcharge+frenchSurcharge+screenSurcharge;
       setPkgPrice(pkg,total);
       const memberEl=document.getElementById(pkg+'MemberPrice');
       if(memberEl)memberEl.textContent=fmt(total*(1-MEMBER_DISCOUNT));
     });
+    const disc=document.getElementById('screenDisclaimer');
+    if(disc)disc.classList.toggle('visible',hasScreens&&screenLocation==='unsure');
   }
   function toggleScreens(pkg,cb){updatePrices();}
   function stepQty(id,delta){
