@@ -723,7 +723,13 @@
           </div>
         </div>
       </div>
-      <div class="pkg-btn-wrap" id="btn-wrap-storm"><button class="pkg-btn" onclick="selectPkg('storm')">Select Package</button></div>
+      <div class="pkg-btn-wrap" id="btn-wrap-storm">
+        <button class="pkg-btn" id="storm-contact-btn" onclick="expandStormContact()">Contact</button>
+        <div id="storm-contact-options" style="display:none;flex-direction:column;gap:8px;margin-top:10px;">
+          <a href="tel:5551234567" class="pkg-btn" style="text-align:center;text-decoration:none;background:var(--white);color:var(--dark);border:1.5px solid #DDD3C4;">📞 Call Us</a>
+          <button class="pkg-btn" style="background:var(--white);color:var(--dark);border:1.5px solid #DDD3C4;" onclick="openContactForm()">✉️ Send a Message</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1006,6 +1012,10 @@
     if(stormEl) stormEl.textContent = fmt(f1total + f2total);
   }
   function toggleScreens(pkg,cb){updatePrices();}
+  function expandStormContact(){
+    document.getElementById('storm-contact-btn').style.display = 'none';
+    document.getElementById('storm-contact-options').style.display = 'flex';
+  }
   function toggleStormFloor(floor, cb){
     const countEl = document.getElementById('storm-floor'+floor+'-count');
     if(countEl) countEl.style.display = cb.checked ? 'block' : 'none';
