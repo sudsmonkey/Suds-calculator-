@@ -382,6 +382,7 @@
           <button type="button" class="story-btn" onclick="selectScreensLoc('unsure',this)">I'm not sure</button>
         </div>
       </div>
+      <p class="unsure-screen-note" id="unsureScreenNote" style="display:none;margin-top:14px;font-size:13px;color:var(--mid);line-height:1.5;">A $50 charge will be removed from your onsite invoice if screens are removable from the outside.</p>
     </div>
 
     <div class="calibrate-step" id="calibrateStep3">
@@ -498,7 +499,7 @@
     </div>
     <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
     <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
-    <div class="screen-disclaimer" id="screenDisclaimer">A $50 screen removal fee has been added. If your screens are removed from the outside, this charge will be removed from your invoice at checkout.</div>
+    <div class="screen-disclaimer" id="screenDisclaimer">A $50 charge has been added. If your screens are removable from outside, this will be removed from your onsite invoice.</div>
   </div>
   </div>
 </header>
@@ -712,7 +713,10 @@
     document.querySelectorAll('#calibrateStep2b .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     screenLocation = value;
-    setTimeout(() => showCalibrateStep('3'), 1100);
+    const note = document.getElementById('unsureScreenNote');
+    if(note) note.style.display = (value === 'unsure') ? 'block' : 'none';
+    const delay = value === 'unsure' ? 2200 : 1100;
+    setTimeout(() => { if(note) note.style.display = 'none'; showCalibrateStep('3'); }, delay);
   }
   function selectFrenchPane(value, btn) {
     document.querySelectorAll('#calibrateStep3 .story-btn').forEach(b => b.classList.remove('active'));
