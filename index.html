@@ -715,7 +715,7 @@
     screenLocation = value;
     const note = document.getElementById('unsureScreenNote');
     if(note) note.style.display = (value === 'unsure') ? 'block' : 'none';
-    const delay = value === 'unsure' ? 2200 : 1100;
+    const delay = value === 'unsure' ? 3000 : 1100;
     setTimeout(() => { if(note) note.style.display = 'none'; showCalibrateStep('3'); }, delay);
   }
   function selectFrenchPane(value, btn) {
