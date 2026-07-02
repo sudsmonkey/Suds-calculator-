@@ -508,7 +508,7 @@
       <div class="calib-spinner">
         <span></span><span></span><span></span><span></span><span></span>
       </div>
-      <p class="calib-loading-label">Use the slider to toggle your home size</p>
+      <p id="calibAllSet" style="display:none;text-align:center;font-size:14px;font-weight:700;color:var(--dark);margin-top:8px;line-height:1.5;">All set! Use the slider to explore your estimate.</p>
     </div>
 
     <div class="calibrate-step" id="calibrateStepStorm">
@@ -824,7 +824,11 @@
   }
   function startCalibrationLoad() {
     showCalibrateStep('Loading');
-    setTimeout(completeCalibration, 4500);
+    setTimeout(() => {
+      document.querySelectorAll('.calib-spinner span').forEach(s => s.style.animationPlayState = 'paused');
+      document.getElementById('calibAllSet').style.display = 'block';
+    }, 4500);
+    setTimeout(completeCalibration, 7000);
   }
 
   let q6bTimer = null;
