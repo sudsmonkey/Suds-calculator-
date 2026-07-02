@@ -122,6 +122,14 @@
     line-height: 1.5;
   }
   .screen-disclaimer.visible { display: block; }
+  .calib-spinner { display:flex; gap:10px; justify-content:center; margin:32px 0 8px; }
+  .calib-spinner span { width:13px; height:13px; border-radius:50%; background:var(--orange); animation:bubblePop 1.3s ease-in-out infinite; }
+  .calib-spinner span:nth-child(2) { animation-delay:0.2s; background:var(--mint); }
+  .calib-spinner span:nth-child(3) { animation-delay:0.4s; }
+  .calib-spinner span:nth-child(4) { animation-delay:0.6s; background:var(--mint); }
+  .calib-spinner span:nth-child(5) { animation-delay:0.8s; }
+  @keyframes bubblePop { 0%,80%,100%{transform:scale(0.6);opacity:0.45} 40%{transform:scale(1.25);opacity:1} }
+  .calib-loading-label { text-align:center; font-size:13px; color:var(--mid); margin-top:4px; }
   .recalibrate-link { display: none; margin-top: 10px; text-align: center; font-size: 12px; color: var(--mid); cursor: pointer; }
   .recalibrate-link span { color: var(--orange); text-decoration: underline; }
   body.calibrated .recalibrate-link { display: block; }
@@ -343,7 +351,7 @@
   <div class="calibrate-box">
     <div class="calibrate-progress">
       <button type="button" class="calibrate-back" id="calibrateBack" onclick="calibrateGoBack()">←</button>
-      <span class="calibrate-step-label" id="calibrateStepLabel">Question 1 of 6</span>
+      <span class="calibrate-step-label" id="calibrateStepLabel">Question 1 of 7</span>
     </div>
 
     <div class="calibrate-step active" id="calibrateStep1">
@@ -455,6 +463,48 @@
           <button type="button" class="story-btn" onclick="selectUncommonFeatures('some',this)">Yes, I have some</button>
         </div>
       </div>
+    </div>
+
+    <div class="calibrate-step" id="calibrateStep6b">
+      <h2><span class="calibrate-icon"></span>Which ones?</h2>
+      <p>Select all that apply.</p>
+      <div class="quick-q" style="margin-top:18px;">
+        <div class="story-btns" style="flex-direction:column;gap:8px;">
+          <button type="button" class="story-btn" onclick="toggleUncommonFeature('clerestory',this)">Clerestory</button>
+          <button type="button" class="story-btn" onclick="toggleUncommonFeature('glass-railing',this)">Glass railing</button>
+          <button type="button" class="story-btn" onclick="toggleUncommonFeature('skylights',this)">Skylights</button>
+          <button type="button" class="story-btn" onclick="toggleUncommonFeature('curtain-wall',this)">Curtain wall</button>
+          <button type="button" class="story-btn" onclick="toggleUncommonFeature('other',this)">Other</button>
+        </div>
+        <button type="button" class="story-btn" style="margin-top:16px;background:var(--orange);color:#fff;border-color:var(--orange);" onclick="showCalibrateStep('7')">Continue →</button>
+      </div>
+    </div>
+
+    <div class="calibrate-step" id="calibrateStep7">
+      <h2><span class="calibrate-icon"></span>Okay, last one!</h2>
+      <p>Are there any of these services you're interested in? Select all that apply.</p>
+      <div class="quick-q" style="margin-top:18px;">
+        <div class="story-btns" style="flex-direction:column;gap:8px;">
+          <button type="button" class="story-btn" onclick="toggleService('blind-dusting',this)">Blind dusting</button>
+          <button type="button" class="story-btn" onclick="toggleService('gutter-cleaning',this)">Gutter cleaning</button>
+          <button type="button" class="story-btn" onclick="toggleService('pressure-washing',this)">Pressure washing</button>
+          <button type="button" class="story-btn" onclick="toggleService('house-washing',this)">House washing</button>
+          <button type="button" class="story-btn" onclick="toggleService('holiday-lighting',this)">Holiday lighting</button>
+        </div>
+        <p style="margin-top:12px;font-size:11px;color:var(--mid);line-height:1.5;">(Internal use only — will not be shared with any 3rd party)</p>
+        <p style="margin-top:8px;font-size:12px;color:var(--mid);line-height:1.5;">These services aren't currently available but we'd love to chat about them during your appointment!</p>
+        <div class="pkg-btn-wrap" id="btn-wrap-calibrate" style="display:block;margin-top:14px;">
+          <button type="button" class="story-btn" style="background:var(--orange);color:#fff;border-color:var(--orange);width:100%;" onclick="calibrateWithBubbles()">Calibrate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="calibrate-step" id="calibrateStepLoading">
+      <h2 style="text-align:center;margin-bottom:0;">Calibrating Suds</h2>
+      <div class="calib-spinner">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <p class="calib-loading-label">Use the slider to toggle your home size</p>
     </div>
 
     <div class="calibrate-step" id="calibrateStepStorm">
@@ -686,13 +736,13 @@
     document.querySelectorAll('.calibrate-step').forEach(el => el.classList.remove('active'));
     const el = document.getElementById('calibrateStep' + id);
     if(el) el.classList.add('active');
-    const LABELS = {'1':'Question 1 of 6','2':'Question 2 of 6','2b':'Question 2 of 6','3':'Question 3 of 6','3b':'Question 3 of 6','4':'Question 4 of 6','5':'Question 5 of 6','5b':'Question 5 of 6','6':'Question 6 of 6'};
+    const LABELS = {'1':'Question 1 of 7','2':'Question 2 of 7','2b':'Question 2 of 7','3':'Question 3 of 7','3b':'Question 3 of 7','4':'Question 4 of 7','5':'Question 5 of 7','5b':'Question 5 of 7','6':'Question 6 of 7','6b':'Question 6 of 7','7':'Question 7 of 7'};
     document.getElementById('calibrateStepLabel').textContent = LABELS[id] || '';
-    document.getElementById('calibrateBack').classList.toggle('visible', id !== '1');
+    document.getElementById('calibrateBack').classList.toggle('visible', id !== '1' && id !== 'Loading');
     calibrateCurrentStep = id;
   }
   function calibrateGoBack() {
-    const PREV = {'2':'1','2b':'2','3':'2','3b':'3','4':'3','5':'4','5b':'5','6':'5','Storm':'5b','Quote':'5b'};
+    const PREV = {'2':'1','2b':'2','3':'2','3b':'3','4':'3','5':'4','5b':'5','6':'5','6b':'6','7':'6','Storm':'5b','Quote':'5b'};
     const prev = PREV[calibrateCurrentStep];
     if(prev) showCalibrateStep(prev);
   }
@@ -751,7 +801,30 @@
   function selectUncommonFeatures(value, btn) {
     document.querySelectorAll('#calibrateStep6 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(completeCalibration, 1100);
+    if(value === 'some') { setTimeout(() => showCalibrateStep('6b'), 1100); }
+    else { setTimeout(() => showCalibrateStep('7'), 1100); }
+  }
+  let uncommonFeatures = [];
+    interestedServices = [];
+  let interestedServices = [];
+  function toggleService(value, btn) {
+    btn.classList.toggle('active');
+    if(btn.classList.contains('active')) { if(!interestedServices.includes(value)) interestedServices.push(value); }
+    else { interestedServices = interestedServices.filter(v => v !== value); }
+  }
+  function calibrateWithBubbles() {
+    spawnBubbles('calibrate');
+    setTimeout(startCalibrationLoad, 900);
+  }
+  function startCalibrationLoad() {
+    showCalibrateStep('Loading');
+    setTimeout(completeCalibration, 2500);
+  }
+
+  function toggleUncommonFeature(value, btn) {
+    btn.classList.toggle('active');
+    if(btn.classList.contains('active')) { if(!uncommonFeatures.includes(value)) uncommonFeatures.push(value); }
+    else { uncommonFeatures = uncommonFeatures.filter(v => v !== value); }
   }
   let calibrated = false;
   function openCalibrate(){
