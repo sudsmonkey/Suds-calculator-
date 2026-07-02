@@ -331,7 +331,7 @@
   <div class="calibrate-box">
     <div class="calibrate-progress">
       <button type="button" class="calibrate-back" id="calibrateBack" onclick="calibrateGoBack()">←</button>
-      <span class="calibrate-step-label" id="calibrateStepLabel">Question 1 of 5</span>
+      <span class="calibrate-step-label" id="calibrateStepLabel">Question 1 of 6</span>
     </div>
 
     <div class="calibrate-step active" id="calibrateStep1">
@@ -348,6 +348,31 @@
     </div>
 
     <div class="calibrate-step" id="calibrateStep2">
+      <h2><span class="calibrate-icon"></span>Screens</h2>
+      <p>Window screens will need to be removed and replaced during cleaning.</p>
+      <div class="quick-q" style="margin-top:18px;">
+        <span class="input-label">Do you have screens?</span>
+        <div class="story-btns" style="flex-direction:column;gap:8px;">
+          <button type="button" class="story-btn" onclick="selectScreens('yes',this)">Yes</button>
+          <button type="button" class="story-btn" onclick="selectScreens('no',this)">No</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="calibrate-step" id="calibrateStep2b">
+      <h2><span class="calibrate-icon"></span>Screens</h2>
+      <p>This helps us know how to plan for screen removal.</p>
+      <div class="quick-q" style="margin-top:18px;">
+        <span class="input-label">Are they removed from inside or outside?</span>
+        <div class="story-btns" style="flex-direction:column;gap:8px;">
+          <button type="button" class="story-btn" onclick="selectScreensLoc('inside',this)">Removed from inside</button>
+          <button type="button" class="story-btn" onclick="selectScreensLoc('outside',this)">Removed from outside</button>
+          <button type="button" class="story-btn" onclick="selectScreensLoc('unsure',this)">I'm not sure</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="calibrate-step" id="calibrateStep3">
       <h2><span class="calibrate-icon"></span>Window Type</h2>
       <p>French pane windows have multiple small panes divided by grids or muntins.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -361,7 +386,7 @@
     </div>
 
 
-    <div class="calibrate-step" id="calibrateStep2b">
+    <div class="calibrate-step" id="calibrateStep3b">
       <h2><span class="calibrate-icon"></span>Window Type</h2>
       <p>Are more than 75% of your windows French pane?</p>
       <div class="story-btns" style="margin-top:18px;">
@@ -370,7 +395,7 @@
       </div>
     </div>
 
-        <div class="calibrate-step" id="calibrateStep3">
+        <div class="calibrate-step" id="calibrateStep4">
       <h2><span class="calibrate-icon"></span>Cleaning History</h2>
       <p>This helps us know what to expect when we arrive.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -383,7 +408,7 @@
       <input type="hidden" id="cleanFreq" value="">
     </div>
 
-    <div class="calibrate-step" id="calibrateStep4">
+    <div class="calibrate-step" id="calibrateStep5">
       <h2><span class="calibrate-icon"></span>Your Neighborhood</h2>
       <p>Some historic homes have special window types that can affect pricing.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -395,7 +420,7 @@
       </div>
     </div>
 
-    <div class="calibrate-step" id="calibrateStep4b">
+    <div class="calibrate-step" id="calibrateStep5b">
       <h2><span class="calibrate-icon"></span>Storm Windows</h2>
       <p>Storm windows are a secondary window installed over the original for insulation.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -407,7 +432,7 @@
       </div>
     </div>
 
-    <div class="calibrate-step" id="calibrateStep5">
+    <div class="calibrate-step" id="calibrateStep6">
       <h2><span class="calibrate-icon"></span>Anything Unusual?</h2>
       <p>These features can affect access and pricing.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -639,18 +664,20 @@
   let selectedStories = 1;
   let frenchPaneMajority = false;
   let frenchPaneFlatSurcharge = 0;
+  let hasScreens = false;
+  let screenLocation = null;
   let calibrateCurrentStep = '1';
   function showCalibrateStep(id) {
     document.querySelectorAll('.calibrate-step').forEach(el => el.classList.remove('active'));
     const el = document.getElementById('calibrateStep' + id);
     if(el) el.classList.add('active');
-    const LABELS = {'1':'Question 1 of 5','2':'Question 2 of 5','3':'Question 3 of 5','4':'Question 4 of 5','4b':'Question 4 of 5','5':'Question 5 of 5'};
+    const LABELS = {'1':'Question 1 of 6','2':'Question 2 of 6','2b':'Question 2 of 6','3':'Question 3 of 6','3b':'Question 3 of 6','4':'Question 4 of 6','5':'Question 5 of 6','5b':'Question 5 of 6','6':'Question 6 of 6'};
     document.getElementById('calibrateStepLabel').textContent = LABELS[id] || '';
     document.getElementById('calibrateBack').classList.toggle('visible', id !== '1');
     calibrateCurrentStep = id;
   }
   function calibrateGoBack() {
-    const PREV = {'2':'1','2b':'2','3':'2','4':'3','4b':'4','5':'4','Storm':'4b','Quote':'4b'};
+    const PREV = {'2':'1','2b':'2','3':'2','3b':'3','4':'3','5':'4','5b':'5','6':'5','Storm':'5b','Quote':'5b'};
     const prev = PREV[calibrateCurrentStep];
     if(prev) showCalibrateStep(prev);
   }
@@ -661,37 +688,50 @@
     updatePrices();
     setTimeout(() => showCalibrateStep('2'), 1100);
   }
-  function selectFrenchPane(value, btn) {
+  function selectScreens(value, btn) {
     document.querySelectorAll('#calibrateStep2 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    hasScreens = (value === 'yes');
+    if(value === 'no') { screenLocation = null; }
+    setTimeout(() => showCalibrateStep(value === 'yes' ? '2b' : '3'), 1100);
+  }
+  function selectScreensLoc(value, btn) {
+    document.querySelectorAll('#calibrateStep2b .story-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    screenLocation = value;
+    setTimeout(() => showCalibrateStep('3'), 1100);
+  }
+  function selectFrenchPane(value, btn) {
+    document.querySelectorAll('#calibrateStep3 .story-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
     if(value !== 'other') { frenchPaneMajority = false; frenchPaneFlatSurcharge = (value === 'some-front') ? 25 : 0; }
-    setTimeout(() => showCalibrateStep(value === 'other' ? '2b' : '3'), 1100);
+    setTimeout(() => showCalibrateStep(value === 'other' ? '3b' : '4'), 1100);
   }
   function selectFrenchPaneOther(value, btn) {
-    document.querySelectorAll('#calibrateStep2b .story-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#calibrateStep3b .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     frenchPaneMajority = (value === 'yes');
     frenchPaneFlatSurcharge = (value === 'yes') ? 0 : 25;
-    setTimeout(() => showCalibrateStep('3'), 1100);
+    setTimeout(() => showCalibrateStep('4'), 1100);
   }
   function selectFreq(value, btn) {
     document.getElementById('cleanFreq').value = value;
-    document.querySelectorAll('#calibrateStep3 .story-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    setTimeout(() => showCalibrateStep('4'), 1100);
-  }
-  function selectHistoric(value, btn) {
     document.querySelectorAll('#calibrateStep4 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(() => showCalibrateStep(value === 'yes' ? '4b' : '5'), 1100);
+    setTimeout(() => showCalibrateStep('5'), 1100);
+  }
+  function selectHistoric(value, btn) {
+    document.querySelectorAll('#calibrateStep5 .story-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    setTimeout(() => showCalibrateStep(value === 'yes' ? '5b' : '6'), 1100);
   }
   function selectStormWindows(value, btn) {
-    document.querySelectorAll('#calibrateStep4b .story-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#calibrateStep5b .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     setTimeout(() => showCalibrateStep(value === 'yes' ? 'Storm' : 'Quote'), 1100);
   }
   function selectUncommonFeatures(value, btn) {
-    document.querySelectorAll('#calibrateStep5 .story-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#calibrateStep6 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     setTimeout(completeCalibration, 1100);
   }
