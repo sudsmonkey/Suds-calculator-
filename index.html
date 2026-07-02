@@ -638,6 +638,7 @@
   const MEMBER_DISCOUNT = 0.20;
   let selectedStories = 1;
   let frenchPaneMajority = false;
+  let frenchPaneFlatSurcharge = 0;
   let calibrateCurrentStep = '1';
   function showCalibrateStep(id) {
     document.querySelectorAll('.calibrate-step').forEach(el => el.classList.remove('active'));
@@ -663,13 +664,14 @@
   function selectFrenchPane(value, btn) {
     document.querySelectorAll('#calibrateStep2 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    if(value !== 'other') frenchPaneMajority = false;
+    if(value !== 'other') { frenchPaneMajority = false; frenchPaneFlatSurcharge = (value === 'some-front') ? 25 : 0; }
     setTimeout(() => showCalibrateStep(value === 'other' ? '2b' : '3'), 1100);
   }
   function selectFrenchPaneOther(value, btn) {
     document.querySelectorAll('#calibrateStep2b .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     frenchPaneMajority = (value === 'yes');
+    frenchPaneFlatSurcharge = (value === 'yes') ? 0 : 25;
     setTimeout(() => showCalibrateStep('3'), 1100);
   }
   function selectFreq(value, btn) {
@@ -753,7 +755,7 @@
       const mpe=document.getElementById(pkg+'-mirrors-price');
       if(mpe)mpe.textContent=me&&me.checked?'+ $'+fmt(mt):'+ $0';
       const storySurcharge=STORY_SURCHARGE[selectedStories]||0;
-      const frenchSurcharge=frenchPaneMajority?(FRENCH_PANE_SURCHARGE[pkg]||0):0;
+      const frenchSurcharge=frenchPaneMajority?(FRENCH_PANE_SURCHARGE[pkg]||0):frenchPaneFlatSurcharge;
       const total=base+st+tt+mt+storySurcharge+frenchSurcharge;
       setPkgPrice(pkg,total);
       const memberEl=document.getElementById(pkg+'MemberPrice');
