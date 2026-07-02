@@ -522,10 +522,11 @@
 
     <div class="calibrate-step" id="calibrateStepQuote">
       <h2><span class="calibrate-icon"></span>Let's Talk In Person</h2>
-      <p>Historic homes without storm windows often have unique configurations we'd love to see firsthand.</p>
-      <p style="margin-top:10px;color:var(--mid);">We'll reach out to schedule a free in-person estimate!</p>
+      <p>Historic homes take an in-person estimate so we can give you an accurate quote.</p>
+      <p style="margin-top:10px;color:var(--mid);">We'd love to see your home firsthand — reach out and we'll get you on the schedule.</p>
       <div class="story-btns" style="flex-direction:column;gap:8px;margin-top:24px;">
-        <button type="button" class="story-btn" onclick="closeCalibrateOverlay()">Got it</button>
+        <a href="tel:5551234567" class="story-btn" style="text-align:center;text-decoration:none;display:block;">📞 Call Us</a>
+        <button type="button" class="story-btn" onclick="openContactForm()">✉️ Send a Message</button>
       </div>
     </div>
 
@@ -799,7 +800,7 @@
   function selectStormWindows(value, btn) {
     document.querySelectorAll('#calibrateStep5b .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(() => showCalibrateStep(value === 'yes' ? 'Storm' : '6'), 1100);
+    setTimeout(() => showCalibrateStep(value === 'yes' ? 'Storm' : 'Quote'), 1100);
   }
   function selectUncommonFeatures(value, btn) {
     document.querySelectorAll('#calibrateStep6 .story-btn').forEach(b => b.classList.remove('active'));
@@ -846,6 +847,9 @@
   }
   function closeCalibrateOverlay(){
     document.getElementById('calibrateOverlay').classList.remove('visible');
+  }
+  function openContactForm(){
+    // TODO: wire up contact form
   }
   document.addEventListener('click', e => {
     const btn = e.target.closest('.story-btn');
