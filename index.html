@@ -634,8 +634,10 @@
   let RATES = { lemur: 0.08, gorilla: 0.11, silver: 0.14 };
   let SCREEN_PRICE = 50, TRACKS_PRICE = 50, MIRROR_PRICE = 5;
   const STORY_SURCHARGE = { 1: 0, 2: 25, 3: 50 };
+  const FRENCH_PANE_SURCHARGE = {lemur:75,gorilla:100,silver:100};
   const MEMBER_DISCOUNT = 0.20;
   let selectedStories = 1;
+  let frenchPaneMajority = false;
   let calibrateCurrentStep = '1';
   function showCalibrateStep(id) {
     document.querySelectorAll('.calibrate-step').forEach(el => el.classList.remove('active'));
@@ -661,11 +663,13 @@
   function selectFrenchPane(value, btn) {
     document.querySelectorAll('#calibrateStep2 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    if(value !== 'other') frenchPaneMajority = false;
     setTimeout(() => showCalibrateStep(value === 'other' ? '2b' : '3'), 1100);
   }
   function selectFrenchPaneOther(value, btn) {
     document.querySelectorAll('#calibrateStep2b .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    frenchPaneMajority = (value === 'yes');
     setTimeout(() => showCalibrateStep('3'), 1100);
   }
   function selectFreq(value, btn) {
@@ -749,7 +753,8 @@
       const mpe=document.getElementById(pkg+'-mirrors-price');
       if(mpe)mpe.textContent=me&&me.checked?'+ $'+fmt(mt):'+ $0';
       const storySurcharge=STORY_SURCHARGE[selectedStories]||0;
-      const total=base+st+tt+mt+storySurcharge;
+      const frenchSurcharge=frenchPaneMajority?(FRENCH_PANE_SURCHARGE[pkg]||0):0;
+      const total=base+st+tt+mt+storySurcharge+frenchSurcharge;
       setPkgPrice(pkg,total);
       const memberEl=document.getElementById(pkg+'MemberPrice');
       if(memberEl)memberEl.textContent=fmt(total*(1-MEMBER_DISCOUNT));
