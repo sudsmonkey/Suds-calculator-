@@ -893,6 +893,7 @@
   let calibrated = false;
   function openCalibrate(){
     if(calibrated) return;
+    if(document.body.classList.contains('storm-mode')) return;
     showCalibrateStep('1');
     document.getElementById('calibrateOverlay').classList.add('visible');
   }
