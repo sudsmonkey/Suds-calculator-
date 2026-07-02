@@ -741,7 +741,7 @@
   function selectHistoric(value, btn) {
     document.querySelectorAll('#calibrateStep5 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(() => showCalibrateStep(value === 'yes' ? '5b' : '6'), 1100);
+    setTimeout(() => showCalibrateStep('5b'), 1100);
   }
   function selectStormWindows(value, btn) {
     document.querySelectorAll('#calibrateStep5b .story-btn').forEach(b => b.classList.remove('active'));
