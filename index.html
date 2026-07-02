@@ -105,6 +105,8 @@
   .calibrate-progress { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .calibrate-back { display: none; background: none; border: none; font-size: 18px; color: var(--mid); cursor: pointer; padding: 0; line-height: 1; }
   .calibrate-back.visible { display: block; }
+  .calibrate-forward { display: none; background: none; border: none; font-size: 18px; color: var(--mid); cursor: pointer; padding: 0; line-height: 1; margin-left: auto; }
+  .calibrate-forward.visible { display: block; }
   .calibrate-step-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); }
   .calibrate-step { display: none; }
   .calibrate-step.active { display: flex; flex-direction: column; flex: 1; }
@@ -352,6 +354,7 @@
     <div class="calibrate-progress">
       <button type="button" class="calibrate-back" id="calibrateBack" onclick="calibrateGoBack()">←</button>
       <span class="calibrate-step-label" id="calibrateStepLabel">Question 1 of 7</span>
+      <button type="button" class="calibrate-forward" id="calibrateForward" onclick="calibrateGoForward()">→</button>
     </div>
 
     <div class="calibrate-step active" id="calibrateStep1">
@@ -740,6 +743,8 @@
     const LABELS = {'1':'Question 1 of 7','2':'Question 2 of 7','2b':'Question 2 of 7','3':'Question 3 of 7','3b':'Question 3 of 7','4':'Question 4 of 7','5':'Question 5 of 7','5b':'Question 5 of 7','6':'Question 6 of 7','6b':'Question 6 of 7','7':'Question 7 of 7'};
     document.getElementById('calibrateStepLabel').textContent = LABELS[id] || '';
     document.getElementById('calibrateBack').classList.toggle('visible', id !== '1' && id !== 'Loading');
+    const noForward = ['7','Loading','Storm','Quote'];
+    document.getElementById('calibrateForward').classList.toggle('visible', recalibrating && !noForward.includes(id));
     calibrateCurrentStep = id;
     if(id === '6b') { startQ6bTimer(5000); } else { clearTimeout(q6bTimer); }
   }
@@ -856,19 +861,36 @@
 
   function completeCalibration(){
     calibrated = true;
+    recalibrating = false;
     document.body.classList.add('calibrated');
     document.getElementById('sqftSlider').disabled = false;
     document.getElementById('sliderWrap').classList.remove('locked');
     closeCalibrateOverlay();
     updatePrices();
   }
+  let recalibrating = false;
+  function calibrateGoForward() {
+    const NEXT = {
+      '1':'2',
+      '2': hasScreens ? '2b' : '3',
+      '2b':'3',
+      '3':'4',
+      '3b':'4',
+      '4':'5',
+      '5':'5b',
+      '5b':'6',
+      '6': uncommonFeatures.length ? '6b' : '7',
+      '6b':'7'
+    };
+    const next = NEXT[calibrateCurrentStep];
+    if(next) showCalibrateStep(next);
+  }
   function reCalibrate(){
     calibrated = false;
+    recalibrating = true;
     document.body.classList.remove('calibrated');
     document.getElementById('sqftSlider').disabled = true;
     document.getElementById('sliderWrap').classList.add('locked');
-    document.querySelectorAll('.story-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('cleanFreq').value = '';
     showCalibrateStep('1');
     document.getElementById('calibrateOverlay').classList.add('visible');
   }
