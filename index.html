@@ -360,7 +360,17 @@
       </div>
     </div>
 
-    <div class="calibrate-step" id="calibrateStep3">
+
+    <div class="calibrate-step" id="calibrateStep2b">
+      <h2><span class="calibrate-icon"></span>Window Type</h2>
+      <p>Are more than 75% of your windows French pane?</p>
+      <div class="story-btns" style="margin-top:18px;">
+        <button type="button" class="story-btn" onclick="selectFrenchPaneOther('yes',this)">Yes</button>
+        <button type="button" class="story-btn" onclick="selectFrenchPaneOther('no',this)">No</button>
+      </div>
+    </div>
+
+        <div class="calibrate-step" id="calibrateStep3">
       <h2><span class="calibrate-icon"></span>Cleaning History</h2>
       <p>This helps us know what to expect when we arrive.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -637,7 +647,7 @@
     calibrateCurrentStep = id;
   }
   function calibrateGoBack() {
-    const PREV = {'2':'1','3':'2','4':'3','4b':'4','5':'4','Storm':'4b','Quote':'4b'};
+    const PREV = {'2':'1','2b':'2','3':'2','4':'3','4b':'4','5':'4','Storm':'4b','Quote':'4b'};
     const prev = PREV[calibrateCurrentStep];
     if(prev) showCalibrateStep(prev);
   }
@@ -650,6 +660,11 @@
   }
   function selectFrenchPane(value, btn) {
     document.querySelectorAll('#calibrateStep2 .story-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    setTimeout(() => showCalibrateStep(value === 'other' ? '2b' : '3'), 1100);
+  }
+  function selectFrenchPaneOther(value, btn) {
+    document.querySelectorAll('#calibrateStep2b .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     setTimeout(() => showCalibrateStep('3'), 1100);
   }
