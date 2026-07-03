@@ -799,7 +799,7 @@
     const noForward = ['7','Loading','Storm','Quote'];
     document.getElementById('calibrateForward').classList.toggle('visible', recalibrating && !noForward.includes(id));
     calibrateCurrentStep = id;
-    if(id === '6b') { startQ6bTimer(5000); } else { clearTimeout(q6bTimer); }
+
   }
   function calibrateGoBack() {
     const PREV = {'2':'1','2b':'2','3':'2','3b':'3','4':'3','5':'4','5b':'5','6':'5','6b':'6','7':'6','Storm':'5b','Quote':'5b'};
