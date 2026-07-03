@@ -488,26 +488,7 @@
           <button type="button" class="story-btn" onclick="toggleUncommonFeature('other',this)">Other</button>
         </div>
         <p style="margin-top:12px;font-size:12px;color:var(--mid);line-height:1.5;">All items can be priced on-site.</p>
-        <div class='pkg-btn-wrap' style='margin-top:16px;'><button type='button' class='story-btn' style='background:var(--orange);color:#fff;border-color:var(--orange);width:100%;' onclick="showCalibrateStep('7')">Next →</button></div>
-      </div>
-    </div>
-
-    <div class="calibrate-step" id="calibrateStep7">
-      <h2><span class="calibrate-icon"></span>Okay, last one!</h2>
-      <p>Are there any of these services you're interested in? Select all that apply.</p>
-      <div class="quick-q" style="margin-top:18px;">
-        <div class="story-btns" style="flex-direction:column;gap:8px;">
-          <button type="button" class="story-btn" onclick="toggleService('blind-dusting',this)">Blind dusting</button>
-          <button type="button" class="story-btn" onclick="toggleService('gutter-cleaning',this)">Gutter cleaning</button>
-          <button type="button" class="story-btn" onclick="toggleService('pressure-washing',this)">Pressure washing</button>
-          <button type="button" class="story-btn" onclick="toggleService('house-washing',this)">House washing</button>
-          <button type="button" class="story-btn" onclick="toggleService('holiday-lighting',this)">Holiday lighting</button>
-        </div>
-        <p style="margin-top:12px;font-size:11px;color:var(--mid);line-height:1.5;">(Internal use only — will not be shared with any 3rd party)</p>
-        <p style="margin-top:8px;font-size:12px;color:var(--mid);line-height:1.5;">These services aren't currently available but we'd love to chat about them during your appointment!</p>
-        <div class="pkg-btn-wrap" id="btn-wrap-calibrate" style="display:block;margin-top:14px;">
-          <button type="button" class="story-btn" style="background:var(--orange);color:#fff;border-color:var(--orange);width:100%;" onclick="calibrateWithBubbles()">Calibrate</button>
-        </div>
+        <div class='pkg-btn-wrap' style='margin-top:16px;'><button type='button' class='story-btn' style='background:var(--orange);color:#fff;border-color:var(--orange);width:100%;' onclick="startCalibrationLoad()">Next →</button></div>
       </div>
     </div>
 
@@ -795,7 +776,7 @@
     document.querySelectorAll('.calibrate-step').forEach(el => el.classList.remove('active'));
     const el = document.getElementById('calibrateStep' + id);
     if(el) el.classList.add('active');
-    const LABELS = {'1':'Question 1 of 7','2':'Question 2 of 7','2b':'Question 2 of 7','3':'Question 3 of 7','3b':'Question 3 of 7','4':'Question 4 of 7','5':'Question 5 of 7','5b':'Question 5 of 7','6':'Question 6 of 7','6b':'Question 6 of 7','7':'Question 7 of 7'};
+    const LABELS = {'1':'Question 1 of 7','2':'Question 2 of 7','2b':'Question 2 of 7','3':'Question 3 of 7','3b':'Question 3 of 7','4':'Question 4 of 7','5':'Question 5 of 7','5b':'Question 5 of 7','6':'Question 6 of 7','6b':'Question 6 of 7'};
     document.getElementById('calibrateStepLabel').textContent = LABELS[id] || '';
     document.getElementById('calibrateBack').classList.toggle('visible', id !== '1' && id !== 'Loading');
     const noForward = ['7','Loading','Storm','Quote'];
@@ -804,7 +785,7 @@
 
   }
   function calibrateGoBack() {
-    const PREV = {'2':'1','2b':'2','3':'2','3b':'3','4':'3','5':'4','5b':'5','6':'5','6b':'6','7':'6','Storm':'5b','Quote':'5b'};
+    const PREV = {'2':'1','2b':'2','3':'2','3b':'3','4':'3','5':'4','5b':'5','6':'5','6b':'6','Storm':'5b','Quote':'5b'};
     const prev = PREV[calibrateCurrentStep];
     if(prev) showCalibrateStep(prev);
   }
@@ -864,7 +845,7 @@
     document.querySelectorAll('#calibrateStep6 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     if(value === 'some') { setTimeout(() => showCalibrateStep('6b'), 1100); }
-    else { setTimeout(() => showCalibrateStep('7'), 1100); }
+    else { setTimeout(startCalibrationLoad, 1100); }
   }
   let uncommonFeatures = [];
   let interestedServices = [];
