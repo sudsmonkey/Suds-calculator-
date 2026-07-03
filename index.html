@@ -485,6 +485,7 @@
           <button type="button" class="story-btn" onclick="toggleUncommonFeature('other',this)">Other</button>
         </div>
         <p style="margin-top:12px;font-size:12px;color:var(--mid);line-height:1.5;">All items can be priced on-site.</p>
+        <div class='pkg-btn-wrap' style='margin-top:16px;'><button type='button' class='story-btn' style='background:var(--orange);color:#fff;border-color:var(--orange);width:100%;' onclick="showCalibrateStep('7')">Next →</button></div>
       </div>
     </div>
 
@@ -888,15 +889,10 @@
   }
 
   let q6bTimer = null;
-  function startQ6bTimer(delay) {
-    clearTimeout(q6bTimer);
-    q6bTimer = setTimeout(() => showCalibrateStep('7'), delay);
-  }
   function toggleUncommonFeature(value, btn) {
     btn.classList.toggle('active');
     if(btn.classList.contains('active')) { if(!uncommonFeatures.includes(value)) uncommonFeatures.push(value); }
     else { uncommonFeatures = uncommonFeatures.filter(v => v !== value); }
-    startQ6bTimer(4200);
   }
   let calibrated = false;
   function openCalibrate(){
