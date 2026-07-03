@@ -112,9 +112,9 @@
   .calibrate-step.active { display: flex; flex-direction: column; flex: 1; }
 
   body:not(.calibrated) .pkg-amount, body:not(.calibrated) .member-price { display: none; }
-  body:not(.calibrated) .pkg { filter: blur(5px); pointer-events: none; user-select: none; transition: filter 0.6s ease; }
-  body.calibrated .pkg { filter: none; transition: filter 0.6s ease; }
-  body.storm-mode .pkg.pkg-storm { filter: none; pointer-events: auto; }
+  body:not(.calibrated) .pkg-btn-wrap { filter: blur(1px); pointer-events: none; user-select: none; }
+  body.calibrated .pkg-btn-wrap { filter: none; }
+  body.storm-mode .pkg.pkg-storm .pkg-btn-wrap { filter: none; pointer-events: auto; }
   .screen-disclaimer {
     display: none;
     margin-top: 10px;
