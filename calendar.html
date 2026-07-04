@@ -50,9 +50,6 @@
   .cal-day.today { border: 2px solid var(--mint); }
   .cal-day.has-slots::after { content: ''; display: block; width: 4px; height: 4px; background: var(--mint); border-radius: 50%; position: absolute; bottom: 3px; }
 
-  /* Progressive reveal */
-  .reveal { display: none; }
-  .reveal.visible { display: block; }
 
   /* Time slots */
   .time-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
@@ -125,14 +122,14 @@
     <div class="cal-grid" id="calGrid"></div>
   </div>
 
-  <div class="reveal" id="timeSection">
+  <div id="timeSection">
     <div class="section-label">Choose a Time</div>
     <div class="time-card">
       <div class="time-grid" id="timeGrid"></div>
     </div>
   </div>
 
-  <div class="reveal" id="infoSection">
+  <div id="infoSection">
     <div class="section-label">Your Info</div>
     <div class="info-card">
       <div class="info-row">
@@ -255,8 +252,6 @@
     selectedTime = null;
     renderCalendar();
     renderTimeSlots();
-    show('timeSection');
-    hide('infoSection');
     updateBtn();
     setTimeout(() => {
       document.getElementById('timeSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -266,6 +261,12 @@
   function renderTimeSlots() {
     const grid = document.getElementById('timeGrid');
     grid.innerHTML = '';
+    if (!selectedDate) {
+      grid.style.gridTemplateColumns = '1fr';
+      grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--mid);font-size:14px;font-weight:700;">Select a date above to see available times</div>';
+      return;
+    }
+    grid.style.gridTemplateColumns = '1fr 1fr';
     const booked = BOOKED[selectedDate] || [];
     SLOTS.forEach(slot => {
       const el = document.createElement('div');
@@ -286,19 +287,12 @@
     document.getElementById('summaryDate').textContent = MONTHS[currentMonth] + ' ' + parseInt(selectedDate.split('-')[2]) + ', ' + currentYear;
     document.getElementById('summaryTime').textContent = slot;
     renderTimeSlots();
-    show('infoSection');
     updateBtn();
-    setTimeout(() => {
-      document.getElementById('infoSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
   }
 
   function updateBtn() {
     document.getElementById('bookBtn').disabled = !(selectedDate && selectedTime);
   }
-
-  function show(id) { document.getElementById(id).classList.add('visible'); }
-  function hide(id) { document.getElementById(id).classList.remove('visible'); }
 
   function prevMonth() {
     currentMonth--;
@@ -313,6 +307,7 @@
   }
 
   renderCalendar();
+  renderTimeSlots();
 </script>
 </body>
 </html>
