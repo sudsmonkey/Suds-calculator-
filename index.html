@@ -886,7 +886,7 @@
     document.querySelectorAll('#calibrateStep3c .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     if(value === 'yes') {
-      setTimeout(enterStormMode, 1100);
+      setTimeout(() => showCalibrateStep('Storm'), 1100);
     } else {
       setTimeout(() => showCalibrateStep('4'), 1100);
     }
