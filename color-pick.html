@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pick a Color</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #F5F0EB; padding: 20px 16px 40px; }
+  h1 { text-align: center; font-size: 13px; font-weight: 700; color: #7C7268; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  p { text-align: center; font-size: 12px; color: #9E9590; margin-bottom: 20px; }
+  .options { display: flex; flex-direction: column; gap: 14px; max-width: 380px; margin: 0 auto; }
+  .option { border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.10); }
+  .preview { padding: 16px 20px 18px; text-align: center; }
+  .circle { width: 48px; height: 48px; border-radius: 50%; background: #F7F1EC; border: 2.5px solid #9ED9C0; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .preview h2 { color: #fff; font-size: 16px; font-weight: 900; }
+  .preview small { color: rgba(255,255,255,0.82); font-size: 11px; display: block; margin-top: 2px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.35); border-radius: 50px; padding: 5px 12px; margin-top: 8px; }
+  .pill span { color: #fff; font-size: 11px; font-weight: 700; }
+  .pill b { background: #fff; border-radius: 50px; padding: 2px 8px; font-size: 11px; font-weight: 900; color: #A6382E; }
+  .meta { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #fff; }
+  .meta .name { font-size: 13px; font-weight: 700; color: #333; }
+  .meta .hex { font-size: 11px; color: #9E9590; font-family: monospace; }
+  .tag { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 8px; border-radius: 50px; }
+  .tag.now { background: #F0FAF6; color: #4A9E7E; }
+  .tag.was { background: #F5F0EB; color: #9E9590; }
+  .tag.far { background: #FFF0F0; color: #C07070; }
+</style>
+</head>
+<body>
+<h1>Pick Your Coral</h1>
+<p>Tell me the letter — A, B, C, D, or E</p>
+<div class="options">
+
+  <div class="option">
+    <div class="preview" style="background:#F56E64;">
+      <div class="circle">🐒</div>
+      <h2>Book Your Clean</h2>
+      <small>Suds Monkey Window Cleaning</small>
+      <div class="pill"><span>Gorilla Grande</span><b>$320</b></div>
+    </div>
+    <div class="meta">
+      <span class="name">A — Original</span>
+      <span class="hex">#F56E64</span>
+      <span class="tag was">Too orange</span>
+    </div>
+  </div>
+
+  <div class="option">
+    <div class="preview" style="background:#F56B69;">
+      <div class="circle">🐒</div>
+      <h2>Book Your Clean</h2>
+      <small>Suds Monkey Window Cleaning</small>
+      <div class="pill"><span>Gorilla Grande</span><b>$320</b></div>
+    </div>
+    <div class="meta">
+      <span class="name">B — Subtle nudge</span>
+      <span class="hex">#F56B69</span>
+      <span class="tag">+tiny pink</span>
+    </div>
+  </div>
+
+  <div class="option">
+    <div class="preview" style="background:#F5696F;">
+      <div class="circle">🐒</div>
+      <h2>Book Your Clean</h2>
+      <small>Suds Monkey Window Cleaning</small>
+      <div class="pill"><span>Gorilla Grande</span><b>$320</b></div>
+    </div>
+    <div class="meta">
+      <span class="name">C — Live now</span>
+      <span class="hex">#F5696F</span>
+      <span class="tag now">On site</span>
+    </div>
+  </div>
+
+  <div class="option">
+    <div class="preview" style="background:#F56675;">
+      <div class="circle">🐒</div>
+      <h2>Book Your Clean</h2>
+      <small>Suds Monkey Window Cleaning</small>
+      <div class="pill"><span>Gorilla Grande</span><b>$320</b></div>
+    </div>
+    <div class="meta">
+      <span class="name">D — Coral-pink</span>
+      <span class="hex">#F56675</span>
+      <span class="tag">+more pink</span>
+    </div>
+  </div>
+
+  <div class="option">
+    <div class="preview" style="background:#F5647A;">
+      <div class="circle">🐒</div>
+      <h2>Book Your Clean</h2>
+      <small>Suds Monkey Window Cleaning</small>
+      <div class="pill"><span>Gorilla Grande</span><b>$320</b></div>
+    </div>
+    <div class="meta">
+      <span class="name">E — Too pink</span>
+      <span class="hex">#F5647A</span>
+      <span class="tag far">Too far</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
