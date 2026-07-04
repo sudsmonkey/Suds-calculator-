@@ -139,28 +139,28 @@
         <div class="info-row-split">
           <div class="info-field">
             <label>First Name</label>
-            <input type="text" placeholder="Jane">
+            <input type="text" id="infoFirstName" placeholder="Jane">
           </div>
           <div class="info-field">
             <label>Last Name</label>
-            <input type="text" placeholder="Smith">
+            <input type="text" id="infoLastName" placeholder="Smith">
           </div>
         </div>
         <div class="info-field">
           <label>Phone</label>
-          <input type="tel" placeholder="(555) 000-0000">
+          <input type="tel" id="infoPhone" placeholder="(555) 000-0000">
         </div>
         <div class="info-field">
           <label>Email</label>
-          <input type="email" placeholder="jane@email.com">
+          <input type="email" id="infoEmail" placeholder="jane@email.com">
         </div>
         <div class="info-field">
           <label>Address</label>
-          <input type="text" placeholder="123 Main St">
+          <input type="text" id="infoAddress" placeholder="123 Main St">
         </div>
         <div class="info-field">
           <label>Notes (optional)</label>
-          <textarea placeholder="Gate code, dogs, anything we should know..."></textarea>
+          <textarea id="infoNotes" placeholder="Gate code, dogs, anything we should know..."></textarea>
         </div>
       </div>
     </div>
@@ -189,10 +189,16 @@
     </div>
 
     <div class="deposit-note" id="depositNote">
-      <strong>$25 deposit</strong> due today to secure your spot — applied toward your total at completion.
+      We'll confirm your appointment within 24 hours.
     </div>
 
-    <button class="book-btn" id="bookBtn" disabled>Confirm &amp; Pay Deposit</button>
+    <button class="book-btn" id="bookBtn" disabled>Confirm Booking</button>
+
+    <div id="bookSuccess" style="display:none;margin-top:20px;background:#F0FAF6;border:1.5px solid #9ED9C0;border-radius:14px;padding:20px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px;">🫧</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:17px;font-weight:900;color:#2D6A52;margin-bottom:4px;">You're on the books!</div>
+      <div style="font-size:13px;color:#4A9E7E;line-height:1.5;">We'll reach out within 24 hours to confirm your appointment.</div>
+    </div>
   </div>
 
 </div>
@@ -335,6 +341,63 @@
       });
       document.getElementById('summaryAddonsSection').style.display = 'block';
     }
+
+    document.getElementById('bookBtn').addEventListener('click', async function() {
+      const firstName = document.getElementById('infoFirstName').value.trim();
+      const lastName  = document.getElementById('infoLastName').value.trim();
+      const phone     = document.getElementById('infoPhone').value.trim();
+      const email     = document.getElementById('infoEmail').value.trim();
+      const address   = document.getElementById('infoAddress').value.trim();
+      const notes     = document.getElementById('infoNotes').value.trim();
+
+      if (!firstName || !phone || !email || !address) {
+        alert('Please fill in your name, phone, email, and service address.');
+        return;
+      }
+
+      const addonRows = document.querySelectorAll('#summaryAddonsList .summary-row');
+      const addonsText = Array.from(addonRows).map(r =>
+        r.querySelector('.label').textContent + ' ' + r.querySelector('.value').textContent
+      ).join(', ');
+
+      const body = new FormData();
+      body.append('first_name', firstName);
+      body.append('last_name', lastName);
+      body.append('_replyto', email);
+      body.append('email', email);
+      body.append('phone', phone);
+      body.append('address', address);
+      body.append('notes', notes);
+      body.append('package', document.getElementById('summaryPkgName').textContent);
+      body.append('date', document.getElementById('summaryDate').textContent);
+      body.append('time', document.getElementById('summaryTime').textContent);
+      body.append('total', document.getElementById('summaryPkgTotal').textContent);
+      if (addonsText) body.append('add_ons', addonsText);
+
+      const btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      try {
+        const res = await fetch('https://formspree.io/f/mjgqjdyz', {
+          method: 'POST',
+          body: body,
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          btn.style.display = 'none';
+          document.getElementById('bookSuccess').style.display = 'block';
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Confirm Booking';
+          alert('Something went wrong. Please try again or call us directly.');
+        }
+      } catch(e) {
+        btn.disabled = false;
+        btn.textContent = 'Confirm Booking';
+        alert('Something went wrong. Please try again or call us directly.');
+      }
+    });
   } else {
     document.getElementById('headerTitle').textContent = 'Check Availability';
     document.getElementById('pkgPill').style.display = 'none';
