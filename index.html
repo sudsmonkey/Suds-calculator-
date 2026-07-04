@@ -794,7 +794,7 @@
         <span class="discount-label">🫧 Monkey Bonus</span>
         <span class="discount-val" id="co-discount">—</span>
       </div>
-      <div class="discount-sub">Share the Suds Calculator with a friend to save 10% — and your friend saves 5% automatically!</div>
+      <div class="discount-sub">Share the Suds Calculator with a friend to save $25 — and your friend saves $15 automatically!</div>
     </div>
     <div id="co-screen-unsure-note" style="display:none;margin-bottom:14px;padding:10px 14px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:10px;font-size:12px;color:#78350F;line-height:1.5;">The $50 screen charge will be removed from your onsite invoice if screens are removable from outside.</div>
     <button class="checkout-btn" onclick="goToCalendar()">Book Now</button>
@@ -1167,7 +1167,7 @@
     document.getElementById('co-package').textContent = PKG_NAMES[pkg];
     document.getElementById('co-sqft').textContent = sqft.toLocaleString() + ' sq ft';
     document.getElementById('co-total').textContent = '$' + fmt(total);
-    document.getElementById('co-discount').textContent = '−$' + fmt(total * 0.10);
+    document.getElementById('co-discount').textContent = '−$25';
 
     document.getElementById('co-screens-row').style.display = sc ? 'flex' : 'none';
     const coUnsureNote = document.getElementById('co-screen-unsure-note');
