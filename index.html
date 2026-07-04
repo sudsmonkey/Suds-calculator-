@@ -1135,8 +1135,17 @@
       updateCheckout(pkg);
       checkoutCard.classList.add('visible');
       setTimeout(() => {
-        checkoutCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 2500);
+        const startY = window.pageYOffset;
+        const targetY = checkoutCard.getBoundingClientRect().top + startY - 12;
+        const duration = 1200;
+        const t0 = performance.now();
+        (function step(now) {
+          const p = Math.min((now - t0) / duration, 1);
+          const ease = p < 0.5 ? 2*p*p : -1+(4-2*p)*p;
+          window.scrollTo(0, startY + (targetY - startY) * ease);
+          if (p < 1) requestAnimationFrame(step);
+        })(t0);
+      }, 1500);
 
     } else {
       checkoutCard.classList.remove('visible');
