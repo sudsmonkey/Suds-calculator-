@@ -392,12 +392,14 @@
         } else {
           btn.disabled = false;
           btn.textContent = 'Confirm Booking';
-          alert('Something went wrong. Please try again or call us directly.');
+          let errMsg = 'Status ' + res.status;
+          try { const j = await res.json(); errMsg += ': ' + (j.error || JSON.stringify(j)); } catch(_) {}
+          alert('Formspree error — ' + errMsg);
         }
       } catch(e) {
         btn.disabled = false;
         btn.textContent = 'Confirm Booking';
-        alert('Something went wrong. Please try again or call us directly.');
+        alert('Network error — ' + e.message);
       }
     });
   } else {
