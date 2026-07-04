@@ -179,6 +179,9 @@
         <span class="label">Time</span>
         <span class="value" id="summaryTime">—</span>
       </div>
+      <div id="summaryAddonsSection" style="display:none;">
+        <div id="summaryAddonsList"></div>
+      </div>
       <div class="summary-row total" id="summaryTotalRow">
         <span class="label">Total</span>
         <span class="value" id="summaryPkgTotal">$—</span>
@@ -319,6 +322,19 @@
     document.getElementById('headerPkgPrice').textContent = '$' + pkgPrice;
     document.getElementById('summaryPkgName').textContent = pkgName;
     document.getElementById('summaryPkgTotal').textContent = '$' + pkgPrice;
+    const addonsParam = params.get('addons');
+    if (addonsParam) {
+      const addonsList = addonsParam.split(',');
+      const container = document.getElementById('summaryAddonsList');
+      addonsList.forEach(a => {
+        const [label, val] = a.split(':');
+        const row = document.createElement('div');
+        row.className = 'summary-row';
+        row.innerHTML = '<span class="label">✓ ' + label + '</span><span class="value">' + val + '</span>';
+        container.appendChild(row);
+      });
+      document.getElementById('summaryAddonsSection').style.display = 'block';
+    }
   } else {
     document.getElementById('headerTitle').textContent = 'Check Availability';
     document.getElementById('pkgPill').style.display = 'none';

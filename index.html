@@ -1190,7 +1190,19 @@
     if (!currentPkg) return;
     const name = PKG_NAMES[currentPkg];
     const price = document.getElementById('co-total').textContent.replace(/[^0-9.]/g,'');
-    window.location.href = 'calendar.html?pkg=' + encodeURIComponent(name) + '&price=' + encodeURIComponent(price);
+    const addons = [];
+    const screensEl = document.getElementById(currentPkg+'-screens');
+    const tracksEl = document.getElementById(currentPkg+'-tracks');
+    const mirrorsEl = document.getElementById(currentPkg+'-mirrors');
+    if(screensEl && screensEl.checked) addons.push('Screen brushing:$50');
+    if(tracksEl && tracksEl.checked) addons.push('Deep clean tracks:$50');
+    if(mirrorsEl && mirrorsEl.checked) {
+      const mv = document.getElementById('co-mirrors-val');
+      addons.push('Mirror cleaning:' + (mv ? mv.textContent : ''));
+    }
+    let url = 'calendar.html?pkg=' + encodeURIComponent(name) + '&price=' + encodeURIComponent(price);
+    if(addons.length) url += '&addons=' + encodeURIComponent(addons.join(','));
+    window.location.href = url;
   }
   let currentPkg = null;
   function saveQuote() {
