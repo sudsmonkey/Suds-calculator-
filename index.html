@@ -885,7 +885,11 @@
   function selectStormQ(value, btn) {
     document.querySelectorAll('#calibrateStep3c .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(() => showCalibrateStep(value === 'yes' ? 'Storm' : '4'), 1100);
+    if(value === 'yes') {
+      setTimeout(enterStormMode, 1100);
+    } else {
+      setTimeout(() => showCalibrateStep('4'), 1100);
+    }
   }
   function selectFreq(value, btn) {
     document.getElementById('cleanFreq').value = value;
