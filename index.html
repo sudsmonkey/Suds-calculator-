@@ -196,6 +196,7 @@
   .qty-stepper button { width: 28px; height: 30px; border: none; background: #F7F1E8; color: var(--orange); font-size: 17px; font-weight: 700; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease; }
   .qty-stepper button:hover { background: #F0E7D8; }
   .qty-stepper button:active { background: #E9DECB; }
+  .pkg-btn.contact-locked { opacity: 0.35; filter: blur(0.5px); pointer-events: none; }
   .qty-stepper input[type="number"] { width: 40px; border: none; border-left: 1px solid #DDD3C4; border-right: 1px solid #DDD3C4; border-radius: 0; text-align: center; padding: 6px 0; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--dark); outline: none; -moz-appearance: textfield; }
   .qty-stepper input::-webkit-outer-spin-button, .qty-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
@@ -750,7 +751,7 @@
         </div>
       </div>
       <div class="pkg-btn-wrap" id="btn-wrap-storm">
-        <button class="pkg-btn" id="storm-contact-btn" onclick="expandStormContact()">Contact</button>
+        <button class="pkg-btn contact-locked" id="storm-contact-btn" onclick="expandStormContact()">Contact</button>
         <div id="storm-contact-options" style="display:none;flex-direction:column;gap:8px;margin-top:10px;">
           <a href="tel:5551234567" class="pkg-btn" style="text-align:center;text-decoration:none;background:var(--white);color:var(--dark);border:1.5px solid #DDD3C4;">📞 Call Us</a>
           <button class="pkg-btn" style="background:var(--white);color:var(--dark);border:1.5px solid #DDD3C4;" onclick="openContactForm()">✉️ Send a Message</button>
@@ -1038,6 +1039,7 @@
     if(sp2) sp2.textContent = sf2&&sf2.checked ? '+ $'+fmt(f2total) : '+ $0';
     const stormEl = document.getElementById('stormPrice');
     if(stormEl) stormEl.textContent = fmt(f1total + f2total);
+    updateStormContactBtn();
   }
   function toggleScreens(pkg,cb){updatePrices();}
   function expandStormContact(){
@@ -1048,6 +1050,16 @@
     const countEl = document.getElementById('storm-floor'+floor+'-count');
     if(countEl) countEl.style.display = cb.checked ? 'block' : 'none';
     updatePrices();
+  }
+  function updateStormContactBtn(){
+    const sf1 = document.getElementById('storm-floor1');
+    const sf1n = document.getElementById('storm-floor1-num');
+    const sf2 = document.getElementById('storm-floor2');
+    const sf2n = document.getElementById('storm-floor2-num');
+    const qty1 = sf1&&sf1.checked ? (parseInt(sf1n&&sf1n.value)||1) : 0;
+    const qty2 = sf2&&sf2.checked ? (parseInt(sf2n&&sf2n.value)||1) : 0;
+    const contactBtn = document.getElementById('storm-contact-btn');
+    if(contactBtn) contactBtn.classList.toggle('contact-locked', qty1+qty2 <= 1);
   }
   function stepQty(id,delta){
     const el=document.getElementById(id);
@@ -1181,6 +1193,9 @@
     if(el)el.textContent=fmt(total);
   }
   document.getElementById('sqftSlider').addEventListener('input',updatePrices);
+  // Auto-check floor 1 storm windows and show stepper
+  const sf1init = document.getElementById('storm-floor1');
+  if(sf1init) { sf1init.checked = true; document.getElementById('storm-floor1-count').style.display = 'block'; }
   updatePrices();
 </script>
 </body>
