@@ -434,6 +434,18 @@
       </div>
     </div>
 
+    <div class="calibrate-step" id="calibrateStep3c">
+      <h2><span class="calibrate-icon"></span>Storm Windows</h2>
+      <p>We specialize in storm windows across historic and other neighborhoods. Our Storm Package covers both layers of glass and the space between — and when most windows have storms, the additional surfaces are typically included.</p>
+      <div class="quick-q" style="margin-top:18px;">
+        <span class="input-label">Do you have storm windows in your home?</span>
+        <div class="story-btns" style="flex-direction:column;gap:8px;">
+          <button type="button" class="story-btn" onclick="selectStormQ('yes',this)">Yes</button>
+          <button type="button" class="story-btn" onclick="selectStormQ('no',this)">No</button>
+        </div>
+      </div>
+    </div>
+
         <div class="calibrate-step" id="calibrateStep4">
       <h2><span class="calibrate-icon"></span>Cleaning History</h2>
       <p>This helps us know what to expect when we arrive.</p>
@@ -821,7 +833,7 @@
     document.querySelectorAll('.calibrate-step').forEach(el => el.classList.remove('active'));
     const el = document.getElementById('calibrateStep' + id);
     if(el) el.classList.add('active');
-    const LABELS = {'1':'Question 1 of 7','2':'Question 2 of 7','2b':'Question 2 of 7','3':'Question 3 of 7','3b':'Question 3 of 7','4':'Question 4 of 7','5':'Question 5 of 7','5b':'Question 5 of 7','6':'Question 6 of 7','6b':'Question 6 of 7'};
+    const LABELS = {'1':'Question 1 of 6','2':'Question 2 of 6','2b':'Question 2 of 6','3':'Question 3 of 6','3b':'Question 3 of 6','3c':'Question 4 of 6','4':'Question 5 of 6','6':'Question 6 of 6','6b':'Question 6 of 6'};
     document.getElementById('calibrateStepLabel').textContent = LABELS[id] || '';
     document.getElementById('calibrateBack').classList.toggle('visible', id !== '1' && id !== 'Loading');
     const noForward = ['7','Loading','Storm','Quote'];
@@ -830,7 +842,7 @@
 
   }
   function calibrateGoBack() {
-    const PREV = {'2':'1','2b':'2','3':'2','3b':'3','4':'3','5':'4','5b':'5','6':'5','6b':'6','Storm':'5b','Quote':'5b'};
+    const PREV = {'2':'1','2b':'2','3':'2','3b':'3','3c':'3','4':'3c','6':'4','6b':'6','Storm':'3c','Quote':'3c'};
     const prev = PREV[calibrateCurrentStep];
     if(prev) showCalibrateStep(prev);
   }
@@ -861,20 +873,25 @@
     document.querySelectorAll('#calibrateStep3 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     if(value !== 'other') { frenchPaneMajority = false; frenchPaneFlatSurcharge = (value === 'some-front') ? 25 : 0; }
-    setTimeout(() => showCalibrateStep(value === 'other' ? '3b' : '4'), 1100);
+    setTimeout(() => showCalibrateStep(value === 'other' ? '3b' : '3c'), 1100);
   }
   function selectFrenchPaneOther(value, btn) {
     document.querySelectorAll('#calibrateStep3b .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     frenchPaneMajority = (value === 'yes');
     frenchPaneFlatSurcharge = (value === 'yes') ? 0 : 25;
-    setTimeout(() => showCalibrateStep('4'), 1100);
+    setTimeout(() => showCalibrateStep('3c'), 1100);
+  }
+  function selectStormQ(value, btn) {
+    document.querySelectorAll('#calibrateStep3c .story-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    setTimeout(() => showCalibrateStep(value === 'yes' ? 'Storm' : '4'), 1100);
   }
   function selectFreq(value, btn) {
     document.getElementById('cleanFreq').value = value;
     document.querySelectorAll('#calibrateStep4 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(() => showCalibrateStep('5'), 1100);
+    setTimeout(() => showCalibrateStep('6'), 1100);
   }
   function selectHistoric(value, btn) {
     document.querySelectorAll('#calibrateStep5 .story-btn').forEach(b => b.classList.remove('active'));
