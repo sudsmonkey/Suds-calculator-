@@ -120,7 +120,7 @@
 
   body:not(.calibrated) .pkg-amount, body:not(.calibrated) .member-price { display: none; }
   body:not(.calibrated) .pkg .pkg-btn-wrap { filter: blur(2px); pointer-events: none; user-select: none; }
-  body.calibrated .pkg .pkg-btn-wrap { filter: none; }
+  body.calibrated .pkg .pkg-btn-wrap { filter: none; pointer-events: auto; user-select: auto; }
   body.storm-mode .pkg.pkg-storm .pkg-btn-wrap { filter: none; pointer-events: auto; }
   .screen-disclaimer {
     display: none;
