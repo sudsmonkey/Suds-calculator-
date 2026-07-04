@@ -133,6 +133,7 @@
   </div>
 
   <div id="infoSection">
+    <div id="infoFormBlock">
     <div class="section-label">Your Info</div>
     <div class="info-card">
       <div class="info-row">
@@ -164,6 +165,7 @@
         </div>
       </div>
     </div>
+    </div><!-- /infoFormBlock -->
 
     <div class="section-label">Summary</div>
     <div class="summary-card">
@@ -404,6 +406,7 @@
     document.getElementById('summaryPkgRow').style.display = 'none';
     document.getElementById('summaryTotalRow').style.display = 'none';
     document.getElementById('depositNote').style.display = 'none';
+    document.getElementById('infoFormBlock').style.display = 'none';
     const btn = document.getElementById('bookBtn');
     btn.textContent = 'Get My Price →';
     btn.onclick = () => { window.location.href = 'index.html'; };
