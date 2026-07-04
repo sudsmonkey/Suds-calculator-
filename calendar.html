@@ -54,8 +54,8 @@
   /* Time slots */
   .time-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
   .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .time-slot { border: 1.5px solid var(--orangeborder); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
-  .time-slot:hover:not(.booked) { border-color: var(--orange); background: #FDF0EF; }
+  .time-slot { width: 100%; border: 1.5px solid var(--orangeborder); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--white); font-family: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  @media (hover: hover) { .time-slot:hover:not(.booked) { border-color: var(--orange); background: #FDF0EF; } }
   .time-slot.selected { background: var(--orange); border-color: var(--orange); }
   .time-slot.selected .time-main { color: #fff; }
   .time-slot.selected .time-sub { color: rgba(255,255,255,0.8); }
@@ -266,9 +266,11 @@
     grid.style.gridTemplateColumns = '1fr 1fr';
     const booked = BOOKED[selectedDate] || [];
     SLOTS.forEach(slot => {
-      const el = document.createElement('div');
+      const el = document.createElement('button');
+      el.type = 'button';
       if (booked.includes(slot)) {
         el.className = 'time-slot booked';
+        el.disabled = true;
         el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">Unavailable</div>';
       } else {
         el.className = 'time-slot' + (selectedTime === slot ? ' selected' : '');
