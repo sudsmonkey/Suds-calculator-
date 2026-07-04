@@ -15,31 +15,28 @@
     --mid: #7C7268;
     --white: #FFFFFF;
     --radius: 20px;
+    --shadow: 0 2px 16px rgba(245,110,100,0.10);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; }
 
-  /* Header */
   .header { background: var(--orange); padding: 20px 24px 28px; text-align: center; }
   .header-logo { width: 70px; height: 70px; border-radius: 50%; background: #F7F1EC; border: 3px solid var(--mint); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; overflow: hidden; }
   .header-logo img { width: 100%; height: 100%; object-fit: cover; }
   .header h1 { color: #fff; font-size: 22px; font-weight: 900; }
   .header p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }
-
-  /* Package pill */
   .pkg-pill { background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 50px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; }
   .pkg-pill span { color: #fff; font-size: 13px; font-weight: 700; }
   .pkg-pill .pkg-price { background: #fff; color: var(--dark); border-radius: 50px; padding: 2px 10px; font-size: 12px; font-weight: 900; }
 
-  /* Layout */
   .content { padding: 20px 16px 40px; max-width: 440px; margin: 0 auto; }
   .section-label { font-size: 11px; font-weight: 900; color: var(--mid); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; margin-top: 24px; }
   .section-label:first-child { margin-top: 0; }
 
-  /* Calendar card */
-  .calendar-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 16px rgba(245,110,100,0.10); }
+  /* Calendar */
+  .calendar-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
   .month-nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid #F5EDE4; }
-  .month-nav button { background: none; border: none; cursor: pointer; color: var(--orange); font-size: 20px; font-weight: 900; padding: 4px 8px; border-radius: 8px; transition: background 0.15s; }
+  .month-nav button { background: none; border: none; cursor: pointer; color: var(--orange); font-size: 22px; font-weight: 900; padding: 4px 10px; border-radius: 8px; transition: background 0.15s; line-height: 1; }
   .month-nav button:hover { background: #FDF0EF; }
   .month-name { font-size: 17px; font-weight: 900; color: var(--dark); }
   .day-headers { display: grid; grid-template-columns: repeat(7, 1fr); padding: 8px 12px 4px; }
@@ -49,12 +46,16 @@
   .cal-day:hover:not(.disabled):not(.empty) { background: #FDF0EF; }
   .cal-day.empty, .cal-day.disabled { cursor: default; }
   .cal-day.disabled { color: #DDD3C4; }
-  .cal-day.selected { background: var(--orange); color: #fff; }
+  .cal-day.selected { background: var(--orange) !important; color: #fff; }
   .cal-day.today { border: 2px solid var(--mint); }
   .cal-day.has-slots::after { content: ''; display: block; width: 4px; height: 4px; background: var(--mint); border-radius: 50%; position: absolute; bottom: 3px; }
 
+  /* Progressive reveal */
+  .reveal { display: none; }
+  .reveal.visible { display: block; }
+
   /* Time slots */
-  .time-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: 0 2px 16px rgba(245,110,100,0.10); }
+  .time-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
   .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .time-slot { border: 1.5px solid var(--orangeborder); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
   .time-slot:hover:not(.booked) { border-color: var(--orange); background: #FDF0EF; }
@@ -66,7 +67,7 @@
   .time-sub { font-size: 11px; color: var(--mid); margin-top: 2px; }
 
   /* Info form */
-  .info-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: 0 2px 16px rgba(245,110,100,0.10); }
+  .info-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
   .info-row { display: flex; flex-direction: column; gap: 10px; }
   .info-row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .info-field label { font-size: 11px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 4px; }
@@ -75,7 +76,7 @@
   .info-field textarea { resize: none; height: 70px; }
 
   /* Summary */
-  .summary-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: 0 2px 16px rgba(245,110,100,0.10); }
+  .summary-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
   .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #F5EDE4; font-size: 14px; }
   .summary-row:last-child { border-bottom: none; padding-top: 10px; }
   .summary-row .label { color: var(--mid); }
@@ -83,11 +84,9 @@
   .summary-row.total .label { font-weight: 900; color: var(--dark); font-size: 15px; }
   .summary-row.total .value { font-size: 18px; font-weight: 900; color: var(--orange); }
 
-  /* Deposit note */
   .deposit-note { background: #F0FAF6; border: 1.5px solid var(--mint); border-radius: 12px; padding: 10px 14px; margin-top: 12px; font-size: 12px; color: var(--mid); line-height: 1.5; }
   .deposit-note strong { color: var(--dark); }
 
-  /* Book button */
   .book-btn { display: block; width: 100%; padding: 16px; border-radius: 50px; border: none; background: var(--orange); color: #fff; font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 900; cursor: pointer; margin-top: 20px; transition: opacity 0.15s; }
   .book-btn:hover { opacity: 0.88; }
   .book-btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -126,85 +125,88 @@
     <div class="cal-grid" id="calGrid"></div>
   </div>
 
-  <div id="timeSlotsSection" style="display:none;">
+  <div class="reveal" id="timeSection">
     <div class="section-label">Choose a Time</div>
     <div class="time-card">
       <div class="time-grid" id="timeGrid"></div>
     </div>
   </div>
 
-  <div class="section-label">Your Info</div>
-  <div class="info-card">
-    <div class="info-row">
-      <div class="info-row-split">
-        <div class="info-field">
-          <label>First Name</label>
-          <input type="text" placeholder="Jane">
+  <div class="reveal" id="infoSection">
+    <div class="section-label">Your Info</div>
+    <div class="info-card">
+      <div class="info-row">
+        <div class="info-row-split">
+          <div class="info-field">
+            <label>First Name</label>
+            <input type="text" placeholder="Jane">
+          </div>
+          <div class="info-field">
+            <label>Last Name</label>
+            <input type="text" placeholder="Smith">
+          </div>
         </div>
         <div class="info-field">
-          <label>Last Name</label>
-          <input type="text" placeholder="Smith">
+          <label>Phone</label>
+          <input type="tel" placeholder="(555) 000-0000">
+        </div>
+        <div class="info-field">
+          <label>Email</label>
+          <input type="email" placeholder="jane@email.com">
+        </div>
+        <div class="info-field">
+          <label>Address</label>
+          <input type="text" placeholder="123 Main St">
+        </div>
+        <div class="info-field">
+          <label>Notes (optional)</label>
+          <textarea placeholder="Gate code, dogs, anything we should know..."></textarea>
         </div>
       </div>
-      <div class="info-field">
-        <label>Phone</label>
-        <input type="tel" placeholder="(555) 000-0000">
-      </div>
-      <div class="info-field">
-        <label>Email</label>
-        <input type="email" placeholder="jane@email.com">
-      </div>
-      <div class="info-field">
-        <label>Address</label>
-        <input type="text" placeholder="123 Main St">
-      </div>
-      <div class="info-field">
-        <label>Notes (optional)</label>
-        <textarea placeholder="Gate code, dogs, anything we should know..."></textarea>
-      </div>
     </div>
-  </div>
 
-  <div class="section-label">Summary</div>
-  <div class="summary-card">
-    <div class="summary-row">
-      <span class="label">Package</span>
-      <span class="value">Gorilla Clean</span>
+    <div class="section-label">Summary</div>
+    <div class="summary-card">
+      <div class="summary-row">
+        <span class="label">Package</span>
+        <span class="value">Gorilla Clean</span>
+      </div>
+      <div class="summary-row">
+        <span class="label">Date</span>
+        <span class="value" id="summaryDate">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="label">Time</span>
+        <span class="value" id="summaryTime">—</span>
+      </div>
+      <div class="summary-row total">
+        <span class="label">Total</span>
+        <span class="value">$320</span>
+      </div>
     </div>
-    <div class="summary-row">
-      <span class="label">Date</span>
-      <span class="value" id="summaryDate">—</span>
-    </div>
-    <div class="summary-row">
-      <span class="label">Time</span>
-      <span class="value" id="summaryTime">—</span>
-    </div>
-    <div class="summary-row total">
-      <span class="label">Total</span>
-      <span class="value">$320</span>
-    </div>
-  </div>
 
-  <div class="deposit-note">
-    <strong>$25 deposit</strong> due today to secure your spot — applied toward your total at completion.
-  </div>
+    <div class="deposit-note">
+      <strong>$25 deposit</strong> due today to secure your spot — applied toward your total at completion.
+    </div>
 
-  <button class="book-btn" id="bookBtn" disabled>Confirm &amp; Pay Deposit</button>
+    <button class="book-btn" id="bookBtn" disabled>Confirm &amp; Pay Deposit</button>
+  </div>
 
 </div>
 
 <script>
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const SLOTS = ['8:00 AM','10:00 AM','12:00 PM','2:00 PM'];
-
-  // Mock booked slots — replace with real data later
   const BOOKED = {
     '2026-07-10': ['8:00 AM','10:00 AM'],
     '2026-07-15': ['12:00 PM']
   };
 
-  let currentYear = new Date().getFullYear();
-  let currentMonth = new Date().getMonth();
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  let currentYear = today.getFullYear();
+  let currentMonth = today.getMonth();
   let selectedDate = null;
   let selectedTime = null;
 
@@ -212,10 +214,9 @@
     const grid = document.getElementById('calGrid');
     grid.innerHTML = '';
     document.getElementById('monthName').textContent = MONTHS[currentMonth] + ' ' + currentYear;
+
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const today = new Date();
-    today.setHours(0,0,0,0);
 
     for (let i = 0; i < firstDay; i++) {
       const el = document.createElement('div');
@@ -225,6 +226,7 @@
 
     for (let d = 1; d <= totalDays; d++) {
       const date = new Date(currentYear, currentMonth, d);
+      date.setHours(0,0,0,0);
       const dateStr = currentYear + '-' + String(currentMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
       const dow = date.getDay();
       const isPast = date < today;
@@ -236,12 +238,12 @@
       if (isPast || isWeekend || fullyBooked) {
         el.className = 'cal-day disabled';
       } else {
-        el.className = 'cal-day available has-slots';
+        el.className = 'cal-day has-slots';
         el.onclick = () => selectDate(dateStr, d);
       }
 
       if (date.getTime() === today.getTime()) el.classList.add('today');
-      if (dateStr === selectedDate) { el.classList.remove('available'); el.classList.add('selected'); }
+      if (dateStr === selectedDate) el.classList.add('selected');
 
       el.textContent = d;
       grid.appendChild(el);
@@ -251,13 +253,14 @@
   function selectDate(dateStr, d) {
     selectedDate = dateStr;
     selectedTime = null;
-    document.getElementById('summaryDate').textContent = MONTHS[currentMonth] + ' ' + d + ', ' + currentYear;
-    document.getElementById('summaryTime').textContent = '—';
     renderCalendar();
     renderTimeSlots();
-    document.getElementById('timeSlotsSection').style.display = 'block';
-    document.getElementById('timeSlotsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    show('timeSection');
+    hide('infoSection');
     updateBtn();
+    setTimeout(() => {
+      document.getElementById('timeSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   }
 
   function renderTimeSlots() {
@@ -280,14 +283,22 @@
 
   function selectTime(slot) {
     selectedTime = slot;
+    document.getElementById('summaryDate').textContent = MONTHS[currentMonth] + ' ' + parseInt(selectedDate.split('-')[2]) + ', ' + currentYear;
     document.getElementById('summaryTime').textContent = slot;
     renderTimeSlots();
+    show('infoSection');
     updateBtn();
+    setTimeout(() => {
+      document.getElementById('infoSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   }
 
   function updateBtn() {
     document.getElementById('bookBtn').disabled = !(selectedDate && selectedTime);
   }
+
+  function show(id) { document.getElementById(id).classList.add('visible'); }
+  function hide(id) { document.getElementById(id).classList.remove('visible'); }
 
   function prevMonth() {
     currentMonth--;
