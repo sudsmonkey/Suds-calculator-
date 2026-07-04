@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
 <title>Suds Calculator – Suds Monkey Window Cleaning</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Barlow+Condensed:ital,wght@1,800&display=swap');
@@ -12,10 +13,19 @@
     --mint: #9ED9C0; --cream: #FDF9F5;
     --white: #FFFFFF; --offwhite: #FFFFFF; --dark: #A6382E; --mid: #7C7268; --radius: 20px;
   }
+  @media (color-gamut: p3) {
+    :root {
+      --orange: color(display-p3 0.953 0.435 0.396);
+      --mint: color(display-p3 0.624 0.851 0.753);
+      --cream: color(display-p3 0.992 0.976 0.961);
+      --dark: color(display-p3 0.651 0.220 0.180);
+    }
+  }
   body {
     background: var(--cream);
     font-family: 'DM Sans', sans-serif;
     color: var(--dark);
+    color-scheme: light;
     min-height: 100vh;
     display: flex; flex-direction: column; align-items: center;
     padding: 32px 16px 60px;
