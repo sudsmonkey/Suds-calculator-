@@ -1100,7 +1100,10 @@
   }
 
   function goToCalendar() {
-    alert('Monkey Calendar coming soon! 🗓️');
+    if (!currentPkg) return;
+    const name = PKG_NAMES[currentPkg];
+    const price = document.getElementById('co-total').textContent.replace(/[^0-9.]/g,'');
+    window.location.href = 'calendar.html?pkg=' + encodeURIComponent(name) + '&price=' + encodeURIComponent(price);
   }
   let currentPkg = null;
   function saveQuote() {

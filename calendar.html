@@ -33,6 +33,7 @@
   .section-label { font-size: 11px; font-weight: 900; color: var(--mid); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; margin-top: 24px; }
   .section-label:first-child { margin-top: 0; }
 
+  /* Calendar */
   .calendar-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); box-shadow: var(--shadow); }
   .month-nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid #F5EDE4; }
   .month-nav button { background: none; border: none; cursor: pointer; color: var(--orange); font-size: 22px; font-weight: 900; padding: 4px 10px; border-radius: 8px; transition: background 0.15s; line-height: 1; }
@@ -49,6 +50,8 @@
   .cal-day.today { border: 2px solid var(--mint); }
   .cal-day.has-slots::after { content: ''; display: block; width: 4px; height: 4px; background: var(--mint); border-radius: 50%; position: absolute; bottom: 3px; }
 
+
+  /* Time slots */
   .time-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
   .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .time-slot { border: 1.5px solid var(--orangeborder); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
@@ -60,6 +63,7 @@
   .time-main { font-size: 15px; font-weight: 900; color: var(--dark); }
   .time-sub { font-size: 11px; color: var(--mid); margin-top: 2px; }
 
+  /* Info form */
   .info-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
   .info-row { display: flex; flex-direction: column; gap: 10px; }
   .info-row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -68,6 +72,7 @@
   .info-field input:focus, .info-field textarea:focus { border-color: var(--orange); }
   .info-field textarea { resize: none; height: 70px; }
 
+  /* Summary */
   .summary-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
   .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #F5EDE4; font-size: 14px; }
   .summary-row:last-child { border-bottom: none; padding-top: 10px; }
@@ -91,8 +96,8 @@
   <h1>Book Your Clean</h1>
   <p>Suds Monkey Window Cleaning</p>
   <div class="pkg-pill">
-    <span>Gorilla Clean</span>
-    <span class="pkg-price">$320</span>
+    <span id="headerPkgName">Gorilla Grande</span>
+    <span class="pkg-price" id="headerPkgPrice">$—</span>
   </div>
 </div>
 
@@ -161,7 +166,7 @@
     <div class="summary-card">
       <div class="summary-row">
         <span class="label">Package</span>
-        <span class="value">Gorilla Clean</span>
+        <span class="value" id="summaryPkgName">Gorilla Grande</span>
       </div>
       <div class="summary-row">
         <span class="label">Date</span>
@@ -173,7 +178,7 @@
       </div>
       <div class="summary-row total">
         <span class="label">Total</span>
-        <span class="value">$320</span>
+        <span class="value" id="summaryPkgTotal">$—</span>
       </div>
     </div>
 
@@ -300,6 +305,15 @@
     if (currentMonth > 11) { currentMonth = 0; currentYear++; }
     renderCalendar();
   }
+
+  // Read package + price from URL params (passed from calculator)
+  const params = new URLSearchParams(window.location.search);
+  const pkgName = params.get('pkg') || 'Gorilla Grande';
+  const pkgPrice = params.get('price') || '—';
+  document.getElementById('headerPkgName').textContent = pkgName;
+  document.getElementById('headerPkgPrice').textContent = pkgPrice ? '$' + pkgPrice : '—';
+  document.getElementById('summaryPkgName').textContent = pkgName;
+  document.getElementById('summaryPkgTotal').textContent = pkgPrice ? '$' + pkgPrice : '—';
 
   renderCalendar();
   renderTimeSlots();
