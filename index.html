@@ -1089,6 +1089,9 @@
       btn.addEventListener('animationend',()=>btn.classList.remove('btn-animate'),{once:true});
       updateCheckout(pkg);
       checkoutCard.classList.add('visible');
+      setTimeout(() => {
+        checkoutCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 1100);
 
     } else {
       checkoutCard.classList.remove('visible');
