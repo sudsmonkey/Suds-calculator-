@@ -278,6 +278,9 @@
   .checkout-row:last-of-type { border-bottom: none; }
   .checkout-row .label { color: var(--mid); }
   .checkout-row .value { font-weight: 600; color: var(--dark); }
+  .co-addons-label { font-size: 10px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); padding: 10px 0 4px; border-top: 1px solid #EBE1D2; margin-top: 2px; }
+  .addon-row .label { color: var(--dark); font-weight: 600; }
+  .addon-val { color: var(--orange) !important; font-weight: 700 !important; }
   .checkout-total {
     display: flex;
     justify-content: space-between;
@@ -782,9 +785,11 @@
   <div class="checkout-body">
     <div class="checkout-row"><span class="label">Package</span><span class="value" id="co-package">—</span></div>
     <div class="checkout-row"><span class="label">Home Size</span><span class="value" id="co-sqft">—</span></div>
-    <div class="checkout-row" id="co-screens-row" style="display:none"><span class="label">Screen brushing</span><span class="value">$50</span></div>
-    <div class="checkout-row" id="co-tracks-row" style="display:none"><span class="label">Deep clean tracks</span><span class="value">$50</span></div>
-    <div class="checkout-row" id="co-mirrors-row" style="display:none"><span class="label">Mirror cleaning</span><span class="value" id="co-mirrors-val">—</span></div>
+    <div class="co-addons-label">Add-ons</div>
+    <div class="checkout-row addon-row" id="co-no-addons"><span class="label" style="font-style:italic;">None</span></div>
+    <div class="checkout-row addon-row" id="co-screens-row" style="display:none"><span class="label">✓ Screen brushing</span><span class="value addon-val">$50</span></div>
+    <div class="checkout-row addon-row" id="co-tracks-row" style="display:none"><span class="label">✓ Deep clean tracks</span><span class="value addon-val">$50</span></div>
+    <div class="checkout-row addon-row" id="co-mirrors-row" style="display:none"><span class="label">✓ Mirror cleaning</span><span class="value addon-val" id="co-mirrors-val">—</span></div>
     <div class="checkout-total">
       <span class="label">Total</span>
       <span class="value" id="co-total">—</span>
