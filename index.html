@@ -92,6 +92,13 @@
   .story-btn { flex: 1; padding: 10px 0; border-radius: 12px; border: 1.5px solid #DDD3C4; background: var(--white); font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; color: var(--dark); cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; }
   .story-btn.active { background: var(--orange); border-color: var(--orange); color: var(--white); }
   .story-btn.bouncing { animation: selectFlip 1.0s ease both; }
+  .feature-wrap { display: flex; flex-direction: column; }
+  .feature-row { display: flex; gap: 8px; align-items: center; }
+  .feature-row .story-btn { flex: 1; }
+  .feat-info-btn { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid #DDD3C4; background: var(--white); color: var(--mid); font-size: 13px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s, color 0.15s; font-family: inherit; }
+  .feat-info-btn.open { border-color: var(--orange); color: var(--orange); background: #FDF0EF; }
+  .feat-info-panel { display: none; background: #FDF9F5; border: 1.5px solid var(--orangeborder); border-radius: 10px; padding: 8px 12px; margin-top: 6px; font-size: 12px; color: var(--mid); line-height: 1.6; }
+  .feat-info-panel.visible { display: block; }
   .quick-q { margin-top: 22px; }
   .quick-q select { width: 100%; padding: 10px 12px; border: 1.5px solid #DDD3C4; border-radius: 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--dark); background: var(--white); outline: none; }
   .quick-q select:focus { border-color: var(--orange); }
@@ -480,12 +487,48 @@
       <p>Select all that apply.</p>
       <div class="quick-q" style="margin-top:18px;">
         <div class="story-btns" style="flex-direction:column;gap:8px;">
-          <button type="button" class="story-btn" onclick="toggleUncommonFeature('clerestory',this)">Clerestory</button>
-          <button type="button" class="story-btn" onclick="toggleUncommonFeature('glass-railing',this)">Glass railing</button>
-          <button type="button" class="story-btn" onclick="toggleUncommonFeature('skylights',this)">Skylights</button>
-          <button type="button" class="story-btn" onclick="toggleUncommonFeature('curtain-wall',this)">Curtain wall</button>
-          <button type="button" class="story-btn" onclick="toggleUncommonFeature('sun-room',this)">Sun rooms</button>
-          <button type="button" class="story-btn" onclick="toggleUncommonFeature('other',this)">Other</button>
+          <div class="feature-wrap">
+            <div class="feature-row">
+              <button type="button" class="story-btn" onclick="toggleUncommonFeature('clerestory',this)">Clerestory</button>
+              <button type="button" class="feat-info-btn" onclick="toggleFeatInfo(this)" aria-label="What is this?">ℹ</button>
+            </div>
+            <div class="feat-info-panel">High windows set along the upper walls, above eye level — usually require extended pole access.</div>
+          </div>
+          <div class="feature-wrap">
+            <div class="feature-row">
+              <button type="button" class="story-btn" onclick="toggleUncommonFeature('glass-railing',this)">Glass railing</button>
+              <button type="button" class="feat-info-btn" onclick="toggleFeatInfo(this)" aria-label="What is this?">ℹ</button>
+            </div>
+            <div class="feat-info-panel">Frameless glass panels used as railings on decks, stairs, or balconies.</div>
+          </div>
+          <div class="feature-wrap">
+            <div class="feature-row">
+              <button type="button" class="story-btn" onclick="toggleUncommonFeature('skylights',this)">Skylights</button>
+              <button type="button" class="feat-info-btn" onclick="toggleFeatInfo(this)" aria-label="What is this?">ℹ</button>
+            </div>
+            <div class="feat-info-panel">Windows set into the roofline — cleaned from the roof surface.</div>
+          </div>
+          <div class="feature-wrap">
+            <div class="feature-row">
+              <button type="button" class="story-btn" onclick="toggleUncommonFeature('curtain-wall',this)">Curtain wall</button>
+              <button type="button" class="feat-info-btn" onclick="toggleFeatInfo(this)" aria-label="What is this?">ℹ</button>
+            </div>
+            <div class="feat-info-panel">Large floor-to-ceiling glass panels, common on modern or commercial-style buildings.</div>
+          </div>
+          <div class="feature-wrap">
+            <div class="feature-row">
+              <button type="button" class="story-btn" onclick="toggleUncommonFeature('sun-room',this)">Sun rooms</button>
+              <button type="button" class="feat-info-btn" onclick="toggleFeatInfo(this)" aria-label="What is this?">ℹ</button>
+            </div>
+            <div class="feat-info-panel">A fully enclosed glass room or porch with windows on multiple sides.</div>
+          </div>
+          <div class="feature-wrap">
+            <div class="feature-row">
+              <button type="button" class="story-btn" onclick="toggleUncommonFeature('other',this)">Other</button>
+              <button type="button" class="feat-info-btn" onclick="toggleFeatInfo(this)" aria-label="What is this?">ℹ</button>
+            </div>
+            <div class="feat-info-panel">Something else unusual — we'll take a look and quote on-site.</div>
+          </div>
         </div>
         <p style="margin-top:12px;font-size:12px;color:var(--mid);line-height:1.5;">All items can be priced on-site.</p>
         <div class='pkg-btn-wrap' style='margin-top:16px;'><button type='button' class='story-btn' style='background:var(--orange);color:#fff;border-color:var(--orange);width:100%;' onclick="startCalibrationLoad()">Next →</button></div>
@@ -872,6 +915,13 @@
   }
 
   let q6bTimer = null;
+  function toggleFeatInfo(btn) {
+    const panel = btn.closest('.feature-wrap').querySelector('.feat-info-panel');
+    const isOpen = panel.classList.contains('visible');
+    panel.classList.toggle('visible', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+  }
+
   function toggleUncommonFeature(value, btn) {
     btn.classList.toggle('active');
     if(btn.classList.contains('active')) { if(!uncommonFeatures.includes(value)) uncommonFeatures.push(value); }
