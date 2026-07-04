@@ -272,7 +272,7 @@
         el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">Unavailable</div>';
       } else {
         el.className = 'time-slot' + (selectedTime === slot ? ' selected' : '');
-        el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">~3 hrs</div>';
+        el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">3–5 hrs</div>';
         el.onclick = () => selectTime(slot);
       }
       grid.appendChild(el);
