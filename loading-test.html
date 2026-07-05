@@ -45,7 +45,7 @@
       setTimeout(() => {
         dots[i].style.animation = 'dotLock 0.61s ease-out forwards';
         if (i === dots.length - 1) {
-          document.getElementById('allSet').style.display = 'block';
+          setTimeout(() => { document.getElementById('allSet').style.display = 'block'; }, 700);
         }
       }, t);
     });
