@@ -73,25 +73,11 @@
     }
     rafId = requestAnimationFrame(frame);
 
-    const lockAt = [3900, 5200, 5900, 6500, 7000];
+    const lockAt = [4800, 5000, 5200, 5400, 5600];
     lockAt.forEach((t, i) => {
       timers.push(setTimeout(() => {
         locked[i] = true;
         lockTimes[i] = performance.now();
-        const remaining = dots.filter((_, j) => j > i && !locked[j]);
-        if (remaining.length) {
-          const targetFreq = (1 / BASE_PERIOD) * (5 / remaining.length);
-          const startF = freqs.slice();
-          const rampStart = performance.now();
-          (function ramp(now) {
-            const p = Math.min((now - rampStart) / 500, 1);
-            const e = ease(p);
-            for (let j = i + 1; j < dots.length; j++) {
-              if (!locked[j]) freqs[j] = startF[j] + (targetFreq - startF[j]) * e;
-            }
-            if (p < 1) requestAnimationFrame(ramp);
-          })(performance.now());
-        }
         if (i === dots.length - 1) {
           cancelAnimationFrame(rafId);
           timers.push(setTimeout(() => { document.getElementById('allSet').style.display = 'block'; }, 700));
