@@ -89,6 +89,10 @@
   .book-btn { display: block; width: 100%; padding: 16px; border-radius: 50px; border: none; background: var(--orange); color: #fff; font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 900; cursor: pointer; margin-top: 20px; transition: opacity 0.15s; }
   .book-btn:hover { opacity: 0.88; }
   .book-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pac-container { border-radius: 10px; border: 1.5px solid var(--orangeborder); box-shadow: 0 4px 16px rgba(0,0,0,0.10); font-family: system-ui, sans-serif; margin-top: 4px; }
+  .pac-item { padding: 8px 12px; font-size: 13px; cursor: pointer; }
+  .pac-item:hover { background: #FDF0EF; }
+  .pac-item-query { font-weight: 700; color: var(--dark); }
 </style>
 </head>
 <body>
@@ -416,6 +420,21 @@
 
   renderCalendar();
   renderTimeSlots();
+
+  function initAutocomplete() {
+    const input = document.getElementById('infoAddress');
+    if (!input) return;
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+      componentRestrictions: { country: 'us' },
+      types: ['address'],
+      fields: ['formatted_address']
+    });
+    autocomplete.addListener('place_changed', function() {
+      const place = autocomplete.getPlace();
+      if (place.formatted_address) input.value = place.formatted_address;
+    });
+  }
 </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrEnJzvM5RCL_Y_TOymjadeQdmgB1swI8&libraries=places&callback=initAutocomplete" async defer></script>
 </body>
 </html>
