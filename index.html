@@ -1277,7 +1277,8 @@
 
   function goToCalendar() {
     if (!currentPkg) return;
-    bounceBtn(document.getElementById('bookNowBtn'));
+    const bookBtn = document.getElementById('bookNowBtn');
+    bounceBtn(bookBtn);
     const name = PKG_NAMES[currentPkg];
     const price = document.getElementById('co-total').textContent.replace(/[^0-9.]/g,'');
     const addons = [];
@@ -1308,7 +1309,7 @@
     let url = 'calendar.html?pkg=' + encodeURIComponent(name) + '&price=' + encodeURIComponent(price);
     if(addons.length) url += '&addons=' + encodeURIComponent(addons.join(','));
     url += '&wizard=' + encodeURIComponent(wizardAnswers.join(' | '));
-    setTimeout(() => { window.location.href = url; }, 420);
+    bookBtn.addEventListener('animationend', () => { window.location.href = url; }, { once: true });
   }
   let currentPkg = null;
   function saveQuote() {
