@@ -933,7 +933,7 @@
   function startCalibrationLoad() {
     showCalibrateStep('Loading');
     const dots = Array.from(document.querySelectorAll('.calib-spinner span'));
-    const lockAt  = [1000, 2100, 3100, 3950, 4750];
+    const lockAt  = [2600, 3600, 4300, 4780, 5100];
     const afterSpeeds = ['1.0s', '0.70s', '0.48s', '0.32s'];
     lockAt.forEach((t, i) => {
       setTimeout(() => {
