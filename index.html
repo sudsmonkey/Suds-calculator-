@@ -933,11 +933,66 @@
   function startCalibrationLoad() {
     showCalibrateStep('Loading');
     const dots = Array.from(document.querySelectorAll('.calib-spinner span'));
+    dots.forEach(d => { d.style.animation = 'none'; });
+
+    const BASE_PERIOD = 1300;
+    const initPhases = [0, 0.154, 0.308, 0.462, 0.615];
+    const phases = initPhases.slice();
+    const freqs = dots.map(() => 1 / BASE_PERIOD);
+    const locked = new Array(5).fill(false);
+    const lockTimes = new Array(5).fill(null);
+    let lastNow = null;
+    let rafId;
+
+    function dotScale(p) {
+      const t = ((p % 1) + 1) % 1;
+      if (t < 0.4) return 0.6 + 0.65 * (t / 0.4);
+      if (t < 0.8) return 1.25 - 0.65 * ((t - 0.4) / 0.4);
+      return 0.6;
+    }
+    function ease(p) { return p < 0.5 ? 2*p*p : -1+(4-2*p)*p; }
+
+    function frame(now) {
+      const dt = lastNow ? now - lastNow : 0;
+      lastNow = now;
+      dots.forEach((dot, i) => {
+        if (locked[i]) {
+          const p = Math.min((now - lockTimes[i]) / 610, 1);
+          const s = 0.6 + 0.4 * ease(p);
+          dot.style.transform = `scale(${s.toFixed(3)})`;
+          dot.style.opacity = (0.45 + 0.55 * ease(p)).toFixed(3);
+        } else {
+          phases[i] = (phases[i] + freqs[i] * dt) % 1;
+          const s = dotScale(phases[i]);
+          dot.style.transform = `scale(${s.toFixed(3)})`;
+          dot.style.opacity = (0.45 + ((s - 0.6) / 0.65) * 0.55).toFixed(3);
+        }
+      });
+      rafId = requestAnimationFrame(frame);
+    }
+    rafId = requestAnimationFrame(frame);
+
     const lockAt = [3900, 5200, 5900, 6500, 7000];
     lockAt.forEach((t, i) => {
       setTimeout(() => {
-        dots[i].style.animation = 'dotLock 0.61s ease-out forwards';
+        locked[i] = true;
+        lockTimes[i] = performance.now();
+        const remaining = dots.filter((_, j) => j > i && !locked[j]);
+        if (remaining.length) {
+          const targetFreq = (1 / BASE_PERIOD) * (5 / remaining.length);
+          const startF = freqs.slice();
+          const rampStart = performance.now();
+          (function ramp(now) {
+            const p = Math.min((now - rampStart) / 500, 1);
+            const e = ease(p);
+            for (let j = i + 1; j < dots.length; j++) {
+              if (!locked[j]) freqs[j] = startF[j] + (targetFreq - startF[j]) * e;
+            }
+            if (p < 1) requestAnimationFrame(ramp);
+          })(performance.now());
+        }
         if (i === dots.length - 1) {
+          cancelAnimationFrame(rafId);
           setTimeout(() => { document.getElementById('calibAllSet').style.display = 'block'; }, 700);
         }
       }, t);
