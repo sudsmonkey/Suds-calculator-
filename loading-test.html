@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading Test</title>
+<style>
+  body { font-family: 'Nunito', sans-serif; background: #FDF9F5; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 24px; }
+  .calib-spinner { display: flex; gap: 10px; justify-content: center; }
+  .calib-spinner span { width: 13px; height: 13px; border-radius: 50%; background: #F56B69; animation: bubblePop 1.3s ease-in-out infinite; }
+  .calib-spinner span:nth-child(2) { animation-delay: 0.2s; background: #9ED9C0; }
+  .calib-spinner span:nth-child(3) { animation-delay: 0.4s; }
+  .calib-spinner span:nth-child(4) { animation-delay: 0.6s; background: #9ED9C0; }
+  .calib-spinner span:nth-child(5) { animation-delay: 0.8s; }
+  @keyframes bubblePop { 0%,80%,100%{transform:scale(0.6);opacity:0.45} 40%{transform:scale(1.25);opacity:1} }
+  @keyframes dotLock { 0%{transform:scale(1.3);opacity:1} 45%{transform:scale(0.88);opacity:1} 72%{transform:scale(1.06);opacity:1} 100%{transform:scale(1);opacity:1} }
+  h2 { font-family: sans-serif; color: #A6382E; margin: 0; }
+  #allSet { display: none; font-size: 14px; font-weight: 700; color: #3d3530; }
+  button { padding: 10px 28px; background: #F56B69; color: #fff; border: none; border-radius: 50px; font-size: 15px; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+<h2>Calibrating Suds</h2>
+<div class="calib-spinner">
+  <span></span><span></span><span></span><span></span><span></span>
+</div>
+<p id="allSet">All set! Toggle the slider to explore your estimate.</p>
+<button onclick="runDemo()">▶ Run Again</button>
+
+<script>
+  function runDemo() {
+    const dots = Array.from(document.querySelectorAll('.calib-spinner span'));
+    document.getElementById('allSet').style.display = 'none';
+
+    // Reset all dots
+    dots.forEach((d, i) => {
+      d.style.animation = '';
+      d.style.animationDuration = '';
+      void d.offsetWidth;
+    });
+
+    const lockAt     = [2600, 3600, 4300, 4780, 5100];
+    const afterSpeeds = ['1.0s', '0.70s', '0.48s', '0.32s'];
+
+    lockAt.forEach((t, i) => {
+      setTimeout(() => {
+        dots[i].style.animation = 'dotLock 0.35s ease forwards';
+        if (i < dots.length - 1) {
+          for (let j = i + 1; j < dots.length; j++) {
+            dots[j].style.animationDuration = afterSpeeds[i];
+          }
+        } else {
+          document.getElementById('allSet').style.display = 'block';
+        }
+      }, t);
+    });
+  }
+
+  runDemo();
+</script>
+</body>
+</html>
