@@ -45,11 +45,10 @@
     const lockTimes = new Array(5).fill(null);
     let lastNow = null;
 
-    function eio(p) { return p < 0.5 ? 2*p*p : -1+(4-2*p)*p; }
     function dotScale(p) {
       const t = ((p % 1) + 1) % 1;
-      if (t < 0.4) return 0.6 + 0.65 * eio(t / 0.4);
-      if (t < 0.8) return 1.25 - 0.65 * eio((t - 0.4) / 0.4);
+      if (t < 0.4) return 0.6 + 0.65 * (t / 0.4);
+      if (t < 0.8) return 1.25 - 0.65 * ((t - 0.4) / 0.4);
       return 0.6;
     }
     function ease(p) { return p < 0.5 ? 2*p*p : -1+(4-2*p)*p; }
