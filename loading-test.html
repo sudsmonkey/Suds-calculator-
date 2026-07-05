@@ -22,7 +22,7 @@
 </div>
 <p id="allSet">All set! Toggle the slider to explore your estimate.</p>
 <button onclick="runDemo()">&#9654; Run Again</button>
-<small style="color:#aaa">v5 — lock at 4800ms</small>
+<small style="color:#aaa">v6 — lock at 3900ms</small>
 
 <script>
   let rafId = null;
@@ -39,7 +39,7 @@
     dots.forEach(d => { d.style.transform = ''; d.style.opacity = ''; });
 
     const BASE_PERIOD = 1300;
-    const initPhases = [0.308, 0.154, 0, 0.846, 0.692];
+    const initPhases = [0, 0.846, 0.692, 0.538, 0.385];
     const phases = initPhases.slice();
     const freqs = dots.map(() => 1 / BASE_PERIOD);
     const locked = new Array(5).fill(false);
@@ -74,7 +74,7 @@
     }
     rafId = requestAnimationFrame(frame);
 
-    const lockAt = [4800, 5000, 5200, 5400, 5600];
+    const lockAt = [3900, 4100, 4300, 4500, 4700];
     lockAt.forEach((t, i) => {
       timers.push(setTimeout(() => {
         locked[i] = true;
