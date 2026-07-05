@@ -39,17 +39,12 @@
       void d.offsetWidth;
     });
 
-    const lockAt     = [3900, 4900, 5600, 6080, 6400];
-    const afterSpeeds = ['1.0s', '0.70s', '0.48s', '0.32s'];
+    const lockAt = [3900, 5200, 5900, 6500, 7000];
 
     lockAt.forEach((t, i) => {
       setTimeout(() => {
         dots[i].style.animation = 'dotLock 0.61s ease-out forwards';
-        if (i < dots.length - 1) {
-          for (let j = i + 1; j < dots.length; j++) {
-            dots[j].style.animationDuration = afterSpeeds[i];
-          }
-        } else {
+        if (i === dots.length - 1) {
           document.getElementById('allSet').style.display = 'block';
         }
       }, t);
