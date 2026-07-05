@@ -935,7 +935,7 @@
     const dots = Array.from(document.querySelectorAll('.calib-spinner span'));
     dots.forEach(d => { d.style.animation = 'none'; });
 
-    const BASE_PERIOD = 840;
+    const BASE_PERIOD = 840; // v10
     const initPhases = [0, 0.875, 0.75, 0.625, 0.5];
     const phases = initPhases.slice();
     const freqs = dots.map(() => 1 / BASE_PERIOD);
