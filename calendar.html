@@ -379,8 +379,7 @@
       body.append('time', document.getElementById('summaryTime').textContent);
       body.append('total', document.getElementById('summaryPkgTotal').textContent);
       if (addonsText) body.append('add_ons', addonsText);
-      const wizardParam = params.get('wizard');
-      if (wizardParam) body.append('home_details', wizardParam);
+      body.append('home_details', params.get('wizard') || '(wizard param missing)');
 
       const btn = this;
       btn.disabled = true;
