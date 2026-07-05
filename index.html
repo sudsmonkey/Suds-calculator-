@@ -253,13 +253,12 @@
   .checkout-card.visible { display: block; }
   @keyframes ctaBounce {
     0%   { transform: scale(1); }
-    20%  { transform: scale(1.08); }
-    42%  { transform: scale(0.95); }
-    62%  { transform: scale(1.04); }
-    80%  { transform: scale(0.99); }
+    22%  { transform: scale(0.91); }
+    55%  { transform: scale(1.08); }
+    75%  { transform: scale(0.97); }
     100% { transform: scale(1); }
   }
-  .checkout-btn.btn-bounce { animation: ctaBounce 0.55s ease; }
+  .checkout-btn.btn-bounce { animation: ctaBounce 0.45s ease; }
   @keyframes slideUp {
     from { opacity: 0; transform: translateY(30px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -1144,16 +1143,6 @@
       updateCheckout(pkg);
       checkoutCard.classList.add('visible');
       setTimeout(() => {
-        document.querySelectorAll('.checkout-btn').forEach((b, i) => {
-          setTimeout(() => {
-            b.classList.remove('btn-bounce');
-            void b.offsetWidth;
-            b.classList.add('btn-bounce');
-            b.addEventListener('animationend', () => b.classList.remove('btn-bounce'), {once:true});
-          }, i * 130);
-        });
-      }, 450);
-      setTimeout(() => {
         const startY = window.pageYOffset;
         const targetY = checkoutCard.getBoundingClientRect().top + startY - 12;
         const duration = 1200;
@@ -1170,6 +1159,15 @@
       checkoutCard.classList.remove('visible');
     }
   }
+
+  document.querySelectorAll('.checkout-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      b.classList.remove('btn-bounce');
+      void b.offsetWidth;
+      b.classList.add('btn-bounce');
+      b.addEventListener('animationend', () => b.classList.remove('btn-bounce'), {once:true});
+    });
+  });
 
   function updateCheckout(pkg) {
     currentPkg = pkg;
