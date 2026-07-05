@@ -22,7 +22,7 @@
 </div>
 <p id="allSet">All set! Toggle the slider to explore your estimate.</p>
 <button onclick="runDemo()">&#9654; Run Again</button>
-<small style="color:#aaa">v9 — cascade ramp</small>
+<small style="color:#aaa">v10 — 25% faster</small>
 
 <script>
   let rafId = null;
@@ -38,7 +38,7 @@
     document.getElementById('allSet').style.display = 'none';
     dots.forEach(d => { d.style.transform = ''; d.style.opacity = ''; });
 
-    const BASE_PERIOD = 1120;
+    const BASE_PERIOD = 840;
     const initPhases = [0, 0.875, 0.75, 0.625, 0.5];
     const phases = initPhases.slice();
     const freqs = dots.map(() => 1 / BASE_PERIOD);
@@ -60,7 +60,7 @@
       lastNow = now;
       dots.forEach((dot, i) => {
         if (locked[i]) {
-          const p = Math.min((now - lockTimes[i]) / 427, 1);
+          const p = Math.min((now - lockTimes[i]) / 320, 1);
           const s = 0.6 + 0.4 * ease(p);
           dot.style.transform = `scale(${s.toFixed(3)})`;
           dot.style.opacity = (0.45 + 0.55 * ease(p)).toFixed(3);
@@ -75,7 +75,7 @@
     }
     rafId = requestAnimationFrame(frame);
 
-    const lockAt = [3360, 4620, 5880, 7140, 8400];
+    const lockAt = [2520, 3465, 4410, 5355, 6300];
     lockAt.forEach((t, i) => {
       timers.push(setTimeout(() => {
         locked[i] = true;
