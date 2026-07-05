@@ -1220,8 +1220,22 @@
       const mv = document.getElementById('co-mirrors-val');
       addons.push('Mirror cleaning:' + (mv ? mv.textContent : ''));
     }
+    const wizardAnswers = [];
+    wizardAnswers.push('Stories: ' + selectedStories);
+    if(frenchPaneMajority) wizardAnswers.push('French pane: Majority of windows');
+    else if(frenchPaneFlatSurcharge > 0) wizardAnswers.push('French pane: Some windows');
+    else wizardAnswers.push('French pane: None');
+    if(hasScreens) {
+      const loc = screenLocation === 'inside' ? 'removable from inside' : screenLocation === 'outside' ? 'removable from outside' : 'mixed';
+      wizardAnswers.push('Screens: Yes — ' + loc);
+    } else { wizardAnswers.push('Screens: No'); }
+    const freqVal = document.getElementById('cleanFreq') ? document.getElementById('cleanFreq').value : '';
+    wizardAnswers.push('Last cleaned: ' + (freqVal === 'while' ? "It's been a while" : freqVal === 'once-or-more' ? 'Once a year or more' : 'Not specified'));
+    if(uncommonFeatures.length) wizardAnswers.push('Unusual windows: ' + uncommonFeatures.join(', '));
+
     let url = 'calendar.html?pkg=' + encodeURIComponent(name) + '&price=' + encodeURIComponent(price);
     if(addons.length) url += '&addons=' + encodeURIComponent(addons.join(','));
+    url += '&wizard=' + encodeURIComponent(wizardAnswers.join(' | '));
     window.location.href = url;
   }
   let currentPkg = null;
