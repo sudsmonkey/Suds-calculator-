@@ -22,7 +22,7 @@
 </div>
 <p id="allSet">All set! Toggle the slider to explore your estimate.</p>
 <button onclick="runDemo()">&#9654; Run Again</button>
-<small style="color:#aaa">v10 — 25% faster</small>
+<small style="color:#aaa">v11 — hold timings</small>
 
 <script>
   let rafId = null;
@@ -84,8 +84,8 @@
         if (i === dots.length - 1) {
           timers.push(setTimeout(() => {
             cancelAnimationFrame(rafId);
-            timers.push(setTimeout(() => { document.getElementById('allSet').style.display = 'block'; }, 200));
-          }, 427));
+            timers.push(setTimeout(() => { document.getElementById('allSet').style.display = 'block'; }, 1100));
+          }, 320));
         }
       }, t));
     });

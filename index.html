@@ -935,7 +935,7 @@
     const dots = Array.from(document.querySelectorAll('.calib-spinner span'));
     dots.forEach(d => { d.style.animation = 'none'; });
 
-    const BASE_PERIOD = 840; // v10
+    const BASE_PERIOD = 840;
     const initPhases = [0, 0.875, 0.75, 0.625, 0.5];
     const phases = initPhases.slice();
     const freqs = dots.map(() => 1 / BASE_PERIOD);
@@ -982,12 +982,12 @@
         if (i === dots.length - 1) {
           setTimeout(() => {
             cancelAnimationFrame(rafId);
-            setTimeout(() => { document.getElementById('calibAllSet').style.display = 'block'; }, 200);
+            setTimeout(() => { document.getElementById('calibAllSet').style.display = 'block'; }, 1100);
           }, 320);
         }
       }, t);
     });
-    setTimeout(completeCalibration, 7200);
+    setTimeout(completeCalibration, 10520);
   }
 
   let q6bTimer = null;
