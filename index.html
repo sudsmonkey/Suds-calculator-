@@ -1221,6 +1221,8 @@
       addons.push('Mirror cleaning:' + (mv ? mv.textContent : ''));
     }
     const wizardAnswers = [];
+    const sqft = document.getElementById('sqftSlider') ? document.getElementById('sqftSlider').value : '';
+    if(sqft) wizardAnswers.push('Sq ft: ' + sqft);
     wizardAnswers.push('Stories: ' + selectedStories);
     if(frenchPaneMajority) wizardAnswers.push('French pane: Majority of windows');
     else if(frenchPaneFlatSurcharge > 0) wizardAnswers.push('French pane: Some windows');
