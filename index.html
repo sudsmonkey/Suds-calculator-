@@ -937,7 +937,10 @@
     const afterSpeeds = ['1.0s', '0.70s', '0.48s', '0.32s'];
     lockAt.forEach((t, i) => {
       setTimeout(() => {
-        dots[i].style.animation = 'dotLock 0.35s ease forwards';
+        dots[i].style.transition = 'transform 0.2s ease, opacity 0.15s ease';
+        dots[i].style.animation = 'none';
+        dots[i].style.transform = 'scale(1)';
+        dots[i].style.opacity = '1';
         if (i < dots.length - 1) {
           for (let j = i + 1; j < dots.length; j++) {
             dots[j].style.animationDuration = afterSpeeds[i];
