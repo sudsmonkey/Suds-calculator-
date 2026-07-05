@@ -798,8 +798,8 @@
       <div class="discount-sub">Share the Suds Calculator with a friend to save $25 — and your friend saves $15 automatically!</div>
     </div>
     <div id="co-screen-unsure-note" style="display:none;margin-bottom:14px;padding:10px 14px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:10px;font-size:12px;color:#78350F;line-height:1.5;">The $50 screen charge will be removed from your onsite invoice if screens are removable from outside.</div>
-    <button class="checkout-btn" onclick="goToCalendar()">Book Now</button>
-    <a class="checkout-btn secondary" href="tel:5551234567" style="display:block;text-align:center;text-decoration:none;">Call Us</a>
+    <button class="checkout-btn" id="bookNowBtn" onclick="goToCalendar()">Book Now</button>
+    <a class="checkout-btn secondary" id="callUsBtn" href="tel:5551234567" style="display:block;text-align:center;text-decoration:none;">Call Us</a>
     <button class="checkout-btn secondary" onclick="saveQuote()">Save My Quote</button>
     <div class="waitlist-msg" id="saveMsg" style="display:none;">🫧 Quote saved! It'll be here when you come back.</div>
     <p style="margin-top:16px;text-align:center;font-size:11px;letter-spacing:0.03em;"><span style="font-family:'Nunito',sans-serif;color:#F4A9A6;">Powered by Monkey Intelligence </span><span style="font-family:'Barlow Condensed',sans-serif;font-style:italic;font-weight:800;font-size:13px;color:#A6382E;letter-spacing:0.05em;">MI</span></p>
@@ -1153,13 +1153,20 @@
     }
   }
 
-  document.querySelectorAll('.checkout-btn').forEach(b => {
-    b.addEventListener('click', () => {
-      b.classList.remove('btn-animate');
-      void b.offsetWidth;
-      b.classList.add('btn-animate');
-      b.addEventListener('animationend', () => b.classList.remove('btn-animate'), {once:true});
-    });
+  function bounceBtn(btn) {
+    btn.classList.remove('btn-animate');
+    void btn.offsetWidth;
+    btn.classList.add('btn-animate');
+    btn.addEventListener('animationend', () => btn.classList.remove('btn-animate'), {once:true});
+  }
+  document.getElementById('callUsBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    bounceBtn(this);
+    const href = this.href;
+    setTimeout(() => { window.location.href = href; }, 420);
+  });
+  document.querySelector('.checkout-btn.secondary[onclick="saveQuote()"]').addEventListener('click', function() {
+    bounceBtn(this);
   });
 
   function updateCheckout(pkg) {
@@ -1218,6 +1225,7 @@
 
   function goToCalendar() {
     if (!currentPkg) return;
+    bounceBtn(document.getElementById('bookNowBtn'));
     const name = PKG_NAMES[currentPkg];
     const price = document.getElementById('co-total').textContent.replace(/[^0-9.]/g,'');
     const addons = [];
@@ -1248,7 +1256,7 @@
     let url = 'calendar.html?pkg=' + encodeURIComponent(name) + '&price=' + encodeURIComponent(price);
     if(addons.length) url += '&addons=' + encodeURIComponent(addons.join(','));
     url += '&wizard=' + encodeURIComponent(wizardAnswers.join(' | '));
-    window.location.href = url;
+    setTimeout(() => { window.location.href = url; }, 420);
   }
   let currentPkg = null;
   function saveQuote() {
