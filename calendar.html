@@ -217,6 +217,9 @@
   const today = new Date();
   today.setHours(0,0,0,0);
 
+  const maxBookableDate = new Date(today);
+  maxBookableDate.setDate(maxBookableDate.getDate() + 14);
+
   let currentYear = today.getFullYear();
   let currentMonth = today.getMonth();
   let selectedDate = null;
@@ -243,11 +246,12 @@
       const dow = date.getDay();
       const isPast = date < today;
       const isWeekend = dow === 0 || dow === 6;
+      const isTooFar = date > maxBookableDate;
       const fullyBooked = BOOKED[dateStr] && BOOKED[dateStr].length >= SLOTS.length;
 
       const el = document.createElement('div');
 
-      if (isPast || isWeekend || fullyBooked) {
+      if (isPast || isWeekend || isTooFar || fullyBooked) {
         el.className = 'cal-day disabled';
       } else {
         el.className = 'cal-day has-slots';
