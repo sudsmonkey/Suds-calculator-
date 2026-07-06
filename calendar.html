@@ -242,12 +242,13 @@
       const dateStr = currentYear + '-' + String(currentMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
       const dow = date.getDay();
       const isPast = date < today;
-      const isWeekend = dow === 0 || dow === 6;
-      const fullyBooked = BOOKED[dateStr] && BOOKED[dateStr].length >= SLOTS.length;
+      const isSunday = dow === 0;
+      const daySlots = dow === 6 ? SLOTS.filter(s => s.includes('AM')) : SLOTS;
+      const fullyBooked = BOOKED[dateStr] && BOOKED[dateStr].length >= daySlots.length;
 
       const el = document.createElement('div');
 
-      if (isPast || isWeekend || fullyBooked) {
+      if (isPast || isSunday || fullyBooked) {
         el.className = 'cal-day disabled';
       } else {
         el.className = 'cal-day has-slots';
@@ -281,9 +282,11 @@
       grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--mid);font-size:14px;font-weight:700;">Select a date above to see available times</div>';
       return;
     }
-    grid.style.gridTemplateColumns = '1fr 1fr';
+    const selDow = new Date(selectedDate + 'T00:00:00').getDay();
+    const activeSlots = selDow === 6 ? SLOTS.filter(s => s.includes('AM')) : SLOTS;
+    grid.style.gridTemplateColumns = activeSlots.length === 1 ? '1fr' : '1fr 1fr';
     const booked = BOOKED[selectedDate] || [];
-    SLOTS.forEach(slot => {
+    activeSlots.forEach(slot => {
       const el = document.createElement('button');
       el.type = 'button';
       if (booked.includes(slot)) {
