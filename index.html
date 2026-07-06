@@ -59,8 +59,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 12px rgba(245,110,100,0.2);
+    box-shadow: 0 2px 12px rgba(240,128,128,0.2);
     overflow: hidden;
+    position: relative;
+  }
+  .logo-circle::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: #F08080;
+    mix-blend-mode: color;
+    opacity: 0.45;
+    pointer-events: none;
   }
   .logo-circle img {
     width: 100%;
