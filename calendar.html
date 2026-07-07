@@ -241,14 +241,16 @@
       date.setHours(0,0,0,0);
       const dateStr = currentYear + '-' + String(currentMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
       const dow = date.getDay();
+      const maxDate = new Date(today); maxDate.setDate(today.getDate() + 18);
       const isPast = date < today;
+      const isTooFar = date > maxDate;
       const isSunday = dow === 0;
       const daySlots = dow === 6 ? SLOTS.filter(s => s.includes('AM')) : SLOTS;
       const fullyBooked = BOOKED[dateStr] && BOOKED[dateStr].length >= daySlots.length;
 
       const el = document.createElement('div');
 
-      if (isPast || isSunday || fullyBooked) {
+      if (isPast || isTooFar || isSunday || fullyBooked) {
         el.className = 'cal-day disabled';
       } else {
         el.className = 'cal-day has-slots';
