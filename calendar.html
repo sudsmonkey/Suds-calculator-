@@ -384,6 +384,7 @@
       body.append('total', document.getElementById('summaryPkgTotal').textContent);
       if (addonsText) body.append('add_ons', addonsText);
       body.append('home_details', params.get('wizard') || '(wizard param missing)');
+      body.append('monkey_bonus', params.get('shared') === 'yes' ? 'Yes — $25 off applied' : 'No');
 
       const btn = this;
       btn.disabled = true;

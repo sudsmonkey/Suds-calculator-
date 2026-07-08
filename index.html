@@ -363,6 +363,15 @@
     }
     .checkout-card, .note-wrap { max-width: 600px; }
   }
+  #monkeyBonusModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:20px; }
+  #monkeyBonusModal.visible { display:flex; }
+  .bonus-card { background:#fff; border-radius:24px; padding:32px 24px 24px; max-width:340px; width:100%; text-align:center; box-shadow:0 8px 40px rgba(0,0,0,0.2); }
+  .bonus-emoji { font-size:52px; margin-bottom:12px; }
+  .bonus-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:22px; color:var(--dark); margin-bottom:8px; }
+  .bonus-sub { font-size:13px; color:var(--mid); line-height:1.6; margin-bottom:24px; }
+  .bonus-yes { display:block; width:100%; padding:14px; border-radius:50px; border:none; background:var(--orange); color:#fff; font-family:'Nunito',sans-serif; font-size:16px; font-weight:900; cursor:pointer; margin-bottom:10px; }
+  .bonus-no { display:block; width:100%; padding:12px; border-radius:50px; border:2px solid #E8E0D2; background:transparent; color:var(--mid); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; }
+  #refBanner { display:none; background:var(--mint); border-radius:12px; padding:10px 14px; margin-bottom:14px; font-size:13px; font-weight:700; color:#2a6b52; text-align:center; }
 </style>
 </head>
 <body>
@@ -782,6 +791,7 @@
 <div class="checkout-card" id="checkoutCard">
   <div class="checkout-hero">
     <h3><img id="co-animal-img" src="" style="width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-right:8px;display:none;border-radius:0;border:none;box-shadow:none;">Your Order Summary</h3>
+    <div id="refBanner">🫧 $10 off — a friend shared this with you!</div>
   </div>
   <div class="checkout-body">
     <div class="checkout-row"><span class="label">Package</span><span class="value" id="co-package">—</span></div>
@@ -798,7 +808,7 @@
         <span class="discount-label">🫧 Monkey Bonus</span>
         <span class="discount-val" id="co-discount">—</span>
       </div>
-      <div class="discount-sub">Share the Suds Calculator with a friend to save $25 — and your friend saves $15 automatically!</div>
+      <div class="discount-sub">Share the Suds Calculator with a friend to save $25 — and your friend saves $10 automatically!</div>
     </div>
     <div id="co-screen-unsure-note" style="display:none;margin-bottom:14px;padding:10px 14px;background:#FEF3C7;border:1px solid #F59E0B;border-radius:10px;font-size:12px;color:#78350F;line-height:1.5;">The $50 screen charge will be removed from your onsite invoice if screens are removable from outside.</div>
     <button class="checkout-btn" id="bookNowBtn" onclick="goToCalendar()">Book Now</button>
@@ -1238,7 +1248,7 @@
     const mn = document.getElementById(pkg+'-mirror-num');
     const mt = mirrorsEl && mirrorsEl.checked ? (parseInt(mn?mn.value:0)||0)*MIRROR_PRICE : 0;
 
-    const total = base + st + tt + mt;
+    const total = base + st + tt + mt - refDiscount;
 
     const coImg = document.getElementById('co-animal-img');
     coImg.src = ANIMAL_IMGS[pkg];
@@ -1276,12 +1286,36 @@
     }
   }
 
+  const refDiscount = new URLSearchParams(window.location.search).get('ref') ? 10 : 0;
+  if (refDiscount) document.getElementById('refBanner').style.display = 'block';
+
   function goToCalendar() {
     if (!currentPkg) return;
+    document.getElementById('monkeyBonusModal').classList.add('visible');
+  }
+
+  function acceptBonus() {
+    document.getElementById('monkeyBonusModal').classList.remove('visible');
+    const shareUrl = 'https://sudsmonkey.github.io/Suds-calculator-/?ref=1';
+    if (navigator.share) {
+      navigator.share({ title: 'Save $10 on window cleaning!', text: 'Use this link for $10 off your first Suds Monkey booking!', url: shareUrl }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(shareUrl).catch(() => { prompt('Copy this link to share:', shareUrl); });
+    }
+    proceedToCalendar(true);
+  }
+
+  function declineBonus() {
+    document.getElementById('monkeyBonusModal').classList.remove('visible');
+    proceedToCalendar(false);
+  }
+
+  function proceedToCalendar(shared) {
     const bookBtn = document.getElementById('bookNowBtn');
     bounceBtn(bookBtn);
     const name = PKG_NAMES[currentPkg];
-    const price = document.getElementById('co-total').textContent.replace(/[^0-9.]/g,'');
+    const rawPrice = parseInt(document.getElementById('co-total').textContent.replace(/[^0-9]/g,''));
+    const finalPrice = shared ? Math.max(0, rawPrice - 25) : rawPrice;
     const addons = [];
     const screensEl = document.getElementById(currentPkg+'-screens');
     const tracksEl = document.getElementById(currentPkg+'-tracks');
@@ -1306,10 +1340,10 @@
     const freqVal = document.getElementById('cleanFreq') ? document.getElementById('cleanFreq').value : '';
     wizardAnswers.push('Last cleaned: ' + (freqVal === 'while' ? "It's been a while" : freqVal === 'once-or-more' ? 'Once a year or more' : 'Not specified'));
     if(uncommonFeatures.length) wizardAnswers.push('Unusual windows: ' + uncommonFeatures.join(', '));
-
-    let url = 'calendar.html?pkg=' + encodeURIComponent(name) + '&price=' + encodeURIComponent(price);
+    let url = 'calendar.html?pkg=' + encodeURIComponent(name) + '&price=' + encodeURIComponent(finalPrice);
     if(addons.length) url += '&addons=' + encodeURIComponent(addons.join(','));
     url += '&wizard=' + encodeURIComponent(wizardAnswers.join(' | '));
+    url += '&shared=' + (shared ? 'yes' : 'no');
     bookBtn.addEventListener('animationend', () => { window.location.href = url; }, { once: true });
   }
   let currentPkg = null;
@@ -1354,5 +1388,15 @@
     } catch(e) { sessionStorage.removeItem('suds_cal'); }
   }
 </script>
+
+<div id="monkeyBonusModal">
+  <div class="bonus-card">
+    <div class="bonus-emoji">🫧</div>
+    <div class="bonus-title">Get your Monkey Bonus!</div>
+    <div class="bonus-sub">Share the Suds Calculator with a friend and save <strong>$25</strong> on your booking. Your friend gets <strong>$10 off</strong> too!</div>
+    <button class="bonus-yes" onclick="acceptBonus()">Yes — share & save $25</button>
+    <button class="bonus-no" onclick="declineBonus()">No thanks</button>
+  </div>
+</div>
 </body>
 </html>
