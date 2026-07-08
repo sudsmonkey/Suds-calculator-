@@ -347,7 +347,8 @@
     transition: opacity 0.15s;
   }
   .checkout-btn:hover { opacity: 0.88; }
-  .checkout-btn.secondary { background: var(--orange); color: white; border: none; margin-top: 10px; }
+  .checkout-btn.secondary { background: transparent; color: var(--orange); border: 2px solid var(--orange); margin-top: 10px; }
+  .checkout-btn.secondary:active { background: var(--orange); color: white; border-color: var(--orange); }
   .waitlist-msg { margin-top: 12px; text-align: center; font-size: 13px; font-weight: 600; color: var(--orange); }
   .note-wrap { width: 100%; max-width: 500px; margin-top: 12px; }
 
