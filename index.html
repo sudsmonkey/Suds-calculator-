@@ -1306,7 +1306,7 @@
     document.getElementById('monkeyBonusModal').classList.remove('visible');
     const shareUrl = 'https://sudsmonkey.github.io/Suds-calculator-/?ref=1';
     if (navigator.share) {
-      navigator.share({ title: 'Save $10 on window cleaning!', text: 'Found this online looks cool — use this link for $10 off your first Suds Monkey booking!', url: shareUrl }).catch(() => {});
+      navigator.share({ title: 'Save $10 on window cleaning!', text: 'Found this online looks cool\n\nUse this link for $10 off your first Suds Monkey booking!', url: shareUrl }).catch(() => {});
     } else {
       navigator.clipboard.writeText(shareUrl).catch(() => { prompt('Copy this link to share:', shareUrl); });
     }
