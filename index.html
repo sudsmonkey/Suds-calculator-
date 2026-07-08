@@ -1291,7 +1291,11 @@
 
   function goToCalendar() {
     if (!currentPkg) return;
-    document.getElementById('monkeyBonusModal').classList.add('visible');
+    if (refDiscount) {
+      proceedToCalendar(false);
+    } else {
+      document.getElementById('monkeyBonusModal').classList.add('visible');
+    }
   }
 
   function acceptBonus() {
