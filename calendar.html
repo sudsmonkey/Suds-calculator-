@@ -187,6 +187,10 @@
       <div id="summaryAddonsSection" style="display:none;">
         <div id="summaryAddonsList"></div>
       </div>
+      <div class="summary-row" id="monkeyBonusRow" style="display:none;">
+        <span class="label">&#x1F9FC; Monkey Bonus</span>
+        <span class="value" style="color:var(--orange);">-$25</span>
+      </div>
       <div class="summary-row total" id="summaryTotalRow">
         <span class="label">Total</span>
         <span class="value" id="summaryPkgTotal">$—</span>
@@ -337,7 +341,12 @@
     document.getElementById('headerPkgName').textContent = pkgName;
     document.getElementById('headerPkgPrice').textContent = '$' + pkgPrice;
     document.getElementById('summaryPkgName').textContent = pkgName;
-    document.getElementById('summaryPkgTotal').textContent = '$' + pkgPrice;
+    const sharedBonus = params.get('shared') === 'yes';
+    const finalPrice = sharedBonus ? Math.max(0, parseInt(pkgPrice) - 25) : parseInt(pkgPrice);
+    if (sharedBonus) {
+      document.getElementById('monkeyBonusRow').style.display = 'flex';
+    }
+    document.getElementById('summaryPkgTotal').textContent = '$' + finalPrice;
     const addonsParam = params.get('addons');
     if (addonsParam) {
       const addonsList = addonsParam.split(',');
