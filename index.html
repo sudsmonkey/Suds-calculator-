@@ -847,7 +847,7 @@
     document.querySelectorAll('.calibrate-step').forEach(el => el.classList.remove('active'));
     const el = document.getElementById('calibrateStep' + id);
     if(el) el.classList.add('active');
-    const LABELS = {'1':'Question 1 of 7','2':'Question 2 of 7','2b':'Question 2 of 7','3':'Question 3 of 7','3b':'Question 3 of 7','3c':'Question 4 of 7','4':'Question 5 of 7','5':'Question 6 of 7','5b':'Question 6 of 7','6':'Question 7 of 7','6b':'Question 7 of 7'};
+    const LABELS = {'1':'Question 1 of 6','2':'Question 2 of 6','2b':'Question 2 of 6','3':'Question 3 of 6','3b':'Question 3 of 6','3c':'Question 4 of 6','4':'Question 5 of 6','5':'Question 6 of 6','6':'Question 6 of 6','6b':'Question 6 of 6'};
     document.getElementById('calibrateStepLabel').textContent = LABELS[id] || '';
     document.getElementById('calibrateBack').classList.toggle('visible', id !== '1' && id !== 'Loading');
     const noForward = ['7','Loading','Storm','Quote'];
@@ -856,7 +856,7 @@
 
   }
   function calibrateGoBack() {
-    const PREV = {'2':'1','2b':'2','3':'2','3b':'3','3c':'3','4':'3c','5':'4','5b':'5','6':'5b','6b':'6','Storm':'5b','Quote':'3c'};
+    const PREV = {'2':'1','2b':'2','3':'2','3b':'3','3c':'3','4':'3c','5':'4','6':'5','6b':'6','Storm':'5','Quote':'3c'};
     const prev = PREV[calibrateCurrentStep];
     if(prev) showCalibrateStep(prev);
   }
@@ -914,7 +914,8 @@
   function selectHistoric(value, btn) {
     document.querySelectorAll('#calibrateStep5 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(() => showCalibrateStep('5b'), 1100);
+    if (value === 'yes') { setTimeout(() => { enterStormMode(); closeCalibrateOverlay(); }, 1100); }
+    else { setTimeout(() => showCalibrateStep('6'), 1100); }
   }
   function selectStormWindows(value, btn) {
     document.querySelectorAll('#calibrateStep5b .story-btn').forEach(b => b.classList.remove('active'));
@@ -1068,8 +1069,7 @@
       '3':'4',
       '3b':'4',
       '4':'5',
-      '5':'5b',
-      '5b':'6',
+      '5':'6',
       '6': uncommonFeatures.length ? '6b' : '7',
       '6b':'7'
     };
