@@ -1080,6 +1080,8 @@
   function enterStormMode(){
     document.body.classList.add('storm-mode');
     closeCalibrateOverlay();
+    document.getElementById('sqftSlider').disabled = false;
+    document.getElementById('sliderWrap').classList.remove('locked');
     document.getElementById('pkg-silver').scrollIntoView({ behavior: 'instant', block: 'start' });
     setTimeout(() => {
       document.getElementById('pkg-storm').scrollIntoView({ behavior: 'smooth', block: 'start' });
