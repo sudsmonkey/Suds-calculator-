@@ -915,7 +915,7 @@
     document.querySelectorAll('#calibrateStep5 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     if (value === 'yes') { setTimeout(() => { enterStormMode(); closeCalibrateOverlay(); }, 1100); }
-    else { setTimeout(startCalibrationLoad, 1100); }
+    else { setTimeout(() => showCalibrateStep('6'), 1100); }
   }
   function selectStormWindows(value, btn) {
     document.querySelectorAll('#calibrateStep5b .story-btn').forEach(b => b.classList.remove('active'));
@@ -926,7 +926,7 @@
     document.querySelectorAll('#calibrateStep6 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     if(value === 'some') { setTimeout(() => showCalibrateStep('6b'), 1100); }
-    else { setTimeout(startCalibrationLoad, 1100); }
+    else { setTimeout(() => showCalibrateStep('6'), 1100); }
   }
   let uncommonFeatures = [];
   let interestedServices = [];
