@@ -92,6 +92,13 @@
   .pac-item { padding: 8px 12px; font-size: 13px; cursor: pointer; }
   .pac-item:hover { background: #FDF0EF; }
   .pac-item-query { font-weight: 700; color: var(--dark); }
+
+  #calShareModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:20px; }
+  #calShareModal.visible { display:flex; }
+  .cal-share-card { background:#fff; border-radius:20px; padding:28px 24px; max-width:340px; width:100%; text-align:center; }
+  .cal-share-emoji { font-size:52px; margin-bottom:12px; }
+  .cal-share-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:20px; color:var(--dark); margin-bottom:8px; }
+  .cal-share-body { font-size:14px; color:var(--mid); line-height:1.5; margin-bottom:20px; }
 </style>
 </head>
 <body>
@@ -367,18 +374,15 @@
       document.getElementById('summaryAddonsSection').style.display = 'block';
     }
 
-    document.getElementById('bookBtn').addEventListener('click', async function() {
+    let calShareOffered = false;
+
+    async function doSubmit() {
       const firstName = document.getElementById('infoFirstName').value.trim();
       const lastName  = document.getElementById('infoLastName').value.trim();
       const phone     = document.getElementById('infoPhone').value.trim();
       const email     = document.getElementById('infoEmail').value.trim();
       const address   = document.getElementById('infoAddress').value.trim();
       const notes     = document.getElementById('infoNotes').value.trim();
-
-      if (!firstName || !phone || !email || !address) {
-        alert('Please fill in your name, phone, email, and service address.');
-        return;
-      }
 
       const addonRows = document.querySelectorAll('#summaryAddonsList .summary-row');
       const addonsText = Array.from(addonRows).map(r =>
@@ -401,7 +405,7 @@
       body.append('home_details', params.get('wizard') || '(wizard param missing)');
       body.append('monkey_bonus', params.get('shared') === 'yes' ? 'Yes — $25 off applied' : 'No');
 
-      const btn = this;
+      const btn = document.getElementById('bookBtn');
       btn.disabled = true;
       btn.textContent = 'Sending…';
 
@@ -426,7 +430,44 @@
         btn.textContent = 'Confirm Booking';
         alert('Network error — ' + e.message);
       }
+    }
+
+    document.getElementById('bookBtn').addEventListener('click', async function() {
+      const firstName = document.getElementById('infoFirstName').value.trim();
+      const lastName  = document.getElementById('infoLastName').value.trim();
+      const phone     = document.getElementById('infoPhone').value.trim();
+      const email     = document.getElementById('infoEmail').value.trim();
+      const address   = document.getElementById('infoAddress').value.trim();
+
+      if (!firstName || !phone || !email || !address) {
+        alert('Please fill in your name, phone, email, and service address.');
+        return;
+      }
+
+      if (!sharedBonus && !calShareOffered) {
+        calShareOffered = true;
+        document.getElementById('calShareModal').classList.add('visible');
+        return;
+      }
+
+      await doSubmit();
     });
+
+    function calShareAndConfirm() {
+      const shareUrl = 'https://sudsmonkey.github.io/Suds-calculator-/?ref=1';
+      if (navigator.share) {
+        navigator.share({ title: 'Save $25 on window cleaning!', text: 'Found this online looks cool\n\nUse this link for $25 off your first Suds Monkey booking!', url: shareUrl }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(shareUrl).catch(() => { prompt('Copy this link to share:', shareUrl); });
+      }
+      document.getElementById('calShareModal').classList.remove('visible');
+      doSubmit();
+    }
+
+    function calSkipShare() {
+      document.getElementById('calShareModal').classList.remove('visible');
+      doSubmit();
+    }
   } else {
     document.getElementById('headerTitle').textContent = 'Check Availability';
     document.getElementById('pkgPill').style.display = 'none';
@@ -477,5 +518,15 @@
   }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrEnJzvM5RCL_Y_TOymjadeQdmgB1swI8&libraries=places&callback=initAutocomplete" async defer></script>
+
+<div id="calShareModal">
+  <div class="cal-share-card">
+    <div class="cal-share-emoji">🐒</div>
+    <div class="cal-share-title">Know someone with dirty windows?</div>
+    <div class="cal-share-body">Share Suds Monkey and they get $25 off their first booking. Takes 2 seconds.</div>
+    <button class="book-btn" onclick="calShareAndConfirm()">Share the Link</button>
+    <button class="book-btn" style="background:transparent;color:var(--orange);border:2px solid var(--orange);margin-top:10px;" onclick="calSkipShare()">No thanks, confirm</button>
+  </div>
+</div>
 </body>
 </html>
