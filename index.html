@@ -1300,7 +1300,11 @@
     const bookBtn = document.getElementById('bookNowBtn');
     bounceBtn(bookBtn);
     bookBtn.addEventListener('animationend', () => {
-      proceedToCalendar(false, !refDiscount);
+      if (refDiscount) {
+        proceedToCalendar(false, false);
+      } else {
+        document.getElementById('monkeyBonusModal').classList.add('visible');
+      }
     }, { once: true });
   }
 
@@ -1308,16 +1312,16 @@
     document.getElementById('monkeyBonusModal').classList.remove('visible');
     const shareUrl = 'https://sudsmonkey.github.io/Suds-calculator-/?ref=1';
     if (navigator.share) {
-      navigator.share({ title: 'Save $10 on window cleaning!', text: 'Found this online looks cool\n\nUse this link for $10 off your first Suds Monkey booking!', url: shareUrl }).catch(() => {});
+      navigator.share({ title: 'Save $25 on window cleaning!', text: 'Found this online looks cool\n\nUse this link for $25 off your first Suds Monkey booking!', url: shareUrl }).catch(() => {});
     } else {
       navigator.clipboard.writeText(shareUrl).catch(() => { prompt('Copy this link to share:', shareUrl); });
     }
-    proceedToCalendar(true);
+    proceedToCalendar(true, false);
   }
 
   function declineBonus() {
     document.getElementById('monkeyBonusModal').classList.remove('visible');
-    proceedToCalendar(false);
+    proceedToCalendar(false, true);
   }
 
   function proceedToCalendar(shared, showShare) {
