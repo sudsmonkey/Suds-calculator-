@@ -383,6 +383,7 @@
     }
 
     let calShareOffered = false;
+    let sharedFromCalendar = false;
 
     function bounceBtn(btn) {
       btn.classList.remove('btn-animate');
@@ -417,7 +418,7 @@
       body.append('total', document.getElementById('summaryPkgTotal').textContent);
       if (addonsText) body.append('add_ons', addonsText);
       body.append('home_details', params.get('wizard') || '(wizard param missing)');
-      body.append('monkey_bonus', params.get('shared') === 'yes' ? 'Yes — $25 off applied' : 'No');
+      body.append('monkey_bonus', (params.get('shared') === 'yes' || sharedFromCalendar) ? 'Yes — $25 off applied' : 'No');
 
       const btn = document.getElementById('bookBtn');
       btn.disabled = true;
@@ -477,6 +478,13 @@
       } else {
         navigator.clipboard.writeText(shareUrl).catch(() => { prompt('Copy this link to share:', shareUrl); });
       }
+      sharedFromCalendar = true;
+      const origPrice = parseInt(params.get('price')) || 0;
+      const discounted = Math.max(0, origPrice - 25);
+      document.getElementById('subtotalRow').style.display = 'flex';
+      document.getElementById('summarySubtotal').textContent = '$' + origPrice;
+      document.getElementById('monkeyBonusRow').style.display = 'flex';
+      document.getElementById('summaryPkgTotal').textContent = '$' + discounted;
       document.getElementById('calShareModal').classList.remove('visible');
       doSubmit();
     }
