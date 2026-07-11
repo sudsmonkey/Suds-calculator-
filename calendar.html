@@ -367,6 +367,9 @@
       document.getElementById('summarySubtotal').textContent = '$' + parseInt(pkgPrice);
       document.getElementById('monkeyBonusRow').style.display = 'flex';
     }
+    if (params.get('showShare') === '1' && !sharedBonus) {
+      setTimeout(() => showCalShareModal(false), 1800);
+    }
     document.getElementById('summaryPkgTotal').textContent = '$' + finalPrice;
     const addonsParam = params.get('addons');
     if (addonsParam) {
@@ -384,6 +387,13 @@
 
     let calShareOffered = false;
     let sharedFromCalendar = false;
+    let calModalFromConfirm = false;
+
+    function showCalShareModal(fromConfirm) {
+      calModalFromConfirm = fromConfirm;
+      calShareOffered = true;
+      document.getElementById('calShareModal').classList.add('visible');
+    }
 
     function bounceBtn(btn) {
       btn.classList.remove('btn-animate');
@@ -463,8 +473,7 @@
       bounceBtn(confirmBtn);
       confirmBtn.addEventListener('animationend', () => {
         if (!sharedBonus && !calShareOffered) {
-          calShareOffered = true;
-          document.getElementById('calShareModal').classList.add('visible');
+          showCalShareModal(true);
         } else {
           doSubmit();
         }
@@ -486,12 +495,12 @@
       document.getElementById('monkeyBonusRow').style.display = 'flex';
       document.getElementById('summaryPkgTotal').textContent = '$' + discounted;
       document.getElementById('calShareModal').classList.remove('visible');
-      doSubmit();
+      if (calModalFromConfirm) doSubmit();
     }
 
     function calSkipShare() {
       document.getElementById('calShareModal').classList.remove('visible');
-      doSubmit();
+      if (calModalFromConfirm) doSubmit();
     }
   } else {
     document.getElementById('headerTitle').textContent = 'Check Availability';

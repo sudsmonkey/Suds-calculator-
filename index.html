@@ -1300,11 +1300,7 @@
     const bookBtn = document.getElementById('bookNowBtn');
     bounceBtn(bookBtn);
     bookBtn.addEventListener('animationend', () => {
-      if (refDiscount) {
-        proceedToCalendar(false);
-      } else {
-        document.getElementById('monkeyBonusModal').classList.add('visible');
-      }
+      proceedToCalendar(false, !refDiscount);
     }, { once: true });
   }
 
@@ -1324,7 +1320,7 @@
     proceedToCalendar(false);
   }
 
-  function proceedToCalendar(shared) {
+  function proceedToCalendar(shared, showShare) {
     const name = PKG_NAMES[currentPkg];
     const rawPrice = parseInt(document.getElementById('co-total').textContent.replace(/[^0-9]/g,''));
     const finalPrice = shared ? Math.max(0, rawPrice - 25) : rawPrice;
@@ -1356,6 +1352,7 @@
     if(addons.length) url += '&addons=' + encodeURIComponent(addons.join(','));
     url += '&wizard=' + encodeURIComponent(wizardAnswers.join(' | '));
     url += '&shared=' + (shared ? 'yes' : 'no');
+    if (showShare) url += '&showShare=1';
     window.location.href = url;
   }
   let currentPkg = null;
