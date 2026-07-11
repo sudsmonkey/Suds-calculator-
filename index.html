@@ -1079,6 +1079,7 @@
   }
   function enterStormMode(){
     document.body.classList.add('storm-mode');
+    document.body.classList.add('calibrated');
     closeCalibrateOverlay();
     document.getElementById('sqftSlider').disabled = false;
     document.getElementById('sliderWrap').classList.remove('locked');
