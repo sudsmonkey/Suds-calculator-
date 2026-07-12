@@ -1300,11 +1300,7 @@
     const bookBtn = document.getElementById('bookNowBtn');
     bounceBtn(bookBtn);
     bookBtn.addEventListener('animationend', () => {
-      if (refDiscount) {
-        proceedToCalendar(false, false);
-      } else {
-        document.getElementById('monkeyBonusModal').classList.add('visible');
-      }
+      proceedToCalendar(false, !refDiscount);
     }, { once: true });
   }
 
