@@ -367,9 +367,6 @@
       document.getElementById('summarySubtotal').textContent = '$' + parseInt(pkgPrice);
       document.getElementById('monkeyBonusRow').style.display = 'flex';
     }
-    if (params.get('showShare') === '1' && !sharedBonus) {
-      setTimeout(() => showCalShareModal(false), 1800);
-    }
     document.getElementById('summaryPkgTotal').textContent = '$' + finalPrice;
     const addonsParam = params.get('addons');
     if (addonsParam) {
