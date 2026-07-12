@@ -354,13 +354,19 @@
     ctx.lineTo(b.x, b.y);
     ctx.stroke();
 
+    // same coral-to-mint look as a stuck bubble, so falling suds don't change color on release
     const headGrad = ctx.createRadialGradient(b.x-b.r*0.3, b.y-b.r*0.3, 0, b.x, b.y, b.r);
-    headGrad.addColorStop(0, 'rgba(255,255,255,0.95)');
-    headGrad.addColorStop(0.6, 'rgba(200,225,215,0.7)');
-    headGrad.addColorStop(1, 'rgba(158,217,192,0.5)');
+    headGrad.addColorStop(0, 'rgba(255,200,200,0.5)');
+    headGrad.addColorStop(0.5, 'rgba(200,180,220,0.4)');
+    headGrad.addColorStop(1, 'rgba(158,217,192,0.3)');
     ctx.fillStyle = headGrad;
     ctx.beginPath();
     ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath();
+    ctx.arc(b.x-b.r*0.35, b.y-b.r*0.35, b.r*0.3, 0, Math.PI*2);
     ctx.fill();
     ctx.restore();
   }
