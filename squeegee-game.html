@@ -276,7 +276,7 @@
         if(b.state === 'stuck' && clearedCells.has(b.cellR+'_'+b.cellC)){
           b.state = 'falling';
           b.vx = Math.sign(dx) * (0.25 + Math.random()*0.35) + (Math.random()-0.5)*0.3;
-          b.vy = 0.6 + Math.random()*0.4;
+          b.vy = 1.0 + Math.random()*0.3;
         }
       }
     }
