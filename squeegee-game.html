@@ -191,6 +191,8 @@
   let cleaned = [];           // cleaned[r][c] — has the squeegee ever wiped this cell before
   let usefulStrokes = 0;      // blade-cells that were freshly loaded with suds
   let wastedStrokes = 0;      // blade-cells that were dry ground the blade had already left and come back to
+  let dryHeavyFrames = 0;     // squeegee frames where over half the blade rode over dry glass instead of suds
+  let squeegeeSweepFrames = 0; // total squeegee frames with real work available, for the dry-heavy ratio
   const MAX_SUDS = 4; // number of applicator strokes to max out suds
 
   function newWindow(){
@@ -209,6 +211,8 @@
     sudsyCellCount = 0;
     usefulStrokes = 0;
     wastedStrokes = 0;
+    dryHeavyFrames = 0;
+    squeegeeSweepFrames = 0;
     dirtSeed = [];
     for(let i=0;i<260;i++){
       dirtSeed.push({
@@ -262,6 +266,7 @@
     const steps = 26;
     const EDGE_OFFSET = Math.max(4, GH*0.02);
     const hadSudsSomewhere = sudsyCellCount > 0; // was there still work to do when this frame started?
+    let frameWetCount = 0, frameDryCount = 0; // how much of THIS frame's blade sat over suds vs dry glass
     for(let i=0;i<=steps;i++){
       const t = i/steps;
       const px = p1.x + (p2.x-p1.x)*t;
@@ -291,19 +296,37 @@
         // Squeegee: remove all suds in one stroke, queueing their bubbles to be released below.
         // Blade is genuinely "loaded" here — always counts as useful.
         usefulStrokes++;
+        frameWetCount++;
         suds[cell.r][cell.c] = 0;
         sudsyCellCount--;
         cleaned[cell.r][cell.c] = true;
         clearedCells.add(key);
-      } else if(cleaned[cell.r][cell.c] && hadSudsSomewhere){
-        const lastStroke = lastTouchedStroke.get(key);
-        if(lastStroke === undefined || moveStrokeId - lastStroke > STROKE_FORGIVENESS){
-          // The blade hasn't been anywhere near here since more than one push-release ago —
-          // a genuine revisit, not just resuming forward progress with a fresh grip on the pad.
-          wastedStrokes++;
+      } else if(cleaned[cell.r][cell.c]){
+        // Already wiped before. Only a fault if it's a genuine stale revisit — not just
+        // the trailing overlap of this same continuous stroke re-covering its own path,
+        // which is normal (a blade narrower than the window has to overlap to avoid gaps).
+        if(hadSudsSomewhere){
+          const lastStroke = lastTouchedStroke.get(key);
+          if(lastStroke === undefined || moveStrokeId - lastStroke > STROKE_FORGIVENESS){
+            // The blade hasn't been anywhere near here since more than one push-release ago —
+            // a genuine revisit, not just resuming forward progress with a fresh grip on the pad.
+            wastedStrokes++;
+            frameDryCount++;
+          }
         }
+      } else if(hadSudsSomewhere){
+        // Never had suds at all — the blade is riding off past the edge of the soaped area.
+        frameDryCount++;
       }
       lastTouchedStroke.set(key, moveStrokeId);
+    }
+
+    // track how much of the blade rode dry glass this frame — real technique wants
+    // most of the blade's length staying in contact with active suds at all times
+    if(currentTool === 'squeegee' && hadSudsSomewhere && (frameWetCount + frameDryCount) > 0){
+      squeegeeSweepFrames++;
+      const dryFraction = frameDryCount / (frameWetCount + frameDryCount);
+      if(dryFraction > 0.5) dryHeavyFrames++;
     }
 
     // release bubbles from cleared cells in a single pass instead of re-scanning
@@ -440,7 +463,9 @@
       const elapsedSeconds = squeegeeStartTime !== null ? (performance.now() - squeegeeStartTime) / 1000 : 0;
       const GRACE_SECONDS = 15; // first 15s of squeegeeing are free
       const timePenalty = Math.floor(Math.max(0, elapsedSeconds - GRACE_SECONDS) / 3); // -1 per 3s over
-      const score = Math.min(99, Math.max(0, efficiency - missedSlots*5 - timePenalty));
+      const dryRatio = squeegeeSweepFrames > 0 ? dryHeavyFrames / squeegeeSweepFrames : 0;
+      const dryPenalty = Math.round(dryRatio * 40); // riding mostly-dry blade for most of the wipe costs up to 40
+      const score = Math.min(99, Math.max(0, efficiency - missedSlots*5 - timePenalty - dryPenalty));
 
       const bananaSrc = document.getElementById('bananaIcon').src;
       const bananaImg = `<img src="${bananaSrc}" style="width:16px;height:16px;vertical-align:-3px;object-fit:contain;">`;
