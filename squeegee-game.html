@@ -184,15 +184,11 @@
   let windowComplete = false; // true once the closeout position has been hit — locks the squeegee in place
   let squeegeeStartTime = null; // when the squeegee tool was first selected this window — timing starts here
   let bubbles = [];        // every suds bubble on the glass: 'stuck' (sitting where it was applied) or 'falling' (released by the squeegee, obeying gravity)
-  let dropToastActive = false; // true while the "dropped your squeegee" message is showing — protects it from being cleared by the next frame's updateHud()
-  let fallingSqueegee = null; // { x, y, angleDeg, vy, rot, alpha } — the squeegee tumbling off the glass after a drop, purely cosmetic
-  let inputLockedUntilRelease = false; // after a drop, the rest of THIS stroke is ignored so it can't silently keep dragging as the applicator and re-soaping the area you were just testing as dry
 
   let currentTool = 'applicator';
   let suds = [];
   let sudsyCellCount = 0;     // how many cells currently hold any suds, kept in sync instead of scanning the grid
   let cleaned = [];           // cleaned[r][c] — has the squeegee ever wiped this cell before
-  let cleanedCellCount = 0;   // how many cells have ever been wiped this window — tells "already finished" apart from "never soaped"
   let usefulStrokes = 0;      // blade-cells that were freshly loaded with suds
   let wastedStrokes = 0;      // blade-cells that were dry ground the blade had already left and come back to
   let dryHeavyFrames = 0;     // squeegee frames where over half the blade rode over dry glass instead of suds
@@ -213,14 +209,10 @@
       cleaned.push(cleanedRow);
     }
     sudsyCellCount = 0;
-    cleanedCellCount = 0;
     usefulStrokes = 0;
     wastedStrokes = 0;
     dryHeavyFrames = 0;
     squeegeeSweepFrames = 0;
-    dropToastActive = false;
-    fallingSqueegee = null;
-    inputLockedUntilRelease = false;
     dirtSeed = [];
     for(let i=0;i<260;i++){
       dirtSeed.push({
@@ -255,17 +247,6 @@
   let lastTouchedStroke = new Map(); // cellKey -> which stroke last had the blade over it
   const STROKE_FORGIVENESS = 1; // resuming with the very next push after a release is free (the pad's travel is limited); going further back than that is a real revisit
 
-  function dropSqueegee(){
-    fallingSqueegee = { x: sx, y: sy, angleDeg: angleDeg, vy: 1, rot: angleDeg, alpha: 1 };
-    inputLockedUntilRelease = true;
-    currentTool = 'applicator';
-    document.getElementById('applicatorBtn').style.border = '3px solid #A6382E';
-    document.getElementById('squeegeeBtn').style.border = '3px solid #F56E64';
-    dropToastActive = true;
-    showToast('Oops, you dropped your squeegee!', true);
-    setTimeout(() => { dropToastActive = false; showToast('', false); }, 1800);
-  }
-
   function sweepBlade(){
     const isFirstFrame = lastSweepSx === null;
     const dy = isFirstFrame ? 0 : sy - lastSweepSy;
@@ -276,7 +257,6 @@
       || Math.abs(angleDeg-lastSweepAngle) > 0.05;
     lastSweepSx = sx; lastSweepSy = sy; lastSweepAngle = angleDeg;
     if(!moved) return;
-    if(inputLockedUntilRelease) return;
     if(currentTool === 'squeegee' && dy < -0.05) return;
 
     const cw = GW/COLS, ch = GH/ROWS;
@@ -286,9 +266,6 @@
     const steps = 26;
     const EDGE_OFFSET = Math.max(4, GH*0.02);
     const hadSudsSomewhere = sudsyCellCount > 0; // was there still work to do when this frame started?
-    // dry glass counts against you unless we're in the closeout approach after everything's
-    // already been wiped — that includes riding dry before a single drop of suds went down
-    const dryMattersHere = sudsyCellCount > 0 || cleanedCellCount === 0;
     let frameWetCount = 0, frameDryCount = 0; // how much of THIS frame's blade sat over suds vs dry glass
     for(let i=0;i<=steps;i++){
       const t = i/steps;
@@ -322,7 +299,6 @@
         frameWetCount++;
         suds[cell.r][cell.c] = 0;
         sudsyCellCount--;
-        if(!cleaned[cell.r][cell.c]) cleanedCellCount++;
         cleaned[cell.r][cell.c] = true;
         clearedCells.add(key);
       } else if(cleaned[cell.r][cell.c]){
@@ -338,9 +314,8 @@
             frameDryCount++;
           }
         }
-      } else if(dryMattersHere){
-        // Never had suds at all — the blade is riding off past the edge of the soaped area
-        // (or nothing's been soaped yet at all).
+      } else if(hadSudsSomewhere){
+        // Never had suds at all — the blade is riding off past the edge of the soaped area.
         frameDryCount++;
       }
       lastTouchedStroke.set(key, moveStrokeId);
@@ -353,8 +328,6 @@
       const dryFraction = frameDryCount / (frameWetCount + frameDryCount);
       if(dryFraction > 0.5) dryHeavyFrames++;
     }
-
-    const shouldDrop = currentTool === 'squeegee' && dryMattersHere && frameWetCount === 0 && frameDryCount > 0;
 
     // release bubbles from cleared cells in a single pass instead of re-scanning
     // the whole bubbles array once per swept cell — that scaled badly with denser suds
@@ -385,9 +358,6 @@
     }
 
     updateHud();
-
-    // checked after updateHud() so its own toast-clearing branch doesn't stomp this message
-    if(shouldDrop) dropSqueegee();
   }
 
   function distToSegment(px,py,x1,y1,x2,y2){
@@ -402,16 +372,6 @@
 
   const GRAVITY = 0.09;
   const TERMINAL_VY = 5.5;
-
-  function updateFallingSqueegee(){
-    if(!fallingSqueegee) return;
-    const f = fallingSqueegee;
-    f.vy = Math.min(9, f.vy + 0.4); // falls faster than suds bubbles — it's a real tool, not a drop of water
-    f.y += f.vy;
-    f.rot += 14; // tumbles as it falls
-    f.alpha -= 0.025;
-    if(f.y - 30 > GH || f.alpha <= 0) fallingSqueegee = null;
-  }
 
   function updateBubbles(){
     for(let i=bubbles.length-1;i>=0;i--){
@@ -511,7 +471,7 @@
       const bananaImg = `<img src="${bananaSrc}" style="width:16px;height:16px;vertical-align:-3px;object-fit:contain;">`;
       showToast(`Squeaky clean! ${bananaImg}${bananaImg}${bananaImg}<br><b>Score: ${score}</b>`, true);
       setTimeout(() => showToast('', false), 3600);
-    } else if(!windowComplete && !dropToastActive){
+    } else if(!windowComplete){
       showToast('', false);
     }
   }
@@ -645,7 +605,6 @@
       if(e.pointerId === anglePointerId) anglePointerId = null;
       if(e.pointerId === movePointerId){
         movePointerId = null;
-        inputLockedUntilRelease = false;
       }
     }, {passive:false});
   });
@@ -768,15 +727,6 @@
       drawApplicatorTool(gctx, sx, sy, angleDeg);
     } else {
       drawSqueegeeTool(gctx, sx, sy, angleDeg);
-    }
-
-    // the dropped squeegee tumbles off the glass independently of whatever tool is active now
-    if(fallingSqueegee){
-      const f = fallingSqueegee;
-      gctx.save();
-      gctx.globalAlpha = Math.max(0, f.alpha);
-      drawSqueegeeTool(gctx, f.x, f.y, f.rot);
-      gctx.restore();
     }
   }
 
@@ -980,7 +930,6 @@
     applyKeyboardAngle();
     sweepBlade(); // also refreshes the HUD, but only when something actually moved
     updateBubbles();
-    updateFallingSqueegee();
     drawGlass();
     drawToggle();
     requestAnimationFrame(loop);
