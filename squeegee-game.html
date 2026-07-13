@@ -356,7 +356,7 @@
     const isPerpendicular = Math.abs(angleDeg) < CLOSEOUT_ANGLE_TOL;
     inCloseoutZone = isPerpendicular && sy >= GH * CLOSEOUT_Y_FRAC;
     inCloseoutTrigger = isPerpendicular && sy >= GH * CLOSEOUT_TRIGGER_Y_FRAC;
-    if(inCloseoutTrigger){
+    if(inCloseoutTrigger && currentTool === 'squeegee'){
       const bananaSrc = document.getElementById('bananaIcon').src;
       const bananaImg = `<img src="${bananaSrc}" style="width:16px;height:16px;vertical-align:-3px;object-fit:contain;">`;
       showToast(`Squeaky clean! ${bananaImg}${bananaImg}${bananaImg}<br><b>Score: 5</b>`, true);
