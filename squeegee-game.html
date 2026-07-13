@@ -186,6 +186,7 @@
   let bubbles = [];        // every suds bubble on the glass: 'stuck' (sitting where it was applied) or 'falling' (released by the squeegee, obeying gravity)
   let dropToastActive = false; // true while the "dropped your squeegee" message is showing — protects it from being cleared by the next frame's updateHud()
   let fallingSqueegee = null; // { x, y, angleDeg, vy, rot, alpha } — the squeegee tumbling off the glass after a drop, purely cosmetic
+  let inputLockedUntilRelease = false; // after a drop, the rest of THIS stroke is ignored so it can't silently keep dragging as the applicator and re-soaping the area you were just testing as dry
 
   let currentTool = 'applicator';
   let suds = [];
@@ -219,6 +220,7 @@
     squeegeeSweepFrames = 0;
     dropToastActive = false;
     fallingSqueegee = null;
+    inputLockedUntilRelease = false;
     dirtSeed = [];
     for(let i=0;i<260;i++){
       dirtSeed.push({
@@ -255,6 +257,7 @@
 
   function dropSqueegee(){
     fallingSqueegee = { x: sx, y: sy, angleDeg: angleDeg, vy: 1, rot: angleDeg, alpha: 1 };
+    inputLockedUntilRelease = true;
     currentTool = 'applicator';
     document.getElementById('applicatorBtn').style.border = '3px solid #A6382E';
     document.getElementById('squeegeeBtn').style.border = '3px solid #F56E64';
@@ -273,6 +276,7 @@
       || Math.abs(angleDeg-lastSweepAngle) > 0.05;
     lastSweepSx = sx; lastSweepSy = sy; lastSweepAngle = angleDeg;
     if(!moved) return;
+    if(inputLockedUntilRelease) return;
     if(currentTool === 'squeegee' && dy < -0.05) return;
 
     const cw = GW/COLS, ch = GH/ROWS;
@@ -641,6 +645,7 @@
       if(e.pointerId === anglePointerId) anglePointerId = null;
       if(e.pointerId === movePointerId){
         movePointerId = null;
+        inputLockedUntilRelease = false;
       }
     }, {passive:false});
   });
