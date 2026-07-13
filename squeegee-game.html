@@ -382,10 +382,10 @@
     inCloseoutTrigger = isPerpendicular && sy >= GH * CLOSEOUT_TRIGGER_Y_FRAC;
     if(pct>=96 && inCloseoutTrigger){
       const bananaSrc = document.getElementById('bananaIcon').src;
-      showToast(`Squeaky clean! 1 banana <img src="${bananaSrc}" style="width:16px;height:16px;vertical-align:-3px;object-fit:contain;"><br><b>Score: ${Math.max(0, 500 - (wastedSqueegeeStrokes * 10))}</b>`, true);
+      showToast(`Squeaky clean! 3 bananas <img src="${bananaSrc}" style="width:16px;height:16px;vertical-align:-3px;object-fit:contain;"><br><b>Score: ${Math.max(0, 500 - (wastedSqueegeeStrokes * 10))}</b>`, true);
       if(!earnedThisWindow){
         earnedThisWindow = true;
-        bananaCount++;
+        bananaCount += 3;
         document.getElementById('bananaCount').textContent = bananaCount;
       }
     } else {
@@ -410,10 +410,10 @@
     const landscape = isLandscape();
 
     if(landscape){
-      GW = 560; GH = 110;
+      GW = 620; GH = 125;
       TW = 560; TH = 140;
     } else {
-      GW = 400; GH = 280;
+      GW = 440; GH = 310;
       TW = 340; TH = 210;
     }
 
