@@ -95,32 +95,10 @@
   <h1>Squeege Master 3000</h1>
   <div style="display:flex;gap:8px;justify-content:center;width:100%;">
     <button id="applicatorBtn" aria-label="Applicator" style="margin:0;padding:12px 38px;background:#D9D9D9;border:3px solid #A6382E;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
-      <svg width="42" height="42" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="applicatorGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#9ED9C0"/>
-            <stop offset="1" stop-color="#F56E64"/>
-          </linearGradient>
-        </defs>
-        <rect x="2.5" y="3" width="19" height="7" rx="3.5" fill="url(#applicatorGrad)"/>
-        <rect x="10" y="12" width="4" height="7" fill="#1b1b1b"/>
-        <circle cx="12" cy="20" r="2.2" fill="#9ED9C0"/>
-      </svg>
+      <canvas id="applicatorIcon" width="64" height="64" style="width:42px;height:42px;"></canvas>
     </button>
     <button id="squeegeeBtn" aria-label="Squeegee" style="margin:0;padding:12px 38px;background:#D9D9D9;border:3px solid transparent;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
-      <svg width="42" height="42" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="squeegeeGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#9ED9C0"/>
-            <stop offset="1" stop-color="#F56E64"/>
-          </linearGradient>
-        </defs>
-        <rect x="1" y="2.6" width="22" height="4.6" rx="2.3" fill="#2b2b2b"/>
-        <rect x="1.8" y="3.3" width="20.4" height="3" rx="1.5" fill="#b7bfc7"/>
-        <rect x="1.8" y="3.8" width="20.4" height="2" rx="1" fill="url(#squeegeeGrad)"/>
-        <rect x="11.1" y="6.8" width="1.8" height="14.5" fill="#F56E64"/>
-        <circle cx="12" cy="6.2" r="2" fill="#F56E64"/>
-      </svg>
+      <canvas id="squeegeeIcon" width="64" height="64" style="width:42px;height:42px;"></canvas>
     </button>
   </div>
   <div class="hud">
@@ -144,6 +122,54 @@
   const gctx = glassCanvas.getContext('2d');
   const toggleCanvas = document.getElementById('toggleCanvas');
   const tctx = toggleCanvas.getContext('2d');
+
+  // button icons reuse the exact same drawing code as the real in-game tools, just at icon scale
+  function drawApplicatorIcon(ctx){
+    const cx = 32, cy = 32, foamW = 42, foamH = 15;
+    ctx.save();
+    ctx.translate(cx, cy);
+    const foamGrad = ctx.createLinearGradient(-foamW/2, 0, foamW/2, 0);
+    foamGrad.addColorStop(0, '#9ED9C0');
+    foamGrad.addColorStop(1, '#F56E64');
+    ctx.fillStyle = foamGrad;
+    ctx.fillRect(-foamW/2, -foamH/2, foamW, foamH);
+    ctx.beginPath(); ctx.arc(-foamW/2, 0, foamH/2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(foamW/2, 0, foamH/2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    for(let x=-foamW/2+4; x<foamW/2; x+=4){
+      for(let y=-foamH/2+3; y<foamH/2; y+=4){
+        ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI*2); ctx.fill();
+      }
+    }
+    ctx.fillStyle = '#1b1b1b';
+    ctx.fillRect(-5, foamH/2, 10, 16);
+    ctx.fillStyle = '#9ED9C0';
+    ctx.beginPath(); ctx.arc(0, foamH/2+16, 5, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  function drawSqueegeeIcon(ctx){
+    const cx = 32, cy = 24, bladeLen = 46;
+    ctx.save();
+    ctx.translate(cx, cy);
+    const p1x = -bladeLen/2, p2x = bladeLen/2;
+    const bladeGrad = ctx.createLinearGradient(p1x, 0, p2x, 0);
+    bladeGrad.addColorStop(0, '#9ED9C0');
+    bladeGrad.addColorStop(1, '#F56E64');
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = 8;
+    ctx.beginPath(); ctx.moveTo(p1x,0); ctx.lineTo(p2x,0); ctx.stroke();
+    ctx.strokeStyle = '#b7bfc7'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(p1x,0); ctx.lineTo(p2x,0); ctx.stroke();
+    ctx.strokeStyle = bladeGrad; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(p1x,0); ctx.lineTo(p2x,0); ctx.stroke();
+    ctx.strokeStyle = '#F56E64'; ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,22); ctx.stroke();
+    ctx.fillStyle = '#F56E64';
+    ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  drawApplicatorIcon(document.getElementById('applicatorIcon').getContext('2d'));
+  drawSqueegeeIcon(document.getElementById('squeegeeIcon').getContext('2d'));
 
   // logo etched on the glass like a decal on a door — visible from the start, unaffected by cleaning
   const logoImg = new Image();
