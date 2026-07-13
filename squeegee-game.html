@@ -565,7 +565,9 @@
     const rad = angleDeg*Math.PI/180;
     const halfDx = Math.abs(Math.cos(rad))*BLADE_LEN/2;
     const halfDy = Math.abs(Math.sin(rad))*BLADE_LEN/2;
-    const margin = 10;
+    // scaled to GH instead of fixed — a flat 10px margin ate 8% of landscape's short glass,
+    // more than the 5% closeout trigger zone, making the bottom edge physically unreachable
+    const margin = Math.min(10, GH * 0.025);
     const x = Math.min(GW-margin-halfDx, Math.max(margin+halfDx, px));
     const y = Math.min(GH-margin-halfDy, Math.max(margin+halfDy, py));
     return {x,y};
