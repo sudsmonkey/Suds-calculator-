@@ -180,7 +180,8 @@
     angleDeg = 0; spinTotal = 0;
     padVx = padCx; padVy = padCy;
     lastSweepSx = null; lastSweepSy = null; lastSweepAngle = null;
-    prevFrameCells = new Set();
+    sweepFrameCounter = 0;
+    lastTouchedFrame = new Map();
     currentTool = 'applicator';
     document.getElementById('applicatorBtn').style.background = '#A6382E';
     document.getElementById('applicatorBtn').style.color = 'white';
@@ -199,7 +200,9 @@
   }
 
   let lastSweepSx = null, lastSweepSy = null, lastSweepAngle = null;
-  let prevFrameCells = new Set(); // cells touched last frame — lets a continuous stroke's natural self-overlap (blade width > per-frame travel) go unpenalized, while genuine backtracking still counts
+  let sweepFrameCounter = 0;
+  let lastTouchedFrame = new Map(); // cellKey -> frame it was last under the blade
+  const RECENCY_WINDOW = 10; // frames a cell still counts as "the blade never really left" — absorbs natural hand jitter in a continuous stroke without missing genuine backtracking
 
   function sweepBlade(){
     const isFirstFrame = lastSweepSx === null;
@@ -213,6 +216,7 @@
     if(!moved) return;
     if(currentTool === 'squeegee' && dy < -0.05) return;
 
+    sweepFrameCounter++;
     const cw = GW/COLS, ch = GH/ROWS;
     const currentCells = new Set();
     const clearedCells = new Set();
@@ -253,13 +257,16 @@
         sudsyCellCount--;
         cleaned[cell.r][cell.c] = true;
         clearedCells.add(key);
-      } else if(cleaned[cell.r][cell.c] && !prevFrameCells.has(key) && hadSudsSomewhere){
-        // Dry ground the blade wasn't already sitting on last frame — genuine backtracking,
-        // not just the natural trailing overlap of a blade wider than one frame's travel.
-        wastedStrokes++;
+      } else if(cleaned[cell.r][cell.c] && hadSudsSomewhere){
+        const lastTouched = lastTouchedFrame.get(key);
+        if(lastTouched === undefined || sweepFrameCounter - lastTouched > RECENCY_WINDOW){
+          // Dry ground the blade hasn't been near recently — genuine backtracking, not just
+          // the natural jitter/trailing-overlap of a continuous stroke.
+          wastedStrokes++;
+        }
       }
+      lastTouchedFrame.set(key, sweepFrameCounter);
     }
-    prevFrameCells = currentCells;
 
     // release bubbles from cleared cells in a single pass instead of re-scanning
     // the whole bubbles array once per swept cell — that scaled badly with denser suds
