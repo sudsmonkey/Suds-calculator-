@@ -182,6 +182,7 @@
     lastSweepSx = null; lastSweepSy = null; lastSweepAngle = null;
     sweepFrameCounter = 0;
     lastTouchedFrame = new Map();
+    lastTouchedTime = new Map();
     currentTool = 'applicator';
     document.getElementById('applicatorBtn').style.background = '#A6382E';
     document.getElementById('applicatorBtn').style.color = 'white';
@@ -202,7 +203,9 @@
   let lastSweepSx = null, lastSweepSy = null, lastSweepAngle = null;
   let sweepFrameCounter = 0;
   let lastTouchedFrame = new Map(); // cellKey -> frame it was last under the blade
-  const RECENCY_WINDOW = 150; // ~2.5s of actual blade movement — the move-pad has limited travel, so covering the whole window takes many separate push-release cycles, and each one shouldn't cost recency
+  let lastTouchedTime = new Map();  // cellKey -> wall-clock time it was last under the blade
+  const RECENCY_WINDOW = 150;   // ~2.5s of actual blade movement — the move-pad has limited travel, so covering the whole window takes many separate push-release cycles, and each one shouldn't cost recency
+  const RECENCY_MAX_PAUSE_MS = 8000; // ...but a genuinely long real-time pause still resets it, even if few movement-frames have technically passed
 
   function sweepBlade(){
     const isFirstFrame = lastSweepSx === null;
@@ -259,13 +262,18 @@
         clearedCells.add(key);
       } else if(cleaned[cell.r][cell.c] && hadSudsSomewhere){
         const lastTouched = lastTouchedFrame.get(key);
-        if(lastTouched === undefined || sweepFrameCounter - lastTouched > RECENCY_WINDOW){
+        const lastTime = lastTouchedTime.get(key);
+        const framesFresh = lastTouched !== undefined && sweepFrameCounter - lastTouched <= RECENCY_WINDOW;
+        const timeFresh = lastTime !== undefined && performance.now() - lastTime <= RECENCY_MAX_PAUSE_MS;
+        if(!(framesFresh && timeFresh)){
           // Dry ground the blade hasn't been near recently — genuine backtracking, not just
-          // the natural jitter/trailing-overlap of a continuous stroke.
+          // the natural jitter/trailing-overlap of a continuous stroke, and not stale from
+          // having sat untouched through a long real-time pause either.
           wastedStrokes++;
         }
       }
       lastTouchedFrame.set(key, sweepFrameCounter);
+      lastTouchedTime.set(key, performance.now());
     }
 
     // release bubbles from cleared cells in a single pass instead of re-scanning
