@@ -185,7 +185,7 @@
   let squeegeeStartTime = null; // when the squeegee tool was first selected this window — timing starts here
   let bubbles = [];        // every suds bubble on the glass: 'stuck' (sitting where it was applied) or 'falling' (released by the squeegee, obeying gravity)
 
-  let currentTool = 'applicator';
+  let currentTool = null; // null until the player picks applicator or squeegee
   let suds = [];
   let sudsyCellCount = 0;     // how many cells currently hold any suds, kept in sync instead of scanning the grid
   let cleaned = [];           // cleaned[r][c] — has the squeegee ever wiped this cell before
@@ -229,8 +229,8 @@
     lastSweepSx = null; lastSweepSy = null; lastSweepAngle = null;
     moveStrokeId = 0;
     lastTouchedStroke = new Map();
-    currentTool = 'applicator';
-    document.getElementById('applicatorBtn').style.border = '3px solid #A6382E';
+    currentTool = null; // no tool picked yet — must explicitly select one before anything happens
+    document.getElementById('applicatorBtn').style.border = '3px solid #F56E64';
     document.getElementById('squeegeeBtn').style.border = '3px solid #F56E64';
     updateHud();
     showToast('', false);
@@ -257,6 +257,7 @@
       || Math.abs(angleDeg-lastSweepAngle) > 0.05;
     lastSweepSx = sx; lastSweepSy = sy; lastSweepAngle = angleDeg;
     if(!moved) return;
+    if(!currentTool) return; // no tool selected yet — nothing happens until the player picks one
     if(currentTool === 'squeegee' && dy < -0.05) return;
 
     const cw = GW/COLS, ch = GH/ROWS;
@@ -739,7 +740,7 @@
 
     if(currentTool === 'applicator'){
       drawApplicatorTool(gctx, sx, sy, angleDeg);
-    } else {
+    } else if(currentTool === 'squeegee'){
       drawSqueegeeTool(gctx, sx, sy, angleDeg);
     }
   }
