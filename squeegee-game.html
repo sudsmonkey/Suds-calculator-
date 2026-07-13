@@ -189,6 +189,7 @@
   let suds = [];
   let sudsyCellCount = 0;     // how many cells currently hold any suds, kept in sync instead of scanning the grid
   let cleaned = [];           // cleaned[r][c] — has the squeegee ever wiped this cell before
+  let cleanedCellCount = 0;   // how many cells have ever been wiped this window — tells "already finished" apart from "never soaped"
   let usefulStrokes = 0;      // blade-cells that were freshly loaded with suds
   let wastedStrokes = 0;      // blade-cells that were dry ground the blade had already left and come back to
   let dryHeavyFrames = 0;     // squeegee frames where over half the blade rode over dry glass instead of suds
@@ -209,6 +210,7 @@
       cleaned.push(cleanedRow);
     }
     sudsyCellCount = 0;
+    cleanedCellCount = 0;
     usefulStrokes = 0;
     wastedStrokes = 0;
     dryHeavyFrames = 0;
@@ -274,6 +276,9 @@
     const steps = 26;
     const EDGE_OFFSET = Math.max(4, GH*0.02);
     const hadSudsSomewhere = sudsyCellCount > 0; // was there still work to do when this frame started?
+    // dry glass counts against you unless we're in the closeout approach after everything's
+    // already been wiped — that includes riding dry before a single drop of suds went down
+    const dryMattersHere = sudsyCellCount > 0 || cleanedCellCount === 0;
     let frameWetCount = 0, frameDryCount = 0; // how much of THIS frame's blade sat over suds vs dry glass
     for(let i=0;i<=steps;i++){
       const t = i/steps;
@@ -307,6 +312,7 @@
         frameWetCount++;
         suds[cell.r][cell.c] = 0;
         sudsyCellCount--;
+        if(!cleaned[cell.r][cell.c]) cleanedCellCount++;
         cleaned[cell.r][cell.c] = true;
         clearedCells.add(key);
       } else if(cleaned[cell.r][cell.c]){
@@ -322,8 +328,9 @@
             frameDryCount++;
           }
         }
-      } else if(hadSudsSomewhere){
-        // Never had suds at all — the blade is riding off past the edge of the soaped area.
+      } else if(dryMattersHere){
+        // Never had suds at all — the blade is riding off past the edge of the soaped area
+        // (or nothing's been soaped yet at all).
         frameDryCount++;
       }
       lastTouchedStroke.set(key, moveStrokeId);
@@ -337,7 +344,7 @@
       if(dryFraction > 0.5) dryHeavyFrames++;
     }
 
-    const shouldDrop = currentTool === 'squeegee' && hadSudsSomewhere && frameWetCount === 0 && frameDryCount > 0;
+    const shouldDrop = currentTool === 'squeegee' && dryMattersHere && frameWetCount === 0 && frameDryCount > 0;
 
     // release bubbles from cleared cells in a single pass instead of re-scanning
     // the whole bubbles array once per swept cell — that scaled badly with denser suds
