@@ -97,7 +97,7 @@
     <button id="applicatorBtn" aria-label="Applicator" style="margin:0;padding:2px 12px;background:#D9D9D9;border:3px solid #A6382E;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
       <canvas id="applicatorIcon" width="64" height="64" style="width:46px;height:46px;"></canvas>
     </button>
-    <button id="squeegeeBtn" aria-label="Squeegee" style="margin:0;padding:2px 12px;background:#D9D9D9;border:3px solid transparent;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
+    <button id="squeegeeBtn" aria-label="Squeegee" style="margin:0;padding:2px 12px;background:#D9D9D9;border:3px solid #F56E64;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
       <canvas id="squeegeeIcon" width="64" height="64" style="width:46px;height:46px;"></canvas>
     </button>
   </div>
@@ -222,7 +222,7 @@
     lastTouchedStroke = new Map();
     currentTool = 'applicator';
     document.getElementById('applicatorBtn').style.border = '3px solid #A6382E';
-    document.getElementById('squeegeeBtn').style.border = '3px solid transparent';
+    document.getElementById('squeegeeBtn').style.border = '3px solid #F56E64';
     updateHud();
     showToast('', false);
   }
@@ -907,14 +907,14 @@
   document.getElementById('applicatorBtn').addEventListener('click', ()=>{
     currentTool = 'applicator';
     document.getElementById('applicatorBtn').style.border = '3px solid #A6382E';
-    document.getElementById('squeegeeBtn').style.border = '3px solid transparent';
+    document.getElementById('squeegeeBtn').style.border = '3px solid #F56E64';
   });
 
   document.getElementById('squeegeeBtn').addEventListener('click', ()=>{
     currentTool = 'squeegee';
     if(squeegeeStartTime === null) squeegeeStartTime = performance.now();
     document.getElementById('squeegeeBtn').style.border = '3px solid #A6382E';
-    document.getElementById('applicatorBtn').style.border = '3px solid transparent';
+    document.getElementById('applicatorBtn').style.border = '3px solid #F56E64';
   });
 
   let resizeTimer = null;
