@@ -150,7 +150,7 @@
 
   let currentTool = 'applicator';
   let suds = [];
-  const MAX_SUDS = 3; // number of applicator strokes to max out suds
+  const MAX_SUDS = 5; // number of applicator strokes to max out suds
 
   function newWindow(){
     clean = [];
@@ -228,18 +228,21 @@
       currentCells.add(key);
 
       if(currentTool === 'applicator'){
-        // Increment suds up to max level, spawning one real bubble per increment
+        // Increment suds up to max level, spawning a few real bubbles per increment for denser foam
         if(suds[cell.r][cell.c] < MAX_SUDS){
           suds[cell.r][cell.c]++;
-          bubbles.push({
-            x: px + (Math.random()-0.5)*cw*0.5,
-            y: py + (Math.random()-0.5)*ch*0.5,
-            r: 2.6 + Math.random()*2.4,
-            vx: 0, vy: 0,
-            state: 'stuck',
-            cellR: cell.r, cellC: cell.c,
-            alpha: 0.85 + Math.random()*0.15
-          });
+          const bubbleCount = 2 + Math.floor(Math.random()*2);
+          for(let n=0;n<bubbleCount;n++){
+            bubbles.push({
+              x: px + (Math.random()-0.5)*cw*0.7,
+              y: py + (Math.random()-0.5)*ch*0.7,
+              r: 2.2 + Math.random()*2.2,
+              vx: 0, vy: 0,
+              state: 'stuck',
+              cellR: cell.r, cellC: cell.c,
+              alpha: 0.85 + Math.random()*0.15
+            });
+          }
         }
       } else {
         // Squeegee: remove all suds in one stroke, releasing their bubbles to fall
