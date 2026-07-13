@@ -180,9 +180,8 @@
     angleDeg = 0; spinTotal = 0;
     padVx = padCx; padVy = padCy;
     lastSweepSx = null; lastSweepSy = null; lastSweepAngle = null;
-    sweepFrameCounter = 0;
-    lastTouchedFrame = new Map();
-    lastTouchedTime = new Map();
+    moveStrokeId = 0;
+    lastTouchedStroke = new Map();
     currentTool = 'applicator';
     document.getElementById('applicatorBtn').style.background = '#A6382E';
     document.getElementById('applicatorBtn').style.color = 'white';
@@ -201,11 +200,9 @@
   }
 
   let lastSweepSx = null, lastSweepSy = null, lastSweepAngle = null;
-  let sweepFrameCounter = 0;
-  let lastTouchedFrame = new Map(); // cellKey -> frame it was last under the blade
-  let lastTouchedTime = new Map();  // cellKey -> wall-clock time it was last under the blade
-  const RECENCY_WINDOW = 150;   // ~2.5s of actual blade movement — the move-pad has limited travel, so covering the whole window takes many separate push-release cycles, and each one shouldn't cost recency
-  const RECENCY_MAX_PAUSE_MS = 8000; // ...but a genuinely long real-time pause still resets it, even if few movement-frames have technically passed
+  let moveStrokeId = 0;             // increments each time the move-pad is freshly pressed (a new "swipe")
+  let lastTouchedStroke = new Map(); // cellKey -> which stroke last had the blade over it
+  const STROKE_FORGIVENESS = 1; // resuming with the very next push after a release is free (the pad's travel is limited); going further back than that is a real revisit
 
   function sweepBlade(){
     const isFirstFrame = lastSweepSx === null;
@@ -219,7 +216,6 @@
     if(!moved) return;
     if(currentTool === 'squeegee' && dy < -0.05) return;
 
-    sweepFrameCounter++;
     const cw = GW/COLS, ch = GH/ROWS;
     const currentCells = new Set();
     const clearedCells = new Set();
@@ -261,19 +257,14 @@
         cleaned[cell.r][cell.c] = true;
         clearedCells.add(key);
       } else if(cleaned[cell.r][cell.c] && hadSudsSomewhere){
-        const lastTouched = lastTouchedFrame.get(key);
-        const lastTime = lastTouchedTime.get(key);
-        const framesFresh = lastTouched !== undefined && sweepFrameCounter - lastTouched <= RECENCY_WINDOW;
-        const timeFresh = lastTime !== undefined && performance.now() - lastTime <= RECENCY_MAX_PAUSE_MS;
-        if(!(framesFresh && timeFresh)){
-          // Dry ground the blade hasn't been near recently — genuine backtracking, not just
-          // the natural jitter/trailing-overlap of a continuous stroke, and not stale from
-          // having sat untouched through a long real-time pause either.
+        const lastStroke = lastTouchedStroke.get(key);
+        if(lastStroke === undefined || moveStrokeId - lastStroke > STROKE_FORGIVENESS){
+          // The blade hasn't been anywhere near here since more than one push-release ago —
+          // a genuine revisit, not just resuming forward progress with a fresh grip on the pad.
           wastedStrokes++;
         }
       }
-      lastTouchedFrame.set(key, sweepFrameCounter);
-      lastTouchedTime.set(key, performance.now());
+      lastTouchedStroke.set(key, moveStrokeId);
     }
 
     // release bubbles from cleared cells in a single pass instead of re-scanning
@@ -515,6 +506,7 @@
     } else if(p.x >= midX && movePointerId === null){
       movePointerId = e.pointerId;
       moveLastX = p.x; moveLastY = p.y;
+      moveStrokeId++;
       try { toggleCanvas.setPointerCapture(e.pointerId); } catch(err) {}
     }
   }, {passive:false});
