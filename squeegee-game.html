@@ -291,6 +291,20 @@
             cellR: cell.r, cellC: cell.c,
             alpha: 0.85 + Math.random()*0.15
           });
+          // once a cell is fully loaded, some of the excess soap runs down the glass right
+          // away — like a mop dripping the instant it's dunked, before you've wiped anything
+          if(suds[cell.r][cell.c] === MAX_SUDS && Math.random() < 0.35){
+            bubbles.push({
+              x: px + (Math.random()-0.5)*cw*0.3,
+              y: py + ch*0.3,
+              r: 2.2 + Math.random()*1.6,
+              vx: (Math.random()-0.5)*0.4,
+              vy: 0.3 + Math.random()*0.3,
+              state: 'falling',
+              cellR: cell.r, cellC: cell.c,
+              alpha: 0.75 + Math.random()*0.2
+            });
+          }
         }
       } else if(suds[cell.r][cell.c] > 0){
         // Squeegee: remove all suds in one stroke, queueing their bubbles to be released below.
