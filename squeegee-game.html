@@ -143,17 +143,26 @@
 
   let currentTool = 'applicator';
   let suds = [];
+  let cleaned = [];        // cleaned[r][c] — cells the squeegee has already wiped, tracked only for the efficiency score
+  let usefulStrokes = 0;   // squeegee passes that actually lifted suds off a cell for the first time
+  let wastedStrokes = 0;   // squeegee passes over a cell that was already cleaned — going over old ground
   const MAX_SUDS = 3; // number of applicator strokes to max out suds
 
   function newWindow(){
     suds = [];
+    cleaned = [];
     for(let r=0;r<ROWS;r++){
       const sudsRow = [];
+      const cleanedRow = [];
       for(let c=0;c<COLS;c++){
         sudsRow.push(0);
+        cleanedRow.push(false);
       }
       suds.push(sudsRow);
+      cleaned.push(cleanedRow);
     }
+    usefulStrokes = 0;
+    wastedStrokes = 0;
     dirtSeed = [];
     for(let i=0;i<260;i++){
       dirtSeed.push({
@@ -167,6 +176,7 @@
     angleDeg = 0; spinTotal = 0;
     padVx = padCx; padVy = padCy;
     lastSweepSx = null; lastSweepSy = null; lastSweepAngle = null;
+    prevFrameCells = new Set();
     currentTool = 'applicator';
     document.getElementById('applicatorBtn').style.background = '#A6382E';
     document.getElementById('applicatorBtn').style.color = 'white';
@@ -185,6 +195,7 @@
   }
 
   let lastSweepSx = null, lastSweepSy = null, lastSweepAngle = null;
+  let prevFrameCells = new Set(); // cells touched last frame, so continuous coverage isn't mistaken for backtracking
 
   function sweepBlade(){
     const isFirstFrame = lastSweepSx === null;
@@ -232,10 +243,17 @@
         // Squeegee: remove all suds in one stroke, queueing their bubbles to be released below
         if(suds[cell.r][cell.c] > 0){
           suds[cell.r][cell.c] = 0;
+          cleaned[cell.r][cell.c] = true;
+          usefulStrokes++;
           clearedCells.add(key);
+        } else if(cleaned[cell.r][cell.c] && !prevFrameCells.has(key)){
+          // no suds left here, already cleaned before, and we weren't already sitting on it
+          // last frame — this is genuine backtracking, not just slow continuous coverage
+          wastedStrokes++;
         }
       }
     }
+    prevFrameCells = currentCells;
 
     // release bubbles from cleared cells in a single pass instead of re-scanning
     // the whole bubbles array once per swept cell — that scaled badly with denser suds
@@ -359,7 +377,9 @@
     if(inCloseoutTrigger && currentTool === 'squeegee'){
       const bananaSrc = document.getElementById('bananaIcon').src;
       const bananaImg = `<img src="${bananaSrc}" style="width:16px;height:16px;vertical-align:-3px;object-fit:contain;">`;
-      showToast(`Squeaky clean! ${bananaImg}${bananaImg}${bananaImg}<br><b>Score: 5</b>`, true);
+      const totalStrokes = usefulStrokes + wastedStrokes;
+      const efficiency = totalStrokes > 0 ? Math.round(usefulStrokes/totalStrokes*100) : 100;
+      showToast(`Squeaky clean! ${bananaImg}${bananaImg}${bananaImg}<br><b>Efficiency: ${efficiency}%</b>`, true);
       if(!earnedThisWindow){
         earnedThisWindow = true;
         bananaCount += 3;
