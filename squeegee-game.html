@@ -123,53 +123,31 @@
   const toggleCanvas = document.getElementById('toggleCanvas');
   const tctx = toggleCanvas.getContext('2d');
 
-  // button icons reuse the exact same drawing code as the real in-game tools, just at icon scale
-  function drawApplicatorIcon(ctx){
-    const cx = 32, cy = 32, foamW = 42, foamH = 15;
-    ctx.save();
-    ctx.translate(cx, cy);
-    const foamGrad = ctx.createLinearGradient(-foamW/2, 0, foamW/2, 0);
-    foamGrad.addColorStop(0, '#9ED9C0');
-    foamGrad.addColorStop(1, '#F56E64');
-    ctx.fillStyle = foamGrad;
-    ctx.fillRect(-foamW/2, -foamH/2, foamW, foamH);
-    ctx.beginPath(); ctx.arc(-foamW/2, 0, foamH/2, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(foamW/2, 0, foamH/2, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    for(let x=-foamW/2+4; x<foamW/2; x+=4){
-      for(let y=-foamH/2+3; y<foamH/2; y+=4){
-        ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI*2); ctx.fill();
-      }
-    }
-    ctx.fillStyle = '#1b1b1b';
-    ctx.fillRect(-5, foamH/2, 10, 16);
-    ctx.fillStyle = '#9ED9C0';
-    ctx.beginPath(); ctx.arc(0, foamH/2+16, 5, 0, Math.PI*2); ctx.fill();
-    ctx.restore();
+  // button icons call the exact same drawApplicatorTool/drawSqueegeeTool used for the
+  // real glass canvas (defined below) — just scaled down to fit a 64x64 icon canvas.
+  // Re-rendered whenever layout() runs, since foam/blade width scales with GW.
+  const applicatorIconCanvas = document.getElementById('applicatorIcon');
+  const squeegeeIconCanvas = document.getElementById('squeegeeIcon');
+  function renderToolIcons(){
+    const toolWidth = GW * 0.28 + 16; // matches foamW/blade length, plus end-cap padding
+    const scale = Math.min(58/toolWidth, 58/41);
+
+    const aCtx = applicatorIconCanvas.getContext('2d');
+    aCtx.clearRect(0,0,64,64);
+    aCtx.save();
+    aCtx.translate(32, 32);
+    aCtx.scale(scale, scale);
+    drawApplicatorTool(aCtx, 0, -12.5, 0); // -12.5 centers the foam+handle+grip assembly
+    aCtx.restore();
+
+    const sCtx = squeegeeIconCanvas.getContext('2d');
+    sCtx.clearRect(0,0,64,64);
+    sCtx.save();
+    sCtx.translate(32, 32);
+    sCtx.scale(scale, scale);
+    drawSqueegeeTool(sCtx, 0, -8.5, 0); // -8.5 centers the blade+handle+grip assembly
+    sCtx.restore();
   }
-  function drawSqueegeeIcon(ctx){
-    const cx = 32, cy = 24, bladeLen = 46;
-    ctx.save();
-    ctx.translate(cx, cy);
-    const p1x = -bladeLen/2, p2x = bladeLen/2;
-    const bladeGrad = ctx.createLinearGradient(p1x, 0, p2x, 0);
-    bladeGrad.addColorStop(0, '#9ED9C0');
-    bladeGrad.addColorStop(1, '#F56E64');
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = 8;
-    ctx.beginPath(); ctx.moveTo(p1x,0); ctx.lineTo(p2x,0); ctx.stroke();
-    ctx.strokeStyle = '#b7bfc7'; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(p1x,0); ctx.lineTo(p2x,0); ctx.stroke();
-    ctx.strokeStyle = bladeGrad; ctx.lineWidth = 6;
-    ctx.beginPath(); ctx.moveTo(p1x,0); ctx.lineTo(p2x,0); ctx.stroke();
-    ctx.strokeStyle = '#F56E64'; ctx.lineWidth = 7;
-    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,22); ctx.stroke();
-    ctx.fillStyle = '#F56E64';
-    ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2); ctx.fill();
-    ctx.restore();
-  }
-  drawApplicatorIcon(document.getElementById('applicatorIcon').getContext('2d'));
-  drawSqueegeeIcon(document.getElementById('squeegeeIcon').getContext('2d'));
 
   // logo etched on the glass like a decal on a door — visible from the start, unaffected by cleaning
   const logoImg = new Image();
@@ -517,6 +495,7 @@
     sx = GW/2; sy = GH/2;
     padVx = padCx; padVy = padCy;
     anglePointerId = null; movePointerId = null;
+    renderToolIcons();
     newWindow();
   }
 
@@ -711,98 +690,96 @@
       }
     }
 
-    const [p1,p2] = bladeEndpoints(sx,sy,angleDeg);
-    gctx.save();
-    
     if(currentTool === 'applicator'){
-      // Draw applicator foam brush - wide squeegee proportions with swivel
-      gctx.translate(sx, sy);
-      gctx.rotate((angleDeg * Math.PI) / 180);
-      
-      // Foam pad (mint to coral gradient) - wide horizontal bar, matches squeegee blade width
-      const foamW = GW * 0.28;  // Same span as squeegee blade
-      const foamH = 16;
-      
-      // Create gradient from mint to coral
-      const foamGrad = gctx.createLinearGradient(-foamW/2, 0, foamW/2, 0);
-      foamGrad.addColorStop(0, '#9ED9C0');   // mint
-      foamGrad.addColorStop(1, '#F56E64');   // coral
-      
-      gctx.fillStyle = foamGrad;
-      gctx.fillRect(-foamW/2, -foamH/2, foamW, foamH);
-      
-      // Rounded corners on foam
-      gctx.fillStyle = foamGrad;
-      gctx.beginPath();
-      gctx.arc(-foamW/2, 0, foamH/2, 0, Math.PI*2);
-      gctx.fill();
-      gctx.beginPath();
-      gctx.arc(foamW/2, 0, foamH/2, 0, Math.PI*2);
-      gctx.fill();
-      
-      // Foam texture dots
-      gctx.fillStyle = 'rgba(255,255,255,0.3)';
-      for(let x = -foamW/2 + 4; x < foamW/2; x += 4){
-        for(let y = -foamH/2 + 3; y < foamH/2; y += 4){
-          gctx.beginPath();
-          gctx.arc(x, y, 1.5, 0, Math.PI*2);
-          gctx.fill();
-        }
-      }
-      
-      // Handle (black)
-      gctx.fillStyle = '#1b1b1b';
-      gctx.fillRect(-5, foamH/2, 10, 20);
-      
-      // Handle grip (mint)
-      gctx.fillStyle = '#9ED9C0';
-      gctx.beginPath();
-      gctx.arc(0, foamH/2 + 20, 5, 0, Math.PI*2);
-      gctx.fill();
+      drawApplicatorTool(gctx, sx, sy, angleDeg);
     } else {
-      // Draw squeegee blade with mint-to-coral gradient
-      // Create gradient along the blade
-      const bladeGrad = gctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-      bladeGrad.addColorStop(0, '#9ED9C0');   // mint
-      bladeGrad.addColorStop(1, '#F56E64');   // coral
-      
-      // Blade shadow
-      gctx.strokeStyle = '#2b2b2b';
-      gctx.lineWidth = 8;
-      gctx.lineCap = 'round';
-      gctx.beginPath();
-      gctx.moveTo(p1.x,p1.y); gctx.lineTo(p2.x,p2.y);
-      gctx.stroke();
-      
-      // Blade highlight with gradient
-      gctx.strokeStyle = '#b7bfc7';
-      gctx.lineWidth = 4;
-      gctx.beginPath();
-      gctx.moveTo(p1.x,p1.y); gctx.lineTo(p2.x,p2.y);
-      gctx.stroke();
-      
-      // Main blade with gradient
-      gctx.strokeStyle = bladeGrad;
-      gctx.lineWidth = 6;
-      gctx.lineCap = 'round';
-      gctx.beginPath();
-      gctx.moveTo(p1.x,p1.y); gctx.lineTo(p2.x,p2.y);
-      gctx.stroke();
-      
-      // Squeegee handle (coral)
-      gctx.strokeStyle = '#F56E64';
-      gctx.lineWidth = 7;
-      gctx.lineCap = 'round';
-      gctx.beginPath();
-      gctx.moveTo(sx,sy); gctx.lineTo(sx, sy+22);
-      gctx.stroke();
-      gctx.fillStyle = '#F56E64';
-      gctx.beginPath();
-      gctx.arc(sx,sy,5,0,Math.PI*2);
-      gctx.fill();
+      drawSqueegeeTool(gctx, sx, sy, angleDeg);
     }
-    
-    gctx.restore();
+  }
+
+  // shared by the live glass canvas and the button icons, so the icons are never
+  // a separate approximation — same code, just called at a smaller scale
+  function drawApplicatorTool(ctx, x, y, angleDeg){
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate((angleDeg * Math.PI) / 180);
+
+    const foamW = GW * 0.28;  // Same span as squeegee blade
+    const foamH = 16;
+
+    const foamGrad = ctx.createLinearGradient(-foamW/2, 0, foamW/2, 0);
+    foamGrad.addColorStop(0, '#9ED9C0');   // mint
+    foamGrad.addColorStop(1, '#F56E64');   // coral
+
+    ctx.fillStyle = foamGrad;
+    ctx.fillRect(-foamW/2, -foamH/2, foamW, foamH);
+
+    ctx.fillStyle = foamGrad;
+    ctx.beginPath();
+    ctx.arc(-foamW/2, 0, foamH/2, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(foamW/2, 0, foamH/2, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    for(let px = -foamW/2 + 4; px < foamW/2; px += 4){
+      for(let py = -foamH/2 + 3; py < foamH/2; py += 4){
+        ctx.beginPath();
+        ctx.arc(px, py, 1.5, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    ctx.fillStyle = '#1b1b1b';
+    ctx.fillRect(-5, foamH/2, 10, 20);
+
+    ctx.fillStyle = '#9ED9C0';
+    ctx.beginPath();
+    ctx.arc(0, foamH/2 + 20, 5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawSqueegeeTool(ctx, x, y, angleDeg){
+    const [p1,p2] = bladeEndpoints(x, y, angleDeg);
+    ctx.save();
+
+    const bladeGrad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+    bladeGrad.addColorStop(0, '#9ED9C0');   // mint
+    bladeGrad.addColorStop(1, '#F56E64');   // coral
+
+    ctx.strokeStyle = '#2b2b2b';
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#b7bfc7';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+    ctx.stroke();
+
+    ctx.strokeStyle = bladeGrad;
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#F56E64';
+    ctx.lineWidth = 7;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x,y); ctx.lineTo(x, y+22);
+    ctx.stroke();
+    ctx.fillStyle = '#F56E64';
+    ctx.beginPath();
+    ctx.arc(x,y,5,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
   }
 
   function drawToggle(){
