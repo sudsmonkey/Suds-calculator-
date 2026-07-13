@@ -184,6 +184,7 @@
   let windowComplete = false; // true once the closeout position has been hit — locks the squeegee in place
   let squeegeeStartTime = null; // when the squeegee tool was first selected this window — timing starts here
   let bubbles = [];        // every suds bubble on the glass: 'stuck' (sitting where it was applied) or 'falling' (released by the squeegee, obeying gravity)
+  let dropToastActive = false; // true while the "dropped your squeegee" message is showing — protects it from being cleared by the next frame's updateHud()
 
   let currentTool = 'applicator';
   let suds = [];
@@ -215,6 +216,7 @@
     wastedStrokes = 0;
     dryHeavyFrames = 0;
     squeegeeSweepFrames = 0;
+    dropToastActive = false;
     dirtSeed = [];
     for(let i=0;i<260;i++){
       dirtSeed.push({
@@ -253,8 +255,9 @@
     currentTool = 'applicator';
     document.getElementById('applicatorBtn').style.border = '3px solid #A6382E';
     document.getElementById('squeegeeBtn').style.border = '3px solid #F56E64';
+    dropToastActive = true;
     showToast('Oops, you dropped your squeegee!', true);
-    setTimeout(() => showToast('', false), 1800);
+    setTimeout(() => { dropToastActive = false; showToast('', false); }, 1800);
   }
 
   function sweepBlade(){
@@ -491,7 +494,7 @@
       const bananaImg = `<img src="${bananaSrc}" style="width:16px;height:16px;vertical-align:-3px;object-fit:contain;">`;
       showToast(`Squeaky clean! ${bananaImg}${bananaImg}${bananaImg}<br><b>Score: ${score}</b>`, true);
       setTimeout(() => showToast('', false), 3600);
-    } else if(!windowComplete){
+    } else if(!windowComplete && !dropToastActive){
       showToast('', false);
     }
   }
