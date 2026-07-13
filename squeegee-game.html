@@ -150,7 +150,8 @@
 
   let currentTool = 'applicator';
   let suds = [];
-  const MAX_SUDS = 5; // number of applicator strokes to max out suds
+  const MAX_SUDS = 4; // number of applicator strokes to max out suds
+  const BUBBLE_CAP = 700; // hard cap on tracked bubbles so dense foam can't tank the frame rate
 
   function newWindow(){
     clean = [];
@@ -214,6 +215,7 @@
 
     const cw = GW/COLS, ch = GH/ROWS;
     const currentCells = new Set();
+    const clearedCells = new Set();
     const [p1,p2] = bladeEndpoints(sx,sy,angleDeg);
     const steps = 26;
     const EDGE_OFFSET = Math.max(4, GH*0.02);
@@ -228,10 +230,10 @@
       currentCells.add(key);
 
       if(currentTool === 'applicator'){
-        // Increment suds up to max level, spawning a few real bubbles per increment for denser foam
-        if(suds[cell.r][cell.c] < MAX_SUDS){
+        // Increment suds up to max level, spawning a bubble or two per increment for thicker foam
+        if(suds[cell.r][cell.c] < MAX_SUDS && bubbles.length < BUBBLE_CAP){
           suds[cell.r][cell.c]++;
-          const bubbleCount = 2 + Math.floor(Math.random()*2);
+          const bubbleCount = 1 + Math.floor(Math.random()*2);
           for(let n=0;n<bubbleCount;n++){
             bubbles.push({
               x: px + (Math.random()-0.5)*cw*0.7,
@@ -245,7 +247,7 @@
           }
         }
       } else {
-        // Squeegee: remove all suds in one stroke, releasing their bubbles to fall
+        // Squeegee: remove all suds in one stroke, queueing their bubbles to be released below
         if(suds[cell.r][cell.c] > 0){
           suds[cell.r][cell.c] = 0;
           if(!clean[cell.r][cell.c]){
@@ -256,13 +258,7 @@
               squeakCount++;
             }
           }
-          for(const b of bubbles){
-            if(b.state === 'stuck' && b.cellR === cell.r && b.cellC === cell.c){
-              b.state = 'falling';
-              b.vx = Math.sign(dx) * (0.25 + Math.random()*0.35) + (Math.random()-0.5)*0.3;
-              b.vy = 0.4 + Math.random()*0.4;
-            }
-          }
+          clearedCells.add(key);
         } else if(clean[cell.r][cell.c]){
           // Squeegee over already-clean area with no suds = wasted stroke
           wastedSqueegeeStrokes++;
@@ -270,6 +266,18 @@
       }
     }
     prevSweptCells = currentCells;
+
+    // release bubbles from cleared cells in a single pass instead of re-scanning
+    // the whole bubbles array once per swept cell — that scaled badly with denser suds
+    if(clearedCells.size){
+      for(const b of bubbles){
+        if(b.state === 'stuck' && clearedCells.has(b.cellR+'_'+b.cellC)){
+          b.state = 'falling';
+          b.vx = Math.sign(dx) * (0.25 + Math.random()*0.35) + (Math.random()-0.5)*0.3;
+          b.vy = 0.4 + Math.random()*0.4;
+        }
+      }
+    }
 
     // the moving blade can also re-engage suds that are already falling — a swipe
     // back through a drop's path knocks it along, not just a one-time release
