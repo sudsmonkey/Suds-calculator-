@@ -255,9 +255,9 @@
           }
           for(const b of bubbles){
             if(b.state === 'stuck' && b.cellR === cell.r && b.cellC === cell.c){
-              // lifted off the glass, but held on the blade — it rides along until the stroke turns downward
-              b.state = 'collected';
-              b.bladeT = bladeT(b.x, b.y, p1.x, p1.y, p2.x, p2.y);
+              b.state = 'falling';
+              b.vx = Math.sign(dx) * (0.25 + Math.random()*0.35) + (Math.random()-0.5)*0.3;
+              b.vy = 0.4 + Math.random()*0.4;
             }
           }
         } else if(clean[cell.r][cell.c]){
@@ -268,25 +268,9 @@
     }
     prevSweptCells = currentCells;
 
+    // the moving blade can also re-engage suds that are already falling — a swipe
+    // back through a drop's path knocks it along, not just a one-time release
     if(currentTool === 'squeegee'){
-      // suds collected on the blade ride along with it sideways; a genuine downward
-      // stroke is what finally releases them to fall, same as a real squeegee bead —
-      // "turns downward" means vertical motion now dominates the stroke, not just any dy jitter
-      const releasing = dy > COLLECT_RELEASE_DY && dy >= Math.abs(dx);
-      for(const b of bubbles){
-        if(b.state !== 'collected') continue;
-        if(releasing){
-          b.state = 'falling';
-          b.vx = Math.sign(dx) * (0.25 + Math.random()*0.35) + (Math.random()-0.5)*0.3;
-          b.vy = 0.4 + Math.random()*0.4;
-        } else {
-          b.x = p1.x + (p2.x-p1.x)*b.bladeT;
-          b.y = p1.y + (p2.y-p1.y)*b.bladeT + EDGE_OFFSET;
-        }
-      }
-
-      // the moving blade can also re-engage suds that are already falling — a swipe
-      // back through a drop's path knocks it along, not just a one-time release
       const BLADE_HIT_RADIUS = 9;
       for(const b of bubbles){
         if(b.state !== 'falling') continue;
@@ -298,15 +282,6 @@
     }
 
     updateHud();
-  }
-
-  const COLLECT_RELEASE_DY = 1.0; // per-frame downward movement that dumps the collected bead
-
-  function bladeT(px,py,x1,y1,x2,y2){
-    const dx = x2-x1, dy = y2-y1;
-    const lenSq = dx*dx + dy*dy;
-    if(lenSq === 0) return 0;
-    return Math.max(0, Math.min(1, ((px-x1)*dx + (py-y1)*dy) / lenSq));
   }
 
   function distToSegment(px,py,x1,y1,x2,y2){
@@ -637,7 +612,6 @@
       if(b.state === 'falling'){
         drawFallingBubble(gctx, b);
       } else {
-        // 'stuck' or 'collected' — both sit still relative to their frame, no motion trail
         drawSudsBubble(gctx, b.x, b.y, b.r);
       }
     }
