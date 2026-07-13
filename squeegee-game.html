@@ -48,9 +48,11 @@
   .toast{
     position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.9);
     background:#6bab90;color:var(--ink);
-    padding:14px 20px;border-radius:10px;font-size:16px;font-weight:700;
+    padding:24px 32px;border-radius:14px;font-size:20px;font-weight:700;
+    line-height:1.5;min-width:220px;
     opacity:0;pointer-events:none;transition:all .25s;text-align:center;
     border:1px solid #4d8a71;z-index:10;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
   }
   .toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
   .box{
@@ -138,7 +140,7 @@
   const COLS = 26, ROWS = 16;
   let dirtSeed = [];       // randomized grime speckle positions, regenerated per window
   let bananaCount = 0; // persists across window resets — the actual currency
-  let earnedThisWindow = false;
+  let windowComplete = false; // true once the closeout position has been hit — locks the squeegee in place
   let bubbles = [];        // every suds bubble on the glass: 'stuck' (sitting where it was applied) or 'falling' (released by the squeegee, obeying gravity)
 
   let currentTool = 'applicator';
@@ -170,7 +172,7 @@
         r: 4+Math.random()*(GW*0.04), a: 0.5+Math.random()*0.35
       });
     }
-    earnedThisWindow = false;
+    windowComplete = false;
     bubbles = [];
     sx = GW/2; sy = GH/2;
     angleDeg = 0; spinTotal = 0;
@@ -374,18 +376,24 @@
     const isPerpendicular = Math.abs(angleDeg) < CLOSEOUT_ANGLE_TOL;
     inCloseoutZone = isPerpendicular && sy >= GH * CLOSEOUT_Y_FRAC;
     inCloseoutTrigger = isPerpendicular && sy >= GH * CLOSEOUT_TRIGGER_Y_FRAC;
-    if(inCloseoutTrigger && currentTool === 'squeegee'){
-      const bananaSrc = document.getElementById('bananaIcon').src;
-      const bananaImg = `<img src="${bananaSrc}" style="width:16px;height:16px;vertical-align:-3px;object-fit:contain;">`;
+    if(inCloseoutTrigger && currentTool === 'squeegee' && !windowComplete){
+      windowComplete = true;
+      bananaCount += 3;
+      document.getElementById('bananaCount').textContent = bananaCount;
+
       const totalStrokes = usefulStrokes + wastedStrokes;
       const efficiency = totalStrokes > 0 ? Math.round(usefulStrokes/totalStrokes*100) : 100;
-      showToast(`Squeaky clean! ${bananaImg}${bananaImg}${bananaImg}<br><b>Efficiency: ${efficiency}%</b>`, true);
-      if(!earnedThisWindow){
-        earnedThisWindow = true;
-        bananaCount += 3;
-        document.getElementById('bananaCount').textContent = bananaCount;
-      }
-    } else {
+      let missedSlots = 0;
+      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(suds[r][c]>0) missedSlots++; }
+      const score = Math.max(0, efficiency - missedSlots*2);
+
+      const bananaSrc = document.getElementById('bananaIcon').src;
+      const bananaImg = `<img src="${bananaSrc}" style="width:16px;height:16px;vertical-align:-3px;object-fit:contain;">`;
+      const missedLine = missedSlots > 0
+        ? `<br><span style="font-size:14px;font-weight:400;">Missed ${missedSlots} slot${missedSlots>1?'s':''}</span>`
+        : '';
+      showToast(`Squeaky clean! ${bananaImg}${bananaImg}${bananaImg}<br><b>Score: ${score}</b>${missedLine}`, true);
+    } else if(!windowComplete){
       showToast('', false);
     }
   }
@@ -478,6 +486,7 @@
 
   toggleCanvas.addEventListener('pointerdown', (e)=>{
     e.preventDefault();
+    if(windowComplete) return;
     const p = toLocal(toggleCanvas,e);
     if(p.x < midX && anglePointerId === null){
       anglePointerId = e.pointerId;
@@ -492,6 +501,7 @@
 
   toggleCanvas.addEventListener('pointermove', (e)=>{
     e.preventDefault();
+    if(windowComplete) return;
     const p = toLocal(toggleCanvas,e);
     if(e.pointerId === anglePointerId){
       const dx = p.x - angleLastX;
@@ -810,6 +820,7 @@
   });
   // if the mouse is actively dragging the angle zone, let it take priority over the keyboard
   function applyKeyboardAngle(){
+    if(windowComplete) return;
     if(anglePointerId !== null) return;
     if(keysDown.left === keysDown.right) return; // neither or both held — no net input
     const delta = (keysDown.right ? 1 : -1) * KEY_DEG_PER_FRAME;
