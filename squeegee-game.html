@@ -247,6 +247,14 @@
   let lastTouchedStroke = new Map(); // cellKey -> which stroke last had the blade over it
   const STROKE_FORGIVENESS = 1; // resuming with the very next push after a release is free (the pad's travel is limited); going further back than that is a real revisit
 
+  function dropSqueegee(){
+    currentTool = 'applicator';
+    document.getElementById('applicatorBtn').style.border = '3px solid #A6382E';
+    document.getElementById('squeegeeBtn').style.border = '3px solid #F56E64';
+    showToast('Oops, you dropped your squeegee!', true);
+    setTimeout(() => showToast('', false), 1800);
+  }
+
   function sweepBlade(){
     const isFirstFrame = lastSweepSx === null;
     const dy = isFirstFrame ? 0 : sy - lastSweepSy;
@@ -329,6 +337,8 @@
       if(dryFraction > 0.5) dryHeavyFrames++;
     }
 
+    const shouldDrop = currentTool === 'squeegee' && hadSudsSomewhere && frameWetCount === 0 && frameDryCount > 0;
+
     // release bubbles from cleared cells in a single pass instead of re-scanning
     // the whole bubbles array once per swept cell — that scaled badly with denser suds
     if(clearedCells.size){
@@ -358,6 +368,9 @@
     }
 
     updateHud();
+
+    // checked after updateHud() so its own toast-clearing branch doesn't stomp this message
+    if(shouldDrop) dropSqueegee();
   }
 
   function distToSegment(px,py,x1,y1,x2,y2){
