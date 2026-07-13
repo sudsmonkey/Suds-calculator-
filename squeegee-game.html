@@ -202,7 +202,7 @@
   let lastSweepSx = null, lastSweepSy = null, lastSweepAngle = null;
   let sweepFrameCounter = 0;
   let lastTouchedFrame = new Map(); // cellKey -> frame it was last under the blade
-  const RECENCY_WINDOW = 60; // ~1s at 60fps — forgives brief pauses/turnarounds between rows in a serpentine pattern, not just single-frame jitter
+  const RECENCY_WINDOW = 150; // ~2.5s of actual blade movement — the move-pad has limited travel, so covering the whole window takes many separate push-release cycles, and each one shouldn't cost recency
 
   function sweepBlade(){
     const isFirstFrame = lastSweepSx === null;
