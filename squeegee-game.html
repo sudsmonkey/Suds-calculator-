@@ -334,7 +334,7 @@
         if(Math.sqrt(ddx*ddx+ddy*ddy) < (a.r+b.r)*0.55){
           const areaA = a.r*a.r, areaB = b.r*b.r;
           a.x = (a.x*areaA + b.x*areaB)/(areaA+areaB);
-          a.y = Math.min(a.y, b.y);
+          a.y = (a.y*areaA + b.y*areaB)/(areaA+areaB);
           a.vy = Math.max(a.vy, b.vy);
           a.vx = (a.vx + b.vx)/2;
           a.r = Math.min(6.5, Math.sqrt(areaA+areaB));
