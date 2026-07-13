@@ -202,7 +202,7 @@
   let lastSweepSx = null, lastSweepSy = null, lastSweepAngle = null;
   let sweepFrameCounter = 0;
   let lastTouchedFrame = new Map(); // cellKey -> frame it was last under the blade
-  const RECENCY_WINDOW = 10; // frames a cell still counts as "the blade never really left" — absorbs natural hand jitter in a continuous stroke without missing genuine backtracking
+  const RECENCY_WINDOW = 60; // ~1s at 60fps — forgives brief pauses/turnarounds between rows in a serpentine pattern, not just single-frame jitter
 
   function sweepBlade(){
     const isFirstFrame = lastSweepSx === null;
