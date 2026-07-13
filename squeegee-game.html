@@ -145,9 +145,10 @@
 
   let currentTool = 'applicator';
   let suds = [];
-  let cleaned = [];        // cleaned[r][c] — cells the squeegee has already wiped, tracked only for the efficiency score
-  let usefulStrokes = 0;   // squeegee passes that actually lifted suds off a cell for the first time
-  let wastedStrokes = 0;   // squeegee passes over a cell that was already cleaned — going over old ground
+  let sudsyCellCount = 0;     // how many cells currently hold any suds, kept in sync instead of scanning the grid
+  let cleaned = [];           // cleaned[r][c] — has the squeegee ever wiped this cell before
+  let usefulStrokes = 0;      // blade-cells that were freshly loaded with suds
+  let wastedStrokes = 0;      // blade-cells that were dry ground the blade had already left and come back to
   const MAX_SUDS = 3; // number of applicator strokes to max out suds
 
   function newWindow(){
@@ -163,6 +164,7 @@
       suds.push(sudsRow);
       cleaned.push(cleanedRow);
     }
+    sudsyCellCount = 0;
     usefulStrokes = 0;
     wastedStrokes = 0;
     dirtSeed = [];
@@ -197,7 +199,7 @@
   }
 
   let lastSweepSx = null, lastSweepSy = null, lastSweepAngle = null;
-  let prevFrameCells = new Set(); // cells touched last frame, so continuous coverage isn't mistaken for backtracking
+  let prevFrameCells = new Set(); // cells touched last frame — lets a continuous stroke's natural self-overlap (blade width > per-frame travel) go unpenalized, while genuine backtracking still counts
 
   function sweepBlade(){
     const isFirstFrame = lastSweepSx === null;
@@ -217,6 +219,7 @@
     const [p1,p2] = bladeEndpoints(sx,sy,angleDeg);
     const steps = 26;
     const EDGE_OFFSET = Math.max(4, GH*0.02);
+    const hadSudsSomewhere = sudsyCellCount > 0; // was there still work to do when this frame started?
     for(let i=0;i<=steps;i++){
       const t = i/steps;
       const px = p1.x + (p2.x-p1.x)*t;
@@ -230,6 +233,7 @@
       if(currentTool === 'applicator'){
         // Increment suds up to max level, spawning one real bubble per increment
         if(suds[cell.r][cell.c] < MAX_SUDS){
+          if(suds[cell.r][cell.c] === 0) sudsyCellCount++;
           suds[cell.r][cell.c]++;
           bubbles.push({
             x: px + (Math.random()-0.5)*cw*0.5,
@@ -241,18 +245,18 @@
             alpha: 0.85 + Math.random()*0.15
           });
         }
-      } else {
-        // Squeegee: remove all suds in one stroke, queueing their bubbles to be released below
-        if(suds[cell.r][cell.c] > 0){
-          suds[cell.r][cell.c] = 0;
-          cleaned[cell.r][cell.c] = true;
-          usefulStrokes++;
-          clearedCells.add(key);
-        } else if(cleaned[cell.r][cell.c] && !prevFrameCells.has(key)){
-          // no suds left here, already cleaned before, and we weren't already sitting on it
-          // last frame — this is genuine backtracking, not just slow continuous coverage
-          wastedStrokes++;
-        }
+      } else if(suds[cell.r][cell.c] > 0){
+        // Squeegee: remove all suds in one stroke, queueing their bubbles to be released below.
+        // Blade is genuinely "loaded" here — always counts as useful.
+        usefulStrokes++;
+        suds[cell.r][cell.c] = 0;
+        sudsyCellCount--;
+        cleaned[cell.r][cell.c] = true;
+        clearedCells.add(key);
+      } else if(cleaned[cell.r][cell.c] && !prevFrameCells.has(key) && hadSudsSomewhere){
+        // Dry ground the blade wasn't already sitting on last frame — genuine backtracking,
+        // not just the natural trailing overlap of a blade wider than one frame's travel.
+        wastedStrokes++;
       }
     }
     prevFrameCells = currentCells;
