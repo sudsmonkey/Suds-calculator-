@@ -201,24 +201,6 @@
     }
     if(audioCtx.state === 'suspended') audioCtx.resume();
   }
-  let lastSqueakTime = 0;
-  function playSqueak(){
-    if(!audioCtx) return;
-    const now = performance.now();
-    if(now - lastSqueakTime < 220) return; // throttle so continuous wiping doesn't spam overlapping notes
-    lastSqueakTime = now;
-    const t0 = audioCtx.currentTime;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(1200, t0);
-    osc.frequency.exponentialRampToValueAtTime(650, t0 + 0.09);
-    gain.gain.setValueAtTime(0.05, t0);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
-    osc.connect(gain).connect(audioCtx.destination);
-    osc.start(t0);
-    osc.stop(t0 + 0.1);
-  }
   function playSudsBeep(){
     if(!audioCtx) return;
     const t0 = audioCtx.currentTime;
@@ -350,7 +332,6 @@
         if(suds[cell.r][cell.c] < MAX_SUDS){
           if(suds[cell.r][cell.c] === 0) sudsyCellCount++;
           suds[cell.r][cell.c]++;
-          playSudsBeep();
           bubbles.push({
             x: px + (Math.random()-0.5)*cw*0.5,
             y: py + (Math.random()-0.5)*ch*0.5,
@@ -384,6 +365,7 @@
         sudsyCellCount--;
         cleaned[cell.r][cell.c] = true;
         clearedCells.add(key);
+        playSudsBeep();
       } else if(cleaned[cell.r][cell.c]){
         // Already wiped before. Only a fault if it's a genuine stale revisit — not just
         // the trailing overlap of this same continuous stroke re-covering its own path,
@@ -403,8 +385,6 @@
       }
       lastTouchedStroke.set(key, moveStrokeId);
     }
-
-    if(frameWetCount > 0) playSqueak();
 
     // track how much of the blade rode dry glass this frame — real technique wants
     // most of the blade's length staying in contact with active suds at all times
