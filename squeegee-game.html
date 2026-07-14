@@ -219,6 +219,20 @@
     osc.start(t0);
     osc.stop(t0 + 0.1);
   }
+  function playSudsBeep(){
+    if(!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 850 + Math.random() * 220; // slight variation so rapid-fire dabs don't sound robotic
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.05, t0 + 0.006); // quick attack
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.15); // gentle tail off
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 0.16);
+  }
   function playChime(){
     if(!audioCtx) return;
     const t0 = audioCtx.currentTime;
@@ -336,6 +350,7 @@
         if(suds[cell.r][cell.c] < MAX_SUDS){
           if(suds[cell.r][cell.c] === 0) sudsyCellCount++;
           suds[cell.r][cell.c]++;
+          playSudsBeep();
           bubbles.push({
             x: px + (Math.random()-0.5)*cw*0.5,
             y: py + (Math.random()-0.5)*ch*0.5,
