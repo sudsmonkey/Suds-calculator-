@@ -191,6 +191,53 @@
   let squeegeeStartTime = null; // when the squeegee tool was first selected this window — timing starts here
   let bubbles = [];        // every suds bubble on the glass: 'stuck' (sitting where it was applied) or 'falling' (released by the squeegee, obeying gravity)
 
+  // ---- sound effects, synthesized directly so the file stays self-contained ----
+  let audioCtx = null;
+  function ensureAudio(){
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return;
+      audioCtx = new AC();
+    }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  let lastSqueakTime = 0;
+  function playSqueak(){
+    if(!audioCtx) return;
+    const now = performance.now();
+    if(now - lastSqueakTime < 220) return; // throttle so continuous wiping doesn't spam overlapping notes
+    lastSqueakTime = now;
+    const t0 = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(1200, t0);
+    osc.frequency.exponentialRampToValueAtTime(650, t0 + 0.09);
+    gain.gain.setValueAtTime(0.05, t0);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 0.1);
+  }
+  function playChime(){
+    if(!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 -- a bright little success jingle
+    notes.forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const start = t0 + i * 0.09;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.12, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.35);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(start);
+      osc.stop(start + 0.4);
+    });
+  }
+
   let currentTool = null; // null until the player picks applicator or squeegee
   let suds = [];
   let sudsyCellCount = 0;     // how many cells currently hold any suds, kept in sync instead of scanning the grid
@@ -342,6 +389,8 @@
       lastTouchedStroke.set(key, moveStrokeId);
     }
 
+    if(frameWetCount > 0) playSqueak();
+
     // track how much of the blade rode dry glass this frame — real technique wants
     // most of the blade's length staying in contact with active suds at all times
     if(currentTool === 'squeegee' && hadSudsSomewhere && (frameWetCount + frameDryCount) > 0){
@@ -474,6 +523,7 @@
     inCloseoutTrigger = isPerpendicular && sy >= GH * CLOSEOUT_TRIGGER_Y_FRAC;
     if(inCloseoutTrigger && currentTool === 'squeegee' && !windowComplete){
       windowComplete = true;
+      playChime();
       bananaCount += 3;
       document.getElementById('bananaCount').textContent = bananaCount;
 
@@ -603,6 +653,7 @@
 
   toggleCanvas.addEventListener('pointerdown', (e)=>{
     e.preventDefault();
+    ensureAudio();
     if(windowComplete) return;
     const p = toLocal(toggleCanvas,e);
     if(p.x < midX && anglePointerId === null){
@@ -976,12 +1027,14 @@
   document.getElementById('resetBtn').addEventListener('click', newWindow);
 
   document.getElementById('applicatorBtn').addEventListener('click', ()=>{
+    ensureAudio();
     currentTool = 'applicator';
     document.getElementById('applicatorBtn').style.border = '3px solid #A6382E';
     document.getElementById('squeegeeBtn').style.border = '3px solid #F56E64';
   });
 
   document.getElementById('squeegeeBtn').addEventListener('click', ()=>{
+    ensureAudio();
     currentTool = 'squeegee';
     if(squeegeeStartTime === null) squeegeeStartTime = performance.now();
     document.getElementById('squeegeeBtn').style.border = '3px solid #A6382E';
