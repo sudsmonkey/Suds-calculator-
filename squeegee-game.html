@@ -552,6 +552,21 @@
     anglePointerId = null; movePointerId = null;
     renderToolIcons();
     newWindow();
+    fitStageToViewport();
+  }
+
+  // guarantees visible background margin above and below the card on any device —
+  // real mobile browser chrome (address/tab bars) can leave less height available
+  // than the card's natural size, so shrink the whole card to fit instead of
+  // letting it silently touch or overflow the top/bottom edges
+  function fitStageToViewport(){
+    const stage = document.querySelector('.stage');
+    const breathingRoom = 24; // minimum combined top+bottom margin we want to guarantee
+    stage.style.transform = 'none';
+    const naturalHeight = stage.getBoundingClientRect().height;
+    const available = window.innerHeight - breathingRoom;
+    const scale = Math.min(1, available / naturalHeight);
+    stage.style.transform = scale < 1 ? `scale(${scale})` : 'none';
   }
 
   function bladeEndpoints(x,y,deg){
@@ -986,6 +1001,10 @@
 
   layout();
   loop();
+  // the title font loads async and can shift its rendered size slightly once it swaps in
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(fitStageToViewport);
+  }
 })();
 </script>
 </body>
