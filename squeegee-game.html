@@ -215,6 +215,20 @@
     osc.start(t0);
     osc.stop(t0 + 0.16);
   }
+  function playApplicatorDab(){
+    if(!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle'; // softer/foamier than the squeegee's brighter sine beep
+    osc.frequency.value = 320 + Math.random() * 90;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.045, t0 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.13);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 0.14);
+  }
   function playChime(){
     if(!audioCtx) return;
     const t0 = audioCtx.currentTime;
@@ -308,6 +322,9 @@
     if(!moved) return;
     if(!currentTool) return; // no tool selected yet — nothing happens until the player picks one
     if(currentTool === 'squeegee' && dy < -0.05) return;
+    // like pushing a real mop: down and sideways strokes are "in the direction of the handle",
+    // a stroke straight up is pulling backward against it and doesn't get the dab sound
+    const movingWithHandle = dy >= -0.05;
 
     const cw = GW/COLS, ch = GH/ROWS;
     const currentCells = new Set();
@@ -332,6 +349,7 @@
         if(suds[cell.r][cell.c] < MAX_SUDS){
           if(suds[cell.r][cell.c] === 0) sudsyCellCount++;
           suds[cell.r][cell.c]++;
+          if(movingWithHandle) playApplicatorDab();
           bubbles.push({
             x: px + (Math.random()-0.5)*cw*0.5,
             y: py + (Math.random()-0.5)*ch*0.5,
