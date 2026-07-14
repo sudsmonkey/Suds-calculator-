@@ -20,7 +20,7 @@
   *{box-sizing:border-box;}
   html,body{
     margin:0;padding:0;height:100%;
-    background:linear-gradient(180deg,#9ED9C0,#5f9c81);
+    background:linear-gradient(180deg,#7ec7ac,#4a8a6f);
     font-family:'Georgia',serif;
     color:var(--ink);
     display:flex;align-items:center;justify-content:center;
@@ -29,14 +29,14 @@
     overflow:hidden;
   }
   .stage{
-    width:min(96vw,480px);
+    width:min(calc(100% - 24px),480px);
     display:flex;flex-direction:column;align-items:center;
     gap:12px;
     padding:10px 14px 15px;
     background:var(--mint);
-    border:2px solid #D9D9D9;
+    border:3px solid #D9D9D9;
     border-radius:22px;
-    box-shadow:0 20px 45px rgba(0,0,0,.28), inset 0 2px 0 rgba(255,255,255,.6), inset 0 -3px 8px rgba(0,0,0,.06);
+    box-shadow:0 20px 45px rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.6), inset 0 -3px 8px rgba(0,0,0,.06);
   }
   h1{
     margin:0;font-size:clamp(18px,5.8vw,26px);color:var(--deepcoral);font-weight:400;
@@ -91,7 +91,7 @@
   /* landscape: keep same top-to-bottom stacking, just use the extra width */
   @media (orientation: landscape){
     .stage{
-      width:min(92vw,620px);
+      width:min(calc(100% - 24px),620px);
       flex-direction:column;
       gap:8px;
       padding:6px 16px;
