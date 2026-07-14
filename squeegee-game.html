@@ -49,6 +49,7 @@
   .hud button{
     font-family:inherit;font-size:12px;padding:2px 12px;border-radius:16px;
     border:1px solid var(--brass);background:#D9D9D9;color:var(--brass);
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.8);
   }
   .toast{
     position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.9);
@@ -65,7 +66,7 @@
     padding:10px;
     background:linear-gradient(160deg,#F56E64,#e8867e);
     border-radius:10px;
-    box-shadow:0 8px 22px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.06);
+    box-shadow:0 10px 26px rgba(0,0,0,.5), inset 0 2px 3px rgba(255,255,255,.25), inset 0 -2px 4px rgba(0,0,0,.15);
     max-width:100%;
   }
   #glassCanvas{
@@ -73,13 +74,14 @@
     background:linear-gradient(180deg,#F6ECDE,#efe1cc);
     touch-action:none;
     max-width:100%; height:auto;
+    box-shadow:inset 0 5px 10px rgba(110,80,50,.22), inset 0 -2px 0 rgba(255,255,255,.75);
   }
   #toggleCanvas{
     display:block;border-radius:3px;
     background:radial-gradient(circle at 50% 40%,#736659,#4f4238);
     touch-action:none;
     max-width:100%; height:auto;
-    box-shadow:inset 0 5px 12px rgba(0,0,0,.65), inset 0 -2px 0 rgba(255,255,255,.2);
+    box-shadow:inset 0 6px 14px rgba(0,0,0,.75), inset 0 -3px 0 rgba(255,255,255,.28);
   }
 
   /* landscape: keep same top-to-bottom stacking, just use the extra width */
@@ -100,10 +102,10 @@
 <div class="stage" id="stage">
   <h1>Squeege Master 3000<span style="font-size:0.4em;vertical-align:super;margin-left:6px;">&trade;</span></h1>
   <div style="display:flex;gap:8px;justify-content:center;width:100%;">
-    <button id="applicatorBtn" aria-label="Applicator" style="margin:0;padding:2px 12px;background:#D9D9D9;border:3px solid #A6382E;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
+    <button id="applicatorBtn" aria-label="Applicator" style="margin:0;padding:2px 12px;background:#D9D9D9;border:3px solid #A6382E;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 4px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.8);">
       <canvas id="applicatorIcon" width="64" height="64" style="width:46px;height:46px;"></canvas>
     </button>
-    <button id="squeegeeBtn" aria-label="Squeegee" style="margin:0;padding:2px 12px;background:#D9D9D9;border:3px solid #F56E64;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
+    <button id="squeegeeBtn" aria-label="Squeegee" style="margin:0;padding:2px 12px;background:#D9D9D9;border:3px solid #F56E64;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 4px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.8);">
       <canvas id="squeegeeIcon" width="64" height="64" style="width:46px;height:46px;"></canvas>
     </button>
   </div>
