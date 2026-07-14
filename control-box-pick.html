@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pick a Control Box Color</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #F5F0EB; padding: 20px 16px 40px; }
+  h1 { text-align: center; font-size: 13px; font-weight: 700; color: #7C7268; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  p { text-align: center; font-size: 12px; color: #9E9590; margin-bottom: 20px; }
+  .options { display: flex; flex-direction: column; gap: 14px; max-width: 380px; margin: 0 auto; }
+  .option { border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.10); }
+  .box {
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 8px;
+    border-radius: 14px 14px 0 0;
+  }
+  .angle, .move {
+    flex: 1;
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .angle { border: 2px solid #F56E64; }
+  .move { border: 2px solid #9ED9C0; }
+  .label { font-size: 9px; font-weight: 700; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .angle .label { color: #F56E64; }
+  .move .label { color: #9ED9C0; }
+  .wheel {
+    height: 26px; border: 2px solid #F56E64; border-radius: 50px;
+    display: flex; align-items: center; justify-content: center; gap: 2px;
+  }
+  .wheel span { width: 2px; height: 14px; background: rgba(255,255,255,0.55); }
+  .pad {
+    height: 26px; border: 2px solid rgba(255,255,255,0.15); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pad .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.6); }
+  .meta { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #fff; }
+  .meta .name { font-size: 13px; font-weight: 700; color: #333; }
+  .meta .hex { font-size: 11px; color: #9E9590; font-family: monospace; }
+</style>
+</head>
+<body>
+<h1>Pick a Control Box Look</h1>
+<p>Tell me the letter — A, B, C, D, or E</p>
+<div class="options">
+
+  <div class="option">
+    <div class="box" style="background:radial-gradient(circle at 50% 40%,#4a1a14,#240c09);">
+      <div class="angle"><div class="label">ANGLE</div><div class="wheel"><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="move"><div class="label" style="color:#9ED9C0;">MOVE</div><div class="pad"><div class="dot"></div></div></div>
+    </div>
+    <div class="meta"><span class="name">A — Original (darkest)</span><span class="hex">#4a1a14 → #240c09</span></div>
+  </div>
+
+  <div class="option">
+    <div class="box" style="background:radial-gradient(circle at 50% 40%,#8a3d2e,#5a231a);">
+      <div class="angle"><div class="label">ANGLE</div><div class="wheel"><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="move"><div class="label" style="color:#9ED9C0;">MOVE</div><div class="pad"><div class="dot"></div></div></div>
+    </div>
+    <div class="meta"><span class="name">B — Lighter red-brown (currently live)</span><span class="hex">#8a3d2e → #5a231a</span></div>
+  </div>
+
+  <div class="option">
+    <div class="box" style="background:radial-gradient(circle at 50% 40%,#D9C7A8,#B8A47E);">
+      <div class="angle" style="border-color:#A6382E;"><div class="label" style="color:#A6382E;">ANGLE</div><div class="wheel" style="border-color:#A6382E;"><span style="background:rgba(60,40,20,0.4);"></span><span style="background:rgba(60,40,20,0.4);"></span><span style="background:rgba(60,40,20,0.4);"></span><span style="background:rgba(60,40,20,0.4);"></span><span style="background:rgba(60,40,20,0.4);"></span></div></div>
+      <div class="move"><div class="label" style="color:#4A9E7E;">MOVE</div><div class="pad" style="border-color:rgba(60,40,20,0.2);"><div class="dot" style="background:rgba(60,40,20,0.5);"></div></div></div>
+    </div>
+    <div class="meta"><span class="name">C — Sand / tan</span><span class="hex">#D9C7A8 → #B8A47E</span></div>
+  </div>
+
+  <div class="option">
+    <div class="box" style="background:radial-gradient(circle at 50% 40%,#4a4038,#2b241f);">
+      <div class="angle"><div class="label">ANGLE</div><div class="wheel"><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="move"><div class="label" style="color:#9ED9C0;">MOVE</div><div class="pad"><div class="dot"></div></div></div>
+    </div>
+    <div class="meta"><span class="name">D — Neutral charcoal</span><span class="hex">#4a4038 → #2b241f</span></div>
+  </div>
+
+  <div class="option">
+    <div class="box" style="background:radial-gradient(circle at 50% 40%,#3a5a4e,#1f342c);">
+      <div class="angle"><div class="label">ANGLE</div><div class="wheel"><span></span><span></span><span></span><span></span><span></span></div></div>
+      <div class="move"><div class="label" style="color:#9ED9C0;">MOVE</div><div class="pad"><div class="dot"></div></div></div>
+    </div>
+    <div class="meta"><span class="name">E — Deep mint-dark</span><span class="hex">#3a5a4e → #1f342c</span></div>
+  </div>
+
+</div>
+</body>
+</html>
