@@ -1325,7 +1325,8 @@
     document.getElementById('calibrateOverlay').classList.add('visible');
     startCalScroll();
   }
-  function fmt(n){return Math.round(n).toLocaleString();}
+  function roundToNine(n){const r=Math.round(n);const ones=r%10;return ones<=5?r-ones-1:r+(9-ones);}
+  function fmt(n){return roundToNine(n).toLocaleString();}
   function updatePrices(){
     const sqft=parseInt(document.getElementById('sqftSlider').value);
     const pct=((sqft-500)/(6000-500))*100;
