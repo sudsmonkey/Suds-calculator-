@@ -2592,6 +2592,7 @@ let currentPkg = null;
     const btnL = document.getElementById('pkgArrowLeft');
     const btnR = document.getElementById('pkgArrowRight');
     if (!row) return;
+    if (!window.matchMedia('(min-width: 900px)').matches) return;
 
     // Clone all cards: prepend one set (left buffer) + append one set (right buffer)
     const cards = Array.from(row.children);
