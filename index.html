@@ -374,8 +374,12 @@
     body { padding: 56px 32px 90px; }
     #playSq3000Btn, #sq3000Section { display: none !important; }
     .pkg:hover { transform: none; }
-    .packages-wrap { position: relative; width: 100%; max-width: 100%; }
+    .packages-wrap { position: relative; width: 100%; max-width: 100%; display: flex; align-items: flex-start; gap: 20px; }
+    .slider-pkg { align-self: flex-start; flex-shrink: 0; }
+    .pkg-arrow-left { left: 300px; }
     .packages {
+      flex: 1;
+      min-width: 0;
       flex-direction: row;
       flex-wrap: nowrap;
       max-width: 100%;
@@ -2594,7 +2598,14 @@ let currentPkg = null;
     if (!row) return;
     if (!window.matchMedia('(min-width: 900px)').matches) return;
 
-    // Clone all cards: prepend one set (left buffer) + append one set (right buffer)
+    // Pull slider card out of scroll row — becomes fixed left panel
+    const sliderCard = row.querySelector('.slider-pkg');
+    if (sliderCard) {
+      row.removeChild(sliderCard);
+      row.parentElement.insertBefore(sliderCard, row);
+    }
+
+    // Clone only the package cards (not slider) for infinite loop
     const cards = Array.from(row.children);
     cards.forEach(c => row.appendChild(c.cloneNode(true)));
     cards.slice().reverse().forEach(c => row.insertBefore(c.cloneNode(true), row.firstChild));
