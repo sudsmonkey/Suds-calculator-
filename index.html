@@ -83,6 +83,8 @@
   .slider-section {
     width: 100%;
     padding: 26px 24px 30px;
+    cursor: default;
+    user-select: auto;
   }
 
   /* Slider card */
@@ -2616,6 +2618,7 @@ let currentPkg = null;
     // Drag to scroll
     let isDown = false, startX, scrollStart;
     row.addEventListener('mousedown', e => {
+      if (e.target.closest('.slider-section')) return;
       isDown = true; startX = e.pageX; scrollStart = row.scrollLeft;
       row.classList.add('dragging'); e.preventDefault();
     });
