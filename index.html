@@ -1325,7 +1325,7 @@
     document.getElementById('calibrateOverlay').classList.add('visible');
     startCalScroll();
   }
-  function roundToNine(n){const r=Math.round(n);const ones=r%10;return ones<=5?r-ones-1:r+(9-ones);}
+  function roundToNine(n){const r=Math.round(n);const ones=r%10;let p=ones<=5?r-ones-1:r+(9-ones);if(Math.floor(p/10)%10===3)p+=10;return p;}
   function fmt(n){return roundToNine(n).toLocaleString();}
   function updatePrices(){
     const sqft=parseInt(document.getElementById('sqftSlider').value);
