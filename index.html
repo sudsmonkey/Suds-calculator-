@@ -163,7 +163,6 @@
 
   /* Storm Package — coral hero, everything else identical */
   .pkg.pkg-storm .pkg-hero { background: linear-gradient(to bottom, #F56E64 0%, #FFFFFF 100%); }
-  #amount-storm { display: block; }
 
   .pkg-hero { background: linear-gradient(to bottom, #9ED9C0 0%, #FFFFFF 100%); padding: 28px 24px 32px; display: flex; flex-direction: column; align-items: center; position: relative; }
   .pkg-badge { position: absolute; top: 12px; right: 14px; font-size: 12px; font-weight: 700; color: var(--orange); }
@@ -909,7 +908,6 @@
       <div class="pkg-name">Silverback Storms</div>
       <div class="pkg-starting">Total</div>
       <div class="pkg-amount" id="amount-storm"><span class="dollar">$</span><span id="stormPrice">0</span></div>
-      <div class="member-price"><span class="lock">🔒</span>Member price: <span class="member-amt">$<span id="stormMemberPrice">0</span></span> — unlocks after your first service</div>
       <ul class="pkg-features">
         <li>Two layers of glass, one thorough clean</li>
         <li>Primary windows cleaned inside &amp; out</li>
@@ -1355,10 +1353,7 @@
     if(sp1) sp1.textContent = sf1&&sf1.checked ? '+ $'+fmt(f1total) : '+ $0';
     if(sp2) sp2.textContent = sf2&&sf2.checked ? '+ $'+fmt(f2total) : '+ $0';
     const stormEl = document.getElementById('stormPrice');
-    const stormMemberEl = document.getElementById('stormMemberPrice');
-    const stormTotal = f1total + f2total;
-    if(stormEl) stormEl.textContent = fmt(stormTotal);
-    if(stormMemberEl) stormMemberEl.textContent = fmt(stormTotal * (1 - MEMBER_DISCOUNT));
+    if(stormEl) stormEl.textContent = fmt(f1total + f2total);
     updateStormContactBtn();
   }
   function toggleScreens(pkg,cb){updatePrices();}
