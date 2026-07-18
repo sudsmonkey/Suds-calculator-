@@ -2587,22 +2587,34 @@ let currentPkg = null;
 
   }
 
-  // Package scroll arrows + drag
+  // Package scroll — infinite loop
   (function() {
     const row = document.getElementById('packagesRow');
     const btnL = document.getElementById('pkgArrowLeft');
     const btnR = document.getElementById('pkgArrowRight');
-    if (!row || !btnL || !btnR) return;
+    if (!row) return;
 
-    function updateArrows() {
-      btnL.classList.toggle('hidden', row.scrollLeft <= 8);
-      btnR.classList.toggle('hidden', row.scrollLeft + row.clientWidth >= row.scrollWidth - 8);
-    }
+    // Clone all cards: prepend one set (left buffer) + append one set (right buffer)
+    const cards = Array.from(row.children);
+    cards.forEach(c => row.appendChild(c.cloneNode(true)));
+    cards.slice().reverse().forEach(c => row.insertBefore(c.cloneNode(true), row.firstChild));
 
-    btnL.addEventListener('click', () => { row.scrollBy({ left: -320, behavior: 'smooth' }); });
-    btnR.addEventListener('click', () => { row.scrollBy({ left: 320, behavior: 'smooth' }); });
-    row.addEventListener('scroll', updateArrows);
-    updateArrows();
+    // Disable snap so instant-jump doesn't feel jarring
+    row.style.scrollSnapType = 'none';
+
+    // Jump to real cards (middle set) after layout is computed
+    requestAnimationFrame(() => { row.scrollLeft = row.scrollWidth / 3; });
+
+    // Seamless loop: when scrolling into a clone zone, silently teleport back
+    row.addEventListener('scroll', function() {
+      const sw = row.scrollWidth / 3;
+      if (row.scrollLeft >= sw * 2) { row.scrollLeft -= sw; }
+      else if (row.scrollLeft < sw * 0.25) { row.scrollLeft += sw; }
+    }, { passive: true });
+
+    // Arrows always visible in loop mode
+    if (btnL) { btnL.classList.remove('hidden'); btnL.addEventListener('click', () => row.scrollBy({ left: -320, behavior: 'smooth' })); }
+    if (btnR) { btnR.classList.remove('hidden'); btnR.addEventListener('click', () => row.scrollBy({ left: 320, behavior: 'smooth' })); }
 
     // Drag to scroll
     let isDown = false, startX, scrollStart;
