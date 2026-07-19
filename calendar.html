@@ -333,7 +333,7 @@
   (function() {
     const p = new URLSearchParams(window.location.search);
     const pkgName = p.get('pkg') || '';
-    const pkgTotal = p.get('total') || '';
+    const pkgTotal = p.get('total') || p.get('price') || '';
     if (pkgName && document.getElementById('summaryPkgName')) {
       document.getElementById('summaryPkgName').textContent = pkgName;
     }
