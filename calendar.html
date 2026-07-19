@@ -399,7 +399,10 @@
       });
       if (res.ok) {
         btn.style.display = 'none';
-        document.getElementById('bookSuccess').style.display = 'block';
+        document.getElementById('infoSection').querySelectorAll('.info-card, .summary-card, .section-label').forEach(function(el) { el.style.display = 'none'; });
+        const success = document.getElementById('bookSuccess');
+        success.style.display = 'block';
+        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
         btn.disabled = false;
         btn.textContent = 'Confirm Booking';
