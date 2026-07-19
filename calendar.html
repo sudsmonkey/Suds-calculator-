@@ -137,20 +137,20 @@
         <div class="info-row-split">
           <div class="info-field">
             <label>First Name</label>
-            <input type="text" placeholder="Jane">
+            <input type="text" id="infoFirstName" placeholder="Jane">
           </div>
           <div class="info-field">
             <label>Last Name</label>
-            <input type="text" placeholder="Smith">
+            <input type="text" id="infoLastName" placeholder="Smith">
           </div>
         </div>
         <div class="info-field">
           <label>Phone</label>
-          <input type="tel" id="phoneInput" placeholder="(555) 000-0000" autocomplete="tel">
+          <input type="tel" id="infoPhone" placeholder="(555) 000-0000" autocomplete="tel">
         </div>
         <div class="info-field">
           <label>Email</label>
-          <input type="email" placeholder="jane@email.com">
+          <input type="email" id="infoEmail" placeholder="jane@email.com">
         </div>
         <div class="info-field">
           <label>Address</label>
@@ -158,7 +158,7 @@
         </div>
         <div class="info-field">
           <label>Notes (optional)</label>
-          <textarea placeholder="Gate code, dogs, anything we should know..."></textarea>
+          <textarea id="infoNotes" placeholder="Gate code, dogs, anything we should know..."></textarea>
         </div>
       </div>
     </div>
@@ -167,7 +167,7 @@
     <div class="summary-card">
       <div class="summary-row">
         <span class="label">Package</span>
-        <span class="value">Gorilla Clean</span>
+        <span class="value" id="summaryPkgName">—</span>
       </div>
       <div class="summary-row">
         <span class="label">Date</span>
@@ -177,13 +177,19 @@
         <span class="label">Time</span>
         <span class="value" id="summaryTime">—</span>
       </div>
+      <div id="summaryAddonsList"></div>
       <div class="summary-row total">
         <span class="label">Total</span>
-        <span class="value">$320</span>
+        <span class="value" id="summaryPkgTotal">—</span>
       </div>
     </div>
 
     <button class="book-btn" id="bookBtn" disabled>Confirm Booking</button>
+    <div id="bookSuccess" style="display:none; text-align:center; padding:24px 0;">
+      <div style="font-size:48px; margin-bottom:12px;">🐒</div>
+      <div style="font-size:20px; font-weight:900; color:var(--dark); margin-bottom:8px;">You're booked!</div>
+      <div style="font-size:14px; color:var(--mid);">We'll send a confirmation to your email. See you soon!</div>
+    </div>
   </div>
 
 </div>
@@ -323,7 +329,73 @@
     if (input) input.autocomplete = 'street-address';
   }
 
-  document.getElementById('phoneInput').addEventListener('input', function(e) {
+  // Populate summary from URL params
+  (function() {
+    const p = new URLSearchParams(window.location.search);
+    const pkgName = p.get('pkg') || '';
+    const pkgTotal = p.get('total') || '';
+    if (pkgName && document.getElementById('summaryPkgName')) {
+      document.getElementById('summaryPkgName').textContent = pkgName;
+    }
+    if (pkgTotal && document.getElementById('summaryPkgTotal')) {
+      document.getElementById('summaryPkgTotal').textContent = '$' + pkgTotal;
+    }
+  })();
+
+  document.getElementById('bookBtn').addEventListener('click', async function() {
+    const btn = this;
+    const firstName = (document.getElementById('infoFirstName').value || '').trim();
+    const lastName  = (document.getElementById('infoLastName').value  || '').trim();
+    const phone     = (document.getElementById('infoPhone').value     || '').trim();
+    const email     = (document.getElementById('infoEmail').value     || '').trim();
+    const address   = (document.getElementById('infoAddress').value   || '').trim();
+    const notes     = (document.getElementById('infoNotes').value     || '').trim();
+    const date      = document.getElementById('summaryDate').textContent;
+    const time      = document.getElementById('summaryTime').textContent;
+    const pkgName   = document.getElementById('summaryPkgName').textContent;
+    const pkgTotal  = document.getElementById('summaryPkgTotal').textContent;
+
+    if (!firstName || !lastName || !phone || !email || !address) {
+      alert('Please fill in your name, phone, email, and address before confirming.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Booking…';
+
+    const data = new FormData();
+    data.append('name', firstName + ' ' + lastName);
+    data.append('phone', phone);
+    data.append('email', email);
+    data.append('address', address);
+    data.append('date', date);
+    data.append('time', time);
+    data.append('package', pkgName);
+    data.append('total', pkgTotal);
+    data.append('notes', notes);
+
+    try {
+      const res = await fetch('https://formspree.io/f/mjgqjdyz', {
+        method: 'POST',
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        btn.style.display = 'none';
+        document.getElementById('bookSuccess').style.display = 'block';
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Confirm Booking';
+        alert('Something went wrong. Please try again or call us directly.');
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Confirm Booking';
+      alert('Connection error. Please check your internet and try again.');
+    }
+  });
+
+  document.getElementById('infoPhone').addEventListener('input', function(e) {
     let v = e.target.value.replace(/\D/g, '').substring(0, 10);
     if (v.length >= 7) v = '(' + v.substring(0,3) + ') ' + v.substring(3,6) + '-' + v.substring(6);
     else if (v.length >= 4) v = '(' + v.substring(0,3) + ') ' + v.substring(3);
