@@ -330,15 +330,26 @@
   }
 
   // Populate summary from URL params
+  const _urlParams = new URLSearchParams(window.location.search);
   (function() {
-    const p = new URLSearchParams(window.location.search);
-    const pkgName = p.get('pkg') || '';
-    const pkgTotal = p.get('total') || p.get('price') || '';
-    if (pkgName && document.getElementById('summaryPkgName')) {
-      document.getElementById('summaryPkgName').textContent = pkgName;
-    }
-    if (pkgTotal && document.getElementById('summaryPkgTotal')) {
-      document.getElementById('summaryPkgTotal').textContent = '$' + pkgTotal;
+    const pkgName  = _urlParams.get('pkg') || '';
+    const pkgTotal = _urlParams.get('total') || _urlParams.get('price') || '';
+    const addons   = _urlParams.get('addons') || '';
+
+    if (pkgName)  document.getElementById('summaryPkgName').textContent = pkgName;
+    if (pkgTotal) document.getElementById('summaryPkgTotal').textContent = '$' + pkgTotal;
+
+    if (addons) {
+      const list = document.getElementById('summaryAddonsList');
+      addons.split(',').forEach(function(a) {
+        const parts = a.split(':');
+        const label = parts[0] || '';
+        const val   = parts[1] || '';
+        const row = document.createElement('div');
+        row.className = 'summary-row';
+        row.innerHTML = '<span class="label">' + label + '</span><span class="value">' + val + '</span>';
+        list.appendChild(row);
+      });
     }
   })();
 
@@ -355,6 +366,10 @@
     const pkgName   = document.getElementById('summaryPkgName').textContent;
     const pkgTotal  = document.getElementById('summaryPkgTotal').textContent;
 
+    const wizard  = _urlParams.get('wizard')  || '';
+    const shared  = _urlParams.get('shared')  || '';
+    const addons  = _urlParams.get('addons')  || '';
+
     if (!firstName || !lastName || !phone || !email) {
       alert('Please fill in your name, phone, and email before confirming.');
       return;
@@ -364,15 +379,20 @@
     btn.textContent = 'Booking…';
 
     const data = new FormData();
-    data.append('name', firstName + ' ' + lastName);
-    data.append('phone', phone);
+    data.append('first_name', firstName);
+    data.append('last_name', lastName);
+    data.append('_replyto', email);
     data.append('email', email);
+    data.append('phone', phone);
     data.append('address', address);
-    data.append('date', date);
-    data.append('time', time);
     data.append('package', pkgName);
     data.append('total', pkgTotal);
-    data.append('notes', notes);
+    data.append('date', date);
+    data.append('time', time);
+    if (addons)  data.append('add_ons', addons.replace(/,/g, ' | '));
+    if (wizard)  data.append('wizard_answers', wizard);
+    if (shared === 'yes') data.append('monkey_bonus', 'Referral discount applied (-$25)');
+    if (notes)   data.append('notes', notes);
 
     try {
       const res = await fetch('https://formspree.io/f/mjgqjdyz', {
