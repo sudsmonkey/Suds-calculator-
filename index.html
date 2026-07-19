@@ -1526,7 +1526,11 @@
     const bookBtn = document.getElementById('bookNowBtn');
     bounceBtn(bookBtn);
     bookBtn.addEventListener('animationend', () => {
-      proceedToCalendar(false, !refDiscount);
+      if (!refDiscount) {
+        document.getElementById('monkeyBonusModal').classList.add('visible');
+      } else {
+        proceedToCalendar(false, false);
+      }
     }, { once: true });
   }
 
