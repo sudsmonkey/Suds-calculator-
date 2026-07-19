@@ -419,11 +419,20 @@
     #btn-wrap-silver .pkg-btn.selected { background: var(--orange) !important; box-shadow: 0 4px 0 #C06060, inset 0 1px 0 rgba(255,255,255,0.2) !important; border-color: var(--orangeborder) !important; }
     .bubble-zone { position: relative; min-width: 900px; min-height: 480px; flex-shrink: 0; align-self: stretch; overflow: hidden; pointer-events: none; }
     .soap-bubble { position: absolute; border-radius: 50%; background: radial-gradient(circle at 30% 28%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 14%, rgba(180,225,255,0.65) 42%, rgba(245,110,100,0.28) 72%, rgba(158,217,192,0.5) 100%); border: 2.5px solid rgba(158,217,192,0.95); box-shadow: inset 4px 4px 10px rgba(255,255,255,1), inset -2px -2px 8px rgba(158,217,192,0.5), 0 4px 16px rgba(245,110,100,0.2); animation: bubbleFloat linear infinite; }
+    body { background: transparent; }
+    #bgBubbleLayer { position: fixed; inset: 0; z-index: -1; background: var(--cream); pointer-events: none; overflow: hidden; }
+    .bg-bubble { position: absolute; background-size: contain; background-repeat: no-repeat; background-position: center; animation: bgBubbleFloat linear infinite; }
   }
   @keyframes bubbleFloat {
     0%   { transform: translateY(0) translateX(0); opacity: 0.8; }
     50%  { transform: translateY(-220px) translateX(10px); opacity: 0.7; }
     100% { transform: translateY(-460px) translateX(-6px); opacity: 0; }
+  }
+  @keyframes bgBubbleFloat {
+    0%   { transform: translateY(0) translateX(0); opacity: 0; }
+    8%   { opacity: 0.65; }
+    90%  { opacity: 0.45; }
+    100% { transform: translateY(-120vh) translateX(8px); opacity: 0; }
   }
   @media (max-width: 899px) {
     .pkg-arrow { display: none; }
@@ -2627,6 +2636,33 @@ let currentPkg = null;
       row.removeChild(sliderCard);
       row.parentElement.insertBefore(sliderCard, row);
     }
+
+    // Full-screen background bubble layer
+    const bgLayer = document.createElement('div');
+    bgLayer.id = 'bgBubbleLayer';
+    document.body.appendChild(bgLayer);
+    const tmpB = document.createElement('div');
+    tmpB.className = 'bubble-particle';
+    tmpB.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;visibility:hidden;';
+    document.body.appendChild(tmpB);
+    const pngUrl = window.getComputedStyle(tmpB).backgroundImage;
+    document.body.removeChild(tmpB);
+    const bgSizes = [16,24,12,40,32,56,20,48,30,14,64,26,38,18,50,22,36,52,28,44,20,34,58,15,42];
+    bgSizes.forEach(function(size, i) {
+      const b = document.createElement('div');
+      b.className = 'bg-bubble';
+      b.style.backgroundImage = pngUrl;
+      const left = (i * 47 + i * i * 3) % 96;
+      const dur = 9 + (i * 41) % 11;
+      const delay = -(i * 2.7 % dur);
+      b.style.width = size + 'px';
+      b.style.height = size + 'px';
+      b.style.left = left + '%';
+      b.style.bottom = (-size - 10) + 'px';
+      b.style.animationDuration = dur + 's';
+      b.style.animationDelay = delay + 's';
+      bgLayer.appendChild(b);
+    });
 
     // Bubble zone — soft scroll endpoint after last card
     const zone = document.createElement('div');
