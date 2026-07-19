@@ -2606,7 +2606,7 @@ let currentPkg = null;
 
   }
 
-  // Package scroll — infinite loop
+  // Package scroll — normal scroll, static slider panel
   (function() {
     const row = document.getElementById('packagesRow');
     const btnL = document.getElementById('pkgArrowLeft');
@@ -2621,32 +2621,7 @@ let currentPkg = null;
       row.parentElement.insertBefore(sliderCard, row);
     }
 
-    // Clone only the package cards (not slider) for infinite loop
-    // Strip IDs from clones so getElementById always hits the originals
-    function cloneStripped(c) {
-      const clone = c.cloneNode(true);
-      clone.removeAttribute('id');
-      clone.querySelectorAll('[id]').forEach(function(el) { el.removeAttribute('id'); });
-      return clone;
-    }
-    const cards = Array.from(row.children);
-    cards.forEach(c => row.appendChild(cloneStripped(c)));
-    cards.slice().reverse().forEach(c => row.insertBefore(cloneStripped(c), row.firstChild));
-
-    // Disable snap so instant-jump doesn't feel jarring
-    row.style.scrollSnapType = 'none';
-
-    // Jump to real cards (middle set) after layout is computed
-    requestAnimationFrame(() => { row.scrollLeft = row.scrollWidth / 3; });
-
-    // Seamless loop: when scrolling into a clone zone, silently teleport back
-    row.addEventListener('scroll', function() {
-      const sw = row.scrollWidth / 3;
-      if (row.scrollLeft >= sw * 2) { row.scrollLeft -= sw; }
-      else if (row.scrollLeft < sw * 0.25) { row.scrollLeft += sw; }
-    }, { passive: true });
-
-    // Arrows always visible in loop mode
+    // Arrows
     if (btnL) { btnL.classList.remove('hidden'); btnL.addEventListener('click', () => row.scrollBy({ left: -320, behavior: 'smooth' })); }
     if (btnR) { btnR.classList.remove('hidden'); btnR.addEventListener('click', () => row.scrollBy({ left: 320, behavior: 'smooth' })); }
 
