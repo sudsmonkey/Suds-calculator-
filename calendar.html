@@ -143,7 +143,7 @@
         </div>
         <div class="info-field">
           <label>Phone</label>
-          <input type="tel" placeholder="(555) 000-0000">
+          <input type="tel" id="phoneInput" placeholder="(555) 000-0000" autocomplete="tel">
         </div>
         <div class="info-field">
           <label>Email</label>
@@ -302,6 +302,14 @@
 
   renderCalendar();
   renderTimeSlots();
+
+  document.getElementById('phoneInput').addEventListener('input', function(e) {
+    let v = e.target.value.replace(/\D/g, '').substring(0, 10);
+    if (v.length >= 7) v = '(' + v.substring(0,3) + ') ' + v.substring(3,6) + '-' + v.substring(6);
+    else if (v.length >= 4) v = '(' + v.substring(0,3) + ') ' + v.substring(3);
+    else if (v.length >= 1) v = '(' + v;
+    e.target.value = v;
+  });
 </script>
 </body>
 </html>
