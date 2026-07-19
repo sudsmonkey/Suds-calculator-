@@ -153,7 +153,7 @@
           <input type="email" id="infoEmail" placeholder="jane@email.com">
         </div>
         <div class="info-field">
-          <label>Address</label>
+          <label>Address (optional)</label>
           <input type="text" id="infoAddress" placeholder="123 Main St" autocomplete="off">
         </div>
         <div class="info-field">
@@ -355,8 +355,8 @@
     const pkgName   = document.getElementById('summaryPkgName').textContent;
     const pkgTotal  = document.getElementById('summaryPkgTotal').textContent;
 
-    if (!firstName || !lastName || !phone || !email || !address) {
-      alert('Please fill in your name, phone, email, and address before confirming.');
+    if (!firstName || !lastName || !phone || !email) {
+      alert('Please fill in your name, phone, and email before confirming.');
       return;
     }
 
