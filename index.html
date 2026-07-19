@@ -2619,9 +2619,16 @@ let currentPkg = null;
     }
 
     // Clone only the package cards (not slider) for infinite loop
+    // Strip IDs from clones so getElementById always hits the originals
+    function cloneStripped(c) {
+      const clone = c.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.querySelectorAll('[id]').forEach(function(el) { el.removeAttribute('id'); });
+      return clone;
+    }
     const cards = Array.from(row.children);
-    cards.forEach(c => row.appendChild(c.cloneNode(true)));
-    cards.slice().reverse().forEach(c => row.insertBefore(c.cloneNode(true), row.firstChild));
+    cards.forEach(c => row.appendChild(cloneStripped(c)));
+    cards.slice().reverse().forEach(c => row.insertBefore(cloneStripped(c), row.firstChild));
 
     // Disable snap so instant-jump doesn't feel jarring
     row.style.scrollSnapType = 'none';
