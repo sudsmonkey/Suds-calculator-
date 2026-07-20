@@ -527,6 +527,25 @@
   #sq3000Section .box { padding:8px; }
   }
 
+
+  /* Wizard step slide transitions */
+  .calibrate-box { overflow: hidden; }
+  @keyframes wizSlideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+  }
+  @keyframes wizSlideInLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to   { transform: translateX(0);     opacity: 1; }
+  }
+  .calibrate-step.wiz-in-right {
+    display: flex !important; flex-direction: column; flex: 1;
+    animation: wizSlideInRight 0.65s cubic-bezier(0.45,0,0.1,1) both;
+  }
+  .calibrate-step.wiz-in-left {
+    display: flex !important; flex-direction: column; flex: 1;
+    animation: wizSlideInLeft 0.65s cubic-bezier(0.45,0,0.1,1) both;
+  }
 </style>
 </head>
 <body>
@@ -2755,6 +2774,34 @@ let currentPkg = null;
     const modal = document.getElementById('desktopGameModal');
     if (modal) modal.classList.remove('visible');
   }
+
+
+  // ── Wizard slide animation ──────────────────────────────
+  (function() {
+    var STEP_ORDER = ['1','2','2b','3','3b','3c','4','5','5b','6','6b','Loading','Storm','Quote'];
+    var _origShow = showCalibrateStep;
+    showCalibrateStep = function(id) {
+      var curId = calibrateCurrentStep;
+      var isSameStep = (id === curId);
+      var inEl = document.getElementById('calibrateStep' + id);
+
+      if (!isSameStep && inEl) {
+        var isForward = STEP_ORDER.indexOf(id) >= STEP_ORDER.indexOf(curId);
+        document.querySelectorAll('.calibrate-step').forEach(function(el) {
+          el.classList.remove('wiz-in-right', 'wiz-in-left');
+        });
+        inEl.classList.add(isForward ? 'wiz-in-right' : 'wiz-in-left');
+      }
+
+      _origShow.call(this, id);
+
+      if (!isSameStep && inEl) {
+        setTimeout(function() {
+          inEl.classList.remove('wiz-in-right', 'wiz-in-left');
+        }, 700);
+      }
+    };
+  })();
 
 </script>
 
