@@ -105,15 +105,20 @@
     100% { transform: translateY(-120vh) translateX(8px); opacity: 0; }
   }
 
+  /* ── Desktop wizard layout ─────────────────────────────── */
   @media (min-width: 900px) {
-    body { zoom: 0.95; }
-    .content { max-width: 600px; padding: 28px 32px 60px; }
+    body { /* no zoom — let full size breathe */ }
+    .content { max-width: 600px; padding: 32px 0 60px; }
+
+    /* Bigger calendar */
     .month-nav { padding: 20px 24px 14px; }
     .month-name { font-size: 20px; }
     .day-headers { padding: 10px 16px 6px; }
     .day-header { font-size: 12px; }
     .cal-grid { gap: 6px; padding: 6px 16px 20px; }
     .cal-day { height: 56px; font-size: 16px; }
+
+    /* Bigger time / form / summary */
     .time-card { padding: 20px; }
     .time-grid { gap: 12px; }
     .time-slot { padding: 16px 12px; border-radius: 16px; }
@@ -127,11 +132,64 @@
     .summary-row.total .label { font-size: 17px; }
     .summary-row.total .value { font-size: 20px; }
     .book-btn { font-size: 19px; padding: 18px; margin-top: 24px; }
-    .section-label { font-size: 12px; margin-top: 30px; }
+    .section-label { font-size: 12px; margin-top: 28px; }
     #bookSuccess { padding: 40px 32px; }
-    #bookSuccess div:first-child { font-size: 26px !important; }
-    #bookSuccess div:last-child { font-size: 16px !important; }
+
+    /* Step progress bar */
+    .wizard-steps {
+      display: flex; align-items: center;
+      padding: 0 32px 28px;
+    }
+    .wizard-step {
+      display: flex; align-items: center; gap: 8px;
+      opacity: 0.3; transition: opacity 0.5s;
+      white-space: nowrap;
+    }
+    .wizard-step.active { opacity: 1; }
+    .wizard-step.done  { opacity: 0.55; }
+    .step-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--orangeborder);
+      transition: background 0.5s, transform 0.3s;
+      flex-shrink: 0;
+    }
+    .wizard-step.active .step-dot { background: var(--orange); transform: scale(1.35); }
+    .wizard-step.done  .step-dot { background: var(--mint); }
+    .step-label {
+      font-size: 11px; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--mid); transition: color 0.5s;
+    }
+    .wizard-step.active .step-label { color: var(--dark); }
+    .wizard-line {
+      flex: 1; height: 1.5px; background: var(--orangeborder);
+      margin: 0 10px; min-width: 20px;
+    }
+
+    /* Viewport clips the sliding track */
+    .wizard-viewport { overflow: hidden; }
+
+    /* Track holds 3 full-width panels side by side */
+    .wizard-track {
+      display: flex; width: 300%;
+      transition: transform 0.82s cubic-bezier(0.45, 0, 0.1, 1);
+      will-change: transform; align-items: flex-start;
+    }
+    .wizard-panel {
+      flex: 0 0 33.3333%; min-width: 0;
+      padding: 0 32px 48px;
+    }
+
+    /* Back arrow */
+    .wizard-back {
+      background: none; border: none; cursor: pointer;
+      color: var(--mid); font-family: 'Nunito', sans-serif;
+      font-size: 13px; font-weight: 700; padding: 0 0 18px;
+      display: block; transition: color 0.15s; letter-spacing: 0.01em;
+    }
+    .wizard-back:hover { color: var(--orange); }
   }
+
 </style>
 </head>
 <body>
@@ -466,6 +524,103 @@
     else if (v.length >= 1) v = '(' + v;
     e.target.value = v;
   });
+
+  // ── Desktop horizontal wizard ──────────────────────────
+  (function() {
+    if (!window.matchMedia('(min-width: 900px)').matches) return;
+
+    var content   = document.querySelector('.content');
+    var dateLabel = content.querySelector('.section-label');
+    var calCard   = content.querySelector('.calendar-card');
+    var timeSec   = document.getElementById('timeSection');
+    var infoSec   = document.getElementById('infoSection');
+
+    // Step indicator
+    var stepsEl = document.createElement('div');
+    stepsEl.className = 'wizard-steps';
+    ['Pick a Date', 'Choose a Time', 'Your Info'].forEach(function(lbl, i) {
+      if (i > 0) {
+        var line = document.createElement('div');
+        line.className = 'wizard-line';
+        stepsEl.appendChild(line);
+      }
+      var s = document.createElement('div');
+      s.className = 'wizard-step' + (i === 0 ? ' active' : '');
+      s.innerHTML = '<span class="step-dot"></span><span class="step-label">' + lbl + '</span>';
+      stepsEl.appendChild(s);
+    });
+
+    // Viewport + track
+    var viewport = document.createElement('div');
+    viewport.className = 'wizard-viewport';
+    var track = document.createElement('div');
+    track.className = 'wizard-track';
+
+    // Panel 0 — date
+    var p0 = document.createElement('div');
+    p0.className = 'wizard-panel';
+    p0.appendChild(dateLabel);
+    p0.appendChild(calCard);
+
+    // Panel 1 — time  (back button prepended)
+    var p1 = document.createElement('div');
+    p1.className = 'wizard-panel';
+    var b1 = document.createElement('button');
+    b1.className = 'wizard-back'; b1.textContent = '← Back';
+    b1.onclick = function() { goTo(0); };
+    p1.appendChild(b1);
+    p1.appendChild(timeSec);
+
+    // Panel 2 — info + summary
+    var p2 = document.createElement('div');
+    p2.className = 'wizard-panel';
+    var b2 = document.createElement('button');
+    b2.className = 'wizard-back'; b2.textContent = '← Back';
+    b2.onclick = function() { goTo(1); };
+    p2.appendChild(b2);
+    p2.appendChild(infoSec);
+
+    track.appendChild(p0);
+    track.appendChild(p1);
+    track.appendChild(p2);
+    viewport.appendChild(track);
+
+    // Rebuild content
+    while (content.firstChild) content.removeChild(content.firstChild);
+    content.appendChild(stepsEl);
+    content.appendChild(viewport);
+
+    var stepEls = stepsEl.querySelectorAll('.wizard-step');
+
+    function goTo(idx) {
+      track.style.transform = 'translateX(-' + (idx * 33.3333) + '%)';
+      stepEls.forEach(function(el, i) {
+        el.className = 'wizard-step' + (i === idx ? ' active' : i < idx ? ' done' : '');
+      });
+    }
+
+    // Patch date selection — slide to time panel
+    window.selectDate = function(dateStr, d) {
+      selectedDate = dateStr;
+      selectedTime = null;
+      renderCalendar();
+      renderTimeSlots();
+      updateBtn();
+      setTimeout(function() { goTo(1); }, 120);
+    };
+
+    // Patch time selection — slide to info panel
+    window.selectTime = function(slot) {
+      selectedTime = slot;
+      document.getElementById('summaryDate').textContent =
+        MONTHS[currentMonth] + ' ' + parseInt(selectedDate.split('-')[2]) + ', ' + currentYear;
+      document.getElementById('summaryTime').textContent = slot;
+      renderTimeSlots();
+      updateBtn();
+      setTimeout(function() { goTo(2); }, 120);
+    };
+  })();
+
 
   (function() {
     var bgLayer = document.createElement('div');
