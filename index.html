@@ -1363,7 +1363,7 @@
     document.getElementById('calibrateOverlay').classList.add('visible');
     startCalScroll();
   }
-  function roundToNine(n){const r=Math.round(n);const ones=r%10;let p=ones<=5?r-ones-1:r+(9-ones);if(Math.floor(p/10)%10===0)p-=10;return p;}
+  function roundToNine(n,skipZeroTens){const r=Math.round(n);const ones=r%10;let p=ones<=5?r-ones-1:r+(9-ones);if(!skipZeroTens&&Math.floor(p/10)%10===0)p-=10;return p;}
   function fmt(n){return roundToNine(n).toLocaleString();}
   function updatePrices(){
     const sqft=parseInt(document.getElementById('sqftSlider').value);
@@ -1388,9 +1388,10 @@
       const frenchSurcharge=frenchPaneMajority?(FRENCH_PANE_SURCHARGE[pkg]||0):frenchPaneFlatSurcharge;
       const screenSurcharge=(hasScreens&&screenLocation!=='outside')?50:0;
       const total=base+st+tt+mt+storySurcharge+frenchSurcharge+screenSurcharge;
-      setPkgPrice(pkg,total);
+      const hasAddon=st>0||tt>0||mt>0;
+      setPkgPrice(pkg,total,hasAddon);
       const memberEl=document.getElementById(pkg+'MemberPrice');
-      if(memberEl)memberEl.textContent=fmt(total*(1-MEMBER_DISCOUNT));
+      if(memberEl)memberEl.textContent=roundToNine(total*(1-MEMBER_DISCOUNT),hasAddon).toLocaleString();
     });
     // Storm package per-unit pricing
     const sf1 = document.getElementById('storm-floor1');
@@ -1629,9 +1630,9 @@ let currentPkg = null;
     const m = document.getElementById('saveMsg');
     if(m) m.style.display = 'block';
   }
-  function setPkgPrice(pkg,total){
+  function setPkgPrice(pkg,total,skipZeroTens){
     const el=document.getElementById(pkg+'Price');
-    if(el)el.textContent=fmt(total);
+    if(el)el.textContent=roundToNine(total,skipZeroTens).toLocaleString();
   }
   document.getElementById('sqftSlider').addEventListener('input',updatePrices);
   // Auto-check floor 1 storm windows and show stepper
