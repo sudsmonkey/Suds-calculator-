@@ -1387,11 +1387,13 @@
       const storySurcharge=STORY_SURCHARGE[selectedStories]||0;
       const frenchSurcharge=frenchPaneMajority?(FRENCH_PANE_SURCHARGE[pkg]||0):frenchPaneFlatSurcharge;
       const screenSurcharge=(hasScreens&&screenLocation!=='outside')?50:0;
-      const total=base+st+tt+mt+storySurcharge+frenchSurcharge+screenSurcharge;
-      const hasAddon=st>0||tt>0||mt>0;
-      setPkgPrice(pkg,total,hasAddon);
+      const addonRaw=st+tt+mt;
+      const calibratedBase=base+storySurcharge+frenchSurcharge+screenSurcharge;
+      const baseRounded=roundToNine(calibratedBase);
+      const displayTotal=addonRaw>0?roundToNine(baseRounded+addonRaw,true):baseRounded;
+      setPkgPrice(pkg,displayTotal);
       const memberEl=document.getElementById(pkg+'MemberPrice');
-      if(memberEl)memberEl.textContent=roundToNine(total*(1-MEMBER_DISCOUNT),hasAddon).toLocaleString();
+      if(memberEl)memberEl.textContent=roundToNine((calibratedBase+addonRaw)*(1-MEMBER_DISCOUNT),addonRaw>0).toLocaleString();
     });
     // Storm package per-unit pricing
     const sf1 = document.getElementById('storm-floor1');
@@ -1519,15 +1521,17 @@
     const mn = document.getElementById(pkg+'-mirror-num');
     const mt = mirrorsEl && mirrorsEl.checked ? (parseInt(mn?mn.value:0)||0)*MIRROR_PRICE : 0;
 
-    const total = base + st + tt + mt - refDiscount;
-    const hasAddon = st > 0 || tt > 0 || mt > 0;
+    const addonRaw = st + tt + mt;
+    const baseRounded = roundToNine(base);
+    const priceRounded = addonRaw > 0 ? roundToNine(baseRounded + addonRaw, true) : baseRounded;
+    const total = priceRounded - refDiscount;
 
     const coImg = document.getElementById('co-animal-img');
     coImg.src = ANIMAL_IMGS[pkg];
     coImg.style.display = 'inline-block';
     document.getElementById('co-package').textContent = PKG_NAMES[pkg];
     document.getElementById('co-sqft').textContent = sqft.toLocaleString() + ' sq ft';
-    document.getElementById('co-total').textContent = '$' + roundToNine(total, hasAddon).toLocaleString();
+    document.getElementById('co-total').textContent = '$' + total.toLocaleString();
     document.getElementById('co-discount').textContent = '−$25';
 
     document.getElementById('co-screens-row').style.display = sc ? 'flex' : 'none';
@@ -1631,9 +1635,9 @@ let currentPkg = null;
     const m = document.getElementById('saveMsg');
     if(m) m.style.display = 'block';
   }
-  function setPkgPrice(pkg,total,skipZeroTens){
+  function setPkgPrice(pkg,displayAmt){
     const el=document.getElementById(pkg+'Price');
-    if(el)el.textContent=roundToNine(total,skipZeroTens).toLocaleString();
+    if(el)el.textContent=displayAmt.toLocaleString();
   }
   document.getElementById('sqftSlider').addEventListener('input',updatePrices);
   // Auto-check floor 1 storm windows and show stepper
