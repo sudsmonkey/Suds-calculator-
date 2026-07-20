@@ -1363,7 +1363,7 @@
     document.getElementById('calibrateOverlay').classList.add('visible');
     startCalScroll();
   }
-  function roundToNine(n){const r=Math.round(n);const ones=r%10;let p=ones<=5?r-ones-1:r+(9-ones);if(Math.floor(p/10)%10===3)p+=10;if(Math.floor(p/10)%10===0)p-=10;return p;}
+  function roundToNine(n){const r=Math.round(n);const ones=r%10;let p=ones<=5?r-ones-1:r+(9-ones);if(Math.floor(p/10)%10===0)p-=10;return p;}
   function fmt(n){return roundToNine(n).toLocaleString();}
   function updatePrices(){
     const sqft=parseInt(document.getElementById('sqftSlider').value);
@@ -1376,14 +1376,14 @@
       const sc=screensEl?screensEl.checked:false;
       const st=sc?SCREEN_PRICE:0;
       const spEl=document.getElementById(pkg+'-screens-price');
-      if(spEl)spEl.textContent=sc?'+ $'+fmt(st):'+ $0';
+      if(spEl)spEl.textContent=sc?'+ $'+st:'+ $0';
       let tt=0;const te=document.getElementById(pkg+'-tracks');
-      if(te){tt=te.checked?TRACKS_PRICE:0;document.getElementById(pkg+'-tracks-price').textContent=te.checked?'+ $'+fmt(tt):'+ $0';}
+      if(te){tt=te.checked?TRACKS_PRICE:0;document.getElementById(pkg+'-tracks-price').textContent=te.checked?'+ $'+tt:'+ $0';}
       const me=document.getElementById(pkg+'-mirrors');
       const mn=document.getElementById(pkg+'-mirror-num');
       const mt=me&&me.checked?(parseInt(mn?mn.value:0)||0)*MIRROR_PRICE:0;
       const mpe=document.getElementById(pkg+'-mirrors-price');
-      if(mpe)mpe.textContent=me&&me.checked?'+ $'+fmt(mt):'+ $0';
+      if(mpe)mpe.textContent=me&&me.checked?'+ $'+mt:'+ $0';
       const storySurcharge=STORY_SURCHARGE[selectedStories]||0;
       const frenchSurcharge=frenchPaneMajority?(FRENCH_PANE_SURCHARGE[pkg]||0):frenchPaneFlatSurcharge;
       const screenSurcharge=(hasScreens&&screenLocation!=='outside')?50:0;
@@ -1534,7 +1534,7 @@
     document.getElementById('co-tracks-row').style.display = (tracksEl && tracksEl.checked) ? 'flex' : 'none';
     const showMirrors = mirrorsEl && mirrorsEl.checked;
     document.getElementById('co-mirrors-row').style.display = showMirrors ? 'flex' : 'none';
-    if(showMirrors) document.getElementById('co-mirrors-val').textContent = '$' + fmt(mt);
+    if(showMirrors) document.getElementById('co-mirrors-val').textContent = '$' + mt;
   }
 
   function spawnBubbles(pkg) {
