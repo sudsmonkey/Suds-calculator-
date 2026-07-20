@@ -1520,13 +1520,14 @@
     const mt = mirrorsEl && mirrorsEl.checked ? (parseInt(mn?mn.value:0)||0)*MIRROR_PRICE : 0;
 
     const total = base + st + tt + mt - refDiscount;
+    const hasAddon = st > 0 || tt > 0 || mt > 0;
 
     const coImg = document.getElementById('co-animal-img');
     coImg.src = ANIMAL_IMGS[pkg];
     coImg.style.display = 'inline-block';
     document.getElementById('co-package').textContent = PKG_NAMES[pkg];
     document.getElementById('co-sqft').textContent = sqft.toLocaleString() + ' sq ft';
-    document.getElementById('co-total').textContent = '$' + fmt(total);
+    document.getElementById('co-total').textContent = '$' + roundToNine(total, hasAddon).toLocaleString();
     document.getElementById('co-discount').textContent = '−$25';
 
     document.getElementById('co-screens-row').style.display = sc ? 'flex' : 'none';
