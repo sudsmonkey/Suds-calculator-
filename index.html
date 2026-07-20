@@ -1509,6 +1509,10 @@
     currentPkg = pkg;
     const sqft = parseInt(document.getElementById('sqftSlider').value);
     const base = sqft * RATES[pkg];
+    const storySurcharge = STORY_SURCHARGE[selectedStories] || 0;
+    const frenchSurcharge = frenchPaneMajority ? (FRENCH_PANE_SURCHARGE[pkg] || 0) : frenchPaneFlatSurcharge;
+    const screenSurcharge = (hasScreens && screenLocation !== 'outside') ? 50 : 0;
+    const calibratedBase = base + storySurcharge + frenchSurcharge + screenSurcharge;
 
     const screensEl = document.getElementById(pkg+'-screens');
     const sc = screensEl ? screensEl.checked : false;
@@ -1522,7 +1526,7 @@
     const mt = mirrorsEl && mirrorsEl.checked ? (parseInt(mn?mn.value:0)||0)*MIRROR_PRICE : 0;
 
     const addonRaw = st + tt + mt;
-    const baseRounded = roundToNine(base);
+    const baseRounded = roundToNine(calibratedBase);
     const priceRounded = addonRaw > 0 ? roundToNine(baseRounded + addonRaw, true) : baseRounded;
     const total = priceRounded - refDiscount;
 
