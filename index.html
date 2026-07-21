@@ -547,14 +547,34 @@
     animation: wizSlideInLeft 0.65s cubic-bezier(0.45,0,0.1,1) both;
   }
 @media (min-width: 900px) {
-  @keyframes calBgDrift {
-    0%   { transform: translateX(0); }
-    50%  { transform: translateX(-220px); }
-    100% { transform: translateX(0); }
+  .wiz-bubble {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99;
+    background: radial-gradient(
+      circle at 34% 30%,
+      rgba(255,255,255,0.72) 0%,
+      rgba(255,255,255,0.18) 14%,
+      rgba(160,220,255,0.07) 38%,
+      rgba(220,160,255,0.06) 62%,
+      rgba(160,255,220,0.05) 80%,
+      transparent 100%
+    );
+    border: 1px solid rgba(255,255,255,0.35);
+    box-shadow:
+      inset -3px -3px 10px rgba(255,255,255,0.25),
+      inset 3px 3px 10px rgba(160,220,255,0.18),
+      0 0 24px rgba(160,220,255,0.08);
+    animation: wizBubbleRise linear both;
+    will-change: transform, opacity;
   }
-  body.cal-drifting #packagesRow {
-    animation: calBgDrift 22s ease-in-out infinite;
-    will-change: transform;
+  @keyframes wizBubbleRise {
+    0%   { transform: translateY(0) translateX(0)   scale(0.4); opacity: 0; }
+    8%   { opacity: 0.9; transform: translateY(-6vh) translateX(var(--sway1)) scale(1); }
+    50%  { transform: translateY(-52vh) translateX(var(--sway2)) scale(1); opacity: 0.85; }
+    92%  { opacity: 0.7; }
+    100% { transform: translateY(-108vh) translateX(var(--sway3)) scale(0.9); opacity: 0; }
   }
 }
 </style>
@@ -1249,9 +1269,29 @@
   let bananaTransparentSrc = null;
   let calScrollId = null;
   let calScrollDir = 1;
+  let wizBubbles = [];
+  let wizBubbleInterval = null;
+
+  function spawnWizBubble() {
+    if (!window.matchMedia('(min-width: 900px)').matches) return;
+    const b = document.createElement('div');
+    b.className = 'wiz-bubble';
+    const size = 60 + Math.random() * 160;
+    const dur = 14 + Math.random() * 16;
+    const startX = 4 + Math.random() * 88;
+    const s1 = ((Math.random() - 0.5) * 60) + 'px';
+    const s2 = ((Math.random() - 0.5) * 120) + 'px';
+    const s3 = ((Math.random() - 0.5) * 80) + 'px';
+    b.style.cssText = `width:${size}px;height:${size}px;left:${startX}%;bottom:-${size}px;animation-duration:${dur}s;--sway1:${s1};--sway2:${s2};--sway3:${s3};`;
+    document.body.appendChild(b);
+    wizBubbles.push(b);
+    setTimeout(() => { b.remove(); wizBubbles = wizBubbles.filter(x => x !== b); }, dur * 1000);
+  }
+
   function startCalScroll(){
     if(window.matchMedia('(min-width: 900px)').matches) {
-      document.body.classList.add('cal-drifting');
+      spawnWizBubble(); spawnWizBubble(); spawnWizBubble();
+      wizBubbleInterval = setInterval(spawnWizBubble, 3200);
       return;
     }
     if(calScrollId) return;
@@ -1283,7 +1323,8 @@
   }
   function stopCalScroll(){
     if(calScrollId){ cancelAnimationFrame(calScrollId); calScrollId = null; }
-    document.body.classList.remove('cal-drifting');
+    if(wizBubbleInterval){ clearInterval(wizBubbleInterval); wizBubbleInterval = null; }
+    wizBubbles.forEach(b => b.remove()); wizBubbles = [];
   }
   function openCalibrate(){
     if(calibrated) return;
