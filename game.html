@@ -23,7 +23,7 @@
   --brass: #8B7355;
 }
 html, body {
-  height: 100%;
+  min-height: 100%;
   background: var(--cream);
   font-family: 'DM Sans', sans-serif;
   color: var(--dark);
@@ -37,6 +37,45 @@ html, body {
   width: 100%;
   max-width: 600px;
   padding: 0 12px 20px;
+  position: relative;
+  z-index: 1;
+}
+@media (min-width: 900px) {
+  #sq3000Section {
+    max-width: 960px;
+    padding: 24px 24px 40px;
+  }
+}
+
+/* Background bubbles */
+.game-bg-bubble {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    circle at 34% 30%,
+    rgba(255,255,255,0.68) 0%,
+    rgba(255,255,255,0.15) 14%,
+    rgba(160,220,255,0.06) 38%,
+    rgba(220,160,255,0.05) 62%,
+    rgba(160,255,220,0.04) 80%,
+    transparent 100%
+  );
+  border: 1px solid rgba(255,255,255,0.32);
+  box-shadow:
+    inset -2px -2px 8px rgba(255,255,255,0.22),
+    inset 2px 2px 8px rgba(160,220,255,0.14),
+    0 0 18px rgba(160,220,255,0.06);
+  animation: gameBubbleRise linear both;
+  will-change: transform, opacity;
+}
+@keyframes gameBubbleRise {
+  0%   { transform: translateY(0) translateX(0) scale(0.5); opacity: 0; }
+  10%  { opacity: 0.8; transform: translateY(-8vh) translateX(var(--sway1)) scale(1); }
+  50%  { transform: translateY(-55vh) translateX(var(--sway2)) scale(1); opacity: 0.7; }
+  90%  { opacity: 0.5; }
+  100% { transform: translateY(-112vh) translateX(var(--sway3)) scale(0.85); opacity: 0; }
 }
   #sq3000Section .stage {
     position:relative;
@@ -619,13 +658,14 @@ html, body {
 
   function layout(){
     const landscape = isLandscape();
+    const desktop = window.innerWidth >= 900;
 
     if(landscape){
-      GW = 620; GH = 125;
-      TW = 560; TH = 140;
+      GW = desktop ? 870 : 620; GH = desktop ? 175 : 125;
+      TW = desktop ? 790 : 560; TH = desktop ? 196 : 140;
     } else {
-      GW = 440; GH = 310;
-      TW = 340; TH = 210;
+      GW = desktop ? 620 : 440; GH = desktop ? 435 : 310;
+      TW = desktop ? 480 : 340; TH = desktop ? 295 : 210;
     }
 
     glassCanvas.width = GW; glassCanvas.height = GH;
@@ -1128,6 +1168,25 @@ html, body {
   }
 })();
 
+</script>
+<script>
+(function() {
+  function spawnBubble() {
+    const b = document.createElement('div');
+    b.className = 'game-bg-bubble';
+    const size = 30 + Math.random() * 100;
+    const dur  = 16 + Math.random() * 18;
+    const startX = 2 + Math.random() * 94;
+    const s1 = ((Math.random() - 0.5) * 50) + 'px';
+    const s2 = ((Math.random() - 0.5) * 100) + 'px';
+    const s3 = ((Math.random() - 0.5) * 70) + 'px';
+    b.style.cssText = `width:${size}px;height:${size}px;left:${startX}%;bottom:-${size}px;animation-duration:${dur}s;--sway1:${s1};--sway2:${s2};--sway3:${s3};`;
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), dur * 1000);
+  }
+  spawnBubble(); spawnBubble(); spawnBubble(); spawnBubble();
+  setInterval(spawnBubble, 2800);
+})();
 </script>
 </body>
 </html>
