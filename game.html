@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Squeege Master 3000™</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --orange: #F56E64;
+  --orangelight: #F6ECDE;
+  --orangeborder: #F56E64;
+  --mint: #9ED9C0;
+  --cream: #FDF9F5;
+  --white: #FFFFFF;
+  --dark: #A6382E;
+  --mid: #7C7268;
+  --radius: 20px;
+  --deepcoral: #A6382E;
+  --ink: #3d3530;
+  --brass: #8B7355;
+}
+html, body {
+  height: 100%;
+  background: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  overflow-x: hidden;
+}
+#sq3000Section {
+  width: 100%;
+  max-width: 600px;
+  padding: 0 12px 20px;
+}
+  #sq3000Section .stage {
+    position:relative;
+    width:100%;
+    display:flex;flex-direction:column;align-items:center;
+    gap:12px;
+    padding:10px 14px 15px;
+    background:linear-gradient(to bottom, #9ED9C0 0%, #FFFFFF 180px);
+    border:1.5px solid var(--orangeborder);
+    border-radius:var(--radius);
+    box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  }
+  #sq3000Section h1 {
+    margin:0;font-size:clamp(18px,5.8vw,26px);color:var(--deepcoral);font-weight:400;
+    font-family:'Anton',sans-serif;text-transform:uppercase;
+    letter-spacing:0.5px;font-style:italic;
+    text-align:center;white-space:nowrap;
+  }
+  #sq3000Section .hud {
+    display:flex;align-items:center;gap:14px;
+    color:var(--ink);font-size:13px;
+  }
+  #sq3000Section .hud .bananas {display:flex;align-items:center;gap:4px;}
+  #sq3000Section .hud .bananas img {width:18px;height:18px;object-fit:contain;border-radius:3px;mix-blend-mode:multiply;}
+  #sq3000Section .hud button {
+    font-family:inherit;font-size:12px;padding:2px 12px;border-radius:16px;
+    border:1px solid var(--brass);background:#D9D9D9;color:var(--brass);
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.8);
+  }
+  #sq3000Section .toast {
+    position:absolute;left:50%;top:50px;transform:translateX(-50%) scale(.9);
+    background:#6bab90;color:var(--ink);
+    padding:24px 32px;border-radius:14px;font-size:20px;font-weight:700;
+    line-height:1.5;min-width:220px;
+    opacity:0;pointer-events:none;transition:all .25s;text-align:center;
+    border:1px solid #4d8a71;z-index:10;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  #sq3000Section .toast.show {opacity:1;transform:translateX(-50%) scale(1);}
+  #sq3000Section .box {
+    position:relative;
+    padding:10px;
+    background:linear-gradient(160deg,#F56E64,#e8867e);
+    border-radius:10px;
+    box-shadow:0 10px 26px rgba(0,0,0,.5), inset 0 2px 3px rgba(255,255,255,.25), inset 0 -2px 4px rgba(0,0,0,.15);
+    max-width:100%;
+  }
+  #sq3000Section #glassCanvas {
+    display:block;border-radius:3px;
+    background:linear-gradient(180deg,#F6ECDE,#efe1cc);
+    touch-action:auto;
+    max-width:100%; height:auto;
+    box-shadow:inset 0 5px 10px rgba(110,80,50,.22), inset 0 -2px 0 rgba(255,255,255,.75);
+  }
+  #sq3000Section #toggleCanvas {
+    display:block;border-radius:3px;
+    background:#ffffff;
+    touch-action:auto;
+    max-width:100%; height:auto;
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.08);
+  }
+
+  /* landscape: keep same top-to-bottom stacking, just use the extra width */
+  @media (orientation: landscape){
+  #sq3000Section .stage {
+      width:min(calc(100% - 24px),620px);
+      flex-direction:column;
+      gap:8px;
+      padding:6px 16px;
+    }
+  #sq3000Section h1 { display:none; }
+  #sq3000Section .hud { font-size:11px; gap:8px; }
+  #sq3000Section .box { padding:8px; }
+  }
+
+
+</style>
+</head>
+<body>
+  <section id="sq3000Section" style="display:block; width:100%; padding:0 0 12px;">
+    <div style="display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:12px;">
+      <span style="font-family:'Nunito',sans-serif; font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--mid); opacity:0.7;">Mini Game</span>
+      <button onclick="window.history.back ? window.history.back() : null;" style="position:absolute; right:0; background:none; border:none; cursor:pointer; font-size:18px; color:var(--mid); opacity:0.5; line-height:1; padding:4px 8px;" aria-label="Close game">&times;</button>
+    </div>
+  <div class="stage" id="stage">
+    <h1>Squeege Master 3000<span style="font-size:0.4em;vertical-align:super;margin-left:2px;">&trade;</span></h1>
+    <div style="display:flex;gap:8px;justify-content:center;width:100%;">
+      <button id="applicatorBtn" aria-label="Applicator" style="margin:0;padding:2px 12px;background:#D9D9D9;border:3px solid #A6382E;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 4px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.8);">
+        <canvas id="applicatorIcon" width="64" height="64" style="width:46px;height:46px;"></canvas>
+      </button>
+      <button id="squeegeeBtn" aria-label="Squeegee" style="margin:0;padding:2px 12px;background:#D9D9D9;border:3px solid #F56E64;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 4px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.8);">
+        <canvas id="squeegeeIcon" width="64" height="64" style="width:46px;height:46px;"></canvas>
+      </button>
+    </div>
+    <div class="hud">
+      <span class="bananas"><img id="bananaIcon" src="data:image/png;base64,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" alt="banana"><b id="bananaCount">0</b></span>
+      <button id="resetBtn">New Window</button>
+      <button id="soundBtn" aria-label="Toggle sound" style="display:inline-flex;align-items:center;justify-content:center;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F56E64" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="#F56E64"></polygon>
+          <g id="soundWaves"><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 5.5a9 9 0 0 1 0 13"></path></g>
+          <g id="soundMuted" style="display:none;"><line x1="16" y1="9" x2="22" y2="15"></line><line x1="22" y1="9" x2="16" y2="15"></line></g>
+        </svg>
+      </button>
+    </div>
+    <div class="box"><canvas id="glassCanvas"></canvas></div>
+    <div class="box"><canvas id="toggleCanvas"></canvas></div>
+    <div class="toast" id="toast"></div>
+  </div>
+
+<script>
+(function(){
+  const glassCanvas = document.getElementById('glassCanvas');
+  const gctx = glassCanvas.getContext('2d');
+  const toggleCanvas = document.getElementById('toggleCanvas');
+  const tctx = toggleCanvas.getContext('2d');
+
+  // button icons call the exact same drawApplicatorTool/drawSqueegeeTool used for the
+  // real glass canvas (defined below) — just scaled down to fit a 64x64 icon canvas.
+  // Re-rendered whenever layout() runs, since foam/blade width scales with GW.
+  const applicatorIconCanvas = document.getElementById('applicatorIcon');
+  const squeegeeIconCanvas = document.getElementById('squeegeeIcon');
+  function renderToolIcons(){
+    const toolWidth = GW * 0.28 + 16; // matches foamW/blade length, plus end-cap padding
+    const scale = Math.min(58/toolWidth, 58/41);
+
+    const aCtx = applicatorIconCanvas.getContext('2d');
+    aCtx.clearRect(0,0,64,64);
+    aCtx.save();
+    aCtx.translate(32, 32);
+    aCtx.scale(scale, scale);
+    drawApplicatorTool(aCtx, 0, -12.5, 0); // -12.5 centers the foam+handle+grip assembly
+    aCtx.restore();
+
+    const sCtx = squeegeeIconCanvas.getContext('2d');
+    sCtx.clearRect(0,0,64,64);
+    sCtx.save();
+    sCtx.translate(32, 32);
+    sCtx.scale(scale, scale);
+    drawSqueegeeTool(sCtx, 0, -8.5, 0); // -8.5 centers the blade+handle+grip assembly
+    sCtx.restore();
+  }
+
+  // logo etched on the glass like a decal on a door — visible from the start, unaffected by cleaning
+  const logoImg = new Image();
+  let logoReady = false;
+  logoImg.onload = () => { logoReady = true; };
+  logoImg.src = 'data:image/png;base64,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';
+
+  const BLADE_LEN_RATIO = 0.28; // blade length as a fraction of glass width, so it scales with box size
+  const ANGLE_LIMIT = 80;
+  const SENSITIVITY = 0.45;   // degrees of S per degree of virtual spin
+  const PIXELS_TO_DEG = 2.0;  // degrees the wheel spins per pixel of horizontal swipe
+  const ZONE_GAP = 10;
+
+  // ---- all of this is recomputed by layout() whenever orientation/size changes ----
+  let GW, GH, TW, TH, BLADE_LEN;
+  let midX, wheelCx, wheelCy, CAP_W, CAP_H;
+  let padLeft, padRight, padTop, padBottom, padCx, padCy;
+  let SM_SCALE_X, SM_SCALE_Y;
+
+  let sx, sy;             // squeegee position
+  let angleDeg = 0;        // S: accumulated, clamped blade angle
+  let spinTotal = 0;       // wheel: cumulative rotation, purely cosmetic
+  let padVx, padVy;        // move-pad's drawn dot position
+
+  // ---- game state: dirt, cleaning, scoring ----
+  const COLS = 26, ROWS = 16;
+  let dirtSeed = [];       // randomized grime speckle positions, regenerated per window
+  let bananaCount = 0; // persists across window resets — the actual currency
+  let windowComplete = false; // true once the closeout position has been hit — locks the squeegee in place
+  let squeegeeStartTime = null; // when the squeegee tool was first selected this window — timing starts here
+  let squeegeeHintTimer = null;
+  let bubbles = [];        // every suds bubble on the glass: 'stuck' (sitting where it was applied) or 'falling' (released by the squeegee, obeying gravity)
+
+  // ---- sound effects, synthesized directly so the file stays self-contained ----
+  let audioCtx = null;
+  let masterGain = null;
+  let soundEnabled = true;
+  function ensureAudio(){
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return;
+      audioCtx = new AC();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = soundEnabled ? 1 : 0;
+      masterGain.connect(audioCtx.destination);
+    }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function toggleSound(){
+    soundEnabled = !soundEnabled;
+    if(masterGain) masterGain.gain.value = soundEnabled ? 1 : 0;
+    document.getElementById('soundWaves').style.display = soundEnabled ? '' : 'none';
+    document.getElementById('soundMuted').style.display = soundEnabled ? 'none' : '';
+  }
+  function playSudsBeep(){
+    if(!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 850 + Math.random() * 220; // slight variation so rapid-fire dabs don't sound robotic
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.05, t0 + 0.006); // quick attack
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.15); // gentle tail off
+    osc.connect(gain).connect(masterGain);
+    osc.start(t0);
+    osc.stop(t0 + 0.16);
+  }
+  function playApplicatorDab(){
+    if(!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle'; // softer/foamier than the squeegee's brighter sine beep
+    osc.frequency.value = 320 + Math.random() * 90;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.045, t0 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.13);
+    osc.connect(gain).connect(masterGain);
+    osc.start(t0);
+    osc.stop(t0 + 0.14);
+  }
+  function playChime(){
+    if(!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 -- a bright little success jingle
+    notes.forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const start = t0 + i * 0.09;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.12, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.35);
+      osc.connect(gain).connect(masterGain);
+      osc.start(start);
+      osc.stop(start + 0.4);
+    });
+  }
+
+  let currentTool = null; // null until the player picks applicator or squeegee
+  let suds = [];
+  let sudsyCellCount = 0;     // how many cells currently hold any suds, kept in sync instead of scanning the grid
+  let cleaned = [];           // cleaned[r][c] — has the squeegee ever wiped this cell before
+  let usefulStrokes = 0;      // blade-cells that were freshly loaded with suds
+  let wastedStrokes = 0;      // blade-cells that were dry ground the blade had already left and come back to
+  let dryHeavyFrames = 0;     // squeegee frames where over half the blade rode over dry glass instead of suds
+  let squeegeeSweepFrames = 0; // total squeegee frames with real work available, for the dry-heavy ratio
+  const MAX_SUDS = 4; // number of applicator strokes to max out suds
+
+  function newWindow(){
+    suds = [];
+    cleaned = [];
+    for(let r=0;r<ROWS;r++){
+      const sudsRow = [];
+      const cleanedRow = [];
+      for(let c=0;c<COLS;c++){
+        sudsRow.push(0);
+        cleanedRow.push(false);
+      }
+      suds.push(sudsRow);
+      cleaned.push(cleanedRow);
+    }
+    sudsyCellCount = 0;
+    usefulStrokes = 0;
+    wastedStrokes = 0;
+    dryHeavyFrames = 0;
+    squeegeeSweepFrames = 0;
+    dirtSeed = [];
+    for(let i=0;i<260;i++){
+      dirtSeed.push({
+        x: Math.random()*GW, y: Math.random()*GH,
+        r: 4+Math.random()*(GW*0.04), a: 0.5+Math.random()*0.35
+      });
+    }
+    windowComplete = false;
+    squeegeeStartTime = null;
+    bubbles = [];
+    sx = GW/2; sy = GH/2;
+    angleDeg = 0; spinTotal = 0;
+    padVx = padCx; padVy = padCy;
+    lastSweepSx = null; lastSweepSy = null; lastSweepAngle = null;
+    moveStrokeId = 0;
+    lastTouchedStroke = new Map();
+    currentTool = null;
+    clearTimeout(squeegeeHintTimer);
+    glassCanvas.style.touchAction = 'auto';
+    toggleCanvas.style.touchAction = 'auto';
+    document.getElementById('applicatorBtn').style.border = '3px solid #F56E64';
+    document.getElementById('squeegeeBtn').style.border = '3px solid #F56E64';
+    updateHud();
+    showToast('', false);
+  }
+
+  function cellAt(px,py){
+    const c = Math.floor(px/(GW/COLS)), r = Math.floor(py/(GH/ROWS));
+    if(c<0||c>=COLS||r<0||r>=ROWS) return null;
+    return {r,c};
+  }
+
+  let lastSweepSx = null, lastSweepSy = null, lastSweepAngle = null;
+  let moveStrokeId = 0;             // increments each time the move-pad is freshly pressed (a new "swipe")
+  let lastTouchedStroke = new Map(); // cellKey -> which stroke last had the blade over it
+  const STROKE_FORGIVENESS = 1; // resuming with the very next push after a release is free (the pad's travel is limited); going further back than that is a real revisit
+
+  function sweepBlade(){
+    const isFirstFrame = lastSweepSx === null;
+    const dy = isFirstFrame ? 0 : sy - lastSweepSy;
+    const dx = isFirstFrame ? 0 : sx - lastSweepSx;
+    const moved = isFirstFrame
+      || Math.abs(sx-lastSweepSx) > 0.05
+      || Math.abs(dy) > 0.05
+      || Math.abs(angleDeg-lastSweepAngle) > 0.05;
+    lastSweepSx = sx; lastSweepSy = sy; lastSweepAngle = angleDeg;
+    if(!moved) return;
+    if(!currentTool) return; // no tool selected yet — nothing happens until the player picks one
+    if(currentTool === 'squeegee' && dy < -0.05) return;
+    // like pushing a real mop: down and sideways strokes are "in the direction of the handle",
+    // a stroke straight up is pulling backward against it and doesn't get the dab sound
+    const movingWithHandle = dy >= -0.05;
+
+    const cw = GW/COLS, ch = GH/ROWS;
+    const currentCells = new Set();
+    const clearedCells = new Set();
+    const [p1,p2] = bladeEndpoints(sx,sy,angleDeg);
+    const steps = 26;
+    const EDGE_OFFSET = Math.max(4, GH*0.02);
+    const hadSudsSomewhere = sudsyCellCount > 0; // was there still work to do when this frame started?
+    let frameWetCount = 0, frameDryCount = 0; // how much of THIS frame's blade sat over suds vs dry glass
+    for(let i=0;i<=steps;i++){
+      const t = i/steps;
+      const px = p1.x + (p2.x-p1.x)*t;
+      const py = p1.y + (p2.y-p1.y)*t + EDGE_OFFSET;
+      const cell = cellAt(px,py);
+      if(!cell) continue;
+      const key = cell.r+'_'+cell.c;
+      if(currentCells.has(key)) continue;
+      currentCells.add(key);
+
+      if(currentTool === 'applicator'){
+        // Increment suds up to max level, spawning one real bubble per increment
+        if(suds[cell.r][cell.c] < MAX_SUDS){
+          if(suds[cell.r][cell.c] === 0) sudsyCellCount++;
+          suds[cell.r][cell.c]++;
+          if(movingWithHandle) playApplicatorDab();
+          bubbles.push({
+            x: px + (Math.random()-0.5)*cw*0.5,
+            y: py + (Math.random()-0.5)*ch*0.5,
+            r: 2.6 + Math.random()*2.4,
+            vx: 0, vy: 0,
+            state: 'stuck',
+            cellR: cell.r, cellC: cell.c,
+            alpha: 0.85 + Math.random()*0.15
+          });
+          // once a cell is fully loaded, some of the excess soap runs down the glass right
+          // away — like a mop dripping the instant it's dunked, before you've wiped anything
+          if(suds[cell.r][cell.c] === MAX_SUDS && Math.random() < 0.35){
+            bubbles.push({
+              x: px + (Math.random()-0.5)*cw*0.3,
+              y: py + ch*0.3,
+              r: 2.2 + Math.random()*1.6,
+              vx: (Math.random()-0.5)*0.4,
+              vy: 0.3 + Math.random()*0.3,
+              state: 'falling',
+              cellR: cell.r, cellC: cell.c,
+              alpha: 0.75 + Math.random()*0.2
+            });
+          }
+        }
+      } else if(suds[cell.r][cell.c] > 0){
+        // Squeegee: remove all suds in one stroke, queueing their bubbles to be released below.
+        // Blade is genuinely "loaded" here — always counts as useful.
+        usefulStrokes++;
+        frameWetCount++;
+        suds[cell.r][cell.c] = 0;
+        sudsyCellCount--;
+        cleaned[cell.r][cell.c] = true;
+        clearedCells.add(key);
+      } else if(cleaned[cell.r][cell.c]){
+        // Already wiped before. Only a fault if it's a genuine stale revisit — not just
+        // the trailing overlap of this same continuous stroke re-covering its own path,
+        // which is normal (a blade narrower than the window has to overlap to avoid gaps).
+        if(hadSudsSomewhere){
+          const lastStroke = lastTouchedStroke.get(key);
+          if(lastStroke === undefined || moveStrokeId - lastStroke > STROKE_FORGIVENESS){
+            // The blade hasn't been anywhere near here since more than one push-release ago —
+            // a genuine revisit, not just resuming forward progress with a fresh grip on the pad.
+            wastedStrokes++;
+            frameDryCount++;
+          }
+        }
+      } else if(hadSudsSomewhere){
+        // Never had suds at all — the blade is riding off past the edge of the soaped area.
+        frameDryCount++;
+      }
+      lastTouchedStroke.set(key, moveStrokeId);
+    }
+
+    // track how much of the blade rode dry glass this frame — real technique wants
+    // most of the blade's length staying in contact with active suds at all times
+    if(currentTool === 'squeegee' && hadSudsSomewhere && (frameWetCount + frameDryCount) > 0){
+      squeegeeSweepFrames++;
+      const dryFraction = frameDryCount / (frameWetCount + frameDryCount);
+      if(dryFraction > 0.5) dryHeavyFrames++;
+    }
+
+    // release bubbles from cleared cells in a single pass instead of re-scanning
+    // the whole bubbles array once per swept cell — that scaled badly with denser suds
+    if(clearedCells.size){
+      for(const b of bubbles){
+        if(b.state === 'stuck' && clearedCells.has(b.cellR+'_'+b.cellC)){
+          b.state = 'falling';
+          b.vx = Math.sign(dx) * (0.25 + Math.random()*0.35) + (Math.random()-0.5)*0.3;
+          // bubbles released near the top of the glass have farther to fall, so give them
+          // a head start on speed instead of relying on gravity alone to catch them up
+          const topBoost = (1 - b.cellR/(ROWS-1)) * 0.9;
+          b.vy = 1.3 + Math.random()*0.4 + topBoost;
+        }
+      }
+    }
+
+    // the moving blade can also re-engage suds that are already falling — a swipe
+    // back through a drop's path knocks it along, not just a one-time release
+    if(currentTool === 'squeegee'){
+      const BLADE_HIT_RADIUS = 9;
+      for(const b of bubbles){
+        if(b.state !== 'falling') continue;
+        if(distToSegment(b.x, b.y, p1.x, p1.y, p2.x, p2.y) < BLADE_HIT_RADIUS){
+          b.vx += Math.sign(dx) * (0.6 + Math.random()*0.5) + (Math.random()-0.5)*0.3;
+          b.vy = Math.max(b.vy * 0.35, 0.15);
+        }
+      }
+    }
+
+    updateHud();
+  }
+
+  function distToSegment(px,py,x1,y1,x2,y2){
+    const dx = x2-x1, dy = y2-y1;
+    const lenSq = dx*dx + dy*dy;
+    let t = lenSq === 0 ? 0 : ((px-x1)*dx + (py-y1)*dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+    const cx = x1 + t*dx, cy = y1 + t*dy;
+    const ddx = px-cx, ddy = py-cy;
+    return Math.sqrt(ddx*ddx + ddy*ddy);
+  }
+
+  const GRAVITY = 0.09;
+  const TERMINAL_VY = 5.5;
+
+  function updateBubbles(){
+    for(let i=bubbles.length-1;i>=0;i--){
+      const b = bubbles[i];
+      if(b.state !== 'falling') continue;
+      b.vy = Math.min(TERMINAL_VY, b.vy + GRAVITY);
+      b.vx *= 0.94;
+      b.x += b.vx;
+      b.y += b.vy;
+      b.alpha -= 0.004;
+      if(b.y - b.r > GH){
+        playSudsBeep(); // the drip actually landed at the bottom of the frame, not just faded away
+        bubbles.splice(i,1);
+      } else if(b.alpha <= 0){
+        bubbles.splice(i,1);
+      }
+    }
+    // falling suds close together coalesce into one bigger drop, like real runoff
+    for(let i=0;i<bubbles.length;i++){
+      const a = bubbles[i];
+      if(a.state !== 'falling') continue;
+      for(let j=bubbles.length-1;j>i;j--){
+        const b = bubbles[j];
+        if(b.state !== 'falling') continue;
+        const ddx = a.x-b.x, ddy = a.y-b.y;
+        if(Math.sqrt(ddx*ddx+ddy*ddy) < (a.r+b.r)*0.55){
+          const areaA = a.r*a.r, areaB = b.r*b.r;
+          a.x = (a.x*areaA + b.x*areaB)/(areaA+areaB);
+          a.y = (a.y*areaA + b.y*areaB)/(areaA+areaB);
+          a.vy = Math.max(a.vy, b.vy);
+          a.vx = (a.vx + b.vx)/2;
+          a.r = Math.min(6.5, Math.sqrt(areaA+areaB));
+          a.alpha = Math.max(a.alpha, b.alpha);
+          bubbles.splice(j,1);
+        }
+      }
+    }
+  }
+
+  function drawFallingBubble(ctx, b){
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, b.alpha);
+    const trailLen = 6 + b.vy*4;
+    const grad = ctx.createLinearGradient(b.x, b.y-trailLen, b.x, b.y);
+    grad.addColorStop(0, 'rgba(255,255,255,0)');
+    grad.addColorStop(1, 'rgba(255,255,255,0.8)');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = Math.max(1, b.r*0.8);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(b.x, b.y-trailLen);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+
+    // same coral-to-mint look as a stuck bubble, so falling suds don't change color on release
+    const headGrad = ctx.createRadialGradient(b.x-b.r*0.3, b.y-b.r*0.3, 0, b.x, b.y, b.r);
+    headGrad.addColorStop(0, 'rgba(255,200,200,0.5)');
+    headGrad.addColorStop(0.5, 'rgba(200,180,220,0.4)');
+    headGrad.addColorStop(1, 'rgba(158,217,192,0.3)');
+    ctx.fillStyle = headGrad;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath();
+    ctx.arc(b.x-b.r*0.35, b.y-b.r*0.35, b.r*0.3, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  const CLOSEOUT_ANGLE_TOL = 6;   // degrees of tilt still considered "perpendicular"
+  const CLOSEOUT_Y_FRAC = 0.82;   // how far down the glass the visual zone band starts (feedback only)
+  const CLOSEOUT_TRIGGER_Y_FRAC = 0.99; // how close to the true bottom edge is required to actually fire
+  let inCloseoutZone = false;     // true when S is in the visual band — drives the glow
+  let inCloseoutTrigger = false;  // true only once S has actually reached the true bottom edge
+
+  function updateHud(){
+    document.getElementById('bananaCount').textContent = bananaCount;
+    const isPerpendicular = Math.abs(angleDeg) < CLOSEOUT_ANGLE_TOL;
+    inCloseoutZone = isPerpendicular && sy >= GH * CLOSEOUT_Y_FRAC;
+    inCloseoutTrigger = isPerpendicular && sy >= GH * CLOSEOUT_TRIGGER_Y_FRAC;
+    if(inCloseoutTrigger && currentTool === 'squeegee' && !windowComplete){
+      windowComplete = true;
+      angleDeg = 0;
+      sy = GH;
+      playChime();
+      bananaCount += 3;
+      document.getElementById('bananaCount').textContent = bananaCount;
+
+      const totalStrokes = usefulStrokes + wastedStrokes;
+      // zero strokes means nothing was ever actually squeegeed -- closing out without doing
+      // any real work shouldn't default to a perfect score just because there's no data
+      const efficiency = totalStrokes > 0 ? Math.round(usefulStrokes/totalStrokes*100) : 0;
+      let missedSlots = 0;
+      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(suds[r][c]>0) missedSlots++; }
+      const elapsedSeconds = squeegeeStartTime !== null ? (performance.now() - squeegeeStartTime) / 1000 : 0;
+      const GRACE_SECONDS = 15; // first 15s of squeegeeing are free
+      const timePenalty = Math.floor(Math.max(0, elapsedSeconds - GRACE_SECONDS) / 3); // -1 per 3s over
+      const dryRatio = squeegeeSweepFrames > 0 ? dryHeavyFrames / squeegeeSweepFrames : 0;
+      const dryPenalty = Math.round(dryRatio * 40); // riding mostly-dry blade for most of the wipe costs up to 40
+      const score = Math.min(99, Math.max(0, efficiency - missedSlots*5 - timePenalty - dryPenalty));
+
+      const bImg = bananaTransparentSrc ? `<img src="${bananaTransparentSrc}" style="width:20px;height:20px;vertical-align:middle;">` : '🍌';
+      showToast(`<div style="text-align:center;">Great job!<br>${bImg}<br>3 bananas<br><b>Score: ${score}</b></div>`, true);
+      setTimeout(() => {
+        showToast('', false);
+        glassCanvas.style.touchAction = 'auto';
+        toggleCanvas.style.touchAction = 'auto';
+      }, 2800);
+    } else if(!windowComplete){
+      showToast('', false);
+    }
+  }
+
+  function showToast(html, on){
+    const t = document.getElementById('toast');
+    t.innerHTML = html;
+    t.classList.toggle('show', on);
+  }
+
+  let anglePointerId = null, angleLastX = 0;
+  let movePointerId = null, moveLastX = 0, moveLastY = 0;
+
+  function isLandscape(){
+    return window.matchMedia('(orientation: landscape)').matches;
+  }
+
+  function layout(){
+    const landscape = isLandscape();
+
+    if(landscape){
+      GW = 620; GH = 125;
+      TW = 560; TH = 140;
+    } else {
+      GW = 440; GH = 310;
+      TW = 340; TH = 210;
+    }
+
+    glassCanvas.width = GW; glassCanvas.height = GH;
+    toggleCanvas.width = TW; toggleCanvas.height = TH;
+    BLADE_LEN = GW * BLADE_LEN_RATIO;
+
+    midX = TW/2;
+    wheelCx = midX/2; wheelCy = TH/2;
+    CAP_W = midX - 40;
+    CAP_H = Math.min(52, TH*0.32);
+
+    padLeft = midX + ZONE_GAP; padRight = TW - 14;
+    const padVInset = TH * 0.22;
+    padTop = padVInset; padBottom = TH - padVInset;
+    padCx = (padLeft+padRight)/2; padCy = (padTop+padBottom)/2;
+
+    // scale so the pad's actual travel range maps to the glass's actual travel range —
+    // the dot bottoming out should coincide with S reaching its own limit, not before
+    const glassMargin = 10;
+    const padTravelX = (padRight-padLeft) - 2*14;   // minus the pad's own dot radius margin
+    const padTravelY = (padBottom-padTop) - 2*14;
+    const glassTravelX = GW - 2*glassMargin;
+    const glassTravelY = GH - 2*glassMargin;
+    SM_SCALE_X = glassTravelX / padTravelX;
+    SM_SCALE_Y = glassTravelY / padTravelY;
+
+    // reset live state that depended on the old dimensions
+    sx = GW/2; sy = GH/2;
+    padVx = padCx; padVy = padCy;
+    anglePointerId = null; movePointerId = null;
+    renderToolIcons();
+    newWindow();
+    fitStageToViewport();
+  }
+
+  function fitStageToViewport(){
+    const stage = document.querySelector('.stage');
+    stage.style.transform = 'none';
+  }
+
+  function bladeEndpoints(x,y,deg){
+    const rad = deg*Math.PI/180;
+    const dx = Math.cos(rad)*BLADE_LEN/2;
+    const dy = Math.sin(rad)*BLADE_LEN/2;
+    return [{x:x-dx,y:y-dy},{x:x+dx,y:y+dy}];
+  }
+
+  function clampPad(px,py){
+    const r = 14;
+    const x = Math.min(padRight-r, Math.max(padLeft+r, px));
+    const y = Math.min(padBottom-r, Math.max(padTop+r, py));
+    return {x,y};
+  }
+
+  function clampGlass(px,py){
+    const rad = angleDeg*Math.PI/180;
+    const halfDx = Math.abs(Math.cos(rad))*BLADE_LEN/2;
+    const halfDy = Math.abs(Math.sin(rad))*BLADE_LEN/2;
+    // scaled to GH instead of fixed — a flat 10px margin ate 8% of landscape's short glass,
+    // more than the 5% closeout trigger zone, making the bottom edge physically unreachable
+    const margin = Math.min(10, GH * 0.025);
+    const x = Math.min(GW-margin-halfDx, Math.max(margin+halfDx, px));
+    const y = Math.min(GH-halfDy, Math.max(margin+halfDy, py));
+    return {x,y};
+  }
+
+  function toLocal(canvas,evt){
+    const rect = canvas.getBoundingClientRect();
+    const cx = evt.clientX - rect.left;
+    const cy = evt.clientY - rect.top;
+    return {x: cx*(canvas.width/rect.width), y: cy*(canvas.height/rect.height)};
+  }
+
+  toggleCanvas.addEventListener('pointerdown', (e)=>{
+    if(!currentTool) return;
+    e.preventDefault();
+    ensureAudio();
+    if(windowComplete) return;
+    const p = toLocal(toggleCanvas,e);
+    if(p.x < midX && anglePointerId === null){
+      anglePointerId = e.pointerId;
+      angleLastX = p.x;
+      try { toggleCanvas.setPointerCapture(e.pointerId); } catch(err) {}
+    } else if(p.x >= midX && movePointerId === null){
+      movePointerId = e.pointerId;
+      moveLastX = p.x; moveLastY = p.y;
+      moveStrokeId++;
+      try { toggleCanvas.setPointerCapture(e.pointerId); } catch(err) {}
+    }
+  }, {passive:false});
+
+  toggleCanvas.addEventListener('pointermove', (e)=>{
+    if(!currentTool) return;
+    e.preventDefault();
+    if(windowComplete) return;
+    const p = toLocal(toggleCanvas,e);
+    if(e.pointerId === anglePointerId){
+      const dx = p.x - angleLastX;
+      const delta = dx * PIXELS_TO_DEG;
+      spinTotal += delta;
+      angleDeg = Math.max(-ANGLE_LIMIT, Math.min(ANGLE_LIMIT, angleDeg + delta*SENSITIVITY));
+      angleLastX = p.x;
+    } else if(e.pointerId === movePointerId){
+      const dx = p.x - moveLastX, dy = p.y - moveLastY;
+      const padClamped = clampPad(padVx+dx, padVy+dy);
+      padVx = padClamped.x; padVy = padClamped.y;
+      const clamped = clampGlass(sx+dx*SM_SCALE_X, sy+dy*SM_SCALE_Y);
+      sx = clamped.x; sy = clamped.y;
+      moveLastX = p.x; moveLastY = p.y;
+    }
+  }, {passive:false});
+
+  ['pointerup','pointerleave','pointercancel'].forEach(evt=>{
+    toggleCanvas.addEventListener(evt, (e)=>{
+      if(!currentTool) return;
+      e.preventDefault();
+      if(e.pointerId === anglePointerId) anglePointerId = null;
+      if(e.pointerId === movePointerId){
+        movePointerId = null;
+      }
+    }, {passive:false});
+  });
+  toggleCanvas.addEventListener('touchstart', (e)=>{ if(currentTool) e.preventDefault(); }, {passive:false});
+  toggleCanvas.addEventListener('touchmove', (e)=>{ if(currentTool) e.preventDefault(); }, {passive:false});
+
+  function drawSudsBubble(ctx, x, y, r){
+    // Gradient from coral to mint
+    const grad = ctx.createRadialGradient(x-r*0.3, y-r*0.3, 0, x, y, r);
+    grad.addColorStop(0, 'rgba(255,200,200,0.5)');
+    grad.addColorStop(0.5, 'rgba(200,180,220,0.4)');
+    grad.addColorStop(1, 'rgba(158,217,192,0.3)');
+    
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath();
+    ctx.arc(x-r*0.35, y-r*0.35, r*0.3, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  function drawBubble(ctx,x,y,r,alpha){
+    ctx.save();
+    ctx.globalAlpha = alpha;
+
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.closePath();
+
+    // diagonal coral-to-mint tint, cream through the middle
+    const lg = ctx.createLinearGradient(x-r,y-r,x+r,y+r);
+    lg.addColorStop(0,   'rgba(158,217,192,0.55)');
+    lg.addColorStop(0.5, 'rgba(246,236,222,0.4)');
+    lg.addColorStop(1,   'rgba(245,110,100,0.55)');
+    ctx.fillStyle = lg;
+    ctx.fill();
+
+    ctx.save();
+    ctx.clip();
+    // soft glossy sheen
+    const rg = ctx.createRadialGradient(x-r*0.3,y-r*0.35,0, x-r*0.3,y-r*0.35, r*1.3);
+    rg.addColorStop(0,'rgba(255,255,255,0.55)');
+    rg.addColorStop(0.4,'rgba(255,255,255,0.12)');
+    rg.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle = rg;
+    ctx.fillRect(x-r,y-r,r*2,r*2);
+    ctx.restore();
+
+    // main highlight streak
+    ctx.save();
+    ctx.translate(x - r*0.3, y - r*0.35);
+    ctx.rotate(-0.5);
+    ctx.scale(1.6,0.7);
+    ctx.beginPath();
+    ctx.arc(0,0,r*0.35,0,Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    ctx.fill();
+    ctx.restore();
+
+    // secondary highlight dot
+    ctx.beginPath();
+    ctx.arc(x+r*0.35, y+r*0.3, r*0.15, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fill();
+
+    // thin rim
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.lineWidth = Math.max(0.6, r*0.06);
+    ctx.strokeStyle = 'rgba(220,150,140,0.5)';
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function drawGlass(){
+    gctx.clearRect(0,0,GW,GH);
+
+    // dirty glass is cream; each cell turns gray the first time the squeegee wipes it
+    const gcw = GW/COLS, gch = GH/ROWS;
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        gctx.fillStyle = cleaned[r][c] ? '#EDEDED' : '#F6ECDE';
+        gctx.fillRect(c*gcw, r*gch, gcw+1, gch+1);
+      }
+    }
+
+    // logo etched on the glass like a decal on a door — always visible, on top of dirt or clean alike
+    if(logoReady){
+      gctx.save();
+      gctx.globalAlpha = 0.4;
+      const pad = Math.min(GW, GH)*0.1; // based on the tighter dimension — GW*0.1 alone left almost no headroom in landscape's short, wide glass
+      const scale = Math.min((GW-pad*2)/logoImg.naturalWidth, (GH-pad*2)/logoImg.naturalHeight);
+      const dw = logoImg.naturalWidth*scale, dh = logoImg.naturalHeight*scale;
+      gctx.drawImage(logoImg, (GW-dw)/2, (GH-dh)/2, dw, dh);
+      gctx.restore();
+    }
+
+    gctx.save();
+    gctx.strokeStyle = 'rgba(255,255,255,.5)';
+    gctx.lineWidth = 3;
+    gctx.strokeRect(4,4,GW-8,GH-8);
+    gctx.restore();
+
+    // every suds bubble is a tracked object: 'stuck' ones sit where they were applied,
+    // 'falling' ones were just released by the squeegee and obey gravity/drawFallingBubble
+    for(const b of bubbles){
+      if(b.state === 'falling'){
+        drawFallingBubble(gctx, b);
+      } else {
+        drawSudsBubble(gctx, b.x, b.y, b.r);
+      }
+    }
+
+    if(currentTool === 'applicator'){
+      drawApplicatorTool(gctx, sx, sy, angleDeg);
+    } else if(currentTool === 'squeegee'){
+      drawSqueegeeTool(gctx, sx, sy, angleDeg);
+    }
+  }
+
+  // shared by the live glass canvas and the button icons, so the icons are never
+  // a separate approximation — same code, just called at a smaller scale
+  function drawApplicatorTool(ctx, x, y, angleDeg){
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate((angleDeg * Math.PI) / 180);
+
+    const foamW = GW * 0.28;  // Same span as squeegee blade
+    const foamH = 16;
+
+    const foamGrad = ctx.createLinearGradient(-foamW/2, 0, foamW/2, 0);
+    foamGrad.addColorStop(0, '#9ED9C0');   // mint
+    foamGrad.addColorStop(1, '#F56E64');   // coral
+
+    ctx.fillStyle = foamGrad;
+    ctx.fillRect(-foamW/2, -foamH/2, foamW, foamH);
+
+    ctx.fillStyle = foamGrad;
+    ctx.beginPath();
+    ctx.arc(-foamW/2, 0, foamH/2, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(foamW/2, 0, foamH/2, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    for(let px = -foamW/2 + 4; px < foamW/2; px += 4){
+      for(let py = -foamH/2 + 3; py < foamH/2; py += 4){
+        ctx.beginPath();
+        ctx.arc(px, py, 1.5, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    ctx.fillStyle = '#1b1b1b';
+    ctx.fillRect(-5, foamH/2, 10, 20);
+
+    ctx.fillStyle = '#9ED9C0';
+    ctx.beginPath();
+    ctx.arc(0, foamH/2 + 20, 5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawSqueegeeTool(ctx, x, y, angleDeg){
+    const [p1,p2] = bladeEndpoints(x, y, angleDeg);
+    ctx.save();
+
+    const bladeGrad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+    bladeGrad.addColorStop(0, '#9ED9C0');   // mint
+    bladeGrad.addColorStop(1, '#F56E64');   // coral
+
+    ctx.strokeStyle = '#2b2b2b';
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#b7bfc7';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+    ctx.stroke();
+
+    ctx.strokeStyle = bladeGrad;
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#F56E64';
+    ctx.lineWidth = 7;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x,y); ctx.lineTo(x, y+22);
+    ctx.stroke();
+    ctx.fillStyle = '#F56E64';
+    ctx.beginPath();
+    ctx.arc(x,y,5,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawToggle(){
+    tctx.clearRect(0,0,TW,TH);
+    tctx.fillStyle = '#ffffff';
+    tctx.fillRect(0,0,TW,TH);
+
+    // Left white zone, right light grey zone
+    tctx.fillStyle = '#FFFFFF';
+    tctx.fillRect(0, 0, midX, TH);
+    tctx.fillStyle = '#EDECEA';
+    tctx.fillRect(midX, 0, TW - midX, TH);
+
+    tctx.save();
+
+    tctx.strokeStyle = 'rgba(0,0,0,0.07)';
+    tctx.lineWidth = 1;
+    tctx.beginPath();
+    tctx.moveTo(midX, 10);
+    tctx.lineTo(midX, TH-10);
+    tctx.stroke();
+
+    tctx.fillStyle = 'rgba(200,80,70,0.75)';
+    tctx.font = '10px Georgia';
+    tctx.textAlign = 'center';
+    tctx.fillText('ANGLE', wheelCx, 18);
+    tctx.fillStyle = 'rgba(60,160,120,0.85)';
+    tctx.fillText('MOVE', padCx, 18);
+
+    // ---- left zone: angle wheel, profile view ----
+    const left = wheelCx - CAP_W/2, right = wheelCx + CAP_W/2;
+    const top = wheelCy - CAP_H/2, bottom = wheelCy + CAP_H/2;
+    const r = CAP_H/2;
+    const angleActive = anglePointerId !== null || keysDown.left !== keysDown.right;
+
+    tctx.beginPath();
+    tctx.moveTo(left+r, top);
+    tctx.lineTo(right-r, top);
+    tctx.arc(right-r, wheelCy, r, -Math.PI/2, Math.PI/2);
+    tctx.lineTo(left+r, bottom);
+    tctx.arc(left+r, wheelCy, r, Math.PI/2, -Math.PI/2);
+    tctx.closePath();
+    tctx.fillStyle = angleActive ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.7)';
+    tctx.fill();
+    tctx.lineWidth = 2.5;
+    tctx.strokeStyle = '#F56E64';
+    tctx.stroke();
+
+    tctx.save();
+    tctx.clip();
+    const spacing = 16;
+    const offset = ((spinTotal * 1.4) % spacing + spacing) % spacing;
+    tctx.strokeStyle = 'rgba(245,110,100,0.85)';
+    tctx.lineWidth = 3;
+    for(let x = left - spacing + offset; x < right + spacing; x += spacing){
+      const distFromCenter = Math.abs(x - wheelCx) / (CAP_W/2);
+      const fade = Math.max(0, 1 - Math.pow(distFromCenter, 1.4));
+      tctx.globalAlpha = fade;
+      tctx.beginPath();
+      tctx.moveTo(x, top+8);
+      tctx.lineTo(x, bottom-8);
+      tctx.stroke();
+    }
+    tctx.restore();
+
+    // ---- right zone: XY move pad ----
+    const moveActive = movePointerId !== null;
+    tctx.fillStyle = '#EDECEA';
+    tctx.strokeStyle = '#9ED9C0';
+    tctx.lineWidth = 2;
+    const padR = 8;
+    tctx.beginPath();
+    tctx.moveTo(padLeft+padR, padTop);
+    tctx.lineTo(padRight-padR, padTop);
+    tctx.arcTo(padRight, padTop, padRight, padTop+padR, padR);
+    tctx.lineTo(padRight, padBottom-padR);
+    tctx.arcTo(padRight, padBottom, padRight-padR, padBottom, padR);
+    tctx.lineTo(padLeft+padR, padBottom);
+    tctx.arcTo(padLeft, padBottom, padLeft, padBottom-padR, padR);
+    tctx.lineTo(padLeft, padTop+padR);
+    tctx.arcTo(padLeft, padTop, padLeft+padR, padTop, padR);
+    tctx.closePath();
+    tctx.fill();
+    tctx.stroke();
+
+    tctx.fillStyle = moveActive ? '#2E7A5A' : '#3A8A68';
+    tctx.beginPath();
+    tctx.arc(padVx, padVy, 9, 0, Math.PI*2);
+    tctx.fill();
+
+    tctx.restore();
+  }
+
+  // ---- keyboard support (PC has no second finger, but it has a keyboard) ----
+  // Hold Left/Right (or A/D) to rotate — works at the same time as dragging the move pad with the mouse.
+  const KEY_DEG_PER_FRAME = 1.1;
+  const keysDown = {left:false, right:false};
+
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A'){ keysDown.left = true; e.preventDefault(); }
+    if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D'){ keysDown.right = true; e.preventDefault(); }
+  });
+  window.addEventListener('keyup', (e)=>{
+    if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A'){ keysDown.left = false; }
+    if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D'){ keysDown.right = false; }
+  });
+  // if the mouse is actively dragging the angle zone, let it take priority over the keyboard
+  function applyKeyboardAngle(){
+    if(windowComplete) return;
+    if(anglePointerId !== null) return;
+    if(keysDown.left === keysDown.right) return; // neither or both held — no net input
+    const delta = (keysDown.right ? 1 : -1) * KEY_DEG_PER_FRAME;
+    spinTotal += delta;
+    angleDeg = Math.max(-ANGLE_LIMIT, Math.min(ANGLE_LIMIT, angleDeg + delta*SENSITIVITY));
+  }
+
+  function loop(){
+    applyKeyboardAngle();
+    sweepBlade(); // also refreshes the HUD, but only when something actually moved
+    updateBubbles();
+    drawGlass();
+    drawToggle();
+    requestAnimationFrame(loop);
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', newWindow);
+  document.getElementById('soundBtn').addEventListener('click', ()=>{
+    ensureAudio();
+    toggleSound();
+  });
+
+  function enableGameTouch(){
+    glassCanvas.style.touchAction = 'none';
+    toggleCanvas.style.touchAction = 'none';
+  }
+
+  document.getElementById('applicatorBtn').addEventListener('click', ()=>{
+    if(windowComplete) return;
+    ensureAudio();
+    currentTool = 'applicator';
+    enableGameTouch();
+    showToast('', false);
+    document.getElementById('applicatorBtn').style.border = '3px solid #A6382E';
+    document.getElementById('squeegeeBtn').style.border = '3px solid #F56E64';
+  });
+
+  document.getElementById('squeegeeBtn').addEventListener('click', ()=>{
+    if(windowComplete) return;
+    ensureAudio();
+    const firstSqueegeePick = currentTool !== 'squeegee';
+    currentTool = 'squeegee';
+    if(squeegeeStartTime === null) squeegeeStartTime = performance.now();
+    enableGameTouch();
+    document.getElementById('squeegeeBtn').style.border = '3px solid #A6382E';
+    document.getElementById('applicatorBtn').style.border = '3px solid #F56E64';
+  });
+
+  let resizeTimer = null;
+  function onOrientationChange(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(layout, 80); // small debounce while the browser finishes rotating
+  }
+  window.addEventListener('resize', onOrientationChange);
+  if(window.matchMedia){
+    window.matchMedia('(orientation: landscape)').addEventListener('change', onOrientationChange);
+  }
+
+  layout();
+  loop();
+  // the title font loads async and can shift its rendered size slightly once it swaps in
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(fitStageToViewport);
+  }
+})();
+
+</script>
+</body>
+</html>
