@@ -1240,26 +1240,41 @@
   let calScrollDir = 1;
   function startCalScroll(){
     if(calScrollId) return;
+    const isDesktop = window.matchMedia('(min-width: 900px)').matches;
+    const row = isDesktop ? document.getElementById('packagesRow') : null;
     function step(){
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if(maxScroll <= 0){ calScrollId = null; return; }
-      window.scrollBy(0, 0.5 * calScrollDir);
-      if(window.scrollY >= maxScroll - 1) calScrollDir = -1;
-      if(window.scrollY <= 1) calScrollDir = 1;
+      if(row) {
+        const maxScroll = row.scrollWidth - row.clientWidth;
+        if(maxScroll > 0) {
+          row.scrollLeft += 0.5 * calScrollDir;
+          if(row.scrollLeft >= maxScroll - 1) calScrollDir = -1;
+          if(row.scrollLeft <= 1) calScrollDir = 1;
+        }
+      } else {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        if(maxScroll <= 0){ calScrollId = null; return; }
+        window.scrollBy(0, 0.5 * calScrollDir);
+        if(window.scrollY >= maxScroll - 1) calScrollDir = -1;
+        if(window.scrollY <= 1) calScrollDir = 1;
+      }
       calScrollId = requestAnimationFrame(step);
     }
     calScrollId = requestAnimationFrame(step);
   }
   function startCalScrollHome(){
     stopCalScroll();
-    const startY = window.scrollY;
-    if(startY <= 0) return;
+    const isDesktop = window.matchMedia('(min-width: 900px)').matches;
+    const row = isDesktop ? document.getElementById('packagesRow') : null;
+    const startVal = row ? row.scrollLeft : window.scrollY;
+    if(startVal <= 0) return;
     const duration = 9800;
     const t0 = performance.now();
     function step(now){
       const p = Math.min((now - t0) / duration, 1);
       const eased = 1 - Math.pow(1 - p, 3);
-      window.scrollTo(0, startY * (1 - eased));
+      const val = startVal * (1 - eased);
+      if(row) row.scrollLeft = val;
+      else window.scrollTo(0, val);
       if(p < 1) calScrollId = requestAnimationFrame(step);
       else calScrollId = null;
     }
