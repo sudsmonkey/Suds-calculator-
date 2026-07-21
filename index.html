@@ -550,42 +550,31 @@
   .wiz-bubble {
     position: fixed;
     border-radius: 50%;
-    overflow: hidden;
     pointer-events: none;
-    z-index: 101;
+    z-index: 99;
+    background: radial-gradient(
+      circle at 34% 30%,
+      rgba(255,255,255,0.72) 0%,
+      rgba(255,255,255,0.18) 14%,
+      rgba(160,220,255,0.07) 38%,
+      rgba(220,160,255,0.06) 62%,
+      rgba(160,255,220,0.05) 80%,
+      transparent 100%
+    );
+    border: 1px solid rgba(255,255,255,0.35);
+    box-shadow:
+      inset -3px -3px 10px rgba(255,255,255,0.25),
+      inset 3px 3px 10px rgba(160,220,255,0.18),
+      0 0 24px rgba(160,220,255,0.08);
     animation: wizBubbleRise linear both;
     will-change: transform, opacity;
-    box-shadow:
-      0 0 0 2px rgba(255,255,255,0.65),
-      0 0 28px rgba(160,220,255,0.3),
-      0 0 70px rgba(200,180,255,0.12);
-  }
-  /* Magnifying lens — captures backdrop at layout size, scale(1.8) zooms it in */
-  .wiz-bubble::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    transform: scale(1.8);
-    transform-origin: center;
-    backdrop-filter: blur(0px) brightness(1.06) saturate(1.12);
-  }
-  /* Glass shine + iridescent tint on top */
-  .wiz-bubble::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(circle at 30% 27%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.08) 20%, transparent 34%),
-      radial-gradient(circle at 70% 73%, rgba(255,255,255,0.18) 0%, transparent 22%),
-      linear-gradient(135deg, rgba(160,220,255,0.07) 0%, rgba(220,160,255,0.06) 50%, rgba(160,255,200,0.06) 100%);
-    pointer-events: none;
   }
   @keyframes wizBubbleRise {
-    0%   { transform: translateY(0) translateX(0) scale(0.3); opacity: 0; }
-    8%   { opacity: 1; transform: translateY(-7vh) translateX(var(--sway1)) scale(1); }
-    50%  { transform: translateY(-52vh) translateX(var(--sway2)) scale(1); opacity: 0.95; }
-    92%  { opacity: 0.65; }
-    100% { transform: translateY(-110vh) translateX(var(--sway3)) scale(0.85); opacity: 0; }
+    0%   { transform: translateY(0) translateX(0) scale(0.4); opacity: 0; }
+    8%   { opacity: 0.9; transform: translateY(-6vh) translateX(var(--sway1)) scale(1); }
+    50%  { transform: translateY(-52vh) translateX(var(--sway2)) scale(1); opacity: 0.85; }
+    92%  { opacity: 0.7; }
+    100% { transform: translateY(-108vh) translateX(var(--sway3)) scale(0.9); opacity: 0; }
   }
 }
 </style>
@@ -1287,7 +1276,7 @@
     if (!window.matchMedia('(min-width: 900px)').matches) return;
     const b = document.createElement('div');
     b.className = 'wiz-bubble';
-    const size = 90 + Math.random() * 200;
+    const size = 60 + Math.random() * 160;
     const dur = 14 + Math.random() * 16;
     const startX = 4 + Math.random() * 88;
     const s1 = ((Math.random() - 0.5) * 60) + 'px';
@@ -1302,7 +1291,7 @@
   function startCalScroll(){
     if(window.matchMedia('(min-width: 900px)').matches) {
       spawnWizBubble(); spawnWizBubble(); spawnWizBubble();
-      wizBubbleInterval = setInterval(spawnWizBubble, 2200);
+      wizBubbleInterval = setInterval(spawnWizBubble, 3200);
       return;
     }
     if(calScrollId) return;
