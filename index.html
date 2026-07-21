@@ -546,6 +546,17 @@
     display: flex !important; flex-direction: column; flex: 1;
     animation: wizSlideInLeft 0.65s cubic-bezier(0.45,0,0.1,1) both;
   }
+@media (min-width: 900px) {
+  @keyframes calBgDrift {
+    0%   { transform: translateX(0); }
+    50%  { transform: translateX(-220px); }
+    100% { transform: translateX(0); }
+  }
+  body.cal-drifting .packages-wrap {
+    animation: calBgDrift 22s ease-in-out infinite;
+    will-change: transform;
+  }
+}
 </style>
 </head>
 <body>
@@ -1238,56 +1249,41 @@
   let bananaTransparentSrc = null;
   let calScrollId = null;
   let calScrollDir = 1;
-  let calScrollRow = null;
   function startCalScroll(){
+    if(window.matchMedia('(min-width: 900px)').matches) {
+      document.body.classList.add('cal-drifting');
+      return;
+    }
     if(calScrollId) return;
-    const isDesktop = window.matchMedia('(min-width: 900px)').matches;
-    calScrollRow = isDesktop ? document.getElementById('packagesRow') : null;
-    if(calScrollRow) calScrollRow.style.scrollSnapType = 'none';
     function step(){
-      if(calScrollRow) {
-        const maxScroll = calScrollRow.scrollWidth - calScrollRow.clientWidth;
-        if(maxScroll > 0) {
-          calScrollRow.scrollLeft += 0.5 * calScrollDir;
-          if(calScrollRow.scrollLeft >= maxScroll - 1) calScrollDir = -1;
-          if(calScrollRow.scrollLeft <= 1) calScrollDir = 1;
-        }
-      } else {
-        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-        if(maxScroll <= 0){ calScrollId = null; return; }
-        window.scrollBy(0, 0.5 * calScrollDir);
-        if(window.scrollY >= maxScroll - 1) calScrollDir = -1;
-        if(window.scrollY <= 1) calScrollDir = 1;
-      }
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if(maxScroll <= 0){ calScrollId = null; return; }
+      window.scrollBy(0, 0.5 * calScrollDir);
+      if(window.scrollY >= maxScroll - 1) calScrollDir = -1;
+      if(window.scrollY <= 1) calScrollDir = 1;
       calScrollId = requestAnimationFrame(step);
     }
     calScrollId = requestAnimationFrame(step);
   }
   function startCalScrollHome(){
     stopCalScroll();
-    const isDesktop = window.matchMedia('(min-width: 900px)').matches;
-    const row = isDesktop ? document.getElementById('packagesRow') : null;
-    const startVal = row ? row.scrollLeft : window.scrollY;
-    if(startVal <= 0) {
-      if(row) row.style.scrollSnapType = '';
-      return;
-    }
+    if(window.matchMedia('(min-width: 900px)').matches) return;
+    const startY = window.scrollY;
+    if(startY <= 0) return;
     const duration = 9800;
     const t0 = performance.now();
     function step(now){
       const p = Math.min((now - t0) / duration, 1);
       const eased = 1 - Math.pow(1 - p, 3);
-      const val = startVal * (1 - eased);
-      if(row) row.scrollLeft = val;
-      else window.scrollTo(0, val);
+      window.scrollTo(0, startY * (1 - eased));
       if(p < 1) calScrollId = requestAnimationFrame(step);
-      else { calScrollId = null; if(row) row.style.scrollSnapType = ''; }
+      else calScrollId = null;
     }
     calScrollId = requestAnimationFrame(step);
   }
   function stopCalScroll(){
     if(calScrollId){ cancelAnimationFrame(calScrollId); calScrollId = null; }
-    if(calScrollRow){ calScrollRow.style.scrollSnapType = ''; calScrollRow = null; }
+    document.body.classList.remove('cal-drifting');
   }
   function openCalibrate(){
     if(calibrated) return;
