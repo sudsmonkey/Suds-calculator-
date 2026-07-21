@@ -112,7 +112,7 @@
   .quick-q select:focus { border-color: var(--orange); }
   .slider-wrap { position: relative; }
   .slider-wrap.locked input[type="range"] { opacity: 0.35; pointer-events: none; }
-  #calibrateOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
+  #calibrateOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
   #calibrateOverlay.visible { display: flex; }
   .calibrate-box { background: var(--white); border-radius: var(--radius); padding: 32px 28px; width: 100%; max-width: 380px; min-height: 380px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
   .calibrate-box h2 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 20px; color: var(--orange); margin-bottom: 6px; }
@@ -550,39 +550,29 @@
   .wiz-bubble {
     position: fixed;
     border-radius: 50%;
-    overflow: hidden;
     pointer-events: none;
-    z-index: 101;
+    z-index: 99;
+    background: radial-gradient(
+      circle at 34% 30%,
+      rgba(255,255,255,0.72) 0%,
+      rgba(255,255,255,0.18) 14%,
+      rgba(160,220,255,0.07) 38%,
+      rgba(220,160,255,0.06) 62%,
+      rgba(160,255,220,0.05) 80%,
+      transparent 100%
+    );
+    border: 1px solid rgba(255,255,255,0.35);
+    box-shadow:
+      inset -3px -3px 10px rgba(255,255,255,0.25),
+      inset 3px 3px 10px rgba(160,220,255,0.18),
+      0 0 24px rgba(160,220,255,0.08);
     animation: wizBubbleRise linear both;
     will-change: transform, opacity;
-    box-shadow:
-      0 0 0 2px rgba(255,255,255,0.7),
-      0 0 20px rgba(255,255,255,0.15),
-      0 0 50px rgba(160,220,255,0.15);
-  }
-  /* Lens: scale(1.8) magnifies; contrast+brightness punch through the dark overlay tint */
-  .wiz-bubble::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    transform: scale(1.8);
-    transform-origin: center;
-    backdrop-filter: blur(0px) contrast(2.2) brightness(1.6) saturate(1.2);
-  }
-  /* Glass shine */
-  .wiz-bubble::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(circle at 30% 27%, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.04) 22%, transparent 36%),
-      radial-gradient(circle at 68% 72%, rgba(255,255,255,0.12) 0%, transparent 20%);
-    pointer-events: none;
   }
   @keyframes wizBubbleRise {
     0%   { transform: translateY(0) translateX(0) scale(0.4); opacity: 0; }
-    8%   { opacity: 1; transform: translateY(-6vh) translateX(var(--sway1)) scale(1); }
-    50%  { transform: translateY(-52vh) translateX(var(--sway2)) scale(1); opacity: 0.95; }
+    8%   { opacity: 0.9; transform: translateY(-6vh) translateX(var(--sway1)) scale(1); }
+    50%  { transform: translateY(-52vh) translateX(var(--sway2)) scale(1); opacity: 0.85; }
     92%  { opacity: 0.7; }
     100% { transform: translateY(-108vh) translateX(var(--sway3)) scale(0.9); opacity: 0; }
   }
