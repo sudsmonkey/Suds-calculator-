@@ -630,8 +630,7 @@ html, body {
       showToast(`<div style="text-align:center;">Great job!<br>${bImg}<br>3 bananas<br><b>Score: ${score}</b></div>`, true);
       setTimeout(() => {
         showToast('', false);
-        glassCanvas.style.touchAction = 'auto';
-        toggleCanvas.style.touchAction = 'auto';
+        newWindow();
       }, 2800);
     } else if(!windowComplete){
       showToast('', false);
