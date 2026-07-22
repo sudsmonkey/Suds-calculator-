@@ -23,7 +23,6 @@
   --brass: #8B7355;
 }
 html, body {
-  width: 100%;
   min-height: 100%;
   background: var(--cream);
   font-family: 'DM Sans', sans-serif;
@@ -31,7 +30,6 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
   padding: 0;
   overflow-x: hidden;
 }
@@ -41,12 +39,11 @@ html, body {
   padding: 0 12px 20px;
   position: relative;
   z-index: 1;
-  margin: 0 auto;
 }
 @media (min-width: 900px) {
   #sq3000Section {
-    max-width: 980px;
-    padding: 0 24px 40px;
+    max-width: 960px;
+    padding: 24px 24px 40px;
   }
 }
 
@@ -55,22 +52,21 @@ html, body {
   position: fixed;
   border-radius: 50%;
   pointer-events: none;
-  z-index: 2;
+  z-index: 0;
   background: radial-gradient(
     circle at 34% 30%,
-    rgba(255,255,255,0.55) 0%,
-    rgba(255,255,255,0.08) 18%,
-    rgba(158,217,192,0.12) 42%,
-    rgba(245,110,100,0.06) 68%,
-    rgba(158,217,192,0.08) 85%,
+    rgba(255,255,255,0.68) 0%,
+    rgba(255,255,255,0.15) 14%,
+    rgba(160,220,255,0.06) 38%,
+    rgba(220,160,255,0.05) 62%,
+    rgba(160,255,220,0.04) 80%,
     transparent 100%
   );
-  border: 1.5px solid rgba(158,217,192,0.55);
+  border: 1px solid rgba(255,255,255,0.32);
   box-shadow:
-    inset -3px -3px 10px rgba(255,255,255,0.4),
-    inset 2px 2px 8px rgba(158,217,192,0.2),
-    0 0 20px rgba(158,217,192,0.12),
-    0 4px 16px rgba(245,110,100,0.06);
+    inset -2px -2px 8px rgba(255,255,255,0.22),
+    inset 2px 2px 8px rgba(160,220,255,0.14),
+    0 0 18px rgba(160,220,255,0.06);
   animation: gameBubbleRise linear both;
   will-change: transform, opacity;
 }
@@ -664,11 +660,11 @@ html, body {
     const desktop = window.innerWidth >= 900;
 
     if(landscape){
-      GW = desktop ? 900 : 620; GH = desktop ? 320 : 125;
-      TW = desktop ? 820 : 560; TH = desktop ? 340 : 140;
+      GW = desktop ? 870 : 620; GH = desktop ? 175 : 125;
+      TW = desktop ? 790 : 560; TH = desktop ? 196 : 140;
     } else {
-      GW = desktop ? 680 : 440; GH = desktop ? 520 : 310;
-      TW = desktop ? 540 : 340; TH = desktop ? 360 : 210;
+      GW = desktop ? 620 : 440; GH = desktop ? 435 : 310;
+      TW = desktop ? 480 : 340; TH = desktop ? 295 : 210;
     }
 
     glassCanvas.width = GW; glassCanvas.height = GH;
