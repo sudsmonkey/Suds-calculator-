@@ -240,6 +240,7 @@ html, body {
   const COLS = 26, ROWS = 16;
   let dirtSeed = [];       // randomized grime speckle positions, regenerated per window
   let bananaCount = 0; // persists across window resets — the actual currency
+  let bananaTransparentSrc = null; // set once on load — white-stripped version of the banana icon
   let windowComplete = false; // true once the closeout position has been hit — locks the squeegee in place
   let squeegeeStartTime = null; // when the squeegee tool was first selected this window — timing starts here
   let squeegeeHintTimer = null;
@@ -1156,10 +1157,31 @@ html, body {
 
   layout();
   loop();
-  // the title font loads async and can shift its rendered size slightly once it swaps in
   if(document.fonts && document.fonts.ready){
     document.fonts.ready.then(fitStageToViewport);
   }
+
+  // strip white from the banana HUD icon so the toast can display it on a coloured background
+  (function(){
+    const hudIcon = document.getElementById('bananaIcon');
+    if(!hudIcon) return;
+    function process(){
+      try {
+        const cvs = document.createElement('canvas');
+        cvs.width = hudIcon.naturalWidth || 64; cvs.height = hudIcon.naturalHeight || 64;
+        const cx = cvs.getContext('2d');
+        cx.drawImage(hudIcon, 0, 0);
+        const id = cx.getImageData(0, 0, cvs.width, cvs.height);
+        const d = id.data;
+        for(let i = 0; i < d.length; i += 4){
+          if(d[i] > 220 && d[i+1] > 220 && d[i+2] > 220) d[i+3] = 0;
+        }
+        cx.putImageData(id, 0, 0);
+        bananaTransparentSrc = cvs.toDataURL('image/png');
+      } catch(e) {}
+    }
+    if(hudIcon.complete) process(); else hudIcon.onload = process;
+  })();
 })();
 
 </script>
