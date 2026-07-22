@@ -2283,8 +2283,7 @@ let currentPkg = null;
       showToast(`<div style="text-align:center;">Great job!<br>${bImg}<br>3 bananas<br><b>Score: ${score}</b></div>`, true);
       setTimeout(() => {
         showToast('', false);
-        glassCanvas.style.touchAction = 'auto';
-        toggleCanvas.style.touchAction = 'auto';
+        newWindow();
       }, 2800);
     } else if(!windowComplete){
       showToast('', false);
@@ -2307,12 +2306,13 @@ let currentPkg = null;
   function layout(){
     const landscape = isLandscape();
 
+    const desktop = window.innerWidth >= 900;
     if(landscape){
-      GW = 620; GH = 125;
-      TW = 560; TH = 140;
+      GW = desktop ? 960 : 620; GH = desktop ? 260 : 125;
+      TW = desktop ? 570 : 560; TH = desktop ? 143 : 140;
     } else {
-      GW = 440; GH = 310;
-      TW = 340; TH = 210;
+      GW = desktop ? 660 : 440; GH = desktop ? 620 : 310;
+      TW = desktop ? 330 : 340; TH = desktop ? 210 : 210;
     }
 
     glassCanvas.width = GW; glassCanvas.height = GH;
