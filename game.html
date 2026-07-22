@@ -110,7 +110,7 @@ html, body {
   /* landscape: keep same top-to-bottom stacking, just use the extra width */
   @media (orientation: landscape){
   #sq3000Section .stage {
-      width:min(calc(100% - 24px),620px);
+      width:min(calc(100% - 24px),960px);
       flex-direction:column;
       gap:8px;
       padding:6px 16px;
@@ -655,11 +655,11 @@ html, body {
     const desktop = window.innerWidth >= 900;
 
     if(landscape){
-      GW = desktop ? 870 : 620; GH = desktop ? 175 : 125;
-      TW = desktop ? 790 : 560; TH = desktop ? 196 : 140;
+      GW = desktop ? 960 : 620; GH = desktop ? 220 : 125;
+      TW = desktop ? 880 : 560; TH = desktop ? 250 : 140;
     } else {
-      GW = desktop ? 620 : 440; GH = desktop ? 435 : 310;
-      TW = desktop ? 480 : 340; TH = desktop ? 295 : 210;
+      GW = desktop ? 780 : 440; GH = desktop ? 580 : 310;
+      TW = desktop ? 640 : 340; TH = desktop ? 400 : 210;
     }
 
     glassCanvas.width = GW; glassCanvas.height = GH;
