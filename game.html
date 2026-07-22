@@ -114,6 +114,7 @@ html, body {
       flex-direction:column;
       gap:8px;
       padding:6px 16px;
+      margin: 0 auto;
     }
   #sq3000Section h1 { display:none; }
   #sq3000Section .hud { font-size:11px; gap:8px; }
@@ -130,7 +131,7 @@ html, body {
     animation: bubbleFloat ease-out forwards;
   }
   body.has-bg-bubbles { background: transparent; }
-  #bgBubbleLayer { position: fixed; inset: 0; z-index: -1; background: var(--cream); pointer-events: none; overflow: hidden; }
+  #bgBubbleLayer { position: fixed; inset: 0; z-index: 0; background: var(--cream); pointer-events: none; overflow: hidden; }
   .bg-bubble { position: absolute; background-size: contain; background-repeat: no-repeat; background-position: center; animation: bgBubbleFloat linear infinite; }
   @keyframes bubbleFloat {
     0%   { transform: translateY(0) translateX(0); opacity: 0.8; }
