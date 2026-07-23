@@ -2422,6 +2422,7 @@ let currentPkg = null;
     if(logoReady){
       gctx.save();
       gctx.globalAlpha = 0.4;
+      gctx.globalCompositeOperation = 'multiply';
       const pad = Math.min(GW, GH)*0.1; // based on the tighter dimension — GW*0.1 alone left almost no headroom in landscape's short, wide glass
       const scale = Math.min((GW-pad*2)/logoImg.naturalWidth, (GH-pad*2)/logoImg.naturalHeight);
       const dw = logoImg.naturalWidth*scale, dh = logoImg.naturalHeight*scale;
