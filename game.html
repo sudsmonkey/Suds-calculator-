@@ -1186,33 +1186,5 @@ html, body {
 })();
 
 </script>
-<script>
-// Background bubble layer — all screen sizes
-  (function() {
-    const bgLayer = document.createElement('div');
-    bgLayer.id = 'bgBubbleLayer';
-    document.body.appendChild(bgLayer);
-    document.body.classList.add('has-bg-bubbles');
-    const tmpB = document.createElement('div');
-    tmpB.className = 'bubble-particle';
-    tmpB.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;visibility:hidden;';
-    document.body.appendChild(tmpB);
-    const pngUrl = window.getComputedStyle(tmpB).backgroundImage;
-    document.body.removeChild(tmpB);
-    const bgSizes = [16,24,12,40,32,56,20,48,30,14,64,26,38,18,50,22,36,52,28,44,20,34,58,15,42];
-    bgSizes.forEach(function(size, i) {
-      const b = document.createElement('div');
-      b.className = 'bg-bubble';
-      b.style.backgroundImage = pngUrl;
-      b.style.width = size + 'px';
-      b.style.height = size + 'px';
-      b.style.left = ((i * 47 + i * i * 3) % 96) + '%';
-      b.style.bottom = (-size - 10) + 'px';
-      b.style.animationDuration = (9 + (i * 41) % 11) + 's';
-      b.style.animationDelay = (-(i * 2.7 % (9 + (i * 41) % 11))) + 's';
-      bgLayer.appendChild(b);
-    });
-  })();
-</script>
 </body>
 </html>
