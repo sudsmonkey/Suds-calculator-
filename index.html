@@ -2828,6 +2828,7 @@ let currentPkg = null;
           sq3kEl.style.display = 'block';
           initSq3000();
           sq3kEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setTimeout(startSq3000Tutorial, 800);
         }
       });
     }
@@ -2842,6 +2843,7 @@ let currentPkg = null;
     sq3k.style.display = 'block';
     modal.classList.add('visible');
     initSq3000();
+    setTimeout(startSq3000Tutorial, 800);
   }
   function closeDesktopGame() {
     const modal = document.getElementById('desktopGameModal');
@@ -2897,5 +2899,236 @@ let currentPkg = null;
     <button class="bonus-no" onclick="declineBonus()">No thanks</button>
   </div>
 </div>
+
+<!-- Game tutorial overlay (same as standalone game.html) -->
+<style>
+#sq3kTutorialOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  display: none;
+}
+#sq3kTutorialOverlay.active {
+  display: block;
+  pointer-events: all;
+}
+#sq3kTutorialScrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+}
+#sq3kSpotlight {
+  position: absolute;
+  border-radius: 14px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
+  transition: all 0.35s cubic-bezier(.4,0,.2,1);
+  pointer-events: none;
+}
+#sq3kCard {
+  position: absolute;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 18px 14px;
+  max-width: 230px;
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+  font-family: 'Nunito', sans-serif;
+  transition: all 0.35s cubic-bezier(.4,0,.2,1);
+}
+#sq3kCard .tc-step  { font-size:10px; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; color:#F56E64; margin-bottom:5px; }
+#sq3kCard .tc-title { font-size:15px; font-weight:900; color:#3d3530; margin-bottom:4px; line-height:1.2; }
+#sq3kCard .tc-body  { font-size:13px; font-weight:600; color:#7C7268; line-height:1.45; margin-bottom:12px; }
+#sq3kCard .tc-actions { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
+#sq3kSkip { font-family:'Nunito',sans-serif; font-size:11px; font-weight:700; color:#aaa; background:none; border:none; cursor:pointer; padding:0; margin-right:auto; }
+#sq3kNext { font-family:'Nunito',sans-serif; font-size:13px; font-weight:900; color:#fff; background:#F56E64; border:none; border-radius:50px; padding:7px 18px; cursor:pointer; box-shadow:0 3px 0 #A6382E; transition:transform 0.1s,box-shadow 0.1s; }
+#sq3kNext:active { transform:translateY(2px); box-shadow:0 1px 0 #A6382E; }
+#sq3kArrow { position:absolute; pointer-events:none; transition:all 0.35s cubic-bezier(.4,0,.2,1); }
+#sq3kDots { display:flex; gap:5px; align-items:center; justify-content:center; margin-bottom:10px; }
+#sq3kDots span { width:6px; height:6px; border-radius:50%; background:#e0d8d4; transition:background 0.2s; display:inline-block; }
+#sq3kDots span.active { background:#F56E64; width:18px; border-radius:3px; }
+</style>
+
+<div id="sq3kTutorialOverlay">
+  <div id="sq3kTutorialScrim"></div>
+  <div id="sq3kSpotlight"></div>
+  <svg id="sq3kArrow" width="60" height="60" viewBox="0 0 60 60" style="display:none;">
+    <defs>
+      <marker id="sq3kArrowhead" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="#F56E64"/>
+      </marker>
+    </defs>
+    <path id="sq3kArrowPath" d="" stroke="#F56E64" stroke-width="2.5" fill="none" stroke-dasharray="5,4" marker-end="url(#sq3kArrowhead)"/>
+  </svg>
+  <div id="sq3kCard" style="display:none;">
+    <div id="sq3kDots"></div>
+    <div class="tc-step"  id="sq3kStep"></div>
+    <div class="tc-title" id="sq3kTitle"></div>
+    <div class="tc-body"  id="sq3kBody"></div>
+    <div class="tc-actions">
+      <button id="sq3kSkip">Skip</button>
+      <button id="sq3kNext">Next →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function startSq3000Tutorial() {
+  const steps = [
+    {
+      target: 'applicatorBtn',
+      title: 'Applicator',
+      body: 'Spread soapy foam across the dirty glass. Drag left and right to cover the whole pane.',
+      cardSide: 'bottom'
+    },
+    {
+      target: 'squeegeeBtn',
+      title: 'Squeegee',
+      body: 'Switch to the squeegee to wipe the soap away and reveal a clean window.',
+      cardSide: 'bottom'
+    },
+    {
+      getRect: function() {
+        var c = document.getElementById('toggleCanvas');
+        var r = c.getBoundingClientRect();
+        return { left: r.left, top: r.top, width: r.width/2, height: r.height, right: r.left+r.width/2, bottom: r.bottom };
+      },
+      title: 'Angle Wheel',
+      body: 'Drag left or right on the wheel to tilt your tool — angle it for better coverage.',
+      cardSide: 'top'
+    },
+    {
+      getRect: function() {
+        var c = document.getElementById('toggleCanvas');
+        var r = c.getBoundingClientRect();
+        return { left: r.left+r.width/2, top: r.top, width: r.width/2, height: r.height, right: r.right, bottom: r.bottom };
+      },
+      title: 'Move Pad',
+      body: 'Drag anywhere on the right pad to slide your tool across the window.',
+      cardSide: 'top'
+    },
+    {
+      target: 'resetBtn',
+      title: 'New Window',
+      body: 'Done with this pane? Tap here to load a fresh dirty window.',
+      cardSide: 'bottom'
+    },
+    {
+      target: 'glassCanvas',
+      title: 'The Window',
+      body: 'This is your window. Pick a tool above, then tap or drag to get cleaning!',
+      cardSide: 'top'
+    }
+  ];
+
+  var current = 0;
+  var overlay   = document.getElementById('sq3kTutorialOverlay');
+  var spotlight = document.getElementById('sq3kSpotlight');
+  var card      = document.getElementById('sq3kCard');
+  var arrow     = document.getElementById('sq3kArrow');
+  var arrowPath = document.getElementById('sq3kArrowPath');
+  var dots      = document.getElementById('sq3kDots');
+  var nextBtn   = document.getElementById('sq3kNext');
+  var skipBtn   = document.getElementById('sq3kSkip');
+
+  function buildDots() {
+    dots.innerHTML = '';
+    steps.forEach(function(_, i) {
+      var s = document.createElement('span');
+      if (i === current) s.classList.add('active');
+      dots.appendChild(s);
+    });
+  }
+
+  function positionCard(rect, side, cardW, cardH) {
+    var pad = 18, vw = window.innerWidth, vh = window.innerHeight;
+    var top, left;
+    if (side === 'bottom') {
+      top  = rect.bottom + pad;
+      left = rect.left + rect.width/2 - cardW/2;
+    } else {
+      top  = rect.top - cardH - pad;
+      left = rect.left + rect.width/2 - cardW/2;
+    }
+    left = Math.max(10, Math.min(left, vw - cardW - 10));
+    top  = Math.max(10, Math.min(top,  vh - cardH - 10));
+    return { top: top, left: left };
+  }
+
+  function drawArrow(rect, pos, cardW, cardH, side) {
+    arrow.style.display = 'block';
+    var cx = rect.left + rect.width/2;
+    var tailX, tailY, tipX, tipY;
+    if (side === 'bottom') {
+      tailX = pos.left + cardW/2; tailY = pos.top + 4;
+      tipX  = cx;                 tipY  = rect.bottom + 6;
+    } else {
+      tailX = pos.left + cardW/2; tailY = pos.top + cardH - 4;
+      tipX  = cx;                 tipY  = rect.top - 6;
+    }
+    var minX = Math.min(tailX,tipX)-10, minY = Math.min(tailY,tipY)-10;
+    var w = Math.abs(tailX-tipX)+20,    h   = Math.abs(tailY-tipY)+20;
+    arrow.style.left = minX+'px'; arrow.style.top = minY+'px';
+    arrow.setAttribute('width', w); arrow.setAttribute('height', h);
+    arrow.setAttribute('viewBox','0 0 '+w+' '+h);
+    arrowPath.setAttribute('d','M'+(tailX-minX)+','+(tailY-minY)+' L'+(tipX-minX)+','+(tipY-minY));
+  }
+
+  function showStep(index) {
+    var step = steps[index];
+    var rect;
+    if (step.getRect) {
+      rect = step.getRect();
+    } else {
+      var el = document.getElementById(step.target);
+      if (!el) { finish(); return; }
+      rect = el.getBoundingClientRect();
+    }
+    var pad = 10;
+    spotlight.style.left   = (rect.left   - pad)+'px';
+    spotlight.style.top    = (rect.top    - pad)+'px';
+    spotlight.style.width  = (rect.width  + pad*2)+'px';
+    spotlight.style.height = (rect.height + pad*2)+'px';
+
+    document.getElementById('sq3kStep').textContent  = 'Tip '+(index+1)+' of '+steps.length;
+    document.getElementById('sq3kTitle').textContent = step.title;
+    document.getElementById('sq3kBody').textContent  = step.body;
+    nextBtn.textContent = index === steps.length-1 ? "Let's go! 🧼" : 'Next →';
+    buildDots();
+
+    card.style.display = 'block';
+    card.style.visibility = 'hidden';
+    requestAnimationFrame(function() {
+      var cardW = card.offsetWidth, cardH = card.offsetHeight;
+      var pos = positionCard(rect, step.cardSide, cardW, cardH);
+      card.style.top  = pos.top+'px';
+      card.style.left = pos.left+'px';
+      card.style.visibility = 'visible';
+      drawArrow(rect, pos, cardW, cardH, step.cardSide);
+    });
+  }
+
+  function finish() {
+    overlay.classList.remove('active');
+    // localStorage.setItem('suds_sq3k_tutorial_done', '1');
+  }
+
+  // clone buttons to remove any stale listeners
+  var newNext = nextBtn.cloneNode(true);
+  var newSkip = skipBtn.cloneNode(true);
+  nextBtn.parentNode.replaceChild(newNext, nextBtn);
+  skipBtn.parentNode.replaceChild(newSkip, skipBtn);
+
+  newNext.addEventListener('click', function() {
+    current++;
+    if (current >= steps.length) { finish(); return; }
+    showStep(current);
+  });
+  newSkip.addEventListener('click', finish);
+
+  overlay.classList.add('active');
+  showStep(0);
+}
+</script>
 </body>
 </html>
