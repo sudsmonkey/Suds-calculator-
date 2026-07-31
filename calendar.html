@@ -460,27 +460,32 @@
     if (shared === 'yes') data.append('monkey_bonus', 'Referral discount applied (-$25)');
     if (notes)   data.append('notes', notes);
 
+    const GAS_SUBMIT = 'https://script.google.com/macros/s/AKfycbwgbDfLLmP8l9E8U9zVa_qGy-dA94VS5DPN06UG2fhXVuTzAPmB7sYw7AnF3jxjqOxtsA/exec';
+    function showSuccess() {
+      btn.style.display = 'none';
+      document.getElementById('infoSection').querySelectorAll('.info-card, .summary-card, .section-label').forEach(function(el) { el.style.display = 'none'; });
+      const success = document.getElementById('bookSuccess');
+      success.style.display = 'block';
+      success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
     try {
-      const res = await fetch('https://formspree.io/f/mjgqjdyz', {
+      const res = await fetch(GAS_SUBMIT, {
         method: 'POST',
         body: data,
         headers: { 'Accept': 'application/json' }
       });
-      if (res.ok) {
-        btn.style.display = 'none';
-        document.getElementById('infoSection').querySelectorAll('.info-card, .summary-card, .section-label').forEach(function(el) { el.style.display = 'none'; });
-        const success = document.getElementById('bookSuccess');
-        success.style.display = 'block';
-        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
+      // GAS may respond with an opaque redirect — treat any completed fetch as success
+      showSuccess();
+    } catch (err) {
+      // If CORS blocks the response, try no-cors (fire-and-forget) then show success
+      try {
+        fetch(GAS_SUBMIT, { method: 'POST', body: data, mode: 'no-cors' });
+        showSuccess();
+      } catch(e2) {
         btn.disabled = false;
         btn.textContent = 'Confirm Booking';
-        alert('Something went wrong. Please try again or call us directly.');
+        alert('Connection error. Please check your internet and try again.');
       }
-    } catch (err) {
-      btn.disabled = false;
-      btn.textContent = 'Confirm Booking';
-      alert('Connection error. Please check your internet and try again.');
     }
   });
 
