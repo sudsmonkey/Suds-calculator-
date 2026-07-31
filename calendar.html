@@ -241,8 +241,6 @@
 <script>
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const SLOTS = ['8:00 AM','1:00 PM'];
-  const BOOKED = {};   // cache: dateStr → array of booked slot strings
-  const GCAL_URL = 'https://script.google.com/macros/s/AKfycbyG7IonDvWNDGJxNFz-iclUlK_KhuQQjMf49rRujB0fhiy3NSQLtWqvfj2gQ97SoSWCnQ/exec';
 
   const today = new Date();
   today.setHours(0,0,0,0);
@@ -273,11 +271,9 @@
       const dow = date.getDay();
       const isPast = date < today;
       const isWeekend = dow === 0 || dow === 6;
-      const fullyBooked = BOOKED[dateStr] && BOOKED[dateStr].length >= SLOTS.length;
-
       const el = document.createElement('div');
 
-      if (isPast || isWeekend || fullyBooked) {
+      if (isPast || isWeekend) {
         el.className = 'cal-day disabled';
       } else {
         el.className = 'cal-day has-slots';
@@ -296,35 +292,11 @@
     selectedDate = dateStr;
     selectedTime = null;
     renderCalendar();
+    renderTimeSlots();
     updateBtn();
     setTimeout(() => {
       document.getElementById('timeSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
-
-    // Already cached — render immediately
-    if (BOOKED[dateStr] !== undefined) {
-      renderTimeSlots();
-      return;
-    }
-
-    // Show loading state while fetching
-    const grid = document.getElementById('timeGrid');
-    grid.style.gridTemplateColumns = '1fr';
-    grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--mid);font-size:14px;font-weight:700;">Checking availability…</div>';
-
-    fetch(GCAL_URL + '?date=' + dateStr)
-      .then(r => r.json())
-      .then(data => {
-        // Script should return { booked: ['8:00 AM', ...] }
-        BOOKED[dateStr] = Array.isArray(data.booked) ? data.booked : [];
-        // Refresh calendar so fully-booked days grey out
-        renderCalendar();
-        if (selectedDate === dateStr) renderTimeSlots();
-      })
-      .catch(() => {
-        BOOKED[dateStr] = [];   // on error, assume all available
-        if (selectedDate === dateStr) renderTimeSlots();
-      });
   }
 
   function renderTimeSlots() {
@@ -336,17 +308,11 @@
       return;
     }
     grid.style.gridTemplateColumns = '1fr 1fr';
-    const booked = BOOKED[selectedDate] || [];
     SLOTS.forEach(slot => {
       const el = document.createElement('div');
-      if (booked.includes(slot)) {
-        el.className = 'time-slot booked';
-        el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">Unavailable</div>';
-      } else {
-        el.className = 'time-slot' + (selectedTime === slot ? ' selected' : '');
-        el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">~3 hrs</div>';
-        el.onclick = () => selectTime(slot);
-      }
+      el.className = 'time-slot' + (selectedTime === slot ? ' selected' : '');
+      el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">~3 hrs</div>';
+      el.onclick = () => selectTime(slot);
       grid.appendChild(el);
     });
   }
@@ -461,7 +427,7 @@
     if (notes)   data.append('notes', notes);
 
     try {
-      const res = await fetch('https://script.google.com/macros/s/AKfycbz7bfacgddxY0omsSSyVdp0M4IiSPyTNz9CMvrEM12pRTCJYK9Kwg4DLAImgr3rTdQEwg/exec', {
+      const res = await fetch('https://formspree.io/f/mjgqjdyz', {
         method: 'POST',
         body: data,
         headers: { 'Accept': 'application/json' }
