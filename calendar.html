@@ -241,7 +241,8 @@
 <script>
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const SLOTS = ['8:00 AM','1:00 PM'];
-  const BOOKED = {};
+  const BOOKED = {};   // cache: dateStr → array of booked slot strings
+  const GCAL_URL = 'https://script.google.com/macros/s/AKfycbyG7IonDvWNDGJxNFz-iclUlK_KhuQQjMf49rRujB0fhiy3NSQLtWqvfj2gQ97SoSWCnQ/exec';
 
   const today = new Date();
   today.setHours(0,0,0,0);
@@ -295,11 +296,35 @@
     selectedDate = dateStr;
     selectedTime = null;
     renderCalendar();
-    renderTimeSlots();
     updateBtn();
     setTimeout(() => {
       document.getElementById('timeSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
+
+    // Already cached — render immediately
+    if (BOOKED[dateStr] !== undefined) {
+      renderTimeSlots();
+      return;
+    }
+
+    // Show loading state while fetching
+    const grid = document.getElementById('timeGrid');
+    grid.style.gridTemplateColumns = '1fr';
+    grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--mid);font-size:14px;font-weight:700;">Checking availability…</div>';
+
+    fetch(GCAL_URL + '?date=' + dateStr)
+      .then(r => r.json())
+      .then(data => {
+        // Script should return { booked: ['8:00 AM', ...] }
+        BOOKED[dateStr] = Array.isArray(data.booked) ? data.booked : [];
+        // Refresh calendar so fully-booked days grey out
+        renderCalendar();
+        if (selectedDate === dateStr) renderTimeSlots();
+      })
+      .catch(() => {
+        BOOKED[dateStr] = [];   // on error, assume all available
+        if (selectedDate === dateStr) renderTimeSlots();
+      });
   }
 
   function renderTimeSlots() {
