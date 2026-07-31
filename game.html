@@ -1340,10 +1340,24 @@ html, body {
       cardSide: 'bottom'
     },
     {
-      target: 'bananaCount',
-      title: 'Bananas',
-      body: 'Earn bananas for every window you clean. Collect them all!',
-      cardSide: 'bottom'
+      getRect: function() {
+        const c = document.getElementById('toggleCanvas');
+        const r = c.getBoundingClientRect();
+        return { left: r.left, top: r.top, width: r.width / 2, height: r.height, right: r.left + r.width / 2, bottom: r.bottom };
+      },
+      title: 'Angle Wheel',
+      body: 'Drag left or right on the wheel to tilt your tool — angle it for better coverage.',
+      cardSide: 'top'
+    },
+    {
+      getRect: function() {
+        const c = document.getElementById('toggleCanvas');
+        const r = c.getBoundingClientRect();
+        return { left: r.left + r.width / 2, top: r.top, width: r.width / 2, height: r.height, right: r.right, bottom: r.bottom };
+      },
+      title: 'Move Pad',
+      body: 'Drag anywhere on the right pad to slide your tool across the window.',
+      cardSide: 'top'
     },
     {
       target: 'resetBtn',
@@ -1443,10 +1457,14 @@ html, body {
 
   function showStep(index) {
     const step = steps[index];
-    const el   = document.getElementById(step.target);
-    if (!el) { finish(); return; }
-
-    const rect = el.getBoundingClientRect();
+    let rect;
+    if (step.getRect) {
+      rect = step.getRect();
+    } else {
+      const el = document.getElementById(step.target);
+      if (!el) { finish(); return; }
+      rect = el.getBoundingClientRect();
+    }
     const pad  = 10;
 
     spotlight.style.left   = (rect.left   - pad) + 'px';
