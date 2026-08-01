@@ -239,6 +239,11 @@
 </div>
 
 <script>
+  // Supabase — paste from Dashboard → Project Settings → API
+  // Until both are set, bookings still go to Formspree as a fallback.
+  const SUPABASE_URL = '';      // e.g. https://xxxx.supabase.co
+  const SUPABASE_ANON_KEY = ''; // anon / public key
+
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const SLOTS = ['8:00 AM','1:00 PM'];
 
@@ -416,43 +421,93 @@
     btn.disabled = true;
     btn.textContent = 'Booking…';
 
-    const data = new FormData();
-    data.append('first_name', firstName);
-    data.append('last_name', lastName);
-    data.append('_replyto', email);
-    data.append('email', email);
-    data.append('phone', phone);
-    data.append('address', address);
-    data.append('package', pkgName);
-    data.append('total', pkgTotal);
-    data.append('date', date);
-    data.append('time', time);
-    if (addons)  data.append('add_ons', addons.replace(/,/g, ' | '));
-    if (wizard)  data.append('wizard_answers', wizard);
-    if (shared === 'yes') data.append('monkey_bonus', 'Referral discount applied (-$25)');
-    if (notes)   data.append('notes', notes);
+    const booking = {
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      phone: phone,
+      address: address || null,
+      package: pkgName || null,
+      total: pkgTotal || null,
+      date: date || null,
+      time: time || null,
+      add_ons: addons ? addons.replace(/,/g, ' | ') : null,
+      wizard_answers: wizard || null,
+      monkey_bonus: shared === 'yes' ? 'Referral discount applied (-$25)' : null,
+      notes: notes || null
+    };
 
-    try {
+    function showBooked() {
+      btn.style.display = 'none';
+      document.getElementById('infoSection').querySelectorAll('.info-card, .summary-card, .section-label').forEach(function(el) { el.style.display = 'none'; });
+      const success = document.getElementById('bookSuccess');
+      success.style.display = 'block';
+      success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function showBookError(message) {
+      btn.disabled = false;
+      btn.textContent = 'Confirm Booking';
+      alert(message);
+    }
+
+    async function submitToSupabase() {
+      const res = await fetch(SUPABASE_URL.replace(/\/$/, '') + '/rest/v1/bookings', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(booking)
+      });
+      if (!res.ok) {
+        let detail = '';
+        try { detail = await res.text(); } catch (_) {}
+        throw new Error(detail || ('Supabase error ' + res.status));
+      }
+    }
+
+    async function submitToFormspree() {
+      const data = new FormData();
+      data.append('first_name', booking.first_name);
+      data.append('last_name', booking.last_name);
+      data.append('_replyto', booking.email);
+      data.append('email', booking.email);
+      data.append('phone', booking.phone);
+      data.append('address', booking.address || '');
+      data.append('package', booking.package || '');
+      data.append('total', booking.total || '');
+      data.append('date', booking.date || '');
+      data.append('time', booking.time || '');
+      if (booking.add_ons) data.append('add_ons', booking.add_ons);
+      if (booking.wizard_answers) data.append('wizard_answers', booking.wizard_answers);
+      if (booking.monkey_bonus) data.append('monkey_bonus', booking.monkey_bonus);
+      if (booking.notes) data.append('notes', booking.notes);
+
       const res = await fetch('https://formspree.io/f/mjgqjdyz', {
         method: 'POST',
         body: data,
         headers: { 'Accept': 'application/json' }
       });
-      if (res.ok) {
-        btn.style.display = 'none';
-        document.getElementById('infoSection').querySelectorAll('.info-card, .summary-card, .section-label').forEach(function(el) { el.style.display = 'none'; });
-        const success = document.getElementById('bookSuccess');
-        success.style.display = 'block';
-        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (!res.ok) throw new Error('Formspree error ' + res.status);
+    }
+
+    try {
+      const supabaseReady = SUPABASE_URL && SUPABASE_ANON_KEY
+        && !/^YOUR_/i.test(SUPABASE_URL)
+        && !/^YOUR_/i.test(SUPABASE_ANON_KEY);
+
+      if (supabaseReady) {
+        await submitToSupabase();
       } else {
-        btn.disabled = false;
-        btn.textContent = 'Confirm Booking';
-        alert('Something went wrong. Please try again or call us directly.');
+        await submitToFormspree();
       }
+      showBooked();
     } catch (err) {
-      btn.disabled = false;
-      btn.textContent = 'Confirm Booking';
-      alert('Connection error. Please check your internet and try again.');
+      console.error('Booking submit failed:', err);
+      showBookError('Something went wrong. Please try again or call us directly.');
     }
   });
 
