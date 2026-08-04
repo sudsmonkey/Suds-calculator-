@@ -151,8 +151,8 @@
   <h1>Book Your Clean</h1>
   <p>Suds Monkey Window Cleaning</p>
   <div class="pkg-pill">
-    <span>Gorilla Clean</span>
-    <span class="pkg-price">$320</span>
+    <span id="pillPkgName">Package</span>
+    <span class="pkg-price" id="pillPkgPrice">—</span>
   </div>
 </div>
 
@@ -448,8 +448,8 @@
     const pkgTotal = _urlParams.get('total') || _urlParams.get('price') || '';
     const addons   = _urlParams.get('addons') || '';
 
-    if (pkgName)  document.getElementById('summaryPkgName').textContent = pkgName;
-    if (pkgTotal) document.getElementById('summaryPkgTotal').textContent = '$' + pkgTotal;
+    if (pkgName)  { document.getElementById('summaryPkgName').textContent = pkgName; document.getElementById('pillPkgName').textContent = pkgName; }
+    if (pkgTotal) { document.getElementById('summaryPkgTotal').textContent = '$' + pkgTotal; document.getElementById('pillPkgPrice').textContent = '$' + pkgTotal; }
 
     if (addons) {
       const list = document.getElementById('summaryAddonsList');
