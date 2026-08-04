@@ -436,22 +436,44 @@
       success.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
+    // Send to Formspree (email + Google Sheet)
+    const formData = new FormData();
+    formData.append('first_name', firstName);
+    formData.append('last_name', lastName);
+    formData.append('_replyto', email);
+    formData.append('email', email);
+    formData.append('phone', phone);
+    formData.append('address', address);
+    formData.append('package', pkgName);
+    formData.append('total', pkgTotal);
+    formData.append('date', date);
+    formData.append('time', time);
+    if (addons)             formData.append('add_ons', addons.replace(/,/g, ' | '));
+    if (wizard)             formData.append('wizard_answers', wizard);
+    if (shared === 'yes')   formData.append('monkey_bonus', 'Referral discount applied (-$25)');
+    if (notes)              formData.append('notes', notes);
+
+    // Send to Supabase (database)
+    fetch(SUPABASE_URL + '/rest/v1/bookings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(booking)
+    }).catch(e => console.warn('Supabase insert failed:', e));
+
     try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/bookings', {
+      const res = await fetch('https://formspree.io/f/mjgqjdyz', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(booking)
+        body: formData,
+        headers: { 'Accept': 'application/json' }
       });
-      if (res.ok || res.status === 201) {
+      if (res.ok) {
         showSuccess();
       } else {
-        const err = await res.json().catch(() => ({}));
-        console.error('Supabase error:', err);
         btn.disabled = false;
         btn.textContent = 'Confirm Booking';
         alert('Something went wrong. Please try again or call us directly.');
