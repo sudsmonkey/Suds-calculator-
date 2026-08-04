@@ -257,15 +257,15 @@
   /* Availability pill */
   .avail-pill { display: flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 50px; width: fit-content; margin: 0 auto 12px; }
   .avail-pill.open    { background: rgba(158,217,192,0.18); border: 1px solid rgba(90,171,138,0.35); }
-  .avail-pill.soon    { background: rgba(245,110,100,0.10); border: 1px solid rgba(245,110,100,0.35); }
+  .avail-pill.soon    { background: rgba(158,217,192,0.18); border: 1px solid rgba(90,171,138,0.35); }
   .avail-pill.loading { background: rgba(124,114,104,0.07); border: 1px solid rgba(124,114,104,0.2); }
   .avail-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .avail-pill.open  .avail-dot { background: #5aab8a; }
-  .avail-pill.soon  .avail-dot { background: var(--orange); }
+  .avail-pill.soon  .avail-dot { background: #5aab8a; }
   .avail-pill.loading .avail-dot { background: var(--mid); opacity: 0.4; }
   .avail-text { font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 0.03em; white-space: nowrap; }
   .avail-pill.open  .avail-text { color: #3A8C6A; }
-  .avail-pill.soon  .avail-text { color: var(--dark); }
+  .avail-pill.soon  .avail-text { color: #3A8C6A; }
   .avail-pill.loading .avail-text { color: var(--mid); }
 
   /* Checkout card */
@@ -2906,6 +2906,14 @@ let currentPkg = null;
     function pad(n) { return String(n).padStart(2,'0'); }
     function isoDate(d) { return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
 
+    function slotHour(slot) {
+      const parts = slot.split(' ');
+      let h = parseInt(parts[0].split(':')[0]);
+      if (parts[1] === 'PM' && h !== 12) h += 12;
+      if (parts[1] === 'AM' && h === 12) h = 0;
+      return h;
+    }
+
     function dayLabel(dateStr) {
       const today = new Date(); today.setHours(0,0,0,0);
       const d     = new Date(dateStr + 'T00:00:00');
@@ -2953,9 +2961,17 @@ let currentPkg = null;
         booked.forEach(r  => { if (r.date_iso) { taken[r.date_iso] = taken[r.date_iso] || new Set(); taken[r.date_iso].add(r.time); } });
         blocked.forEach(r => { if (r.date)     { taken[r.date]     = taken[r.date]     || new Set(); taken[r.date].add(r.time);     } });
 
+        const now = new Date();
+        const currentHour = now.getHours() + now.getMinutes() / 60;
+        const todayStr = isoDate(new Date());
+
         for (const dateStr of dates) {
           const takenToday = taken[dateStr] || new Set();
-          const openSlots  = SLOTS.filter(s => !takenToday.has(s));
+          const openSlots  = SLOTS.filter(s => {
+            if (takenToday.has(s)) return false;
+            if (dateStr === todayStr && currentHour + 1 > slotHour(s)) return false;
+            return true;
+          });
           if (openSlots.length > 0) {
             const label   = dayLabel(dateStr);
             const isToday = label === 'Today';
