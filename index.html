@@ -254,6 +254,20 @@
   }
   .note { margin-top: 24px; font-size: 12px; color: var(--mid); text-align: center; max-width: 400px; line-height: 1.6; }
 
+  /* Availability pill */
+  .avail-pill { display: flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 50px; width: fit-content; margin: 0 auto 12px; }
+  .avail-pill.open    { background: rgba(158,217,192,0.18); border: 1px solid rgba(90,171,138,0.35); }
+  .avail-pill.soon    { background: rgba(245,110,100,0.10); border: 1px solid rgba(245,110,100,0.35); }
+  .avail-pill.loading { background: rgba(124,114,104,0.07); border: 1px solid rgba(124,114,104,0.2); }
+  .avail-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .avail-pill.open  .avail-dot { background: #5aab8a; }
+  .avail-pill.soon  .avail-dot { background: var(--orange); }
+  .avail-pill.loading .avail-dot { background: var(--mid); opacity: 0.4; }
+  .avail-text { font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 0.03em; white-space: nowrap; }
+  .avail-pill.open  .avail-text { color: #3A8C6A; }
+  .avail-pill.soon  .avail-text { color: var(--dark); }
+  .avail-pill.loading .avail-text { color: var(--mid); }
+
   /* Checkout card */
   .checkout-card {
     display: none;
@@ -855,6 +869,7 @@
           <span class="addon-price" id="lemur-tracks-price">+ $0</span>
         </div>
       </div>
+      <div class="avail-pill loading" id="avail-lemur"><div class="avail-dot"></div><div class="avail-text">Checking availability…</div></div>
       <div class="pkg-btn-wrap" id="btn-wrap-lemur"><button class="pkg-btn" onclick="selectPkg('lemur')">Select Package</button></div>
     </div>
   </div>
@@ -903,6 +918,7 @@
           </div>
         </div>
       </div>
+      <div class="avail-pill loading" id="avail-gorilla"><div class="avail-dot"></div><div class="avail-text">Checking availability…</div></div>
       <div class="pkg-btn-wrap" id="btn-wrap-gorilla"><button class="pkg-btn" onclick="selectPkg('gorilla')">Select Package</button></div>
     </div>
   </div>
@@ -940,6 +956,7 @@
           </div>
         </div>
       </div>
+      <div class="avail-pill loading" id="avail-silver"><div class="avail-dot"></div><div class="avail-text">Checking availability…</div></div>
       <div class="pkg-btn-wrap" id="btn-wrap-silver"><button class="pkg-btn" style="background:var(--mint);" onclick="selectPkg('silver')">Select Package</button></div>
     </div>
   </div>
@@ -1024,6 +1041,7 @@
           </div>
         </div>
       </div>
+      <div class="avail-pill loading" id="avail-storm"><div class="avail-dot"></div><div class="avail-text">Checking availability…</div></div>
       <div class="pkg-btn-wrap" id="btn-wrap-storm">
         <button class="pkg-btn contact-locked" id="storm-contact-btn" onclick="expandStormContact()">Contact</button>
         <div id="storm-contact-options" style="display:none;flex-direction:column;gap:8px;margin-top:10px;">
@@ -2876,6 +2894,87 @@ let currentPkg = null;
         }, 700);
       }
     };
+  })();
+
+  // ── Availability pill ────────────────────────────────────────────────
+  (function() {
+    const SB_URL = 'https://ykjkcegpwiqhpfcgkwro.supabase.co';
+    const SB_KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
+    const SLOTS  = ['8:00 AM', '1:00 PM'];
+    const PILL_IDS = ['avail-lemur', 'avail-gorilla', 'avail-silver', 'avail-storm'];
+
+    function pad(n) { return String(n).padStart(2,'0'); }
+    function isoDate(d) { return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+
+    function dayLabel(dateStr) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const d     = new Date(dateStr + 'T00:00:00');
+      const diff  = Math.round((d - today) / 86400000);
+      if (diff === 0) return 'Today';
+      if (diff === 1) return 'Tomorrow';
+      return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+
+    function setPill(text, isToday) {
+      PILL_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = 'avail-pill ' + (isToday ? 'soon' : 'open');
+        el.innerHTML = '<div class="avail-dot"></div><div class="avail-text">' + text + '</div>';
+      });
+    }
+
+    async function loadAvailability() {
+      try {
+        const today = new Date(); today.setHours(0,0,0,0);
+        // Look across the next 45 weekdays
+        const dates = [];
+        const d = new Date(today);
+        while (dates.length < 45) {
+          const dow = d.getDay();
+          if (dow !== 0 && dow !== 6) dates.push(isoDate(d));
+          d.setDate(d.getDate() + 1);
+        }
+        const from = dates[0], to = dates[dates.length - 1];
+
+        const [bRes, blRes] = await Promise.all([
+          fetch(SB_URL + '/rest/v1/bookings?select=date_iso,time&date_iso=gte.' + from + '&date_iso=lte.' + to, {
+            headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+          }),
+          fetch(SB_URL + '/rest/v1/blocked_slots?select=date,time&date=gte.' + from + '&date=lte.' + to, {
+            headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+          })
+        ]);
+
+        const booked  = bRes.ok  ? await bRes.json() : [];
+        const blocked = blRes.ok ? await blRes.json() : [];
+
+        const taken = {};
+        booked.forEach(r  => { if (r.date_iso) { taken[r.date_iso] = taken[r.date_iso] || new Set(); taken[r.date_iso].add(r.time); } });
+        blocked.forEach(r => { if (r.date)     { taken[r.date]     = taken[r.date]     || new Set(); taken[r.date].add(r.time);     } });
+
+        for (const dateStr of dates) {
+          const takenToday = taken[dateStr] || new Set();
+          const openSlots  = SLOTS.filter(s => !takenToday.has(s));
+          if (openSlots.length > 0) {
+            const label   = dayLabel(dateStr);
+            const isToday = label === 'Today';
+            const slotStr = openSlots[0];
+            setPill(label + ' · ' + slotStr + ' open', isToday);
+            return;
+          }
+        }
+        // Nothing open in 45 days
+        setPill('No availability in the next 45 days', false);
+      } catch(e) {
+        PILL_IDS.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'none';
+        });
+      }
+    }
+
+    loadAvailability();
   })();
 
 </script>
