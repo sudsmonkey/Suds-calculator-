@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suds Monkey — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #F56E64;
+    --dark:   #A6382E;
+    --mint:   #9ED9C0;
+    --dark-mint: #3A8C6A;
+    --cream:  #FDF9F5;
+    --light:  #F6ECDE;
+    --ink:    #3d3530;
+    --mid:    #7C7268;
+    --border: #E8DDD6;
+    --white:  #FFFFFF;
+    --radius: 16px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.07);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; color: var(--ink); }
+
+  /* ── Login gate ── */
+  #loginGate {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .login-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    padding: 40px 32px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .login-logo {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--light);
+    border: 3px solid var(--mint);
+    margin: 0 auto 20px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .login-logo img { width: 100%; height: 100%; object-fit: cover; }
+  .login-title { font-size: 20px; font-weight: 900; color: var(--dark); margin-bottom: 4px; }
+  .login-sub { font-size: 13px; color: var(--mid); margin-bottom: 28px; }
+  .login-card input[type="password"] {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--cream);
+    outline: none;
+    text-align: center;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+  .login-card input[type="password"]:focus { border-color: var(--orange); }
+  .login-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 50px;
+    border: none;
+    background: var(--orange);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--dark);
+  }
+  .login-err { font-size: 13px; color: var(--dark); margin-top: 12px; display: none; }
+
+  /* ── Dashboard shell ── */
+  #adminDash { display: none; }
+
+  .top-bar {
+    background: var(--orange);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .top-bar-title { color: #fff; font-size: 17px; font-weight: 900; }
+  .top-bar-sub { color: rgba(255,255,255,0.8); font-size: 12px; }
+  .logout-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 50px;
+    padding: 6px 14px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    border-bottom: 1.5px solid var(--border);
+    background: var(--white);
+  }
+  .tab {
+    flex: 1;
+    padding: 14px 12px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--mid);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+  /* ── Panel ── */
+  .panel { display: none; padding: 20px 16px 40px; max-width: 520px; margin: 0 auto; }
+  .panel.active { display: block; }
+
+  .section-label {
+    font-size: 11px; font-weight: 900; color: var(--mid);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 10px; margin-top: 24px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  /* ── Mini calendar (block panel) ── */
+  .cal-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .month-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .month-nav button {
+    background: none; border: none; cursor: pointer;
+    color: var(--orange); font-size: 20px; font-weight: 900;
+    padding: 4px 10px; border-radius: 8px; line-height: 1;
+  }
+  .month-nav button:hover { background: #FDF0EF; }
+  .month-name { font-size: 16px; font-weight: 900; color: var(--dark); }
+  .day-headers { display: grid; grid-template-columns: repeat(7,1fr); padding: 8px 12px 4px; }
+  .day-header { text-align: center; font-size: 10px; font-weight: 700; color: var(--mid); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; padding: 4px 12px 14px; }
+  .cal-day {
+    width: 100%; aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; color: var(--dark); position: relative;
+  }
+  .cal-day:hover:not(.disabled):not(.empty) { background: #FDF0EF; }
+  .cal-day.empty, .cal-day.disabled { cursor: default; }
+  .cal-day.disabled { color: #DDD3C4; }
+  .cal-day.selected { background: var(--orange) !important; color: #fff; }
+  .cal-day.today { border: 2px solid var(--mint); }
+  .cal-day.has-block::after {
+    content: ''; display: block;
+    width: 4px; height: 4px;
+    background: var(--dark);
+    border-radius: 50%; position: absolute; bottom: 2px;
+  }
+
+  /* ── Slot buttons ── */
+  .slot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .slot-btn {
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--white);
+  }
+  .slot-btn.available { border-color: var(--mint); background: rgba(158,217,192,0.08); }
+  .slot-btn.available .slot-status { color: var(--dark-mint); }
+  .slot-btn.booked-customer { border-color: #DDD3C4; background: #F5EDE4; cursor: not-allowed; }
+  .slot-btn.booked-customer .slot-status { color: var(--mid); }
+  .slot-btn.blocked-admin { border-color: var(--orange); background: rgba(245,110,100,0.07); }
+  .slot-btn.blocked-admin .slot-status { color: var(--dark); }
+  .slot-time { font-size: 16px; font-weight: 900; color: var(--ink); margin-bottom: 4px; }
+  .slot-status { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .slot-action { font-size: 11px; color: var(--mid); margin-top: 6px; }
+
+  /* ── Booking cards ── */
+  .booking-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+  }
+  .booking-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .booking-name { font-size: 16px; font-weight: 900; color: var(--dark); }
+  .booking-date-badge {
+    background: var(--orange);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 4px 10px;
+    border-radius: 50px;
+    white-space: nowrap;
+  }
+  .booking-row { display: flex; gap: 8px; font-size: 13px; color: var(--mid); margin-bottom: 4px; }
+  .booking-row strong { color: var(--ink); font-weight: 700; }
+  .booking-package {
+    display: inline-block;
+    background: var(--light);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-top: 6px;
+  }
+  .booking-total {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--orange);
+    margin-top: 6px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--mid);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .filter-btn {
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    border-radius: 50px;
+    padding: 6px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--mid);
+    cursor: pointer;
+  }
+  .filter-btn.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+
+  .spinner {
+    text-align: center;
+    padding: 32px;
+    color: var(--mid);
+    font-size: 13px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<!-- ─────────── Login gate ─────────── -->
+<div id="loginGate">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="suds_logo.png" onerror="this.style.display='none';this.parentNode.textContent='🐒'">
+    </div>
+    <div class="login-title">Admin Access</div>
+    <div class="login-sub">Suds Monkey — Internal Dashboard</div>
+    <form id="loginForm">
+      <input type="password" id="passInput" placeholder="Enter password" autocomplete="current-password">
+      <button type="submit" class="login-btn">Enter →</button>
+      <div class="login-err" id="loginErr">Incorrect password — try again.</div>
+    </form>
+  </div>
+</div>
+
+<!-- ─────────── Admin dashboard ─────────── -->
+<div id="adminDash">
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">Suds Monkey Admin</div>
+      <div class="top-bar-sub" id="todayLabel"></div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Log out</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('block')">Block Slots</div>
+    <div class="tab" onclick="switchTab('bookings')">Bookings</div>
+  </div>
+
+  <!-- Block Slots panel -->
+  <div class="panel active" id="panelBlock">
+    <div class="section-label">Pick a date</div>
+    <div class="cal-card">
+      <div class="month-nav">
+        <button onclick="adminPrevMonth()">‹</button>
+        <span class="month-name" id="adminMonthName"></span>
+        <button onclick="adminNextMonth()">›</button>
+      </div>
+      <div class="day-headers">
+        <div class="day-header">Su</div><div class="day-header">Mo</div>
+        <div class="day-header">Tu</div><div class="day-header">We</div>
+        <div class="day-header">Th</div><div class="day-header">Fr</div>
+        <div class="day-header">Sa</div>
+      </div>
+      <div class="cal-grid" id="adminCalGrid"></div>
+    </div>
+
+    <div id="slotSection" style="display:none;">
+      <div class="section-label" id="slotSectionLabel">Time slots</div>
+      <div class="slot-grid" id="slotGrid"></div>
+    </div>
+  </div>
+
+  <!-- Bookings panel -->
+  <div class="panel" id="panelBookings">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('upcoming', this)">Upcoming</button>
+      <button class="filter-btn" onclick="setFilter('all', this)">All</button>
+    </div>
+    <div id="bookingsList"></div>
+  </div>
+</div>
+
+<script>
+  // ── Config ──────────────────────────────
+  const ADMIN_PASSWORD = 'SudsAdmin2025'; // Change this to your own password
+  const SUPABASE_URL   = 'https://ykjkcegpwiqhpfcgkwro.supabase.co';
+  const SUPABASE_KEY   = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
+  const SLOTS          = ['8:00 AM', '1:00 PM'];
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+
+  // ── Auth ────────────────────────────────
+  function init() {
+    if (sessionStorage.getItem('suds_admin') === '1') showDash();
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (document.getElementById('passInput').value === ADMIN_PASSWORD) {
+      sessionStorage.setItem('suds_admin', '1');
+      showDash();
+    } else {
+      document.getElementById('loginErr').style.display = 'block';
+      document.getElementById('passInput').value = '';
+      document.getElementById('passInput').focus();
+    }
+  });
+
+  function showDash() {
+    document.getElementById('loginGate').style.display = 'none';
+    document.getElementById('adminDash').style.display = 'block';
+    const now = new Date();
+    document.getElementById('todayLabel').textContent =
+      MONTHS[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+    renderAdminCal();
+    loadBookings();
+  }
+
+  function logout() {
+    sessionStorage.removeItem('suds_admin');
+    location.reload();
+  }
+
+  // ── Tabs ────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      const names = ['block', 'bookings'];
+      t.classList.toggle('active', names[i] === name);
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel' + (name === 'block' ? 'Block' : 'Bookings')).classList.add('active');
+    if (name === 'bookings') loadBookings();
+  }
+
+  // ── Admin calendar ───────────────────────
+  const adminToday = new Date();
+  adminToday.setHours(0,0,0,0);
+  let adminYear  = adminToday.getFullYear();
+  let adminMonth = adminToday.getMonth();
+  let adminSelectedDate = null;
+  let adminTakenSlots = {};
+
+  function renderAdminCal() {
+    const grid = document.getElementById('adminCalGrid');
+    grid.innerHTML = '';
+    document.getElementById('adminMonthName').textContent = MONTHS[adminMonth] + ' ' + adminYear;
+
+    const firstDay  = new Date(adminYear, adminMonth, 1).getDay();
+    const totalDays = new Date(adminYear, adminMonth + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-day empty';
+      grid.appendChild(el);
+    }
+
+    for (let d = 1; d <= totalDays; d++) {
+      const date = new Date(adminYear, adminMonth, d);
+      date.setHours(0,0,0,0);
+      const dateStr = adminYear + '-' + String(adminMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      const isPast = date < adminToday;
+      const el = document.createElement('div');
+
+      el.className = 'cal-day' + (isPast ? ' disabled' : '');
+      if (!isPast) el.onclick = () => adminSelectDate(dateStr);
+      if (date.getTime() === adminToday.getTime()) el.classList.add('today');
+      if (dateStr === adminSelectedDate) el.classList.add('selected');
+      el.textContent = d;
+      grid.appendChild(el);
+    }
+  }
+
+  function adminPrevMonth() {
+    adminMonth--;
+    if (adminMonth < 0) { adminMonth = 11; adminYear--; }
+    renderAdminCal();
+  }
+  function adminNextMonth() {
+    adminMonth++;
+    if (adminMonth > 11) { adminMonth = 0; adminYear++; }
+    renderAdminCal();
+  }
+
+  async function adminSelectDate(dateStr) {
+    adminSelectedDate = dateStr;
+    renderAdminCal();
+
+    const slotSec = document.getElementById('slotSection');
+    slotSec.style.display = 'block';
+    const parts = dateStr.split('-');
+    const label = MONTHS[parseInt(parts[1])-1] + ' ' + parseInt(parts[2]) + ', ' + parts[0];
+    document.getElementById('slotSectionLabel').textContent = label;
+
+    const grid = document.getElementById('slotGrid');
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--mid);font-size:13px;font-weight:700;">Loading…</div>';
+
+    try {
+      const [bRes, blRes] = await Promise.all([
+        fetch(SUPABASE_URL + '/rest/v1/bookings?select=time&date_iso=eq.' + dateStr, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        }),
+        fetch(SUPABASE_URL + '/rest/v1/blocked_slots?select=id,time&date=eq.' + dateStr, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        })
+      ]);
+      const booked  = bRes.ok  ? await bRes.json() : [];
+      const blocked = blRes.ok ? await blRes.json() : [];
+
+      adminTakenSlots[dateStr] = {
+        customer: new Set(booked.map(r => r.time)),
+        admin:    Object.fromEntries(blocked.map(r => [r.time, r.id]))
+      };
+    } catch(e) {
+      console.warn('Failed to load slot data:', e);
+      adminTakenSlots[dateStr] = { customer: new Set(), admin: {} };
+    }
+
+    renderSlots(dateStr);
+  }
+
+  function renderSlots(dateStr) {
+    const grid = document.getElementById('slotGrid');
+    grid.innerHTML = '';
+    const data = adminTakenSlots[dateStr] || { customer: new Set(), admin: {} };
+
+    SLOTS.forEach(slot => {
+      const isCust  = data.customer.has(slot);
+      const isAdmin = slot in data.admin;
+      const el = document.createElement('div');
+
+      if (isCust) {
+        el.className = 'slot-btn booked-customer';
+        el.innerHTML = `<div class="slot-time">${slot}</div>
+          <div class="slot-status">Customer Booked</div>
+          <div class="slot-action">Cannot unblock</div>`;
+      } else if (isAdmin) {
+        el.className = 'slot-btn blocked-admin';
+        el.innerHTML = `<div class="slot-time">${slot}</div>
+          <div class="slot-status">Blocked by You</div>
+          <div class="slot-action">Tap to unblock</div>`;
+        el.onclick = () => unblockSlot(dateStr, slot, data.admin[slot]);
+      } else {
+        el.className = 'slot-btn available';
+        el.innerHTML = `<div class="slot-time">${slot}</div>
+          <div class="slot-status">Available</div>
+          <div class="slot-action">Tap to block</div>`;
+        el.onclick = () => blockSlot(dateStr, slot);
+      }
+      grid.appendChild(el);
+    });
+  }
+
+  async function blockSlot(dateStr, time) {
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/blocked_slots', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({ date: dateStr, time: time })
+      });
+      if (res.ok || res.status === 201) {
+        const rows = await res.json();
+        const id = Array.isArray(rows) && rows[0] ? rows[0].id : null;
+        if (!adminTakenSlots[dateStr]) adminTakenSlots[dateStr] = { customer: new Set(), admin: {} };
+        if (id) adminTakenSlots[dateStr].admin[time] = id;
+        renderSlots(dateStr);
+      } else {
+        alert('Failed to block slot. Check Supabase RLS policies.');
+      }
+    } catch(e) {
+      alert('Network error: ' + e.message);
+    }
+  }
+
+  async function unblockSlot(dateStr, time, id) {
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/blocked_slots?id=eq.' + id, {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY
+        }
+      });
+      if (res.ok) {
+        delete adminTakenSlots[dateStr].admin[time];
+        renderSlots(dateStr);
+      } else {
+        alert('Failed to unblock. Check Supabase RLS policies.');
+      }
+    } catch(e) {
+      alert('Network error: ' + e.message);
+    }
+  }
+
+  // ── Bookings list ────────────────────────
+  let bookingFilter = 'upcoming';
+
+  function setFilter(f, btn) {
+    bookingFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadBookings();
+  }
+
+  async function loadBookings() {
+    const list = document.getElementById('bookingsList');
+    list.innerHTML = '<div class="spinner">Loading bookings…</div>';
+
+    try {
+      let url = SUPABASE_URL + '/rest/v1/bookings?select=*&order=date_iso.asc,time.asc';
+      if (bookingFilter === 'upcoming') {
+        const todayStr = adminToday.toISOString().split('T')[0];
+        url += '&date_iso=gte.' + todayStr;
+      }
+      const res = await fetch(url, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      });
+
+      if (!res.ok) {
+        list.innerHTML = '<div class="empty-state">Could not load bookings.<br>Check Supabase RLS — bookings needs a SELECT policy for anon.</div>';
+        return;
+      }
+
+      const rows = await res.json();
+      if (!rows.length) {
+        list.innerHTML = '<div class="empty-state">No ' + (bookingFilter === 'upcoming' ? 'upcoming ' : '') + 'bookings yet.</div>';
+        return;
+      }
+
+      list.innerHTML = '';
+      rows.forEach(b => {
+        const card = document.createElement('div');
+        card.className = 'booking-card';
+        const name = [b.first_name, b.last_name].filter(Boolean).join(' ') || '—';
+        const dateLabel = b.date || b.date_iso || '—';
+        card.innerHTML = `
+          <div class="booking-header">
+            <div class="booking-name">${esc(name)}</div>
+            <div class="booking-date-badge">${esc(dateLabel)}</div>
+          </div>
+          <div class="booking-row">🕐 <strong>${esc(b.time || '—')}</strong></div>
+          ${b.phone ? `<div class="booking-row">📞 ${esc(b.phone)}</div>` : ''}
+          ${b.email ? `<div class="booking-row">✉️ ${esc(b.email)}</div>` : ''}
+          ${b.address ? `<div class="booking-row">📍 ${esc(b.address)}</div>` : ''}
+          ${b.notes ? `<div class="booking-row">💬 ${esc(b.notes)}</div>` : ''}
+          <div class="booking-package">${esc(b.package || '—')}</div>
+          ${b.add_ons ? `<div class="booking-row" style="margin-top:6px;">Add-ons: ${esc(b.add_ons)}</div>` : ''}
+          ${b.monkey_bonus ? `<div class="booking-row" style="color:var(--dark-mint);">🐒 ${esc(b.monkey_bonus)}</div>` : ''}
+          <div class="booking-total">${esc(b.total || '')}</div>
+        `;
+        list.appendChild(card);
+      });
+    } catch(e) {
+      list.innerHTML = '<div class="empty-state">Network error loading bookings.</div>';
+    }
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  init();
+</script>
+</body>
+</html>
