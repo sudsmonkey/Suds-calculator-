@@ -50,7 +50,16 @@
   .cal-day.disabled { color: #DDD3C4; }
   .cal-day.selected { background: var(--orange) !important; color: #fff; }
   .cal-day.today { border: 2px solid var(--mint); }
-  .cal-day.has-slots::after { content: ''; display: block; width: 4px; height: 4px; background: var(--mint); border-radius: 50%; position: absolute; bottom: 3px; }
+  .cal-day.has-slots::after { content: ''; display: block; width: 5px; height: 5px; background: #5aab8a; border-radius: 50%; position: absolute; bottom: 3px; }
+  .cal-day.partial::after  { content: ''; display: block; width: 5px; height: 5px; background: var(--orange); border-radius: 50%; position: absolute; bottom: 3px; }
+  .cal-day.full-booked { color: #C8B8AA; cursor: not-allowed; }
+  .cal-day.full-booked:hover { background: none; }
+  .cal-legend { display: flex; gap: 14px; justify-content: center; padding: 10px 12px 14px; border-top: 1px solid #F5EDE4; }
+  .cal-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--mid); }
+  .cal-legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .cal-legend-dot.open    { background: #5aab8a; }
+  .cal-legend-dot.limited { background: var(--orange); }
+  .cal-legend-dot.full    { background: #C8B8AA; }
 
 
   /* Time slots */
@@ -166,6 +175,11 @@
       <div class="day-header">Sa</div>
     </div>
     <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-legend">
+      <div class="cal-legend-item"><div class="cal-legend-dot open"></div> Open</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot limited"></div> Limited</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot full"></div> Full</div>
+    </div>
   </div>
 
   <div id="timeSection">
@@ -250,9 +264,36 @@
   let selectedDate = null;
   let selectedTime = null;
   let takenSlots = new Set();
+  let monthAvailability = {};
 
   const SUPABASE_URL = 'https://ykjkcegpwiqhpfcgkwro.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
+
+  async function fetchMonthAvailability(year, month) {
+    const pad = n => String(n).padStart(2,'0');
+    const from = year + '-' + pad(month+1) + '-01';
+    const last = new Date(year, month+1, 0).getDate();
+    const to   = year + '-' + pad(month+1) + '-' + pad(last);
+    try {
+      const [bRes, blRes] = await Promise.all([
+        fetch(SUPABASE_URL + '/rest/v1/bookings?select=date_iso,time&date_iso=gte.' + from + '&date_iso=lte.' + to, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        }),
+        fetch(SUPABASE_URL + '/rest/v1/blocked_slots?select=date,time&date=gte.' + from + '&date=lte.' + to, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        })
+      ]);
+      const booked  = bRes.ok  ? await bRes.json() : [];
+      const blocked = blRes.ok ? await blRes.json() : [];
+      const map = {};
+      booked.forEach(r  => { if (r.date_iso) map[r.date_iso] = (map[r.date_iso] || 0) + 1; });
+      blocked.forEach(r => { if (r.date)     map[r.date]     = (map[r.date]     || 0) + 1; });
+      monthAvailability = map;
+    } catch(e) {
+      console.warn('Month availability fetch failed:', e);
+      monthAvailability = {};
+    }
+  }
 
   async function fetchTakenSlots(dateStr) {
     takenSlots = new Set();
@@ -273,13 +314,16 @@
     }
   }
 
-  function renderCalendar() {
+  async function renderCalendar() {
     const grid = document.getElementById('calGrid');
     grid.innerHTML = '';
     document.getElementById('monthName').textContent = MONTHS[currentMonth] + ' ' + currentYear;
 
+    await fetchMonthAvailability(currentYear, currentMonth);
+
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const pad = n => String(n).padStart(2,'0');
 
     for (let i = 0; i < firstDay; i++) {
       const el = document.createElement('div');
@@ -290,14 +334,20 @@
     for (let d = 1; d <= totalDays; d++) {
       const date = new Date(currentYear, currentMonth, d);
       date.setHours(0,0,0,0);
-      const dateStr = currentYear + '-' + String(currentMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      const dateStr = currentYear + '-' + pad(currentMonth+1) + '-' + pad(d);
       const dow = date.getDay();
       const isPast = date < today;
       const isWeekend = dow === 0 || dow === 6;
       const el = document.createElement('div');
+      const taken = monthAvailability[dateStr] || 0;
 
       if (isPast || isWeekend) {
         el.className = 'cal-day disabled';
+      } else if (taken >= SLOTS.length) {
+        el.className = 'cal-day full-booked';
+      } else if (taken === SLOTS.length - 1) {
+        el.className = 'cal-day partial';
+        el.onclick = () => selectDate(dateStr, d);
       } else {
         el.className = 'cal-day has-slots';
         el.onclick = () => selectDate(dateStr, d);
@@ -359,16 +409,16 @@
     document.getElementById('bookBtn').disabled = !(selectedDate && selectedTime);
   }
 
-  function prevMonth() {
+  async function prevMonth() {
     currentMonth--;
     if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-    renderCalendar();
+    await renderCalendar();
   }
 
-  function nextMonth() {
+  async function nextMonth() {
     currentMonth++;
     if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-    renderCalendar();
+    await renderCalendar();
   }
 
   renderCalendar();
