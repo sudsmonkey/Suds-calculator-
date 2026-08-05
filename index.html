@@ -267,6 +267,12 @@
   .avail-pill.open  .avail-text { color: #3A8C6A; }
   .avail-pill.soon  .avail-text { color: #3A8C6A; }
   .avail-pill.loading .avail-text { color: var(--mid); }
+  .avail-pill.open.coral    { background: rgba(245,110,100,0.10); border-color: rgba(245,110,100,0.35); }
+  .avail-pill.soon.coral    { background: rgba(245,110,100,0.10); border-color: rgba(245,110,100,0.35); }
+  .avail-pill.open.coral  .avail-dot { background: #F56E64; }
+  .avail-pill.soon.coral  .avail-dot { background: #F56E64; }
+  .avail-pill.open.coral  .avail-text { color: #A6382E; }
+  .avail-pill.soon.coral  .avail-text { color: #A6382E; }
 
   /* Checkout card */
   .checkout-card {
@@ -2927,7 +2933,8 @@ let currentPkg = null;
       PILL_IDS.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
-        el.className = 'avail-pill ' + (isToday ? 'soon' : 'open');
+        const state = isToday ? 'soon' : 'open';
+        el.className = 'avail-pill ' + state + (id === 'avail-silver' ? ' coral' : '');
         el.innerHTML = '<div class="avail-dot"></div><div class="avail-text">' + text + '</div>';
       });
     }
