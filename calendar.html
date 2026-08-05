@@ -373,20 +373,23 @@
     await fetchTakenSlots(dateStr);
     renderTimeSlots();
     updateBtn();
-    setTimeout(() => {
-      document.getElementById('timeSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
   }
 
   function renderTimeSlots() {
     const grid = document.getElementById('timeGrid');
     grid.innerHTML = '';
+    grid.style.gridTemplateColumns = '1fr 1fr';
     if (!selectedDate) {
-      grid.style.gridTemplateColumns = '1fr';
-      grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--mid);font-size:14px;font-weight:700;">Select a date above to see available times</div>';
+      SLOTS.forEach(slot => {
+        const el = document.createElement('div');
+        el.className = 'time-slot booked';
+        el.style.opacity = '0.3';
+        el.style.cursor = 'default';
+        el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">—</div>';
+        grid.appendChild(el);
+      });
       return;
     }
-    grid.style.gridTemplateColumns = '1fr 1fr';
     SLOTS.forEach(slot => {
       const taken = takenSlots.has(slot);
       const el = document.createElement('div');
