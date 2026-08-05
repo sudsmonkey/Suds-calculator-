@@ -353,6 +353,7 @@
         el.onclick = () => selectDate(dateStr, d);
       }
 
+      el.dataset.date = dateStr;
       if (date.getTime() === today.getTime()) el.classList.add('today');
       if (dateStr === selectedDate) el.classList.add('selected');
 
@@ -364,7 +365,10 @@
   async function selectDate(dateStr, d) {
     selectedDate = dateStr;
     selectedTime = null;
-    renderCalendar();
+    // Toggle selected class without re-rendering the whole calendar
+    document.querySelectorAll('#calGrid .cal-day.selected').forEach(el => el.classList.remove('selected'));
+    const dayEl = document.querySelector('#calGrid [data-date="' + dateStr + '"]');
+    if (dayEl) dayEl.classList.add('selected');
 
     const grid = document.getElementById('timeGrid');
     grid.innerHTML = '';
