@@ -367,8 +367,16 @@
     renderCalendar();
 
     const grid = document.getElementById('timeGrid');
-    grid.style.gridTemplateColumns = '1fr';
-    grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--mid);font-size:14px;font-weight:700;">Checking availability…</div>';
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = '1fr 1fr';
+    SLOTS.forEach(slot => {
+      const el = document.createElement('div');
+      el.className = 'time-slot booked';
+      el.style.opacity = '0.3';
+      el.style.cursor = 'default';
+      el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">Checking…</div>';
+      grid.appendChild(el);
+    });
 
     await fetchTakenSlots(dateStr);
     renderTimeSlots();
