@@ -318,6 +318,7 @@
   <div class="tabs">
     <div class="tab active" onclick="switchTab('block')">Block Slots</div>
     <div class="tab" onclick="switchTab('bookings')">Bookings</div>
+    <div class="tab" onclick="switchTab('consults')">Consults</div>
   </div>
 
   <!-- Block Slots panel -->
@@ -354,6 +355,15 @@
       <button class="filter-btn" onclick="setFilter('all', this)">All</button>
     </div>
     <div id="bookingsList"></div>
+  </div>
+
+  <!-- Consults panel -->
+  <div class="panel" id="panelConsults">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setConsultFilter('upcoming', this)">Upcoming</button>
+      <button class="filter-btn" onclick="setConsultFilter('all', this)">All</button>
+    </div>
+    <div id="consultsList"></div>
   </div>
 </div>
 
@@ -399,14 +409,15 @@
   }
 
   // ── Tabs ────────────────────────────────
+  const PANEL_MAP = { block: 'panelBlock', bookings: 'panelBookings', consults: 'panelConsults' };
+
   function switchTab(name) {
-    document.querySelectorAll('.tab').forEach((t, i) => {
-      const names = ['block', 'bookings'];
-      t.classList.toggle('active', names[i] === name);
-    });
+    const tabNames = ['block', 'bookings', 'consults'];
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', tabNames[i] === name));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel' + (name === 'block' ? 'Block' : 'Bookings')).classList.add('active');
+    document.getElementById(PANEL_MAP[name]).classList.add('active');
     if (name === 'bookings') loadBookings();
+    if (name === 'consults') loadConsults();
   }
 
   // ── Admin calendar ───────────────────────
@@ -665,6 +676,76 @@
 
   function esc(str) {
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Consults list ────────────────────────
+  const CONSULT_SERVICE_LABELS = {
+    storefront: 'Storefront & Retail',
+    office: 'Office Building',
+    high_rise: 'High-Rise',
+    post_construction: 'Post-Construction',
+    hoa_multi: 'HOA & Multi-Family'
+  };
+
+  let consultFilter = 'upcoming';
+
+  function setConsultFilter(f, btn) {
+    consultFilter = f;
+    document.querySelectorAll('#panelConsults .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadConsults();
+  }
+
+  async function loadConsults() {
+    const list = document.getElementById('consultsList');
+    list.innerHTML = '<div class="spinner">Loading consults…</div>';
+    try {
+      let url = SUPABASE_URL + '/rest/v1/consult_bookings?select=*&order=date.asc,time.asc';
+      if (consultFilter === 'upcoming') {
+        url += '&date=gte.' + adminToday.toISOString().split('T')[0];
+      }
+      const res = await fetch(url, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      });
+      if (!res.ok) {
+        list.innerHTML = '<div class="empty-state">Could not load consults.<br>Make sure the <code>consult_bookings</code> table exists with anon SELECT policy.</div>';
+        return;
+      }
+      const rows = await res.json();
+      if (!rows.length) {
+        list.innerHTML = '<div class="empty-state">No ' + (consultFilter === 'upcoming' ? 'upcoming ' : '') + 'consultations yet.</div>';
+        return;
+      }
+      list.innerHTML = '';
+      rows.forEach(b => {
+        const card = document.createElement('div');
+        card.className = 'booking-card';
+        const name = [b.first_name, b.last_name].filter(Boolean).join(' ') || '—';
+        const isSite = b.type === 'site_visit';
+        const typeLabel = isSite ? 'Site Visit' : 'Phone Consult';
+        const badgeBg   = isSite ? 'var(--dark-mint)' : 'var(--orange)';
+        const serviceLabel = CONSULT_SERVICE_LABELS[b.service_type] || b.service_type || '—';
+        card.innerHTML = `
+          <div class="booking-header">
+            <div>
+              <div class="booking-name">${esc(name)}</div>
+              ${b.company ? `<div style="font-size:12px;color:var(--mid);margin-top:2px;">${esc(b.company)}</div>` : ''}
+            </div>
+            <div class="booking-date-badge" style="background:${badgeBg};">${esc(typeLabel)}</div>
+          </div>
+          <div class="booking-row">🗓 <strong>${esc(b.date || '—')}${b.time ? ' · ' + esc(b.time) : ''}</strong></div>
+          <div class="booking-row">🏢 ${esc(serviceLabel)}</div>
+          ${b.sizing_info ? `<div class="booking-row">📐 ${esc(b.sizing_info)}</div>` : ''}
+          ${b.phone ? `<div class="booking-row">📞 ${esc(b.phone)}</div>` : ''}
+          ${b.email ? `<div class="booking-row">✉ ${esc(b.email)}</div>` : ''}
+          ${b.address ? `<div class="booking-row">📍 ${esc(b.address)}</div>` : ''}
+          ${b.notes ? `<div class="booking-row">💬 ${esc(b.notes)}</div>` : ''}
+        `;
+        list.appendChild(card);
+      });
+    } catch(e) {
+      list.innerHTML = '<div class="empty-state">Network error loading consults.</div>';
+    }
   }
 
   init();
