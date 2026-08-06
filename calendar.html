@@ -408,6 +408,7 @@
     SLOTS.forEach(slot => {
       const taken = takenSlots.has(slot);
       const el = document.createElement('div');
+      el.dataset.slot = slot;
       el.className = 'time-slot' + (taken ? ' booked' : '') + (!taken && selectedTime === slot ? ' selected' : '');
       el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">' + (taken ? 'Unavailable' : '~3 hrs') + '</div>';
       if (!taken) el.onclick = () => selectTime(slot);
@@ -417,9 +418,11 @@
 
   function selectTime(slot) {
     selectedTime = slot;
+    document.querySelectorAll('#timeGrid .time-slot').forEach(el => el.classList.remove('selected'));
+    const el = document.querySelector('#timeGrid [data-slot="' + slot + '"]');
+    if (el) el.classList.add('selected');
     document.getElementById('summaryDate').textContent = MONTHS[currentMonth] + ' ' + parseInt(selectedDate.split('-')[2]) + ', ' + currentYear;
     document.getElementById('summaryTime').textContent = slot;
-    renderTimeSlots();
     updateBtn();
   }
 
