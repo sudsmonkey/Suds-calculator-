@@ -18,7 +18,7 @@
   --ink: #3d3530;
   --white: #FFFFFF;
   --border: #E8DDD6;
-  --radius: 20px;
+  --radius: 10px;
   --shadow: 0 2px 20px rgba(166,56,46,0.08);
   --max: 640px;
 }
@@ -52,11 +52,25 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .hd-phone:hover { background: var(--orange); color: #fff; border-color: var(--orange); }
 
 /* ── Hero ─────────────────────────── */
-.hero { background: var(--orange); padding: 36px 20px 32px; text-align: center; }
+.hero {
+  background: #111;
+  position: relative;
+  padding: 56px 20px 36px;
+  text-align: center;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url('img-hero.jpg') center 35%/cover no-repeat;
+  opacity: 0.38;
+  z-index: 0;
+}
+.hero > * { position: relative; z-index: 1; }
 .hero-eyebrow {
   font-family: 'Barlow Condensed', sans-serif;
   font-style: italic; font-weight: 800; font-size: 14px;
-  letter-spacing: 0.12em; color: rgba(255,255,255,0.75);
+  letter-spacing: 0.12em; color: rgba(255,255,255,0.6);
   text-transform: uppercase; margin-bottom: 10px;
 }
 .hero h1 {
@@ -64,7 +78,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   color: #fff; margin-bottom: 12px; text-wrap: balance;
 }
 .hero-sub {
-  font-size: 15px; color: rgba(255,255,255,0.85); line-height: 1.6;
+  font-size: 15px; color: rgba(255,255,255,0.72); line-height: 1.6;
   max-width: 320px; margin: 0 auto 28px;
 }
 .path-grid {
@@ -72,27 +86,40 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   gap: 10px; max-width: 480px; margin: 0 auto;
 }
 .path-card {
-  background: rgba(255,255,255,0.15);
-  border: 1.5px solid rgba(255,255,255,0.3);
-  border-radius: 18px; padding: 0;
-  text-decoration: none; text-align: center;
-  transition: all 0.18s; display: block;
+  position: relative;
+  border-radius: 10px;
   overflow: hidden;
+  display: block;
+  text-decoration: none;
+  background: #222;
+  transition: transform 0.18s;
 }
 .path-card:hover {
-  background: rgba(255,255,255,0.24);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45);
 }
 .path-card img {
-  width: 100%; display: block;
-  border-radius: 18px;
-  object-fit: cover;
+  width: 100%; height: 178px;
+  object-fit: cover; display: block;
+  opacity: 0.82;
+  transition: opacity 0.18s;
+}
+.path-card:hover img { opacity: 1; }
+.path-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.82));
+  padding: 26px 12px 12px;
 }
 .path-icon { display: none; }
-.path-label { display: none; }
+.path-label {
+  font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 900;
+  color: #fff; display: block; margin-bottom: 2px;
+}
 .path-desc { display: none; }
-.path-cta { display: none; }
+.path-cta {
+  font-size: 11px; font-weight: 700;
+  color: var(--orange); display: block; letter-spacing: 0.02em;
+}
 
 /* ── Proof strip ─────────────────── */
 .proof-strip {
@@ -138,7 +165,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .svc-card {
   background: var(--white); border: 1.5px solid var(--border);
-  border-radius: 16px; padding: 18px 14px;
+  border-radius: 10px; padding: 18px 14px;
   text-decoration: none; transition: all 0.15s; display: block;
 }
 .svc-card:hover { border-color: var(--orangeborder); transform: translateY(-1px); box-shadow: var(--shadow); }
@@ -150,7 +177,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
 /* ── Before / After ──────────────── */
 .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.ba-card { border-radius: 14px; overflow: hidden; }
+.ba-card { border-radius: 10px; overflow: hidden; }
 .ba-split { display: grid; grid-template-columns: 1fr 1fr; height: 130px; }
 .ba-before {
   background: linear-gradient(135deg, #C4BBB2 0%, #ADA49A 100%);
@@ -172,7 +199,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .testi-grid { display: flex; flex-direction: column; gap: 10px; }
 .testi-card {
   background: var(--white); border: 1.5px solid var(--border);
-  border-radius: 16px; padding: 18px;
+  border-radius: 10px; padding: 18px;
 }
 .testi-stars { font-size: 13px; margin-bottom: 8px; color: var(--orange); }
 .testi-quote { font-size: 14px; color: var(--ink); line-height: 1.65; font-style: italic; margin-bottom: 12px; }
@@ -244,10 +271,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   <p class="hero-sub">Get a real price and a real time slot — no waiting for a callback.</p>
   <div class="path-grid">
     <a href="calculator.html" class="path-card">
-      <img src="img-residential.jpg" alt="Residential">
+      <img src="img-wash.jpg" alt="Residential window cleaning">
+      <div class="path-overlay">
+        <span class="path-label">Residential</span>
+        <span class="path-cta">Get My Price →</span>
+      </div>
     </a>
     <a href="consult.html" class="path-card">
-      <img src="img-commercial.jpg" alt="Commercial">
+      <img src="img-highrise.jpg" alt="Commercial high-rise cleaning">
+      <div class="path-overlay">
+        <span class="path-label">Commercial</span>
+        <span class="path-cta">Book a Consult →</span>
+      </div>
     </a>
   </div>
 </section>
