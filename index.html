@@ -74,27 +74,25 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .path-card {
   background: rgba(255,255,255,0.15);
   border: 1.5px solid rgba(255,255,255,0.3);
-  border-radius: 18px; padding: 22px 14px;
+  border-radius: 18px; padding: 0;
   text-decoration: none; text-align: center;
   transition: all 0.18s; display: block;
+  overflow: hidden;
 }
 .path-card:hover {
   background: rgba(255,255,255,0.24);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0,0,0,0.14);
 }
-.path-icon { font-size: 36px; margin-bottom: 10px; display: block; line-height: 1; }
-.path-label {
-  font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 900;
-  color: #fff; display: block; margin-bottom: 5px;
+.path-card img {
+  width: 100%; display: block;
+  border-radius: 18px;
+  object-fit: cover;
 }
-.path-desc { font-size: 12px; color: rgba(255,255,255,0.78); line-height: 1.45; margin-bottom: 12px; }
-.path-cta {
-  display: inline-block; background: rgba(255,255,255,0.22);
-  border-radius: 50px; padding: 5px 14px;
-  font-size: 12px; font-weight: 800; color: #fff;
-  font-family: 'Nunito', sans-serif;
-}
+.path-icon { display: none; }
+.path-label { display: none; }
+.path-desc { display: none; }
+.path-cta { display: none; }
 
 /* ── Proof strip ─────────────────── */
 .proof-strip {
@@ -246,16 +244,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   <p class="hero-sub">Get a real price and a real time slot — no waiting for a callback.</p>
   <div class="path-grid">
     <a href="calculator.html" class="path-card">
-      <span class="path-icon">🏡</span>
-      <span class="path-label">Residential</span>
-      <span class="path-desc">Instant quote. Pick your time. Done.</span>
-      <span class="path-cta">Get My Price →</span>
+      <img src="img-residential.jpg" alt="Residential">
     </a>
     <a href="consult.html" class="path-card">
-      <span class="path-icon">🏢</span>
-      <span class="path-label">Commercial</span>
-      <span class="path-desc">Site visit or phone consult — your call.</span>
-      <span class="path-cta">Book a Consult →</span>
+      <img src="img-commercial.jpg" alt="Commercial">
     </a>
   </div>
 </section>
