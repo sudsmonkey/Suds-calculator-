@@ -54,7 +54,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
   }
+  .calc-back { position: absolute; top: 14px; left: 16px; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
+  .calc-back:hover { color: #fff; }
   .logo-circle {
     width: 110px;
     height: 110px;
@@ -825,6 +828,7 @@
   <!-- Header + Slider Card -->
   <div class="header-card pkg slider-pkg">
   <div class="header-hero">
+    <a href="index.html" class="calc-back">← Home</a>
     <div class="logo-circle">
       <img class="logo" src="logo.png" alt="Suds Monkey" onerror="this.parentNode.style.fontSize='32px';this.parentNode.textContent='🐒'">
     </div>
