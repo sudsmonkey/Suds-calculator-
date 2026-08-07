@@ -178,6 +178,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 /* ── Before / After ──────────────── */
 .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .ba-card { border-radius: 10px; overflow: hidden; }
+.ba-photo { width: 100%; height: 130px; object-fit: cover; display: block; }
 .ba-split { display: grid; grid-template-columns: 1fr 1fr; height: 130px; }
 .ba-before {
   background: linear-gradient(135deg, #C4BBB2 0%, #ADA49A 100%);
@@ -405,11 +406,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
         <div class="ba-caption">Storefront, Downtown OKC</div>
       </div>
       <div class="ba-card">
-        <div class="ba-split">
-          <div class="ba-before"><span class="ba-label">Before</span></div>
-          <div class="ba-after"><span class="ba-label">After</span></div>
-        </div>
-        <div class="ba-caption">Residential, Edmond</div>
+        <img src="img-detail.jpg" alt="Frame detail, Edmond" class="ba-photo">
+        <div class="ba-caption">Frame detail, Edmond</div>
       </div>
       <div class="ba-card">
         <div class="ba-split">
