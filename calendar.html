@@ -21,7 +21,7 @@
   body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; }
 
   .header { background: #111; padding: 20px 24px 28px; text-align: center; position: relative; overflow: hidden; }
-  .header-bg { position: absolute; inset: 0; background: url('img-res-tree.jpg') center 40%/cover no-repeat; opacity: 0.5; }
+  .header-bg { position: absolute; inset: 0; background: url('img-res-tree.jpg') center 40%/cover no-repeat; opacity: 0.5; display: none; }
   .header > *:not(.header-bg) { position: relative; z-index: 1; }
   .back-link { position: absolute; top: 14px; left: 16px; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
   .back-link:hover { color: #fff; }
@@ -469,6 +469,12 @@
   const _urlParams = new URLSearchParams(window.location.search);
   (function() {
     const pkgName  = _urlParams.get('pkg') || '';
+    const residentialPkgs = ['lemur','gorilla','silverback','silverback supreme','silverback storm'];
+    if (residentialPkgs.some(function(p){ return pkgName.toLowerCase().includes(p); })) {
+      document.querySelector('.header-bg').style.display = 'block';
+    } else {
+      document.querySelector('.header-bg').style.display = 'none';
+    }
     const pkgTotal = _urlParams.get('total') || _urlParams.get('price') || '';
     const addons   = _urlParams.get('addons') || '';
 
