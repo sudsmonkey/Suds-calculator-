@@ -105,12 +105,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   content: '';
   position: absolute; inset: 0;
   border-radius: 24px;
+  z-index: 0;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   -webkit-mask-image: linear-gradient(to right, black 0%, transparent 100%);
   mask-image: linear-gradient(to right, black 0%, transparent 100%);
   pointer-events: none;
 }
+.path-card > * { position: relative; z-index: 1; }
 .path-card:hover {
   background: rgba(255,255,255,0.22);
   transform: translateY(-1px);
