@@ -168,7 +168,7 @@
   body.calibrated .recalibrate-link { display: block; }
 
   /* Package cards */
-  .packages { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 500px; }
+  .packages { display: flex; flex-direction: column; gap: 36px; width: 100%; max-width: 500px; }
   .pkg { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 16px rgba(245,110,100,0.10); transition: transform 0.15s, box-shadow 0.15s; display: flex; flex-direction: column; }
   .pkg:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(245,110,100,0.18); }
   .pkg.selected { }
@@ -176,20 +176,20 @@
   /* Storm Package — coral hero, everything else identical */
   .pkg.pkg-storm .pkg-hero { background: linear-gradient(to bottom, #9ED9C0 0%, #FFFFFF 100%); }
 
-  .pkg-hero { background: linear-gradient(to bottom, #9ED9C0 0%, #FFFFFF 100%); padding: 28px 24px 32px; display: flex; flex-direction: column; align-items: center; position: relative; }
+  .pkg-hero { background: linear-gradient(to bottom, #9ED9C0 0%, #FFFFFF 100%); padding: 14px 24px 16px; display: flex; flex-direction: column; align-items: center; position: relative; }
   .pkg-badge { position: absolute; top: 12px; right: 14px; font-size: 12px; font-weight: 700; color: var(--orange); }
 
   /* Animal circle */
-  .animal-circle { width: 90px; height: 90px; border-radius: 50%; background: white; border: 3px solid var(--orangeborder); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.14), 0 2px 8px rgba(245,110,100,0.18); overflow: hidden; transition: box-shadow 0.3s ease; }
+  .animal-circle { width: 64px; height: 64px; border-radius: 50%; background: white; border: 3px solid var(--orangeborder); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.14), 0 2px 8px rgba(245,110,100,0.18); overflow: hidden; transition: box-shadow 0.3s ease; }
   .animal-circle img { width: 100%; height: 100%; object-fit: cover; }
   .pkg:hover .animal-circle { box-shadow: 0 0 0 6px rgba(245,110,100,0.2), 0 8px 28px rgba(245,110,100,0.6); }
   #pkg-silver:hover .animal-circle { box-shadow: 0 0 0 6px rgba(100,185,155,0.25), 0 8px 28px rgba(100,185,155,0.7); }
 
   /* Body */
-  .pkg-body { padding: 20px 24px 24px; display: flex; flex-direction: column; flex: 1; }
+  .pkg-body { padding: 12px 24px 16px; display: flex; flex-direction: column; flex: 1; }
   .pkg-name { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 22px; color: var(--dark); text-align: center; margin-bottom: 4px; }
   .pkg-starting { font-size: 13px; color: var(--mid); text-align: center; margin-bottom: 2px; }
-  .pkg-amount { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 52px; color: var(--dark); text-align: center; line-height: 1; margin-bottom: 20px; position: relative; }
+  .pkg-amount { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 38px; color: var(--dark); text-align: center; line-height: 1; margin-bottom: 12px; position: relative; }
   .pkg-amount .dollar { font-size: 28px; vertical-align: super; }
   .member-price { text-align: center; font-size: 12.5px; color: var(--mid); margin-top: -14px; margin-bottom: 18px; max-width: 160px; margin-left: auto; margin-right: auto; }
   .member-price .lock { margin-right: 3px; }
