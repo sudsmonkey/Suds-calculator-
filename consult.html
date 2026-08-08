@@ -34,8 +34,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
   opacity: 0.38;
 }
 .header > *:not(.header-bg) { position: relative; z-index: 1; }
-.back-link { position: absolute; top: 14px; left: 16px; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; z-index: 2; }
-.back-link:hover { color: #fff; }
+.top-nav { background: var(--white); border-bottom: 1px solid #F0E8DE; padding: 10px 16px; }
+.back-link { color: var(--mid); font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
+.back-link:hover { color: var(--dark); }
 .header-phone { position: absolute; top: 14px; right: 16px; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 700; text-decoration: none; z-index: 2; }
 .header-phone:hover { color: #fff; }
 .header-logo { width: 72px; height: 72px; border-radius: 50%; background: #fff; border: 3px solid var(--mint); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
@@ -164,11 +165,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
 </head>
 <body>
 
+<nav class="top-nav"><a href="index.html" class="back-link">← Back</a></nav>
 <div class="header">
   <div class="header-bg"></div>
-  <a href="index.html" class="back-link">← Back</a>
-<h1>Book a Phone Consultation or Site-Visit</h1>
-  <p>Commercial &amp; specialty services</p>
+  <h1>Book a Phone Consultation or Site-Visit</h1>
 </div>
 
 <div class="progress-wrap">
