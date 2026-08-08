@@ -31,9 +31,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
 .header-bg {
   position: absolute; inset: 0;
   background: url('img-wash.jpg') center 40%/cover no-repeat;
-  opacity: 0.38;
+  opacity: 0.55;
 }
-.header > *:not(.header-bg) { position: relative; z-index: 1; }
+.header-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(166,56,46,0.55) 0%, rgba(80,20,15,0.65) 100%);
+  z-index: 0;
+}
+.header > *:not(.header-bg):not(.header-overlay) { position: relative; z-index: 1; }
 .top-nav { background: var(--white); border-bottom: 1px solid #F0E8DE; padding: 10px 16px; }
 .back-link { color: var(--mid); font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
 .back-link:hover { color: var(--dark); }
@@ -168,6 +173,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
 <nav class="top-nav"><a href="index.html" class="back-link">← Back</a></nav>
 <div class="header">
   <div class="header-bg"></div>
+  <div class="header-overlay"></div>
   <h1>Book a Consultation or Site-Visit</h1>
 </div>
 
