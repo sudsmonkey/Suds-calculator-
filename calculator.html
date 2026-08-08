@@ -630,8 +630,8 @@
     </div>
 
     <div class="calibrate-step active" id="calibrateStep1">
-      <h2><span class="calibrate-icon"></span>Let's Calibrate the Slider</h2>
-      <p>A few quick questions to get you an accurate quote.</p>
+      <h2><span class="calibrate-icon"></span>Let's Get Your Price</h2>
+      <p>Answer a few questions and toggle your home size to see package pricing.</p>
       <div class="quick-q" style="margin-top:18px;">
         <span class="input-label">How many stories is your home?</span>
         <div class="story-btns">
@@ -2808,6 +2808,13 @@ let currentPkg = null;
       row.scrollLeft = scrollStart - (e.pageX - startX);
     });
   })();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const _params = new URLSearchParams(window.location.search);
+    if (!_params.get('pkg') && !calibrated) {
+      setTimeout(openCalibrate, 300);
+    }
+  });
 
   document.addEventListener('DOMContentLoaded', function() {
     const unpeeledEl = document.getElementById('bananaUnpeeled');
