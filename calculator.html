@@ -13,7 +13,7 @@
     --white: #FFFFFF; --offwhite: #FFFFFF; --dark: #A6382E; --mid: #7C7268; --radius: 20px;
   }
   body {
-    background: var(--cream);
+    background: transparent;
     font-family: 'DM Sans', sans-serif;
     color: var(--dark);
     min-height: 100vh;
@@ -23,6 +23,20 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+  .page-bg {
+    position: fixed; inset: 0; z-index: -1;
+    display: flex; flex-direction: column;
+  }
+  .page-bg-img {
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+  }
+  .page-bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(253,249,245,0.72);
   }
 
 
@@ -48,31 +62,14 @@
     align-items: center;
   }
   .header-hero {
-    background: var(--dark);
+    background: #F56E64;
     width: 100%;
     padding: 18px 24px 22px;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-    overflow: hidden;
   }
-  .hero-slide {
-    position: absolute; inset: 0;
-    background-size: cover;
-    background-position: center 35%;
-    background-repeat: no-repeat;
-    opacity: 0;
-    transition: opacity 1.2s ease;
-    z-index: 0;
-  }
-  .hero-slide.active { opacity: 1; }
-  .hero-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(to bottom, rgba(166,56,46,0.55) 0%, rgba(80,20,15,0.65) 100%);
-    z-index: 1;
-  }
-  .header-hero > *:not(.hero-slide):not(.hero-overlay) { position: relative; z-index: 2; }
   .calc-back { position: absolute; top: 14px; left: 16px; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
   .calc-back:hover { color: #fff; }
   .logo-circle {
@@ -615,6 +612,11 @@
 </style>
 </head>
 <body>
+<div class="page-bg">
+  <div class="page-bg-img" style="background-image:url('img-hero.jpg')"></div>
+  <div class="page-bg-img" style="background-image:url('img-wash.jpg')"></div>
+  <div class="page-bg-img" style="background-image:url('img-highrise.jpg')"></div>
+</div>
 
 
 <div id="calibrateOverlay">
@@ -840,10 +842,6 @@
   <!-- Header + Slider Card -->
   <div class="header-card pkg slider-pkg">
   <div class="header-hero">
-    <div class="hero-slide active" style="background-image:url('img-hero.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('img-wash.jpg')"></div>
-    <div class="hero-slide" style="background-image:url('img-highrise.jpg')"></div>
-    <div class="hero-overlay"></div>
     <a href="index.html" class="calc-back">← Home</a>
     <div class="logo-circle">
       <img class="logo" src="logo.png" alt="Suds Monkey" onerror="this.parentNode.style.fontSize='32px';this.parentNode.textContent='🐒'">
@@ -3271,15 +3269,6 @@ function startSq3000Tutorial() {
   overlay.classList.add('active');
   showStep(0);
 }
-(function(){
-  const slides = document.querySelectorAll('.header-hero .hero-slide');
-  let cur = 0;
-  setInterval(function(){
-    slides[cur].classList.remove('active');
-    cur = (cur + 1) % slides.length;
-    slides[cur].classList.add('active');
-  }, 4000);
-})();
 </script>
 </body>
 </html>
