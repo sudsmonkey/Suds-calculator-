@@ -59,13 +59,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   text-align: center;
   overflow: hidden;
 }
-.hero::before {
-  content: '';
+.hero-slide {
   position: absolute; inset: 0;
-  background: url('img-hero.jpg') center 35%/cover no-repeat;
-  opacity: 0.38;
+  background-size: cover;
+  background-position: center 35%;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 1.2s ease;
   z-index: 0;
 }
+.hero-slide.active { opacity: 0.38; }
 .hero > * { position: relative; z-index: 1; }
 .hero-eyebrow {
   font-family: 'Barlow Condensed', sans-serif;
@@ -256,6 +259,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
 <!-- Hero -->
 <section class="hero">
+  <div class="hero-slide active" style="background-image:url('img-hero.jpg')"></div>
+  <div class="hero-slide" style="background-image:url('img-wash.jpg')"></div>
+  <div class="hero-slide" style="background-image:url('img-highrise.jpg')"></div>
+  <div class="hero-slide" style="background-image:url('img-residential.jpg')"></div>
   <div class="hero-eyebrow">Oklahoma City Metro</div>
   <h1>Spotless Windows<br>Booked Online</h1>
   <p class="hero-sub">Get a real price and a real time slot — no waiting for a callback</p>
@@ -477,5 +484,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   <div class="footer-copy">© 2025 Suds Monkey. All rights reserved.</div>
 </footer>
 
+<script>
+(function(){
+  const slides = document.querySelectorAll('.hero-slide');
+  let cur = 0;
+  setInterval(function(){
+    slides[cur].classList.remove('active');
+    cur = (cur + 1) % slides.length;
+    slides[cur].classList.add('active');
+  }, 4000);
+})();
+</script>
 </body>
 </html>
