@@ -70,7 +70,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   background: linear-gradient(to bottom, rgba(166,56,46,0.55) 0%, rgba(80,20,15,0.65) 100%);
   z-index: 0;
 }
-.hero > * { position: relative; z-index: 1; }
+.hero > *:not(.hero-slide):not(.hero-overlay) { position: relative; z-index: 1; }
 .hero-eyebrow {
   font-family: 'Barlow Condensed', sans-serif;
   font-style: italic; font-weight: 800; font-size: 14px;
