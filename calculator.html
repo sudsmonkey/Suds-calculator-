@@ -458,7 +458,7 @@
     .soap-bubble { position: absolute; border-radius: 50%; background: radial-gradient(circle at 30% 28%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 14%, rgba(180,225,255,0.65) 42%, rgba(245,110,100,0.28) 72%, rgba(158,217,192,0.5) 100%); border: 2.5px solid rgba(158,217,192,0.95); box-shadow: inset 4px 4px 10px rgba(255,255,255,1), inset -2px -2px 8px rgba(158,217,192,0.5), 0 4px 16px rgba(245,110,100,0.2); animation: bubbleFloat linear infinite; }
   }
   body.has-bg-bubbles { background: transparent; }
-  #bgBubbleLayer { position: fixed; inset: 0; z-index: -1; background: var(--cream); pointer-events: none; overflow: hidden; }
+  #bgBubbleLayer { position: fixed; inset: 0; z-index: -1; background: transparent; pointer-events: none; overflow: hidden; }
   .bg-bubble { position: absolute; background-size: contain; background-repeat: no-repeat; background-position: center; animation: bgBubbleFloat linear infinite; }
   @keyframes bubbleFloat {
     0%   { transform: translateY(0) translateX(0); opacity: 0.8; }
