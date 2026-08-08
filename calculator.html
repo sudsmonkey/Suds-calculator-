@@ -48,14 +48,31 @@
     align-items: center;
   }
   .header-hero {
-    background: #F56E64;
+    background: var(--dark);
     width: 100%;
     padding: 18px 24px 22px;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
+    overflow: hidden;
   }
+  .hero-slide {
+    position: absolute; inset: 0;
+    background-size: cover;
+    background-position: center 35%;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    z-index: 0;
+  }
+  .hero-slide.active { opacity: 1; }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(166,56,46,0.55) 0%, rgba(80,20,15,0.65) 100%);
+    z-index: 1;
+  }
+  .header-hero > *:not(.hero-slide):not(.hero-overlay) { position: relative; z-index: 2; }
   .calc-back { position: absolute; top: 14px; left: 16px; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
   .calc-back:hover { color: #fff; }
   .logo-circle {
@@ -145,12 +162,7 @@
     line-height: 1.5;
   }
   .screen-disclaimer.visible { display: block; }
-  .calib-spinner { display:flex; gap:10px; justify-content:center; margin:32px 0 8px; }
-  .calib-spinner span { width:13px; height:13px; border-radius:50%; background:var(--orange); animation:bubblePop 1.3s ease-in-out infinite; }
-  .calib-spinner span:nth-child(2) { animation-delay:0.2s; background:var(--mint); }
-  .calib-spinner span:nth-child(3) { animation-delay:0.4s; }
-  .calib-spinner span:nth-child(4) { animation-delay:0.6s; background:var(--mint); }
-  .calib-spinner span:nth-child(5) { animation-delay:0.8s; }
+  .calib-spinner { display:none; }
   @keyframes bubblePop { 0%,80%,100%{transform:scale(0.6);opacity:0.45} 40%{transform:scale(1.25);opacity:1} }
   @keyframes dotLock { from{transform:scale(0.6);opacity:0.45} to{transform:scale(1);opacity:1} }
   .calib-loading-label { text-align:center; font-size:13px; color:var(--mid); margin-top:4px; }
@@ -828,6 +840,10 @@
   <!-- Header + Slider Card -->
   <div class="header-card pkg slider-pkg">
   <div class="header-hero">
+    <div class="hero-slide active" style="background-image:url('img-hero.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('img-wash.jpg')"></div>
+    <div class="hero-slide" style="background-image:url('img-highrise.jpg')"></div>
+    <div class="hero-overlay"></div>
     <a href="index.html" class="calc-back">← Home</a>
     <div class="logo-circle">
       <img class="logo" src="logo.png" alt="Suds Monkey" onerror="this.parentNode.style.fontSize='32px';this.parentNode.textContent='🐒'">
@@ -3255,6 +3271,15 @@ function startSq3000Tutorial() {
   overlay.classList.add('active');
   showStep(0);
 }
+(function(){
+  const slides = document.querySelectorAll('.header-hero .hero-slide');
+  let cur = 0;
+  setInterval(function(){
+    slides[cur].classList.remove('active');
+    cur = (cur + 1) % slides.length;
+    slides[cur].classList.add('active');
+  }, 4000);
+})();
 </script>
 </body>
 </html>
