@@ -164,7 +164,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 }
 .svc-card:hover { border-color: var(--orangeborder); transform: translateY(-1px); box-shadow: var(--shadow); }
 .svc-card.featured { border-color: var(--orangeborder); background: #FEF8F7; grid-column: 1 / -1; padding-top: 0; overflow: hidden; }
-.svc-card-img { width: calc(100% + 28px); margin: 0 -14px 14px; height: 160px; background-size: cover; background-position: center; }
+.svc-card-img { width: calc(100% + 28px); margin: 0 -14px 14px; display: block; height: auto; }
 .svc-name { font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 900; color: var(--dark); margin-bottom: 4px; line-height: 1.2; }
 .svc-desc { font-size: 12px; color: var(--mid); line-height: 1.45; }
 .svc-action { font-size: 11px; font-weight: 700; color: var(--orange); margin-top: 8px; display: block; }
@@ -340,7 +340,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <p class="section-sub">Residential quotes are instant. Commercial starts with a free consult — site visit or phone call, your choice.</p>
     <div class="services-grid">
       <a href="calculator.html" class="svc-card featured">
-        <div class="svc-card-img" style="background-image:url('img-residential-windows.jpg')"></div>
+        <img class="svc-card-img" src="img-residential-windows.jpg" alt="Residential windows">
         <div class="svc-name">Residential</div>
         <div class="svc-desc">Interior &amp; exterior, any size home.</div>
         <span class="svc-action">Instant quote →</span>
