@@ -50,7 +50,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 /* ── Hero ─────────────────────────── */
 .hero {
   background: var(--dark);
-  position: relative;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
   padding: 56px 20px 36px;
   text-align: center;
   overflow: hidden;
@@ -277,6 +279,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     </a>
   </div>
 </section>
+<div class="hero-spacer"></div>
 
 <!-- Proof strip -->
 <div class="proof-strip">
@@ -487,6 +490,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     cur = (cur + 1) % slides.length;
     slides[cur].classList.add('active');
   }, 4000);
+})();
+
+(function(){
+  const hero = document.querySelector('.hero');
+  const spacer = document.querySelector('.hero-spacer');
+  function syncSpacer(){ spacer.style.height = hero.offsetHeight + 'px'; }
+  syncSpacer();
+  window.addEventListener('resize', syncSpacer);
 })();
 </script>
 </body>
