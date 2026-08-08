@@ -28,7 +28,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
 /* ── Header ─────────────────────── */
 .site-header {
-  position: sticky; top: 0; z-index: 100;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
   background: rgba(253,249,245,0.96);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
@@ -484,11 +484,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 })();
 
 (function(){
+  const header = document.querySelector('.site-header');
   const hero = document.querySelector('.hero');
   const spacer = document.querySelector('.hero-spacer');
-  function syncSpacer(){ spacer.style.height = hero.offsetHeight + 'px'; }
-  syncSpacer();
-  window.addEventListener('resize', syncSpacer);
+  function sync(){
+    const hh = header.offsetHeight;
+    hero.style.top = hh + 'px';
+    spacer.style.height = (hh + hero.offsetHeight) + 'px';
+  }
+  sync();
+  window.addEventListener('resize', sync);
 })();
 </script>
 </body>
