@@ -64,7 +64,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   transition: opacity 1.2s ease;
   z-index: 0;
 }
-.hero-slide.active { opacity: 0.38; }
+.hero-slide.active { opacity: 1; }
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(166,56,46,0.55) 0%, rgba(80,20,15,0.65) 100%);
+  z-index: 0;
+}
 .hero > * { position: relative; z-index: 1; }
 .hero-eyebrow {
   font-family: 'Barlow Condensed', sans-serif;
@@ -259,6 +264,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   <div class="hero-slide" style="background-image:url('img-wash.jpg')"></div>
   <div class="hero-slide" style="background-image:url('img-highrise.jpg')"></div>
   <div class="hero-slide" style="background-image:url('img-residential.jpg')"></div>
+  <div class="hero-overlay"></div>
   <div class="hero-eyebrow">Oklahoma City Metro</div>
   <h1>Spotless Windows<br>Booked Online</h1>
   <p class="hero-sub">Get a real price and a real time slot — no waiting for a callback</p>
