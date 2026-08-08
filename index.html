@@ -88,34 +88,30 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   max-width: 320px; margin: 0 auto 28px;
 }
 .path-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 10px; max-width: 480px; margin: 0 auto;
+  display: flex; gap: 10px; justify-content: center; margin: 0 auto;
 }
 .path-card {
-  border-radius: 10px;
-  display: block;
+  border-radius: 24px;
+  display: inline-block;
   text-decoration: none;
-  background: rgba(255,255,255,0.12);
-  border: 1.5px solid rgba(255,255,255,0.22);
-  padding: 12px 14px;
+  background: rgba(255,255,255,0.14);
+  border: 1.5px solid rgba(255,255,255,0.28);
+  padding: 8px 22px;
   transition: all 0.18s;
   backdrop-filter: blur(4px);
 }
 .path-card:hover {
-  background: rgba(255,255,255,0.2);
-  transform: translateY(-2px);
+  background: rgba(255,255,255,0.22);
+  transform: translateY(-1px);
 }
 .path-overlay { }
 .path-icon { display: none; }
 .path-label {
-  font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 900;
-  color: #fff; display: block; margin-bottom: 4px;
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 900;
+  color: #fff; display: block;
 }
 .path-desc { display: none; }
-.path-cta {
-  font-size: 12px; font-weight: 700;
-  color: var(--orange); display: block; letter-spacing: 0.02em;
-}
+.path-cta { display: none; }
 
 /* ── Proof strip ─────────────────── */
 .proof-strip {
