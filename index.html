@@ -86,38 +86,28 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   gap: 10px; max-width: 480px; margin: 0 auto;
 }
 .path-card {
-  position: relative;
   border-radius: 10px;
-  overflow: hidden;
   display: block;
   text-decoration: none;
-  background: #222;
-  transition: transform 0.18s;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.22);
+  padding: 20px 16px;
+  transition: all 0.18s;
+  backdrop-filter: blur(4px);
 }
 .path-card:hover {
+  background: rgba(255,255,255,0.2);
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.45);
 }
-.path-card img {
-  width: 100%; height: 178px;
-  object-fit: cover; display: block;
-  opacity: 0.82;
-  transition: opacity 0.18s;
-}
-.path-card:hover img { opacity: 1; }
-.path-overlay {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: linear-gradient(transparent, rgba(0,0,0,0.82));
-  padding: 26px 12px 12px;
-}
+.path-overlay { }
 .path-icon { display: none; }
 .path-label {
-  font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 900;
-  color: #fff; display: block; margin-bottom: 2px;
+  font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 900;
+  color: #fff; display: block; margin-bottom: 4px;
 }
 .path-desc { display: none; }
 .path-cta {
-  font-size: 11px; font-weight: 700;
+  font-size: 12px; font-weight: 700;
   color: var(--orange); display: block; letter-spacing: 0.02em;
 }
 
@@ -271,18 +261,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   <p class="hero-sub">Get a real price and a real time slot — no waiting for a callback.</p>
   <div class="path-grid">
     <a href="calculator.html" class="path-card">
-      <img src="img-wash.jpg" alt="Residential window cleaning">
-      <div class="path-overlay">
-        <span class="path-label">Residential</span>
-        <span class="path-cta">Get My Price →</span>
-      </div>
+      <span class="path-label">Residential</span>
+      <span class="path-cta">Get My Price →</span>
     </a>
     <a href="consult.html" class="path-card">
-      <img src="img-highrise.jpg" alt="Commercial high-rise cleaning">
-      <div class="path-overlay">
-        <span class="path-label">Commercial</span>
-        <span class="path-cta">Book a Consult →</span>
-      </div>
+      <span class="path-label">Commercial</span>
+      <span class="path-cta">Book a Consult →</span>
     </a>
   </div>
 </section>
