@@ -73,9 +73,9 @@
   .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .time-slot { border: 1.5px solid var(--orangeborder); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
   .time-slot:hover:not(.booked) { border-color: var(--orange); background: #FDF0EF; }
-  .time-slot.selected { background: var(--orange); border-color: var(--orange); }
-  .time-slot.selected .time-main { color: #fff; }
-  .time-slot.selected .time-sub { color: rgba(255,255,255,0.8); }
+  .time-slot.selected, .time-slot.selected:hover { background: var(--orange); border-color: var(--orange); }
+  .time-slot.selected .time-main, .time-slot.selected:hover .time-main { color: #fff; }
+  .time-slot.selected .time-sub, .time-slot.selected:hover .time-sub { color: rgba(255,255,255,0.8); }
   .time-slot.booked { background: #F5EDE4; border-color: #DDD3C4; cursor: not-allowed; opacity: 0.5; }
   .time-main { font-size: 15px; font-weight: 900; color: var(--dark); }
   .time-sub { font-size: 11px; color: var(--mid); margin-top: 2px; }
