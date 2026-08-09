@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Suds Monkey – Window Cleaning Oklahoma City Metro</title>
 <meta name="description" content="Professional window cleaning across Oklahoma City, Edmond, Norman, Moore and the OKC metro. Instant online quotes for homes. Commercial consultations for businesses of any size.">
 <link rel="canonical" href="https://sudsmonkey.github.io/Suds-calculator-/">
@@ -28,7 +28,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
 /* ── Header ─────────────────────── */
 .site-header {
-  position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; z-index: 200;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
   background: rgb(100,30,22);
   border-bottom: none;
   padding: 8px 20px;
@@ -508,9 +508,9 @@ document.addEventListener('click', function(e){
   const hero = document.querySelector('.hero');
   const spacer = document.querySelector('.hero-spacer');
   function sync(){
-    const hb = header.getBoundingClientRect().bottom;
-    hero.style.top = hb + 'px';
-    spacer.style.height = (hb + hero.offsetHeight) + 'px';
+    const hh = header.offsetHeight;
+    hero.style.top = hh + 'px';
+    spacer.style.height = (hh + hero.offsetHeight) + 'px';
   }
   sync();
   window.addEventListener('resize', sync);
