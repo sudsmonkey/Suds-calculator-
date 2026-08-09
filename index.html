@@ -29,12 +29,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 /* ── Header ─────────────────────── */
 .site-header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  background: rgba(100,30,22,0.97);
-  backdrop-filter: blur(8px);
+  background: rgb(100,30,22);
   border-bottom: none;
   padding: 8px 20px;
   min-height: 76px;
   display: flex; align-items: center; justify-content: space-between;
+  -webkit-transform: translateZ(0); transform: translateZ(0);
 }
 .hd-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .hd-logo-img { display: flex; align-items: center; }
@@ -57,6 +57,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   padding: 32px 20px 24px;
   text-align: center;
   overflow: hidden;
+  -webkit-transform: translateZ(0); transform: translateZ(0);
 }
 .hero-slide {
   position: absolute; inset: 0;
