@@ -58,7 +58,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   padding: 32px 20px 24px;
   text-align: center;
   overflow: hidden;
-  -webkit-transform: translateZ(0); transform: translateZ(0);
+  -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0);
+  will-change: transform;
 }
 .hero-slide {
   position: absolute; inset: 0;
@@ -515,7 +516,8 @@ document.addEventListener('click', function(e){
     spacer.style.height = (hh + hero.offsetHeight) + 'px';
   }
   sync();
-  window.addEventListener('resize', sync);
+  // Only re-sync on orientation change, not on scroll-triggered resize (URL bar hide/show)
+  window.addEventListener('orientationchange', function(){ setTimeout(sync, 200); });
 })();
 </script>
 </body>
