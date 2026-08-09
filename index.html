@@ -38,7 +38,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .hd-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .hd-logo-img { display: flex; align-items: center; }
 .hd-logo-img img { width: 52px; height: 52px; object-fit: contain; filter: brightness(0) invert(1); }
-.hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; display: flex; align-items: center; }
+.hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; }
 .hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
 .hd-burger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.2s; }
 .hd-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 180px; overflow: hidden; }
@@ -264,8 +264,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <div class="hd-logo-img">
       <img src="logo.png" alt="Suds Monkey" onerror="this.style.display='none';this.parentNode.textContent='🐒'">
     </div>
-    <div class="hd-brand">Suds Monkey</div>
   </a>
+  <div class="hd-brand">Suds Monkey</div>
   <div style="position:relative;">
     <button class="hd-burger" id="hdBurger" onclick="toggleMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
