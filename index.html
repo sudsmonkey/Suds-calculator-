@@ -518,6 +518,7 @@ document.addEventListener('click', function(e){
   const setWidth = 1840;   // 8 photos × (220 + 10)px
   const photoWidth = 230;  // one photo step
   let activeStrip = null;
+  const visibleStrips = new Set();
 
   function setupStrip(el){
     el.scrollLeft = setWidth;
@@ -558,13 +559,16 @@ document.addEventListener('click', function(e){
 
     new IntersectionObserver(function(entries){
       if(entries[0].isIntersecting){
-        if(activeStrip && activeStrip !== ctrl) activeStrip.stop(); // pause the other row
+        visibleStrips.add(ctrl);
+        if(activeStrip && activeStrip !== ctrl) activeStrip.stop();
         activeStrip = ctrl;
         ctrl.start();
         stopHero();
       } else {
+        visibleStrips.delete(ctrl);
         ctrl.stop();
-        if(activeStrip === ctrl){ activeStrip = null; startHero(); }
+        if(activeStrip === ctrl) activeStrip = null;
+        if(visibleStrips.size === 0) startHero(); // resume hero only when both rows are out of view
       }
     }, { threshold: 0.15 }).observe(el);
   }
