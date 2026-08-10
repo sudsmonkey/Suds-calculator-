@@ -556,23 +556,25 @@ document.addEventListener('click', function(e){
   scroll.scrollLeft = setWidth;  // start in middle set
 
   let autoOn = false, touching = false, resumeTimer = null;
+  let dir = 1, touchStartX = 0;
 
-  // setInterval is more reliable than RAF on iOS for long-running auto-scroll
   setInterval(function(){
     if(!autoOn || touching) return;
-    scroll.scrollLeft += 1;
-    if(scroll.scrollLeft >= setWidth * 2)    scroll.scrollLeft -= setWidth;
+    scroll.scrollLeft += dir;
+    if(scroll.scrollLeft >= setWidth * 2)       scroll.scrollLeft -= setWidth;
     else if(scroll.scrollLeft < setWidth * 0.5) scroll.scrollLeft += setWidth;
-  }, 30); // ~33fps, 1px/tick ≈ 33px/s (one set every ~56s)
+  }, 30);
 
-  scroll.addEventListener('touchstart', function(){
+  scroll.addEventListener('touchstart', function(e){
     touching = true;
+    touchStartX = e.touches[0].clientX;
     clearTimeout(resumeTimer);
   }, { passive: true });
 
-  scroll.addEventListener('touchend', function(){
-    // Clamp after manual scroll in case user dragged into set 1 or 3
-    if(scroll.scrollLeft >= setWidth * 2)    scroll.scrollLeft -= setWidth;
+  scroll.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    if(Math.abs(dx) > 10) dir = dx < 0 ? 1 : -1; // swipe left = forward, swipe right = backward
+    if(scroll.scrollLeft >= setWidth * 2)       scroll.scrollLeft -= setWidth;
     else if(scroll.scrollLeft < setWidth * 0.5) scroll.scrollLeft += setWidth;
     resumeTimer = setTimeout(function(){ touching = false; }, 1500);
   }, { passive: true });
