@@ -398,6 +398,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_4505.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_7328.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_4092.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
         </div>
       </div>
     </div>
@@ -557,13 +565,15 @@ document.addEventListener('click', function(e){
 (function(){
   var scroll = document.querySelector('.glass-scroll');
   if (!scroll) return;
-  // Half the track = one full set of 8 photos × (220px + 10px gap) = 1840px
-  var half = 1840;
+  // One set = 8 photos × (220px + 10px gap) = 1840px. Three sets total.
+  var setWidth = 1840;
+  // Start in the middle set so there's content to scroll in both directions
+  scroll.scrollLeft = setWidth;
   scroll.addEventListener('scroll', function(){
-    if (scroll.scrollLeft >= half) {
-      scroll.scrollLeft -= half;
-    } else if (scroll.scrollLeft <= 0) {
-      scroll.scrollLeft += half;
+    if (scroll.scrollLeft < setWidth * 0.5) {
+      scroll.scrollLeft += setWidth;
+    } else if (scroll.scrollLeft > setWidth * 2) {
+      scroll.scrollLeft -= setWidth;
     }
   }, { passive: true });
 })();
