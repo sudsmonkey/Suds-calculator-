@@ -189,7 +189,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .glass-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
   margin: 0 -20px;
   scrollbar-width: none;
 }
@@ -203,7 +202,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   overflow: hidden; background: #EDE5DE;
   display: flex; align-items: center; justify-content: center;
   margin-right: 10px;
-  scroll-snap-align: start;
 }
 .glass-photo img { width: 100%; height: 100%; object-fit: cover; }
 .glass-cta {
@@ -515,28 +513,24 @@ document.addEventListener('click', function(e){
   startHero();
 
   // ── Photo strip setup (shared logic for res + commercial) ─
-  const setWidth = 1840;   // 8 photos × (220 + 10)px
-  const photoWidth = 230;  // one photo step
+  const setWidth = 1840; // 8 photos × (220 + 10)px
   let activeStrip = null;
   const visibleStrips = new Set();
 
   function setupStrip(el){
     el.scrollLeft = setWidth;
-    let autoOn = false, touching = false, advancing = false, dir = 1, startX = 0;
+    let autoOn = false, touching = false, dir = 1, startX = 0;
 
     function clamp(){
       if(el.scrollLeft >= setWidth * 2)       el.scrollLeft -= setWidth;
       else if(el.scrollLeft < setWidth * 0.5) el.scrollLeft += setWidth;
     }
 
-    function advanceOne(){
-      if(!autoOn || touching || advancing) return;
-      advancing = true;
-      el.scrollTo({ left: el.scrollLeft + dir * photoWidth, behavior: 'smooth' });
-      setTimeout(function(){ clamp(); advancing = false; }, 500);
-    }
-
-    setInterval(advanceOne, 2500);
+    setInterval(function(){
+      if(!autoOn || touching) return;
+      el.scrollLeft += dir;
+      clamp();
+    }, 30);
 
     el.addEventListener('touchstart', function(e){
       touching = true; startX = e.touches[0].clientX;
