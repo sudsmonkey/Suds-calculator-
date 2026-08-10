@@ -187,24 +187,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 }
 .glass-em { font-weight: 700; color: var(--dark); }
 .glass-scroll {
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
   margin: 0 -20px;
+  scrollbar-width: none;
 }
+.glass-scroll::-webkit-scrollbar { display: none; }
 .glass-track {
   display: flex;
   flex-wrap: nowrap;
-  animation: glassMarquee 55s linear infinite;
-}
-.glass-track:hover { animation-play-state: paused; }
-@keyframes glassMarquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-1840px); }
+  padding: 0 20px;
 }
 .glass-photo {
   flex: 0 0 220px; height: 160px; border-radius: 14px;
   overflow: hidden; background: #EDE5DE;
   display: flex; align-items: center; justify-content: center;
   margin-right: 10px;
+  scroll-snap-align: start;
 }
 .glass-photo img { width: 100%; height: 100%; object-fit: cover; }
 .glass-cta {
@@ -552,6 +552,20 @@ document.addEventListener('click', function(e){
   sync();
   // Only re-sync on orientation change, not on scroll-triggered resize (URL bar hide/show)
   window.addEventListener('orientationchange', function(){ setTimeout(sync, 200); });
+})();
+
+(function(){
+  var scroll = document.querySelector('.glass-scroll');
+  if (!scroll) return;
+  // Half the track = one full set of 8 photos × (220px + 10px gap) = 1840px
+  var half = 1840;
+  scroll.addEventListener('scroll', function(){
+    if (scroll.scrollLeft >= half) {
+      scroll.scrollLeft -= half;
+    } else if (scroll.scrollLeft <= 0) {
+      scroll.scrollLeft += half;
+    }
+  }, { passive: true });
 })();
 </script>
 </body>
