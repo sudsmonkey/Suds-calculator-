@@ -192,13 +192,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 }
 .glass-track {
   display: flex;
-  width: max-content;
+  flex-wrap: nowrap;
   animation: glassMarquee 55s linear infinite;
 }
 .glass-track:hover { animation-play-state: paused; }
 @keyframes glassMarquee {
   0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  100% { transform: translateX(-1840px); }
 }
 .glass-photo {
   flex: 0 0 220px; height: 160px; border-radius: 14px;
