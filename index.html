@@ -187,24 +187,25 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 }
 .glass-em { font-weight: 700; color: var(--dark); }
 .glass-scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
+  overflow: hidden;
   margin: 0 -20px;
-  scrollbar-width: none;
 }
-.glass-scroll::-webkit-scrollbar { display: none; }
 .glass-track {
   display: flex;
   flex-wrap: nowrap;
-  padding: 0 20px;
+  animation: glassMarquee 55s linear infinite;
+}
+.glass-track:hover { animation-play-state: paused; }
+.glass-track.paused { animation-play-state: paused; }
+@keyframes glassMarquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-1840px); }
 }
 .glass-photo {
   flex: 0 0 220px; height: 160px; border-radius: 14px;
   overflow: hidden; background: #EDE5DE;
   display: flex; align-items: center; justify-content: center;
   margin-right: 10px;
-  scroll-snap-align: start;
 }
 .glass-photo img { width: 100%; height: 100%; object-fit: cover; }
 .glass-cta {
@@ -398,14 +399,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_4505.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_7328.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_4092.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
         </div>
       </div>
     </div>
@@ -540,12 +533,29 @@ document.addEventListener('click', function(e){
 
 (function(){
   const slides = document.querySelectorAll('.hero-slide');
-  let cur = 0;
-  setInterval(function(){
+  let cur = 0, timer = null;
+  function advance(){
     slides[cur].classList.remove('active');
     cur = (cur + 1) % slides.length;
     slides[cur].classList.add('active');
-  }, 4000);
+  }
+  function startSlides(){ if(!timer) timer = setInterval(advance, 4000); }
+  function stopSlides(){ clearInterval(timer); timer = null; }
+  startSlides();
+
+  const track = document.querySelector('.glass-track');
+  const glassSection = document.querySelector('.glass-scroll');
+  if(glassSection && track){
+    new IntersectionObserver(function(entries){
+      if(entries[0].isIntersecting){
+        stopSlides();
+        track.classList.remove('paused');
+      } else {
+        startSlides();
+        track.classList.add('paused');
+      }
+    }, { threshold: 0.15 }).observe(glassSection);
+  }
 })();
 
 (function(){
@@ -562,21 +572,6 @@ document.addEventListener('click', function(e){
   window.addEventListener('orientationchange', function(){ setTimeout(sync, 200); });
 })();
 
-(function(){
-  var scroll = document.querySelector('.glass-scroll');
-  if (!scroll) return;
-  // One set = 8 photos × (220px + 10px gap) = 1840px. Three sets total.
-  var setWidth = 1840;
-  // Start in the middle set so there's content to scroll in both directions
-  scroll.scrollLeft = setWidth;
-  scroll.addEventListener('scroll', function(){
-    if (scroll.scrollLeft < setWidth * 0.5) {
-      scroll.scrollLeft += setWidth;
-    } else if (scroll.scrollLeft > setWidth * 2) {
-      scroll.scrollLeft -= setWidth;
-    }
-  }, { passive: true });
-})();
 </script>
 </body>
 </html>
