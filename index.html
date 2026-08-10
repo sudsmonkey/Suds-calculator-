@@ -517,7 +517,7 @@ document.addEventListener('click', function(e){
   // ── Photo strip setup (shared logic for res + commercial) ─
   const setWidth = 1840;   // 8 photos × (220 + 10)px
   const photoWidth = 230;  // one photo step
-  let visibleStrips = 0;
+  let activeStrip = null;
 
   function setupStrip(el){
     el.scrollLeft = setWidth;
@@ -551,13 +551,20 @@ document.addEventListener('click', function(e){
       setTimeout(function(){ touching = false; }, 400);
     }, { passive: true });
 
+    const ctrl = {
+      start: function(){ autoOn = true; },
+      stop:  function(){ autoOn = false; }
+    };
+
     new IntersectionObserver(function(entries){
       if(entries[0].isIntersecting){
-        autoOn = true;
-        if(++visibleStrips === 1) stopHero();
+        if(activeStrip && activeStrip !== ctrl) activeStrip.stop(); // pause the other row
+        activeStrip = ctrl;
+        ctrl.start();
+        stopHero();
       } else {
-        autoOn = false;
-        if(--visibleStrips <= 0){ visibleStrips = 0; startHero(); }
+        ctrl.stop();
+        if(activeStrip === ctrl){ activeStrip = null; startHero(); }
       }
     }, { threshold: 0.15 }).observe(el);
   }
