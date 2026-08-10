@@ -187,19 +187,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 }
 .glass-em { font-weight: 700; color: var(--dark); }
 .glass-scroll {
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 0 -20px;
+  scrollbar-width: none;
 }
+.glass-scroll::-webkit-scrollbar { display: none; }
 .glass-track {
   display: flex;
   flex-wrap: nowrap;
-  animation: glassMarquee 55s linear infinite;
-}
-.glass-track:hover { animation-play-state: paused; }
-.glass-track.paused { animation-play-state: paused; }
-@keyframes glassMarquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-1840px); }
 }
 .glass-photo {
   flex: 0 0 220px; height: 160px; border-radius: 14px;
@@ -399,6 +395,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_4505.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_7328.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_4092.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
         </div>
       </div>
     </div>
@@ -532,30 +536,56 @@ document.addEventListener('click', function(e){
 });
 
 (function(){
+  // ── Hero slideshow ──────────────────────────────────────
   const slides = document.querySelectorAll('.hero-slide');
-  let cur = 0, timer = null;
-  function advance(){
+  let cur = 0, heroTimer = null;
+  function heroAdvance(){
     slides[cur].classList.remove('active');
     cur = (cur + 1) % slides.length;
     slides[cur].classList.add('active');
   }
-  function startSlides(){ if(!timer) timer = setInterval(advance, 4000); }
-  function stopSlides(){ clearInterval(timer); timer = null; }
-  startSlides();
+  function startHero(){ if(!heroTimer) heroTimer = setInterval(heroAdvance, 4000); }
+  function stopHero(){ clearInterval(heroTimer); heroTimer = null; }
+  startHero();
 
-  const track = document.querySelector('.glass-track');
-  const glassSection = document.querySelector('.glass-scroll');
-  if(glassSection && track){
-    new IntersectionObserver(function(entries){
-      if(entries[0].isIntersecting){
-        stopSlides();
-        track.classList.remove('paused');
-      } else {
-        startSlides();
-        track.classList.add('paused');
-      }
-    }, { threshold: 0.15 }).observe(glassSection);
+  // ── Residential photo scroll (RAF-driven, touch-friendly) ─
+  const scroll = document.querySelector('.glass-scroll');
+  if(!scroll) return;
+
+  const setWidth = 1840; // 8 photos × (220 + 10)px
+  scroll.scrollLeft = setWidth;  // start in middle set
+
+  let autoOn = false, touching = false, resumeTimer = null;
+
+  function clamp(){
+    if(scroll.scrollLeft >= setWidth * 2) scroll.scrollLeft -= setWidth;
+    else if(scroll.scrollLeft < setWidth * 0.5) scroll.scrollLeft += setWidth;
   }
+
+  (function tick(){
+    if(autoOn && !touching) scroll.scrollLeft += 0.5;
+    clamp();
+    requestAnimationFrame(tick);
+  })();
+
+  scroll.addEventListener('touchstart', function(){
+    touching = true;
+    clearTimeout(resumeTimer);
+  }, { passive: true });
+
+  scroll.addEventListener('touchend', function(){
+    resumeTimer = setTimeout(function(){ touching = false; }, 1500);
+  }, { passive: true });
+
+  scroll.addEventListener('touchcancel', function(){
+    resumeTimer = setTimeout(function(){ touching = false; }, 1500);
+  }, { passive: true });
+
+  // ── Toggle on scroll into view ──────────────────────────
+  new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting){ stopHero();  autoOn = true; }
+    else                          { startHero(); autoOn = false; }
+  }, { threshold: 0.15 }).observe(scroll);
 })();
 
 (function(){
