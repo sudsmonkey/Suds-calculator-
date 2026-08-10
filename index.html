@@ -411,11 +411,33 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       <div class="glass-type">Commercial</div>
       <p class="glass-body"><span class="glass-lead">From small boutiques to large medical facilities,</span> Suds Monkey delivers <span class="glass-em">reliable, consistent service</span> to OKC business owners and managers across the metro and surrounding states. Our trained technicians are skilled at <span class="glass-em">working at height</span> on larger projects and are always mindful of keeping disruption to a minimum.</p>
       <a href="consult.html" class="glass-cta">Tap the commercial button to schedule a consultation or site visit for your property.</a>
-      <div class="glass-scroll">
-        <div class="glass-photo"><span class="glass-photo-label">Photo coming soon</span></div>
-        <div class="glass-photo"><span class="glass-photo-label">Photo coming soon</span></div>
-        <div class="glass-photo"><span class="glass-photo-label">Photo coming soon</span></div>
-        <div class="glass-photo"><span class="glass-photo-label">Photo coming soon</span></div>
+      <div class="glass-scroll" id="commScroll">
+        <div class="glass-track">
+          <div class="glass-photo"><img src="IMG_0790.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_2513.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_3313.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_3598.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_4891.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_6740.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_6839.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_9876.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_0790.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_2513.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_3313.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_3598.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_4891.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_6740.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_6839.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_9876.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_0790.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_2513.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_3313.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_3598.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_4891.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_6740.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_6839.jpeg" alt="Commercial windows"></div>
+          <div class="glass-photo"><img src="IMG_9876.jpeg" alt="Commercial windows"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -549,46 +571,50 @@ document.addEventListener('click', function(e){
   function stopHero(){ clearInterval(heroTimer); heroTimer = null; }
   startHero();
 
-  // ── Residential photo scroll (setInterval-driven, touch-friendly) ─
-  const scroll = document.querySelector('.glass-scroll');
-  if(!scroll) return;
-
+  // ── Photo strip setup (shared logic for res + commercial) ─
   const setWidth = 1840; // 8 photos × (220 + 10)px
-  scroll.scrollLeft = setWidth;  // start in middle set
+  let visibleStrips = 0;
 
-  let autoOn = false, touching = false, resumeTimer = null;
-  let dir = 1, touchStartX = 0;
+  function setupStrip(el){
+    el.scrollLeft = setWidth;
+    let autoOn = false, touching = false, resumeTimer = null, dir = 1, startX = 0;
 
-  setInterval(function(){
-    if(!autoOn || touching) return;
-    scroll.scrollLeft += dir;
-    if(scroll.scrollLeft >= setWidth * 2)       scroll.scrollLeft -= setWidth;
-    else if(scroll.scrollLeft < setWidth * 0.5) scroll.scrollLeft += setWidth;
-  }, 30);
+    setInterval(function(){
+      if(!autoOn || touching) return;
+      el.scrollLeft += dir;
+      if(el.scrollLeft >= setWidth * 2)       el.scrollLeft -= setWidth;
+      else if(el.scrollLeft < setWidth * 0.5) el.scrollLeft += setWidth;
+    }, 30);
 
-  scroll.addEventListener('touchstart', function(e){
-    touching = true;
-    touchStartX = e.touches[0].clientX;
-    clearTimeout(resumeTimer);
-  }, { passive: true });
+    el.addEventListener('touchstart', function(e){
+      touching = true; startX = e.touches[0].clientX;
+      clearTimeout(resumeTimer);
+    }, { passive: true });
 
-  scroll.addEventListener('touchend', function(e){
-    var dx = e.changedTouches[0].clientX - touchStartX;
-    if(Math.abs(dx) > 10) dir = dx < 0 ? 1 : -1; // swipe left = forward, swipe right = backward
-    if(scroll.scrollLeft >= setWidth * 2)       scroll.scrollLeft -= setWidth;
-    else if(scroll.scrollLeft < setWidth * 0.5) scroll.scrollLeft += setWidth;
-    resumeTimer = setTimeout(function(){ touching = false; }, 1500);
-  }, { passive: true });
+    el.addEventListener('touchend', function(e){
+      var dx = e.changedTouches[0].clientX - startX;
+      if(Math.abs(dx) > 10) dir = dx < 0 ? 1 : -1;
+      if(el.scrollLeft >= setWidth * 2)       el.scrollLeft -= setWidth;
+      else if(el.scrollLeft < setWidth * 0.5) el.scrollLeft += setWidth;
+      resumeTimer = setTimeout(function(){ touching = false; }, 1500);
+    }, { passive: true });
 
-  scroll.addEventListener('touchcancel', function(){
-    resumeTimer = setTimeout(function(){ touching = false; }, 1500);
-  }, { passive: true });
+    el.addEventListener('touchcancel', function(){
+      resumeTimer = setTimeout(function(){ touching = false; }, 1500);
+    }, { passive: true });
 
-  // ── Toggle on scroll into view ──────────────────────────
-  new IntersectionObserver(function(entries){
-    if(entries[0].isIntersecting){ stopHero();  autoOn = true; }
-    else                          { startHero(); autoOn = false; }
-  }, { threshold: 0.15 }).observe(scroll);
+    new IntersectionObserver(function(entries){
+      if(entries[0].isIntersecting){
+        autoOn = true;
+        if(++visibleStrips === 1) stopHero();
+      } else {
+        autoOn = false;
+        if(--visibleStrips <= 0){ visibleStrips = 0; startHero(); }
+      }
+    }, { threshold: 0.15 }).observe(el);
+  }
+
+  document.querySelectorAll('.glass-scroll').forEach(setupStrip);
 })();
 
 (function(){
