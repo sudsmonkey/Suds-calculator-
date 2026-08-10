@@ -548,7 +548,7 @@ document.addEventListener('click', function(e){
   function stopHero(){ clearInterval(heroTimer); heroTimer = null; }
   startHero();
 
-  // ── Residential photo scroll (RAF-driven, touch-friendly) ─
+  // ── Residential photo scroll (setInterval-driven, touch-friendly) ─
   const scroll = document.querySelector('.glass-scroll');
   if(!scroll) return;
 
@@ -557,16 +557,13 @@ document.addEventListener('click', function(e){
 
   let autoOn = false, touching = false, resumeTimer = null;
 
-  function clamp(){
-    if(scroll.scrollLeft >= setWidth * 2) scroll.scrollLeft -= setWidth;
+  // setInterval is more reliable than RAF on iOS for long-running auto-scroll
+  setInterval(function(){
+    if(!autoOn || touching) return;
+    scroll.scrollLeft += 1;
+    if(scroll.scrollLeft >= setWidth * 2)    scroll.scrollLeft -= setWidth;
     else if(scroll.scrollLeft < setWidth * 0.5) scroll.scrollLeft += setWidth;
-  }
-
-  (function tick(){
-    if(autoOn && !touching) scroll.scrollLeft += 0.5;
-    clamp();
-    requestAnimationFrame(tick);
-  })();
+  }, 30); // ~33fps, 1px/tick ≈ 33px/s (one set every ~56s)
 
   scroll.addEventListener('touchstart', function(){
     touching = true;
@@ -574,6 +571,9 @@ document.addEventListener('click', function(e){
   }, { passive: true });
 
   scroll.addEventListener('touchend', function(){
+    // Clamp after manual scroll in case user dragged into set 1 or 3
+    if(scroll.scrollLeft >= setWidth * 2)    scroll.scrollLeft -= setWidth;
+    else if(scroll.scrollLeft < setWidth * 0.5) scroll.scrollLeft += setWidth;
     resumeTimer = setTimeout(function(){ touching = false; }, 1500);
   }, { passive: true });
 
