@@ -526,35 +526,35 @@ document.addEventListener('click', function(e){
       else if(el.scrollLeft < setWidth * 0.5) el.scrollLeft += setWidth;
     }
 
-    let settling = false, settleTimer = null;
+    let lastPos = el.scrollLeft;
 
     setInterval(function(){
-      if(!autoOn || touching || settling) return;
-      el.scrollLeft += dir;
-      clamp();
+      if(!autoOn){ lastPos = el.scrollLeft; return; }
+      const delta = Math.abs(el.scrollLeft - lastPos);
+      if(touching || delta >= 2){
+        // User dragging or momentum still faster than auto-scroll: hands off
+        lastPos = el.scrollLeft;
+        clamp();
+      } else {
+        // Momentum has slowed to our speed or stopped: take over smoothly
+        el.scrollLeft += dir;
+        lastPos = el.scrollLeft;
+        clamp();
+      }
     }, 30);
 
     el.addEventListener('touchstart', function(e){
-      touching = true; settling = false;
-      clearTimeout(settleTimer);
-      startX = e.touches[0].clientX;
+      touching = true; startX = e.touches[0].clientX;
     }, { passive: true });
 
     el.addEventListener('touchend', function(e){
       var dx = e.changedTouches[0].clientX - startX;
       if(Math.abs(dx) > 10) dir = dx < 0 ? 1 : -1;
-      touching = false; settling = true;
+      touching = false;
     }, { passive: true });
 
     el.addEventListener('touchcancel', function(){
-      touching = false; settling = true;
-    }, { passive: true });
-
-    // Wait for momentum scroll to fully die before resuming auto-scroll
-    el.addEventListener('scroll', function(){
-      if(!settling) return;
-      clearTimeout(settleTimer);
-      settleTimer = setTimeout(function(){ clamp(); settling = false; }, 150);
+      touching = false;
     }, { passive: true });
 
     const ctrl = {
