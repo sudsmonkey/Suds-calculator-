@@ -693,6 +693,7 @@ document.addEventListener('click', function(e){
         if(Math.abs(diff) < 0.5){
           xPos = centerState.target; clamp(); render();
           var cs = centerState; centerState = null;
+          dir = cs.dir;
           openTarget = xPos;
           overlayOpen = true; videoScrolled = 0; videoScrollPaused = false;
           videoExpand.open(
@@ -799,7 +800,7 @@ document.addEventListener('click', function(e){
         while(target >= setWidth * 2) target -= setWidth;
         while(target < setWidth * 0.5) target += setWidth;
         inertia = 0;
-        centerState = { target: target, slot: slot };
+        centerState = { target: target, slot: slot, dir: target > xPos ? 1 : -1 };
       }
 
       slot.addEventListener('touchstart', function(e){
