@@ -3,191 +3,267 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Book a Consultation – Suds Monkey Window Cleaning</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Commercial Consultation – Suds Monkey</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --orange: #F56E64;
-  --orangeborder: #F0A9A5;
   --mint: #9ED9C0;
   --cream: #FDF9F5;
   --dark: #A6382E;
   --mid: #7C7268;
+  --ink: #2B2218;
   --white: #FFFFFF;
+  --border: #EDE5DC;
   --radius: 20px;
-  --shadow: 0 2px 16px rgba(245,110,100,0.10);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: #111; -webkit-font-smoothing: antialiased; }
 
-/* Header */
-.header {
-  position: relative;
-  text-align: center;
-  overflow: hidden;
-  padding: 120px 24px 100px;
-  background: #111;
+/* Nav */
+.top-nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.header-bg {
-  position: absolute; inset: 0;
-  background: url('img-wash.jpg') center 40%/cover no-repeat;
-  opacity: 0.55;
-}
-.header-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(166,56,46,0.28) 0%, rgba(80,20,15,0.38) 100%);
-  z-index: 0;
-}
-.header > *:not(.header-bg):not(.header-overlay) { position: relative; z-index: 1; }
-.top-nav { background: var(--white); border-bottom: 1px solid #F0E8DE; padding: 10px 16px; }
 .back-link { color: var(--mid); font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
 .back-link:hover { color: var(--dark); }
-.header-phone { position: absolute; top: 14px; right: 16px; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 700; text-decoration: none; z-index: 2; }
-.header-phone:hover { color: #fff; }
-.header-logo { width: 72px; height: 72px; border-radius: 50%; background: #fff; border: 3px solid var(--mint); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
-.header-logo img { width: 100%; height: 100%; object-fit: cover; }
-.header h1 { color: #fff; font-size: 22px; font-weight: 900; font-family: 'Nunito', sans-serif; text-shadow: 0 1px 6px rgba(0,0,0,0.4); }
-.header p { color: rgba(255,255,255,0.82); font-size: 13px; margin-top: 4px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+.nav-phone { color: var(--dark); font-size: 13px; font-weight: 700; text-decoration: none; }
+.nav-phone:hover { color: var(--orange); }
 
-/* Progress */
-.progress-wrap { background: var(--white); border-bottom: 1px solid #F0E8DE; padding: 12px 24px; }
-.progress-label { font-size: 11px; font-weight: 700; color: var(--mid); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
-.progress-bar-bg { height: 4px; background: #EBE1D2; border-radius: 2px; }
-.progress-bar-fill { height: 4px; background: var(--orange); border-radius: 2px; transition: width 0.35s ease; }
+/* Hero — locked/sticky, no text */
+.hero {
+  position: sticky;
+  top: 0;
+  height: 46vh;
+  z-index: 1;
+  overflow: hidden;
+}
+.hero-img {
+  position: absolute;
+  inset: 0;
+  background: url('img-wash.jpg') center 40%/cover no-repeat;
+  opacity: 0.62;
+}
+.hero-ov {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(20,5,3,0.2) 0%, rgba(20,5,3,0.55) 100%);
+}
 
-/* Layout */
-.content { padding: 20px 16px 60px; max-width: 440px; margin: 0 auto; }
-.step { display: none; }
-.step.active { display: block; }
+/* Content slides over hero */
+.qs {
+  position: relative;
+  z-index: 2;
+  background: var(--cream);
+  border-radius: 28px 28px 0 0;
+  margin-top: -32px;
+  padding-bottom: 80px;
+  min-height: 100vh;
+}
 
-.step-heading { font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: var(--dark); margin-bottom: 6px; }
-.step-sub { font-size: 14px; color: var(--mid); margin-bottom: 20px; line-height: 1.5; }
-.section-label { font-size: 11px; font-weight: 900; color: var(--mid); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+/* Question sections */
+.q {
+  padding: 40px 20px 36px;
+  max-width: 440px;
+  margin: 0 auto;
+  border-bottom: 1px solid var(--border);
+}
+
+.q-num {
+  font-family: 'Anton', sans-serif;
+  font-size: 12px;
+  color: var(--orange);
+  letter-spacing: 0.12em;
+  margin-bottom: 6px;
+}
+.q-head {
+  font-family: 'Nunito', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--dark);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+.q-sub {
+  font-size: 13px;
+  color: var(--mid);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
 
 /* Service tiles */
 .service-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.service-tile { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: 16px; padding: 20px 12px; text-align: center; cursor: pointer; transition: all 0.15s; user-select: none; }
-.service-tile:hover { border-color: var(--orange); background: #FEF8F7; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(245,110,100,0.15); }
-.service-tile.selected { background: var(--orange); border-color: var(--orange); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(245,110,100,0.25); }
-.service-tile.selected .service-name { color: #fff; }
-.service-emoji { font-size: 32px; display: block; margin-bottom: 8px; line-height: 1; }
+.service-tile {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.service-tile:hover { border-color: var(--orange); background: #FEF8F7; }
+.service-tile.sel { background: var(--orange); border-color: var(--orange); box-shadow: 0 4px 14px rgba(245,110,100,0.25); }
+.service-tile.sel .service-name { color: #fff; }
+.service-emoji { font-size: 30px; display: block; margin-bottom: 8px; }
 .service-name { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800; color: var(--dark); line-height: 1.3; }
 
-/* Sizing card */
-.sizing-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 28px 20px; box-shadow: var(--shadow); }
-.sizing-question { font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800; color: var(--dark); margin-bottom: 24px; text-align: center; line-height: 1.4; }
+/* Number stepper */
+.stepper-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+}
 .num-wrap { display: flex; align-items: center; justify-content: center; gap: 20px; }
-.num-btn { width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid #DDD3C4; background: var(--white); font-size: 24px; font-weight: 700; color: var(--dark); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; line-height: 1; }
+.num-btn {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 1.5px solid #DDD3C4; background: var(--white);
+  font-size: 24px; font-weight: 700; color: var(--dark);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; line-height: 1;
+}
 .num-btn:hover { border-color: var(--orange); background: #FEF8F7; }
-.num-display { font-family: 'Nunito', sans-serif; font-size: 52px; font-weight: 900; color: var(--orange); min-width: 100px; text-align: center; line-height: 1; }
-.num-unit { font-size: 13px; color: var(--mid); text-align: center; margin-top: 8px; }
+.num-display {
+  font-family: 'Nunito', sans-serif;
+  font-size: 52px; font-weight: 900;
+  color: var(--orange);
+  min-width: 100px; text-align: center; line-height: 1;
+}
+.num-unit { font-size: 12px; color: var(--mid); text-align: center; margin-top: 6px; }
 
-/* Photo placeholder */
-.upload-zone { border: 2px dashed #DDD3C4; border-radius: var(--radius); padding: 40px 24px; text-align: center; background: var(--white); position: relative; }
-.upload-icon { font-size: 44px; margin-bottom: 14px; display: block; }
-.upload-title { font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 900; color: var(--dark); margin-bottom: 6px; }
-.upload-sub { font-size: 13px; color: var(--mid); line-height: 1.6; }
-.upload-badge { display: inline-block; background: rgba(158,217,192,0.2); border: 1px solid rgba(90,171,138,0.3); color: #3A8C6A; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 50px; padding: 4px 12px; margin-top: 14px; }
-
-/* Info form */
-.card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+/* Form */
 .field-group { display: flex; flex-direction: column; gap: 10px; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .field label { font-size: 11px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 4px; }
-.field label .opt { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 11px; }
-.field input, .field textarea { width: 100%; border: 1.5px solid #DDD3C4; border-radius: 10px; padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--dark); background: var(--cream); outline: none; transition: border 0.15s; }
-.field input:focus, .field textarea:focus { border-color: var(--orange); background: var(--white); }
+.field label .opt { font-weight: 400; text-transform: none; letter-spacing: 0; }
+.field input, .field textarea {
+  width: 100%;
+  border: 1.5px solid #DDD3C4;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--white);
+  outline: none;
+  transition: border 0.15s;
+  -webkit-appearance: none;
+}
+.field input:focus, .field textarea:focus { border-color: var(--orange); }
 .field textarea { resize: none; height: 70px; }
 
-/* Connect cards */
-.connect-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.connect-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: 16px; padding: 22px 16px; text-align: center; cursor: pointer; transition: all 0.15s; user-select: none; }
-.connect-card:hover { border-color: var(--orange); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(245,110,100,0.15); }
-.connect-card.selected { background: var(--orange); border-color: var(--orange); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(245,110,100,0.25); }
-.connect-card.selected .connect-name,
-.connect-card.selected .connect-desc { color: #fff; }
-.connect-emoji { font-size: 30px; margin-bottom: 10px; display: block; line-height: 1; }
-.connect-name { font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 900; color: var(--dark); margin-bottom: 6px; }
-.connect-desc { font-size: 12px; color: var(--mid); line-height: 1.45; }
+/* Continue button */
+.btn-continue {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 50px;
+  border: none;
+  background: var(--orange);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px; font-weight: 900;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.18);
+}
+.btn-continue:hover { opacity: 0.88; }
 
-/* Calendar */
-.calendar-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); box-shadow: var(--shadow); }
-.month-nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid #F5EDE4; }
-.month-nav button { background: none; border: none; cursor: pointer; color: var(--orange); font-size: 22px; font-weight: 900; padding: 4px 10px; border-radius: 8px; transition: background 0.15s; line-height: 1; }
-.month-nav button:hover { background: #FDF0EF; }
-.month-name { font-size: 17px; font-weight: 900; color: var(--dark); font-family: 'Nunito', sans-serif; }
-.day-headers { display: grid; grid-template-columns: repeat(7, 1fr); padding: 8px 12px 4px; }
-.day-header { text-align: center; font-size: 11px; font-weight: 700; color: var(--mid); letter-spacing: 0.05em; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 4px 12px 16px; }
-.cal-day { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; color: var(--dark); font-family: 'Nunito', sans-serif; }
-.cal-day:hover:not(.disabled):not(.empty) { background: #FDF0EF; }
-.cal-day.empty, .cal-day.disabled { cursor: default; color: #DDD3C4; }
-.cal-day.today { border: 2px solid var(--mint); }
-.cal-day.selected { background: var(--orange) !important; color: #fff; }
-
-/* Time slots */
-.time-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); margin-top: 12px; }
-.time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.time-slot { border: 1.5px solid var(--orangeborder); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
-.time-slot:hover:not(.booked) { border-color: var(--orange); background: #FDF0EF; }
-.time-slot.selected { background: var(--orange); border-color: var(--orange); }
-.time-slot.selected .time-main { color: #fff; }
-.time-slot.selected .time-sub { color: rgba(255,255,255,0.8); }
-.time-slot.booked { background: #F5EDE4; border-color: #DDD3C4; cursor: not-allowed; opacity: 0.5; }
-.time-main { font-size: 15px; font-weight: 900; color: var(--dark); font-family: 'Nunito', sans-serif; }
-.time-sub { font-size: 11px; color: var(--mid); margin-top: 2px; }
-
-/* Buttons */
-.btn-row { display: flex; gap: 10px; margin-top: 20px; }
-.btn-back { padding: 14px 20px; border-radius: 50px; border: 1.5px solid #DDD3C4; background: var(--white); color: var(--mid); font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-.btn-back:hover { border-color: var(--orange); color: var(--dark); }
-.btn-next { flex: 1; padding: 14px; border-radius: 50px; border: none; background: var(--orange); color: #fff; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 900; cursor: pointer; transition: opacity 0.15s; box-shadow: 0 4px 0 #C06060; }
-.btn-next:hover { opacity: 0.88; }
-.btn-next:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
-.btn-confirm { display: block; width: 100%; padding: 16px; border-radius: 50px; border: none; background: var(--orange); color: #fff; font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 900; cursor: pointer; margin-top: 20px; transition: opacity 0.15s; box-shadow: 0 4px 0 #C06060; }
-.btn-confirm:hover { opacity: 0.88; }
-.btn-confirm:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
-.skip-link { text-align: center; margin-top: 14px; font-size: 13px; color: var(--mid); }
-.skip-link a { color: var(--mid); font-weight: 600; cursor: pointer; text-decoration: underline; }
+/* End section */
+.q-end {
+  padding: 48px 20px 60px;
+  max-width: 440px;
+  margin: 0 auto;
+  text-align: center;
+}
+.end-heading {
+  font-family: 'Nunito', sans-serif;
+  font-size: 26px; font-weight: 900;
+  color: var(--dark);
+  margin-bottom: 8px;
+}
+.end-sub {
+  font-size: 14px; color: var(--mid);
+  margin-bottom: 28px; line-height: 1.5;
+}
+.btn-coral {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border-radius: 50px;
+  border: none;
+  background: var(--orange);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px; font-weight: 900;
+  cursor: pointer;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.18);
+  transition: opacity 0.15s;
+}
+.btn-coral:hover { opacity: 0.88; }
+.btn-mint {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border-radius: 50px;
+  border: none;
+  background: var(--mint);
+  color: var(--dark);
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px; font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.14);
+  transition: opacity 0.15s;
+}
+.btn-mint:hover { opacity: 0.88; }
 
 /* Success */
-.success-card { background: #E8F8F2; border: 1.5px solid var(--mint); border-radius: var(--radius); padding: 32px 24px; text-align: center; }
+.success-card {
+  background: #E8F8F2;
+  border: 1.5px solid var(--mint);
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  text-align: center;
+  display: none;
+}
+.success-card.show { display: block; }
 .success-emoji { font-size: 52px; margin-bottom: 12px; display: block; }
 .success-title { font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 900; color: #2A7A5A; margin-bottom: 8px; }
-.success-sub { font-size: 14px; color: #3A9A6E; line-height: 1.6; margin-bottom: 20px; }
-.success-detail { background: rgba(255,255,255,0.65); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; text-align: left; }
-.success-detail-label { font-size: 11px; font-weight: 700; color: var(--mid); text-transform: uppercase; letter-spacing: 0.06em; }
-.success-detail-value { font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800; color: var(--dark); margin-top: 2px; }
-.btn-home { display: inline-block; margin-top: 20px; padding: 12px 28px; border-radius: 50px; background: var(--white); border: 1.5px solid #DDD3C4; color: var(--dark); font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; text-decoration: none; transition: all 0.15s; }
-.btn-home:hover { border-color: var(--orange); }
-
-@media (min-width: 400px) {
-  .service-grid { gap: 12px; }
-  .service-tile { padding: 22px 14px; }
-  .service-emoji { font-size: 36px; }
-}
+.success-sub { font-size: 14px; color: #3A9A6E; line-height: 1.6; }
+.btn-home { display: inline-block; margin-top: 20px; padding: 12px 28px; border-radius: 50px; background: var(--white); border: 1.5px solid #DDD3C4; color: var(--dark); font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; text-decoration: none; }
 </style>
 </head>
 <body>
 
-<nav class="top-nav"><a href="index.html" class="back-link">← Back</a></nav>
-<div class="header">
-  <div class="header-bg"></div>
-  <div class="header-overlay"></div>
-  <h1>Book a Consultation or Site-Visit</h1>
+<nav class="top-nav">
+  <a href="index.html" class="back-link">← Back</a>
+  <a href="tel:4058822277" class="nav-phone">(405) 882-2277</a>
+</nav>
+
+<!-- Locked hero — image only, no text -->
+<div class="hero">
+  <div class="hero-img"></div>
+  <div class="hero-ov"></div>
 </div>
 
-<div class="progress-wrap">
-  <div class="progress-label" id="progressLabel">Step 1 of 5</div>
-  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:20%"></div></div>
-</div>
+<!-- Questions scroll down over the hero -->
+<main class="qs">
 
-<div class="content">
-
-  <!-- Step 1: Service type -->
-  <div class="step active" id="step1">
-    <p class="step-heading">What type of property?</p>
-    <p class="step-sub">We'll tailor the consultation to your situation.</p>
+  <!-- Q1: Property type -->
+  <section class="q" id="q1">
+    <div class="q-num">01</div>
+    <h2 class="q-head">What type of property?</h2>
+    <p class="q-sub">We'll tailor the scope to your situation.</p>
     <div class="service-grid">
       <div class="service-tile" id="tile-storefront" onclick="selectService('storefront')">
         <span class="service-emoji">🏪</span>
@@ -210,12 +286,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
         <div class="service-name">HOA &amp; Multi-Family</div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Step 2: Sizing question -->
-  <div class="step" id="step2">
-    <div class="sizing-card">
-      <div class="sizing-question" id="sizingQuestion">How many windows?</div>
+  <!-- Q2: Scope/size -->
+  <section class="q" id="q2">
+    <div class="q-num">02</div>
+    <h2 class="q-head" id="q2Head">Roughly how many windows?</h2>
+    <div class="stepper-card">
       <div class="num-wrap">
         <button class="num-btn" onclick="stepNum(-1)">−</button>
         <div>
@@ -225,145 +302,48 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
         <button class="num-btn" onclick="stepNum(1)">+</button>
       </div>
     </div>
-    <div class="btn-row">
-      <button class="btn-back" onclick="goTo(1)">Back</button>
-      <button class="btn-next" onclick="goTo(3)">Next</button>
-    </div>
-  </div>
+    <button class="btn-continue" onclick="scrollTo('q3')">Next →</button>
+  </section>
 
-  <!-- Step 3: Photo upload placeholder -->
-  <div class="step" id="step3">
-    <p class="step-heading">Got photos?</p>
-    <p class="step-sub">Help us come prepared. Totally optional — skip if you'd rather just talk it through.</p>
-    <div class="upload-zone">
-      <span class="upload-icon">📸</span>
-      <div class="upload-title">Add photos of your property</div>
-      <div class="upload-sub">Windows, access points, anything we should know about — the more context, the better the consult.</div>
-      <div class="upload-badge">Coming soon</div>
-    </div>
-    <div class="btn-row">
-      <button class="btn-back" onclick="goTo(2)">Back</button>
-      <button class="btn-next" onclick="goTo(4)">Next</button>
-    </div>
-    <div class="skip-link"><a onclick="goTo(4)">Skip for now</a></div>
-  </div>
-
-  <!-- Step 4: Contact info -->
-  <div class="step" id="step4">
-    <p class="step-heading">Your info</p>
-    <p class="step-sub">So we can reach you before the consultation.</p>
-    <div class="card">
-      <div class="field-group">
-        <div class="field-row">
-          <div class="field"><label>First Name</label><input type="text" id="infoFirst" placeholder="Jane" autocomplete="given-name"></div>
-          <div class="field"><label>Last Name</label><input type="text" id="infoLast" placeholder="Smith" autocomplete="family-name"></div>
-        </div>
-        <div class="field"><label>Phone</label><input type="tel" id="infoPhone" placeholder="(555) 000-0000" autocomplete="tel"></div>
-        <div class="field"><label>Email</label><input type="email" id="infoEmail" placeholder="jane@company.com" autocomplete="email"></div>
-        <div class="field"><label>Company <span class="opt">(optional)</span></label><input type="text" id="infoCompany" placeholder="ABC Properties"></div>
-        <div class="field"><label>Property Address <span class="opt">(optional)</span></label><input type="text" id="infoAddress" placeholder="123 Main St"></div>
-        <div class="field"><label>Notes <span class="opt">(optional)</span></label><textarea id="infoNotes" placeholder="Anything we should know before the call…"></textarea></div>
+  <!-- Q3: Contact info -->
+  <section class="q" id="q3">
+    <div class="q-num">03</div>
+    <h2 class="q-head">How can we reach you?</h2>
+    <p class="q-sub">We'll be in touch to scope the job before any visit.</p>
+    <div class="field-group">
+      <div class="field-row">
+        <div class="field"><label>First Name</label><input type="text" id="infoFirst" placeholder="Jane" autocomplete="given-name"></div>
+        <div class="field"><label>Last Name</label><input type="text" id="infoLast" placeholder="Smith" autocomplete="family-name"></div>
       </div>
+      <div class="field"><label>Phone</label><input type="tel" id="infoPhone" placeholder="(405) 000-0000" autocomplete="tel"></div>
+      <div class="field"><label>Email</label><input type="email" id="infoEmail" placeholder="jane@company.com" autocomplete="email"></div>
+      <div class="field"><label>Company <span class="opt">(optional)</span></label><input type="text" id="infoCompany" placeholder="ABC Properties"></div>
+      <div class="field"><label>Notes <span class="opt">(optional)</span></label><textarea id="infoNotes" placeholder="Anything we should know before the call…"></textarea></div>
     </div>
-    <div class="btn-row">
-      <button class="btn-back" onclick="goTo(3)">Back</button>
-      <button class="btn-next" onclick="validateStep4()">Next</button>
-    </div>
-  </div>
+    <button class="btn-continue" onclick="scrollTo('qend')">Almost there →</button>
+  </section>
 
-  <!-- Step 5: How to connect -->
-  <div class="step" id="step5">
-    <p class="step-heading">How would you like to connect?</p>
-    <p class="step-sub">Both are free. Either way we'll be ready with a real number, not a generic estimate.</p>
-    <div class="connect-grid">
-      <div class="connect-card" id="card-site_visit" onclick="selectConnect('site_visit')">
-        <span class="connect-emoji">🚐</span>
-        <div class="connect-name">Site Visit</div>
-        <div class="connect-desc">We come to your property. Fastest path to an accurate quote.</div>
-      </div>
-      <div class="connect-card" id="card-phone_consult" onclick="selectConnect('phone_consult')">
-        <span class="connect-emoji">📞</span>
-        <div class="connect-name">Phone Consult</div>
-        <div class="connect-desc">Quick 15–30 min call to scope the job before we visit.</div>
-      </div>
+  <!-- End: two relevant buttons -->
+  <section class="q-end" id="qend">
+    <div id="endButtons">
+      <h2 class="end-heading">Ready to connect?</h2>
+      <p class="end-sub">Choose how you'd like to move forward with us.</p>
+      <button class="btn-coral" onclick="submitLead('site_visit')">Request a Site Visit</button>
+      <button class="btn-mint" onclick="submitLead('phone_consult')">Request a Phone Consult</button>
     </div>
-    <div class="btn-row"><button class="btn-back" onclick="goTo(4)">Back</button></div>
-  </div>
-
-  <!-- Step 6: Calendar + slots -->
-  <div class="step" id="step6">
-    <p class="step-heading" id="calTitle">Pick a date</p>
-    <p class="step-sub" id="calSub" style="margin-bottom:16px;"></p>
-    <div class="calendar-card">
-      <div class="month-nav">
-        <button onclick="prevMonth()">‹</button>
-        <div class="month-name" id="monthName"></div>
-        <button onclick="nextMonth()">›</button>
-      </div>
-      <div class="day-headers">
-        <div class="day-header">Su</div><div class="day-header">Mo</div>
-        <div class="day-header">Tu</div><div class="day-header">We</div>
-        <div class="day-header">Th</div><div class="day-header">Fr</div>
-        <div class="day-header">Sa</div>
-      </div>
-      <div class="cal-grid" id="calGrid"></div>
-    </div>
-
-    <div id="slotSection" style="display:none;">
-      <div class="section-label" style="margin-top:20px;">Choose a Time</div>
-      <div class="time-card">
-        <div class="time-grid" id="timeGrid"></div>
-      </div>
-    </div>
-
-    <button class="btn-confirm" id="btnConfirm" disabled onclick="submitBooking()">Confirm Consultation</button>
-    <div class="btn-row" style="margin-top:12px;">
-      <button class="btn-back" style="width:100%;" onclick="goTo(5)">Back</button>
-    </div>
-  </div>
-
-  <!-- Confirmation -->
-  <div class="step" id="stepConfirm">
-    <div class="success-card">
+    <div class="success-card" id="successCard">
       <span class="success-emoji">🐒</span>
-      <div class="success-title">You're on the schedule!</div>
-      <div class="success-sub" id="successSub">We'll be in touch. Check your email for a confirmation.</div>
-      <div class="success-detail">
-        <div class="success-detail-label">Consultation Type</div>
-        <div class="success-detail-value" id="successType">—</div>
-      </div>
-      <div class="success-detail">
-        <div class="success-detail-label">Date &amp; Time</div>
-        <div class="success-detail-value" id="successDateTime">—</div>
-      </div>
-      <div class="success-detail">
-        <div class="success-detail-label">Service</div>
-        <div class="success-detail-value" id="successService">—</div>
-      </div>
+      <div class="success-title">Got it!</div>
+      <div class="success-sub" id="successMsg">We'll be in touch shortly.</div>
       <a href="index.html" class="btn-home">← Back to Home</a>
     </div>
-  </div>
+  </section>
 
-</div>
+</main>
 
 <script>
-  // ── Config ────────────────────────────────────────────────────────────
   const SUPABASE_URL = 'https://ykjkcegpwiqhpfcgkwro.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
-  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-  const SITE_VISIT_SLOTS = ['8:00 AM', '1:00 PM'];
-
-  // Phone consult pool: 9am–4pm, :15 and :45 only
-  const ALL_CONSULT_TIMES = [
-    '9:15 AM', '9:45 AM',
-    '10:15 AM', '10:45 AM',
-    '11:15 AM', '11:45 AM',
-    '12:15 PM', '12:45 PM',
-    '1:15 PM', '1:45 PM',
-    '2:15 PM', '2:45 PM',
-    '3:15 PM', '3:45 PM'
-  ];
 
   const SERVICE_LABELS = {
     storefront:        'Storefront & Retail',
@@ -373,301 +353,80 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
     hoa_multi:         'HOA & Multi-Family'
   };
 
-  const SIZING_CONFIG = {
-    storefront:        { question: 'Roughly how many windows or panes?', unit: 'windows', default: 12,   min: 1,   max: 200,   step: 1    },
-    office:            { question: 'How many stories?',                  unit: 'stories', default: 3,    min: 1,   max: 50,    step: 1    },
-    high_rise:         { question: 'Approximate number of floors?',      unit: 'floors',  default: 10,   min: 2,   max: 100,   step: 1    },
-    post_construction: { question: 'Estimated square footage?',          unit: 'sq ft',   default: 2500, min: 500, max: 50000, step: 500  },
-    hoa_multi:         { question: 'How many units or buildings?',       unit: 'units',   default: 10,   min: 1,   max: 500,   step: 1    }
+  const SIZING = {
+    storefront:        { head: 'Roughly how many windows?',     unit: 'windows', val: 12,   min: 1,   max: 200,   step: 1   },
+    office:            { head: 'How many stories?',             unit: 'stories', val: 3,    min: 1,   max: 50,    step: 1   },
+    high_rise:         { head: 'Approximate number of floors?', unit: 'floors',  val: 10,   min: 2,   max: 100,   step: 1   },
+    post_construction: { head: 'Estimated square footage?',     unit: 'sq ft',   val: 2500, min: 500, max: 50000, step: 500 },
+    hoa_multi:         { head: 'How many units or buildings?',  unit: 'units',   val: 10,   min: 1,   max: 500,   step: 1   }
   };
 
-  // ── State ──────────────────────────────────────────────────────────────
-  let currentStep     = 1;
   let selectedService = null;
-  let sizingValue     = 0;
-  let connectionType  = null;
-  let selectedDate    = null;
-  let selectedTime    = null;
-  let currentSlots    = [];
-  let takenSlots      = new Set();
+  let cfg = SIZING.storefront;
+  let sizingValue = cfg.val;
 
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  let currentMonth = today.getMonth();
-  let currentYear  = today.getFullYear();
+  function scrollTo(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
-  // ── Utilities ──────────────────────────────────────────────────────────
+  function selectService(service) {
+    selectedService = service;
+    document.querySelectorAll('.service-tile').forEach(t => t.classList.remove('sel'));
+    document.getElementById('tile-' + service).classList.add('sel');
+
+    cfg = SIZING[service];
+    sizingValue = cfg.val;
+    document.getElementById('q2Head').textContent = cfg.head;
+    document.getElementById('numDisplay').textContent = sizingValue.toLocaleString();
+    document.getElementById('numUnit').textContent = cfg.unit;
+
+    setTimeout(() => scrollTo('q2'), 320);
+  }
+
+  function stepNum(delta) {
+    sizingValue = Math.min(cfg.max, Math.max(cfg.min, sizingValue + delta * cfg.step));
+    document.getElementById('numDisplay').textContent = sizingValue.toLocaleString();
+  }
+
   function pad(n) { return String(n).padStart(2, '0'); }
   function isoDate(d) { return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
 
-  // Deterministic slot generator: same date always yields same slots
-  function dateHash(str) {
-    let h = 0;
-    for (const c of str) h = (Math.imul(31, h) + c.charCodeAt(0)) | 0;
-    return Math.abs(h);
-  }
-  function getConsultSlotsForDate(dateStr) {
-    let h = dateHash(dateStr);
-    const pool = [...ALL_CONSULT_TIMES];
-    for (let i = pool.length - 1; i > 0; i--) {
-      h = (Math.abs(h) * 1664525 + 1013904223) & 0x7fffffff;
-      const j = h % (i + 1);
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    h = (Math.abs(h) * 1664525 + 1013904223) & 0x7fffffff;
-    const count = (h % 2) + 2; // 2 or 3 slots
-    return pool.slice(0, count).sort((a, b) => ALL_CONSULT_TIMES.indexOf(a) - ALL_CONSULT_TIMES.indexOf(b));
-  }
-
-  // ── Progress ───────────────────────────────────────────────────────────
-  function updateProgress() {
-    const label = document.getElementById('progressLabel');
-    const fill  = document.getElementById('progressFill');
-    if (typeof currentStep !== 'number') {
-      label.textContent = 'All done!';
-      fill.style.width  = '100%';
-    } else if (currentStep === 6) {
-      label.textContent = 'Pick your time';
-      fill.style.width  = '100%';
-    } else {
-      label.textContent = 'Step ' + currentStep + ' of 5';
-      fill.style.width  = (currentStep / 5 * 100) + '%';
-    }
-  }
-
-  function goTo(step) {
-    document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-    const el = (step === 'confirm')
-      ? document.getElementById('stepConfirm')
-      : document.getElementById('step' + step);
-    if (el) el.classList.add('active');
-    currentStep = step;
-    updateProgress();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // ── Step 1 ─────────────────────────────────────────────────────────────
-  function selectService(service) {
-    selectedService = service;
-    document.querySelectorAll('.service-tile').forEach(el => el.classList.remove('selected'));
-    document.getElementById('tile-' + service).classList.add('selected');
-
-    const cfg = SIZING_CONFIG[service];
-    document.getElementById('sizingQuestion').textContent = cfg.question;
-    document.getElementById('numUnit').textContent        = cfg.unit;
-    sizingValue = cfg.default;
-    document.getElementById('numDisplay').textContent = sizingValue.toLocaleString();
-
-    setTimeout(() => goTo(2), 180);
-  }
-
-  // ── Step 2 ─────────────────────────────────────────────────────────────
-  function stepNum(delta) {
-    const cfg = SIZING_CONFIG[selectedService];
-    sizingValue = Math.max(cfg.min, Math.min(cfg.max, sizingValue + delta * cfg.step));
-    document.getElementById('numDisplay').textContent = sizingValue.toLocaleString();
-  }
-
-  // ── Step 4 ─────────────────────────────────────────────────────────────
-  function validateStep4() {
+  async function submitLead(type) {
     const first = document.getElementById('infoFirst').value.trim();
     const last  = document.getElementById('infoLast').value.trim();
     const phone = document.getElementById('infoPhone').value.trim();
     const email = document.getElementById('infoEmail').value.trim();
+
     if (!first || !last || !phone || !email) {
-      alert('Please fill in your name, phone, and email to continue.');
+      scrollTo('q3');
+      setTimeout(() => document.getElementById('infoFirst').focus(), 500);
       return;
     }
-    goTo(5);
-  }
 
-  document.getElementById('infoPhone').addEventListener('input', function(e) {
-    let v = e.target.value.replace(/\D/g, '').substring(0, 10);
-    if (v.length >= 7) v = '(' + v.substring(0,3) + ') ' + v.substring(3,6) + '-' + v.substring(6);
-    else if (v.length >= 4) v = '(' + v.substring(0,3) + ') ' + v.substring(3);
-    else if (v.length >= 1) v = '(' + v;
-    e.target.value = v;
-  });
+    const company = document.getElementById('infoCompany').value.trim();
+    const notes   = document.getElementById('infoNotes').value.trim();
+    const today   = new Date();
 
-  // ── Step 5 ─────────────────────────────────────────────────────────────
-  function selectConnect(type) {
-    connectionType = type;
-    document.querySelectorAll('.connect-card').forEach(el => el.classList.remove('selected'));
-    document.getElementById('card-' + type).classList.add('selected');
-
-    document.getElementById('calTitle').textContent = type === 'site_visit'
-      ? 'Pick a date for your site visit'
-      : 'Pick a time for your call';
-    document.getElementById('calSub').textContent = type === 'site_visit'
-      ? 'We come to you — morning or afternoon slots available.'
-      : 'Quick 15–30 min call, Monday through Friday.';
-
-    selectedDate = null; selectedTime = null; takenSlots = new Set(); currentSlots = [];
-    document.getElementById('slotSection').style.display = 'none';
-    document.getElementById('btnConfirm').disabled = true;
-
-    setTimeout(() => { goTo(6); renderCalendar(); }, 180);
-  }
-
-  // ── Calendar ───────────────────────────────────────────────────────────
-  function renderCalendar() {
-    const grid = document.getElementById('calGrid');
-    grid.innerHTML = '';
-    document.getElementById('monthName').textContent = MONTHS[currentMonth] + ' ' + currentYear;
-
-    const firstDay  = new Date(currentYear, currentMonth, 1).getDay();
-    const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-    for (let i = 0; i < firstDay; i++) {
-      const el = document.createElement('div');
-      el.className = 'cal-day empty';
-      grid.appendChild(el);
-    }
-
-    for (let d = 1; d <= totalDays; d++) {
-      const date    = new Date(currentYear, currentMonth, d);
-      date.setHours(0, 0, 0, 0);
-      const dateStr = isoDate(date);
-      const dow     = date.getDay();
-      const el      = document.createElement('div');
-      el.dataset.date = dateStr;
-
-      if (date < today || dow === 0 || dow === 6) {
-        el.className = 'cal-day disabled';
-      } else {
-        el.className = 'cal-day';
-        el.onclick = () => pickDate(dateStr);
-      }
-      if (date.getTime() === today.getTime()) el.classList.add('today');
-      if (dateStr === selectedDate) el.classList.add('selected');
-      el.textContent = d;
-      grid.appendChild(el);
-    }
-  }
-
-  async function pickDate(dateStr) {
-    selectedDate = dateStr;
-    selectedTime = null;
-    document.getElementById('btnConfirm').disabled = true;
-
-    document.querySelectorAll('#calGrid .cal-day.selected').forEach(el => el.classList.remove('selected'));
-    const dayEl = document.querySelector('#calGrid [data-date="' + dateStr + '"]');
-    if (dayEl) dayEl.classList.add('selected');
-
-    currentSlots = connectionType === 'site_visit'
-      ? SITE_VISIT_SLOTS
-      : getConsultSlotsForDate(dateStr);
-
-    // Show loading state
-    const grid = document.getElementById('timeGrid');
-    grid.innerHTML = '';
-    grid.style.gridTemplateColumns = '1fr 1fr';
-    currentSlots.forEach(slot => {
-      const el = document.createElement('div');
-      el.className = 'time-slot booked';
-      el.style.opacity = '0.3';
-      el.style.cursor = 'default';
-      el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">Checking…</div>';
-      grid.appendChild(el);
-    });
-    document.getElementById('slotSection').style.display = 'block';
-
-    await fetchTakenSlots(dateStr);
-    renderSlots();
-  }
-
-  async function fetchTakenSlots(dateStr) {
-    takenSlots = new Set();
-    try {
-      if (connectionType === 'site_visit') {
-        // Share availability with residential calendar
-        const [bRes, blRes, cRes] = await Promise.all([
-          fetch(SUPABASE_URL + '/rest/v1/bookings?select=time&date_iso=eq.' + dateStr, {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-          }),
-          fetch(SUPABASE_URL + '/rest/v1/blocked_slots?select=time&date=eq.' + dateStr, {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-          }),
-          fetch(SUPABASE_URL + '/rest/v1/consult_bookings?select=time&date=eq.' + dateStr + '&type=eq.site_visit', {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-          })
-        ]);
-        [...(bRes.ok ? await bRes.json() : []),
-         ...(blRes.ok ? await blRes.json() : []),
-         ...(cRes.ok ? await cRes.json() : [])].forEach(r => takenSlots.add(r.time));
-      } else {
-        const res = await fetch(
-          SUPABASE_URL + '/rest/v1/consult_bookings?select=time&date=eq.' + dateStr + '&type=eq.phone_consult',
-          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
-        );
-        (res.ok ? await res.json() : []).forEach(r => takenSlots.add(r.time));
-      }
-    } catch(e) { console.warn('Slot check failed:', e); }
-  }
-
-  function renderSlots() {
-    const grid = document.getElementById('timeGrid');
-    grid.innerHTML = '';
-    grid.style.gridTemplateColumns = '1fr 1fr';
-    const sub = connectionType === 'site_visit' ? '~2 hrs' : '~20 min';
-    currentSlots.forEach(slot => {
-      const taken = takenSlots.has(slot);
-      const el = document.createElement('div');
-      el.className = 'time-slot' + (taken ? ' booked' : '') + (!taken && selectedTime === slot ? ' selected' : '');
-      el.innerHTML = '<div class="time-main">' + slot + '</div><div class="time-sub">' + (taken ? 'Unavailable' : sub) + '</div>';
-      if (!taken) el.onclick = () => selectTime(slot);
-      grid.appendChild(el);
-    });
-  }
-
-  function selectTime(slot) {
-    selectedTime = slot;
-    renderSlots();
-    document.getElementById('btnConfirm').disabled = false;
-  }
-
-  function prevMonth() {
-    currentMonth--;
-    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-    selectedDate = null; selectedTime = null;
-    document.getElementById('slotSection').style.display = 'none';
-    document.getElementById('btnConfirm').disabled = true;
-    renderCalendar();
-  }
-  function nextMonth() {
-    currentMonth++;
-    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-    selectedDate = null; selectedTime = null;
-    document.getElementById('slotSection').style.display = 'none';
-    document.getElementById('btnConfirm').disabled = true;
-    renderCalendar();
-  }
-
-  // ── Submit ─────────────────────────────────────────────────────────────
-  async function submitBooking() {
-    const btn = document.getElementById('btnConfirm');
-    btn.disabled = true;
-    btn.textContent = 'Booking…';
-
-    const dateDisplay = new Date(selectedDate + 'T12:00:00')
-      .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-
-    const record = {
-      type:         connectionType,
-      service_type: selectedService,
-      date:         selectedDate,
-      time:         selectedTime,
-      first_name:   document.getElementById('infoFirst').value.trim(),
-      last_name:    document.getElementById('infoLast').value.trim(),
-      phone:        document.getElementById('infoPhone').value.trim(),
-      email:        document.getElementById('infoEmail').value.trim(),
-      company:      document.getElementById('infoCompany').value.trim() || null,
-      address:      document.getElementById('infoAddress').value.trim() || null,
-      sizing_info:  SIZING_CONFIG[selectedService].unit + ': ' + sizingValue.toLocaleString(),
-      notes:        document.getElementById('infoNotes').value.trim() || null
+    const payload = {
+      first_name: first,
+      last_name:  last,
+      phone,
+      email,
+      package:  'Commercial - ' + (SERVICE_LABELS[selectedService] || 'Consult'),
+      total:    0,
+      date_iso: isoDate(today),
+      time:     type === 'site_visit' ? 'Site Visit Request' : 'Phone Consult Request',
+      date:     today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      notes:    [
+        sizingValue + ' ' + cfg.unit,
+        company ? 'Company: ' + company : '',
+        notes
+      ].filter(Boolean).join(' | ')
     };
 
     try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/consult_bookings', {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/bookings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -675,32 +434,21 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
           'Authorization': 'Bearer ' + SUPABASE_KEY,
           'Prefer': 'return=minimal'
         },
-        body: JSON.stringify(record)
+        body: JSON.stringify(payload)
       });
 
-      if (res.ok || res.status === 201) {
-        document.getElementById('successType').textContent      = connectionType === 'site_visit' ? 'Site Visit' : 'Phone Consultation';
-        document.getElementById('successDateTime').textContent  = dateDisplay + ' · ' + selectedTime;
-        document.getElementById('successService').textContent   = SERVICE_LABELS[selectedService];
-        document.getElementById('successSub').textContent       = connectionType === 'site_visit'
-          ? 'We\'ll be at your property at ' + selectedTime + '. Check your email for a confirmation.'
-          : 'We\'ll call you at ' + selectedTime + '. Check your email for a confirmation.';
-        goTo('confirm');
-      } else {
-        btn.disabled = false;
-        btn.textContent = 'Confirm Consultation';
-        alert('Something went wrong. Please try again or call us at (405) 882-2277.');
-      }
+      if (!res.ok) throw new Error('Submit failed');
+
+      document.getElementById('endButtons').style.display = 'none';
+      document.getElementById('successMsg').textContent = type === 'site_visit'
+        ? "We'll schedule a site visit and be in touch within one business day."
+        : "We'll give you a call to scope the job — usually within one business day.";
+      document.getElementById('successCard').classList.add('show');
+
     } catch(e) {
-      btn.disabled = false;
-      btn.textContent = 'Confirm Consultation';
-      alert('Connection error. Please check your internet and try again.');
+      alert('Something went wrong. Please call us at (405) 882-2277.');
     }
   }
-
-  // ── Init ───────────────────────────────────────────────────────────────
-  updateProgress();
 </script>
-
 </body>
 </html>
