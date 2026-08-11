@@ -230,7 +230,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .glass-video-slot {
   background: url('IMG_0858.jpeg') center/cover no-repeat;
   position: relative;
+  transition: transform 0.35s ease;
 }
+.glass-video-slot.playing { transform: scale(1.18); z-index: 10; }
 .glass-video-slot::after {
   content: ''; position: absolute; inset: 0; border-radius: inherit;
   background: rgba(0,0,0,0.32); pointer-events: none;
@@ -566,57 +568,6 @@ document.addEventListener('click', function(e){
   }
 });
 
-// ── Inline video slots ───────────────────────────────────
-(function(){
-  function stopAllSlots(){
-    document.querySelectorAll('.glass-video-slot.playing').forEach(function(slot){
-      slot.classList.remove('playing');
-      var v = slot.querySelector('.vslot-video');
-      if(v){ v.pause(); v.currentTime = 0; }
-    });
-  }
-
-  document.querySelectorAll('.glass-video-slot').forEach(function(slot){
-    var vid = slot.querySelector('.vslot-video');
-    if(!vid) return;
-    var tapX, tapY;
-
-    slot.addEventListener('touchstart', function(e){
-      tapX = e.touches[0].clientX; tapY = e.touches[0].clientY;
-    }, { passive: true });
-
-    slot.addEventListener('touchend', function(e){
-      if(slot.classList.contains('playing')) return; // let native controls handle it
-      var dx = Math.abs(e.changedTouches[0].clientX - tapX);
-      var dy = Math.abs(e.changedTouches[0].clientY - tapY);
-      if(dx < 10 && dy < 10){
-        e.preventDefault();
-        stopAllSlots();
-        slot.classList.add('playing');
-        vid.play().catch(function(){});
-      }
-    }, { passive: false });
-
-    slot.addEventListener('click', function(){ // desktop fallback
-      if(slot.classList.contains('playing')) return;
-      stopAllSlots();
-      slot.classList.add('playing');
-      vid.play().catch(function(){});
-    });
-
-    vid.addEventListener('click', function(){
-      slot.classList.remove('playing');
-      vid.pause(); vid.currentTime = 0;
-    });
-
-    vid.addEventListener('ended', function(){
-      setTimeout(function(){
-        slot.classList.remove('playing');
-        vid.currentTime = 0;
-      }, 600);
-    });
-  });
-})();
 
 (function(){
   // ── Hero slideshow ──────────────────────────────────────
@@ -643,7 +594,8 @@ document.addEventListener('click', function(e){
 
     let xPos = setWidth;
     let autoOn = false, dir = 1, startX = 0, startY = 0, lastTouchX = 0;
-    let inertia = 0, recentMoves = [], swipeAxis = null; // 'h' | 'v' | null
+    let inertia = 0, recentMoves = [], swipeAxis = null;
+    let centerState = null, videoPlaying = false;
 
     function clamp(){
       while(xPos >= setWidth * 2)       xPos -= setWidth;
@@ -655,14 +607,27 @@ document.addEventListener('click', function(e){
 
     (function loop(){
       requestAnimationFrame(loop);
-      if(!autoOn) return;
+      if(centerState){
+        var diff = centerState.target - xPos;
+        if(Math.abs(diff) < 0.5){
+          xPos = centerState.target; clamp(); render();
+          centerState.slot.classList.add('playing');
+          centerState.vid.play().catch(function(){});
+          videoPlaying = true;
+          centerState = null;
+        } else {
+          xPos += diff * 0.1; clamp(); render();
+        }
+        return;
+      }
+      if(videoPlaying || !autoOn) return;
       xPos += dir * 0.5 + inertia;
       if(Math.abs(inertia) > 0.05) inertia *= 0.955; else inertia = 0;
-      clamp();
-      render();
+      clamp(); render();
     })();
 
     el.addEventListener('touchstart', function(e){
+      if(centerState || videoPlaying) return;
       startX = lastTouchX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
       swipeAxis = null;
@@ -709,6 +674,49 @@ document.addEventListener('click', function(e){
       }
       recentMoves = [];
     }, { passive: true });
+
+    // ── Video slots ──────────────────────────────────────
+    el.querySelectorAll('.glass-video-slot').forEach(function(slot){
+      var vid = slot.querySelector('.vslot-video');
+      if(!vid) return;
+      var vtapX, vtapY;
+
+      function activateSlot(){
+        var idx = Array.from(track.children).indexOf(slot);
+        if(idx < 0) return;
+        var target = idx * 230 + 110 - el.offsetWidth / 2;
+        while(target >= setWidth * 2) target -= setWidth;
+        while(target < setWidth * 0.5) target += setWidth;
+        inertia = 0;
+        centerState = { target: target, slot: slot, vid: vid };
+      }
+
+      function deactivateSlot(){
+        slot.classList.remove('playing');
+        vid.pause(); vid.currentTime = 0;
+        videoPlaying = false;
+      }
+
+      slot.addEventListener('touchstart', function(e){
+        if(slot.classList.contains('playing')) return;
+        vtapX = e.touches[0].clientX; vtapY = e.touches[0].clientY;
+      }, { passive: true });
+
+      slot.addEventListener('touchend', function(e){
+        if(slot.classList.contains('playing')) return;
+        var dx = Math.abs(e.changedTouches[0].clientX - vtapX);
+        var dy = Math.abs(e.changedTouches[0].clientY - vtapY);
+        if(dx < 10 && dy < 10){ e.preventDefault(); activateSlot(); }
+      }, { passive: false });
+
+      slot.addEventListener('click', function(){
+        if(slot.classList.contains('playing')) return;
+        activateSlot();
+      });
+
+      vid.addEventListener('click', function(){ deactivateSlot(); });
+      vid.addEventListener('ended', function(){ setTimeout(deactivateSlot, 600); });
+    });
 
     const ctrl = {
       start: function(){ autoOn = true; },
