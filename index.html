@@ -225,6 +225,34 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .testi-name { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 900; color: var(--dark); }
 .testi-loc { font-size: 12px; color: var(--mid); }
 
+/* ── Video thumbnail in strip ───── */
+.glass-video-thumb { position: relative; cursor: pointer; }
+.play-badge {
+  position: absolute; bottom: 8px; right: 8px;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(0,0,0,0.58); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.play-badge svg { width: 13px; height: 13px; fill: #fff; }
+
+/* ── Video modal ─────────────────── */
+#video-modal {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.88);
+  align-items: center; justify-content: center;
+}
+#video-modal.open { display: flex; }
+#modal-video {
+  max-width: 92vw; max-height: 80vh;
+  border-radius: 14px; outline: none;
+}
+#video-close {
+  position: absolute; top: 18px; right: 20px;
+  color: #fff; font-size: 30px; line-height: 1;
+  cursor: pointer; background: none; border: none; padding: 4px 8px;
+}
+
 /* ── CTA band ────────────────────── */
 .cta-band { background: var(--dark); padding: 40px 20px; text-align: center; }
 .cta-band h2 {
@@ -361,26 +389,26 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
         <div class="glass-track">
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_4505.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo glass-video-thumb" data-video="video1.mp4"><img src="IMG_4505.jpeg" alt="Watch video"><div class="play-badge"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></div></div>
           <div class="glass-photo"><img src="IMG_7328.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4092.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo glass-video-thumb" data-video="video2.mp4"><img src="IMG_4096.jpeg" alt="Watch video"><div class="play-badge"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></div></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_4505.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo glass-video-thumb" data-video="video1.mp4"><img src="IMG_4505.jpeg" alt="Watch video"><div class="play-badge"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></div></div>
           <div class="glass-photo"><img src="IMG_7328.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4092.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo glass-video-thumb" data-video="video2.mp4"><img src="IMG_4096.jpeg" alt="Watch video"><div class="play-badge"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></div></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_4505.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo glass-video-thumb" data-video="video1.mp4"><img src="IMG_4505.jpeg" alt="Watch video"><div class="play-badge"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></div></div>
           <div class="glass-photo"><img src="IMG_7328.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4092.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo glass-video-thumb" data-video="video2.mp4"><img src="IMG_4096.jpeg" alt="Watch video"><div class="play-badge"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></div></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
         </div>
@@ -512,6 +540,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   <div class="footer-copy">© 2025 Suds Monkey. All rights reserved.</div>
 </footer>
 
+<!-- Video lightbox modal -->
+<div id="video-modal">
+  <button id="video-close" aria-label="Close video">✕</button>
+  <video id="modal-video" controls playsinline></video>
+</div>
+
 <script>
 function toggleMenu(){
   document.getElementById('hdMenu').classList.toggle('open');
@@ -521,6 +555,48 @@ document.addEventListener('click', function(e){
     document.getElementById('hdMenu').classList.remove('open');
   }
 });
+
+// ── Video modal ──────────────────────────────────────────
+(function(){
+  const modal    = document.getElementById('video-modal');
+  const vid      = document.getElementById('modal-video');
+  const closeBtn = document.getElementById('video-close');
+
+  function closeModal(){
+    modal.classList.remove('open');
+    vid.pause();
+    vid.removeAttribute('src');
+    vid.load();
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
+
+  // Tap detection on video thumbs (touchend since touchmove may preventDefault)
+  document.querySelectorAll('.glass-video-thumb').forEach(function(thumb){
+    var tapX, tapY;
+    thumb.addEventListener('touchstart', function(e){
+      tapX = e.touches[0].clientX; tapY = e.touches[0].clientY;
+    }, { passive: true });
+    thumb.addEventListener('touchend', function(e){
+      var dx = Math.abs(e.changedTouches[0].clientX - tapX);
+      var dy = Math.abs(e.changedTouches[0].clientY - tapY);
+      if(dx < 10 && dy < 10){
+        vid.src = thumb.dataset.video;
+        vid.load();
+        vid.play().catch(function(){});
+        modal.classList.add('open');
+      }
+    }, { passive: true });
+    // Desktop click fallback
+    thumb.addEventListener('click', function(){
+      vid.src = thumb.dataset.video;
+      vid.load();
+      vid.play().catch(function(){});
+      modal.classList.add('open');
+    });
+  });
+})();
 
 (function(){
   // ── Hero slideshow ──────────────────────────────────────
