@@ -636,7 +636,7 @@ document.addEventListener('click', function(e){
 
     bd.addEventListener('click', close);
     box.addEventListener('click', close);
-    expVid.addEventListener('ended', function(){ setTimeout(close, 600); });
+    expVid.addEventListener('ended', close);
 
     return {
       isOpen: function(){ return activeSlot !== null; },
@@ -718,7 +718,7 @@ document.addEventListener('click', function(e){
           var cb = returnState.onDone; returnState = null;
           if(cb) cb();
         } else {
-          xPos += rdiff * 0.22; clamp(); render();
+          xPos += rdiff * 0.07; clamp(); render();
         }
         return;
       }
