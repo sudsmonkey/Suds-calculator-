@@ -570,8 +570,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     <div class="section-tag">Just for fun</div>
     <h2 style="font-family:'Anton',sans-serif; font-size:clamp(32px,7vw,52px); color:var(--orange); font-style:italic; text-transform:uppercase; letter-spacing:1px; line-height:1; margin-bottom:8px;">Squeege Master 3000<span style="font-size:0.35em; vertical-align:super; margin-left:3px;">&trade;</span></h2>
     <p class="section-sub">Think you can run a window cleaning empire? Take a break and find out.</p>
-    <a href="game.html" style="display:inline-block; background: var(--mint); color: var(--dark); font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 900; border-radius: 50px; padding: 12px 28px; text-decoration: none; box-shadow: 0 4px 0 rgba(0,0,0,0.18);">Play Now →</a>
+    <button id="gameBtn" onclick="launchGame()" style="display:inline-block; background: var(--mint); color: var(--dark); font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 900; border-radius: 50px; padding: 12px 28px; border: none; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.18);">Play Now →</button>
   </div>
+</div>
+
+<!-- Game embed -->
+<div id="gameEmbed" style="display:none; width:100%; background:var(--cream); border-top:1px solid var(--border);">
+  <iframe id="gameFrame" src="" style="width:100%; border:none; display:block;" scrolling="no"></iframe>
 </div>
 
 <!-- CTA + Service area -->
@@ -615,6 +620,32 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 <script>
 function toggleMenu(){
   document.getElementById('hdMenu').classList.toggle('open');
+}
+
+function launchGame() {
+  const embed = document.getElementById('gameEmbed');
+  const frame = document.getElementById('gameFrame');
+  const btn = document.getElementById('gameBtn');
+  if (embed.style.display === 'none') {
+    frame.src = 'game.html';
+    embed.style.display = 'block';
+    btn.textContent = 'Hide Game ↑';
+    // Size the iframe to match the game's content once loaded
+    frame.onload = function() {
+      try {
+        const h = frame.contentDocument.body.scrollHeight;
+        frame.style.height = (h || 700) + 'px';
+      } catch(e) {
+        frame.style.height = '700px';
+      }
+    };
+    setTimeout(() => embed.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  } else {
+    embed.style.display = 'none';
+    frame.src = '';
+    btn.textContent = 'Play Now →';
+    document.getElementById('gameBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 }
 document.addEventListener('click', function(e){
   if(!e.target.closest('#hdBurger') && !e.target.closest('#hdMenu')){
