@@ -700,14 +700,10 @@ document.addEventListener('click', function(e){
             function(){ overlayOpen = false; videoScrolled = 0; videoScrollPaused = false; videoPlaying = false; returnState = null; },
             function(collapseNow){
               videoPlaying = true;
-              if(videoScrollPaused){
-                // Already completed one full cycle — card is right there
-                returnState = { target: xPos, onDone: collapseNow };
-              } else {
-                // Fast-forward through remaining portion of the cycle
-                var remaining = setWidth - videoScrolled;
-                returnState = { target: xPos + remaining, onDone: collapseNow };
-              }
+              var t = openTarget;
+              while(t - xPos >  setWidth / 2) t -= setWidth;
+              while(xPos - t >  setWidth / 2) t += setWidth;
+              returnState = { target: t, onDone: collapseNow };
             }
           );
         } else {
