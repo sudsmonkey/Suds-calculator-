@@ -703,7 +703,7 @@ document.addEventListener('click', function(e){
               var t = openTarget;
               while(t - xPos >  setWidth / 2) t -= setWidth;
               while(xPos - t >  setWidth / 2) t += setWidth;
-              returnState = { target: t, onDone: collapseNow };
+              returnState = { target: t, onDone: collapseNow, returnDir: t >= xPos ? 1 : -1 };
             }
           );
         } else {
@@ -715,8 +715,9 @@ document.addEventListener('click', function(e){
         var rdiff = returnState.target - xPos;
         if(Math.abs(rdiff) < 0.5){
           xPos = returnState.target; clamp(); render();
-          var cb = returnState.onDone; returnState = null;
-          if(cb) cb();
+          var rs = returnState; returnState = null;
+          dir = rs.returnDir;
+          if(rs.onDone) rs.onDone();
         } else {
           xPos += rdiff * 0.07; clamp(); render();
         }
