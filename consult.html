@@ -22,7 +22,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
 
 /* Header */
 .header {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 0;
   text-align: center;
   overflow: hidden;
   padding: 120px 24px 100px;
@@ -39,7 +41,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
   z-index: 0;
 }
 .header > *:not(.header-bg):not(.header-overlay) { position: relative; z-index: 1; }
-.top-nav { background: var(--white); border-bottom: 1px solid #F0E8DE; padding: 10px 16px; }
+.top-nav { position: relative; z-index: 1; background: var(--white); border-bottom: 1px solid #F0E8DE; padding: 10px 16px; }
 .back-link { color: var(--mid); font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
 .back-link:hover { color: var(--dark); }
 .header-phone { position: absolute; top: 14px; right: 16px; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 700; text-decoration: none; z-index: 2; }
@@ -50,13 +52,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
 .header p { color: rgba(255,255,255,0.82); font-size: 13px; margin-top: 4px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
 
 /* Progress */
-.progress-wrap { background: var(--white); border-bottom: 1px solid #F0E8DE; padding: 12px 24px; }
+.progress-wrap { position: relative; z-index: 1; background: var(--white); border-bottom: 1px solid #F0E8DE; padding: 12px 24px; }
 .progress-label { font-size: 11px; font-weight: 700; color: var(--mid); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
 .progress-bar-bg { height: 4px; background: #EBE1D2; border-radius: 2px; }
 .progress-bar-fill { height: 4px; background: var(--orange); border-radius: 2px; transition: width 0.35s ease; }
 
 /* Layout */
-.content { padding: 20px 16px 60px; max-width: 440px; margin: 0 auto; }
+.content { position: relative; z-index: 1; background: var(--cream); padding: 20px 16px 60px; max-width: 440px; margin: 0 auto; }
 .step { display: none; }
 .step.active { display: block; }
 
@@ -174,7 +176,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height:
 <div class="header">
   <div class="header-bg"></div>
   <div class="header-overlay"></div>
-  <h1>Book a Consultation or Site-Visit</h1>
 </div>
 
 <div class="progress-wrap">
