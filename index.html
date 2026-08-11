@@ -603,6 +603,13 @@ document.addEventListener('click', function(e){
       slot.classList.add('playing');
       vid.play().catch(function(){});
     });
+
+    vid.addEventListener('ended', function(){
+      setTimeout(function(){
+        slot.classList.remove('playing');
+        vid.currentTime = 0;
+      }, 600);
+    });
   });
 })();
 
