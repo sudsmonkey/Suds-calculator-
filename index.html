@@ -514,6 +514,7 @@ document.addEventListener('click', function(e){
   const setWidth = 1840; // 8 photos × (220 + 10)px
   let activeStrip = null;
   const visibleStrips = new Set();
+  const stripRatios = new Map(); // ctrl → latest intersectionRatio
 
   function setupStrip(el){
     const track = el.querySelector('.glass-track');
@@ -594,19 +595,40 @@ document.addEventListener('click', function(e){
     };
 
     new IntersectionObserver(function(entries){
+      const ratio = entries[0].intersectionRatio;
+      stripRatios.set(ctrl, ratio);
+
       if(entries[0].isIntersecting){
         visibleStrips.add(ctrl);
-        if(activeStrip && activeStrip !== ctrl) activeStrip.stop();
-        activeStrip = ctrl;
-        ctrl.start();
         stopHero();
+        const activeRatio = activeStrip ? (stripRatios.get(activeStrip) || 0) : 0;
+        // Only take over if there's no active strip, we already are it,
+        // or we're genuinely more visible than whoever is currently scrolling
+        if(!activeStrip || activeStrip === ctrl || ratio > activeRatio){
+          if(activeStrip && activeStrip !== ctrl) activeStrip.stop();
+          activeStrip = ctrl;
+          ctrl.start();
+        }
       } else {
+        stripRatios.set(ctrl, 0);
         visibleStrips.delete(ctrl);
         ctrl.stop();
-        if(activeStrip === ctrl) activeStrip = null;
-        if(visibleStrips.size === 0) startHero(); // resume hero only when both rows are out of view
+        if(activeStrip === ctrl){
+          activeStrip = null;
+          // Hand off to the most-visible remaining strip (if any)
+          if(visibleStrips.size > 0){
+            let best = null, bestR = -1;
+            visibleStrips.forEach(function(c){
+              const r = stripRatios.get(c) || 0;
+              if(r > bestR){ bestR = r; best = c; }
+            });
+            if(best){ activeStrip = best; best.start(); }
+          } else {
+            startHero();
+          }
+        }
       }
-    }, { threshold: 0.15 }).observe(el);
+    }, { threshold: [0, 0.15, 0.3, 0.5, 0.75] }).observe(el);
   }
 
   document.querySelectorAll('.glass-scroll').forEach(setupStrip);
