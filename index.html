@@ -676,7 +676,7 @@ document.addEventListener('click', function(e){
     let autoOn = false, dir = 1, startX = 0, startY = 0, lastTouchX = 0;
     let inertia = 0, recentMoves = [], swipeAxis = null;
     let centerState = null, returnState = null, videoPlaying = false;
-    let openTarget = 0;
+    let openTarget = 0, overlayOpen = false, videoScrolled = 0, videoScrollPaused = false;
 
     function clamp(){
       while(xPos >= setWidth * 2)       xPos -= setWidth;
@@ -694,12 +694,13 @@ document.addEventListener('click', function(e){
           xPos = centerState.target; clamp(); render();
           var cs = centerState; centerState = null;
           openTarget = xPos;
+          overlayOpen = true; videoScrolled = 0; videoScrollPaused = false;
           videoExpand.open(
             cs.slot,
-            function(){ videoPlaying = false; returnState = null; },
+            function(){ overlayOpen = false; videoScrolled = 0; videoScrollPaused = false; videoPlaying = false; returnState = null; },
             function(collapseNow){
               videoPlaying = true;
-              // Normalize target to shortest path from current xPos
+              // xPos is already at openTarget (snapped at cycle end) — rewind is instant
               var t = openTarget;
               while(t - xPos >  setWidth / 2) t -= setWidth;
               while(xPos - t >  setWidth / 2) t += setWidth;
@@ -722,8 +723,18 @@ document.addEventListener('click', function(e){
         }
         return;
       }
-      if(videoPlaying || !autoOn) return;
-      xPos += dir * 0.5 + inertia;
+      if(videoPlaying || videoScrollPaused || !autoOn) return;
+      var step = dir * 0.5 + inertia;
+      if(overlayOpen){
+        videoScrolled += Math.abs(step);
+        if(videoScrolled >= setWidth){
+          // One full cycle done — card is back in original position; snap and freeze
+          videoScrollPaused = true; inertia = 0;
+          xPos = openTarget; clamp(); render();
+          return;
+        }
+      }
+      xPos += step;
       if(Math.abs(inertia) > 0.05) inertia *= 0.955; else inertia = 0;
       clamp(); render();
     })();
