@@ -236,17 +236,45 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   </div>
 </section>
 
+<!-- Q2: Stories -->
+<section class="q-section" id="q2" style="display:none;">
+  <div class="q-num">02</div>
+  <h2 class="q-head">How many stories?</h2>
+  <p class="q-sub">Height affects access equipment and pricing.</p>
+  <div class="mc-card">
+    <div class="mc-option" id="tile-s1" onclick="selectStories('s1')">
+      <span class="mc-label">1–2 stories</span><span class="mc-dot"></span>
+    </div>
+    <div class="mc-option" id="tile-s3" onclick="selectStories('s3')">
+      <span class="mc-label">3–8 stories</span><span class="mc-dot"></span>
+    </div>
+    <div class="mc-option" id="tile-s8" onclick="selectStories('s8')">
+      <span class="mc-label">8+ stories</span><span class="mc-dot"></span>
+    </div>
+  </div>
+</section>
+
 <script>
   function toggleMenu() {
     document.getElementById('hdMenu').classList.toggle('open');
   }
 
   let selectedType = null;
+  let selectedStories = null;
 
   function selectType(type) {
     selectedType = type;
-    document.querySelectorAll('.mc-option').forEach(t => t.classList.remove('sel'));
+    document.querySelectorAll('#q1 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + type).classList.add('sel');
+    const q2 = document.getElementById('q2');
+    q2.style.display = 'block';
+    setTimeout(() => q2.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  }
+
+  function selectStories(val) {
+    selectedStories = val;
+    document.querySelectorAll('#q2 .mc-option').forEach(t => t.classList.remove('sel'));
+    document.getElementById('tile-' + val).classList.add('sel');
   }
 
   // Sync hero top to sit below the fixed header, spacer keeps content below both
