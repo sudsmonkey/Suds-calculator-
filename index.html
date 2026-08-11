@@ -606,7 +606,7 @@ document.addEventListener('click', function(e){
     var box = document.getElementById('vid-expand');
     var expVid = document.getElementById('vid-exp-v');
     var bd  = document.getElementById('vid-backdrop');
-    var activeSlot = null, activeStrip = null, closeCb = null;
+    var activeSlot = null, activeStrip = null, closeCb = null, closeStartCb = null;
 
     function nearestSlot(){
       if(!activeStrip) return null;
@@ -627,6 +627,7 @@ document.addEventListener('click', function(e){
       if(!activeSlot) return;
       bd.classList.remove('show');
       expVid.pause();
+      if(closeStartCb){ closeStartCb(); closeStartCb = null; } // freeze strip now
       var target = nearestSlot();
       activeSlot = null; activeStrip = null;
       if(target){
@@ -654,10 +655,12 @@ document.addEventListener('click', function(e){
     expVid.addEventListener('ended', function(){ setTimeout(close, 600); });
 
     return {
-      open: function(slot, stripEl, onClose){
+      isOpen: function(){ return activeSlot !== null; },
+      open: function(slot, stripEl, onClose, onCloseStart){
         activeSlot = slot;
         activeStrip = stripEl;
         closeCb = onClose;
+        closeStartCb = onCloseStart;
         var r = slot.getBoundingClientRect();
         box.classList.remove('anim');
         box.style.top    = r.top    + 'px';
@@ -706,14 +709,17 @@ document.addEventListener('click', function(e){
         if(Math.abs(diff) < 0.5){
           xPos = centerState.target; clamp(); render();
           var cs = centerState; centerState = null;
-          videoPlaying = true;
-          videoExpand.open(cs.slot, el, function(){ videoPlaying = false; });
+          videoExpand.open(
+            cs.slot, el,
+            function(){ videoPlaying = false; },  // onCloseEnd: resume strip
+            function(){ videoPlaying = true;  }   // onCloseStart: freeze strip
+          );
         } else {
           xPos += diff * 0.1; clamp(); render();
         }
         return;
       }
-      if(!autoOn) return;
+      if(videoPlaying || !autoOn) return;
       xPos += dir * 0.5 + inertia;
       if(Math.abs(inertia) > 0.05) inertia *= 0.955; else inertia = 0;
       clamp(); render();
@@ -783,19 +789,19 @@ document.addEventListener('click', function(e){
       }
 
       slot.addEventListener('touchstart', function(e){
-        if(videoPlaying) return;
+        if(videoExpand.isOpen() || centerState) return;
         vtapX = e.touches[0].clientX; vtapY = e.touches[0].clientY;
       }, { passive: true });
 
       slot.addEventListener('touchend', function(e){
-        if(videoPlaying) return;
+        if(videoExpand.isOpen() || centerState) return;
         var dx = Math.abs(e.changedTouches[0].clientX - vtapX);
         var dy = Math.abs(e.changedTouches[0].clientY - vtapY);
         if(dx < 10 && dy < 10){ e.preventDefault(); activateSlot(); }
       }, { passive: false });
 
       slot.addEventListener('click', function(){
-        if(videoPlaying) return;
+        if(videoExpand.isOpen() || centerState) return;
         activateSlot();
       });
     });
