@@ -405,7 +405,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline controls preload="none"></video></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline preload="none"></video></div>
           <!-- Set 2 -->
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
@@ -415,7 +415,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline controls preload="none"></video></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline preload="none"></video></div>
           <!-- Set 3 -->
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
@@ -425,7 +425,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline controls preload="none"></video></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline preload="none"></video></div>
         </div>
       </div>
     </div>
@@ -602,6 +602,11 @@ document.addEventListener('click', function(e){
       stopAllSlots();
       slot.classList.add('playing');
       vid.play().catch(function(){});
+    });
+
+    vid.addEventListener('click', function(){
+      slot.classList.remove('playing');
+      vid.pause(); vid.currentTime = 0;
     });
 
     vid.addEventListener('ended', function(){
