@@ -520,8 +520,8 @@ document.addEventListener('click', function(e){
     if(!track) return;
 
     let xPos = setWidth;
-    let autoOn = false, dir = 1, startX = 0, lastTouchX = 0;
-    let inertia = 0, recentMoves = [];
+    let autoOn = false, dir = 1, startX = 0, startY = 0, lastTouchX = 0;
+    let inertia = 0, recentMoves = [], swipeAxis = null; // 'h' | 'v' | null
 
     function clamp(){
       while(xPos >= setWidth * 2)       xPos -= setWidth;
@@ -542,20 +542,39 @@ document.addEventListener('click', function(e){
 
     el.addEventListener('touchstart', function(e){
       startX = lastTouchX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      swipeAxis = null;
       inertia = 0; recentMoves = [];
     }, { passive: true });
 
     el.addEventListener('touchmove', function(e){
       const x = e.touches[0].clientX;
+      const y = e.touches[0].clientY;
+
+      // Determine axis once we have enough movement to be sure
+      if(swipeAxis === null){
+        const dx = Math.abs(x - startX);
+        const dy = Math.abs(y - startY);
+        if(dx > 6 || dy > 6){
+          // generous horizontal bias: 1.5× more horizontal than vertical = h
+          swipeAxis = dx > dy * 1.5 ? 'h' : 'v';
+        }
+        if(swipeAxis !== 'h') return; // still deciding or going vertical
+      }
+      if(swipeAxis !== 'h') return; // vertical swipe — let page scroll
+
+      e.preventDefault(); // we own this gesture; stop vertical drift
       recentMoves.push({ x, t: Date.now() });
       if(recentMoves.length > 6) recentMoves.shift();
       xPos += lastTouchX - x;
       lastTouchX = x;
       clamp();
       render();
-    }, { passive: true });
+    }, { passive: false });
 
     el.addEventListener('touchend', function(e){
+      if(swipeAxis !== 'h'){ swipeAxis = null; return; }
+      swipeAxis = null;
       const dx = e.changedTouches[0].clientX - startX;
       if(Math.abs(dx) > 10) dir = dx < 0 ? 1 : -1;
       if(recentMoves.length >= 2){
