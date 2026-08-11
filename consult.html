@@ -170,6 +170,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   transition: opacity 0.12s;
 }
 
+/* ── Photo upload ────────────────── */
+.photo-drop { border: 2px dashed var(--border); border-radius: 16px; padding: 32px 20px; text-align: center; cursor: pointer; transition: border-color 0.15s; background: var(--cream); max-width: 440px; }
+.photo-drop:hover { border-color: var(--orange); }
+.photo-drop-label { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 15px; color: var(--dark); margin-top: 10px; }
+.photo-drop-sub { font-size: 13px; color: var(--mid); margin-top: 4px; }
+.photo-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; max-width: 440px; }
+.photo-thumb { width: 72px; height: 72px; border-radius: 10px; object-fit: cover; border: 1.5px solid var(--border); }
+.photo-skip { font-size: 13px; color: var(--mid); text-align: center; margin-top: 10px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
 /* ── Calendar embed ──────────────── */
 .cal-section { position: relative; z-index: 150; background: var(--cream); padding: 40px 20px 60px; border-top: 1px solid var(--border); }
 .cal-wrap { max-width: 440px; }
@@ -323,6 +332,22 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   </div>
 </section>
 
+<!-- Photo upload -->
+<section class="q-section" id="photo-section" style="display:none; background: var(--white);">
+  <div class="q-num">04</div>
+  <h2 class="q-head">Got any photos?</h2>
+  <p class="q-sub">Totally optional — helps us visualize the job before we connect.</p>
+  <input type="file" id="photoInput" accept="image/*" multiple style="display:none;" onchange="handlePhotos(this)">
+  <div class="photo-drop" onclick="document.getElementById('photoInput').click()">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--mid)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    <div class="photo-drop-label">Tap to add photos</div>
+    <div class="photo-drop-sub">Building exterior, windows, access points</div>
+  </div>
+  <div class="photo-thumbs" id="photoThumbs"></div>
+  <button onclick="showCTAs()" style="display:block; width:100%; max-width:440px; text-align:center; background:var(--orange); color:#fff; font-family:'Nunito',sans-serif; font-size:16px; font-weight:900; border-radius:50px; padding:15px 28px; border:none; cursor:pointer; box-shadow:0 4px 0 rgba(166,56,46,0.35); margin-top:20px;">Continue</button>
+  <p class="photo-skip" onclick="showCTAs()">Skip for now</p>
+</section>
+
 <!-- CTAs -->
 <section class="q-section" id="cta-section" style="display:none; background: var(--white);">
   <h2 class="q-head" style="margin-bottom: 6px;">How would you like to connect?</h2>
@@ -421,9 +446,26 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     selectedService = val;
     document.querySelectorAll('#q3 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + val).classList.add('sel');
+    const ps = document.getElementById('photo-section');
+    ps.style.display = 'block';
+    setTimeout(() => ps.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  }
+
+  function showCTAs() {
     const cta = document.getElementById('cta-section');
     cta.style.display = 'block';
     setTimeout(() => cta.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  }
+
+  function handlePhotos(input) {
+    const thumbs = document.getElementById('photoThumbs');
+    thumbs.innerHTML = '';
+    Array.from(input.files).forEach(file => {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.className = 'photo-thumb';
+      thumbs.appendChild(img);
+    });
   }
 
   // ── Calendar embed ───────────────────────────────────
