@@ -700,11 +700,14 @@ document.addEventListener('click', function(e){
             function(){ overlayOpen = false; videoScrolled = 0; videoScrollPaused = false; videoPlaying = false; returnState = null; },
             function(collapseNow){
               videoPlaying = true;
-              // xPos is already at openTarget (snapped at cycle end) — rewind is instant
-              var t = openTarget;
-              while(t - xPos >  setWidth / 2) t -= setWidth;
-              while(xPos - t >  setWidth / 2) t += setWidth;
-              returnState = { target: t, onDone: collapseNow };
+              if(videoScrollPaused){
+                // Already completed one full cycle — card is right there
+                returnState = { target: xPos, onDone: collapseNow };
+              } else {
+                // Fast-forward through remaining portion of the cycle
+                var remaining = setWidth - videoScrolled;
+                returnState = { target: xPos + remaining, onDone: collapseNow };
+              }
             }
           );
         } else {
@@ -719,7 +722,7 @@ document.addEventListener('click', function(e){
           var cb = returnState.onDone; returnState = null;
           if(cb) cb();
         } else {
-          xPos += rdiff * 0.12; clamp(); render();
+          xPos += rdiff * 0.22; clamp(); render();
         }
         return;
       }
