@@ -1313,11 +1313,8 @@
         if (i === dots.length - 1) {
           setTimeout(() => {
             cancelAnimationFrame(rafId);
-            setTimeout(() => {
-              document.getElementById('calibAllSet').style.display = 'block';
-              var ov = document.getElementById('calibrateOverlay');
-              if(ov){ ov.style.backdropFilter='blur(0px)'; ov.style.webkitBackdropFilter='blur(0px)'; ov.style.background='rgba(0,0,0,0.32)'; }
-            }, 1100);
+            setTimeout(() => { document.getElementById('calibAllSet').style.display = 'block'; }, 1100);
+            setTimeout(() => { var ov=document.getElementById('calibrateOverlay'); if(ov){ov.style.backdropFilter='blur(0px)';ov.style.webkitBackdropFilter='blur(0px)';ov.style.background='rgba(0,0,0,0.32)';} }, 1100);
           }, 320);
         }
       }, t);
