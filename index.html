@@ -606,25 +606,47 @@ document.addEventListener('click', function(e){
     var box = document.getElementById('vid-expand');
     var expVid = document.getElementById('vid-exp-v');
     var bd  = document.getElementById('vid-backdrop');
-    var activeSlot = null, closeCb = null;
+    var activeSlot = null, activeStrip = null, closeCb = null;
+
+    function nearestSlot(){
+      if(!activeStrip) return null;
+      var slots = activeStrip.querySelectorAll('.glass-video-slot');
+      var sr = activeStrip.getBoundingClientRect();
+      var sc = sr.left + sr.width / 2;
+      var best = null, bestDist = Infinity;
+      slots.forEach(function(s){
+        var r = s.getBoundingClientRect();
+        if(r.right < sr.left - 20 || r.left > sr.right + 20) return;
+        var dist = Math.abs((r.left + r.width / 2) - sc);
+        if(dist < bestDist){ bestDist = dist; best = s; }
+      });
+      return best;
+    }
 
     function close(){
       if(!activeSlot) return;
       bd.classList.remove('show');
       expVid.pause();
-      var r = activeSlot.getBoundingClientRect();
-      activeSlot = null;
-      box.style.top    = r.top    + 'px';
-      box.style.left   = r.left   + 'px';
-      box.style.width  = r.width  + 'px';
-      box.style.height = r.height + 'px';
-      box.addEventListener('transitionend', function done(e){
-        if(e.propertyName !== 'width') return;
-        box.removeEventListener('transitionend', done);
+      var target = nearestSlot();
+      activeSlot = null; activeStrip = null;
+      if(target){
+        var r = target.getBoundingClientRect();
+        box.style.top    = r.top    + 'px';
+        box.style.left   = r.left   + 'px';
+        box.style.width  = r.width  + 'px';
+        box.style.height = r.height + 'px';
+        box.addEventListener('transitionend', function done(e){
+          if(e.propertyName !== 'width') return;
+          box.removeEventListener('transitionend', done);
+          box.style.display = 'none';
+          expVid.src = ''; expVid.load();
+          if(closeCb){ closeCb(); closeCb = null; }
+        });
+      } else {
         box.style.display = 'none';
         expVid.src = ''; expVid.load();
         if(closeCb){ closeCb(); closeCb = null; }
-      });
+      }
     }
 
     bd.addEventListener('click', close);
@@ -632,8 +654,9 @@ document.addEventListener('click', function(e){
     expVid.addEventListener('ended', function(){ setTimeout(close, 600); });
 
     return {
-      open: function(slot, onClose){
+      open: function(slot, stripEl, onClose){
         activeSlot = slot;
+        activeStrip = stripEl;
         closeCb = onClose;
         var r = slot.getBoundingClientRect();
         box.classList.remove('anim');
@@ -684,13 +707,13 @@ document.addEventListener('click', function(e){
           xPos = centerState.target; clamp(); render();
           var cs = centerState; centerState = null;
           videoPlaying = true;
-          videoExpand.open(cs.slot, function(){ videoPlaying = false; });
+          videoExpand.open(cs.slot, el, function(){ videoPlaying = false; });
         } else {
           xPos += diff * 0.1; clamp(); render();
         }
         return;
       }
-      if(videoPlaying || !autoOn) return;
+      if(!autoOn) return;
       xPos += dir * 0.5 + inertia;
       if(Math.abs(inertia) > 0.05) inertia *= 0.955; else inertia = 0;
       clamp(); render();
