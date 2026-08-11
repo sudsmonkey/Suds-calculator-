@@ -21,37 +21,43 @@
 html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-font-smoothing: antialiased; }
 
-/* Nav */
-.top-nav {
-  position: relative;
-  z-index: 11;
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* Header */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(100,30,22,0.97);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 8px 20px;
+  min-height: 76px;
+  display: flex; align-items: center; justify-content: space-between;
 }
-.back-link { color: var(--mid); font-size: 13px; font-weight: 700; text-decoration: none; }
-.back-link:hover { color: var(--dark); }
-.nav-phone { color: var(--dark); font-size: 13px; font-weight: 700; text-decoration: none; }
-.nav-phone:hover { color: var(--orange); }
+.hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; }
+.hd-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.hd-logo-img { display: flex; align-items: center; }
+.hd-logo-img img { width: 62px; height: 62px; object-fit: contain; filter: brightness(0) invert(1); }
+.hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
+.hd-burger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.2s; }
+.hd-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 180px; overflow: hidden; }
+.hd-menu.open { display: block; }
+.hd-menu a { display: block; padding: 13px 18px; font-size: 14px; font-weight: 700; color: var(--dark); text-decoration: none; border-bottom: 1px solid var(--border); font-family: 'Nunito', sans-serif; }
+.hd-menu a:last-child { border-bottom: none; }
+.hd-menu a:hover { background: #FDF0EF; color: var(--orange); }
 
-/* Hero — locked */
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  overflow: hidden;
-  padding: 120px 24px 100px;
+/* Hero */
+.hero {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  height: 260px;
   background: #111;
+  overflow: hidden;
 }
-.header-bg {
+.hero-bg {
   position: absolute; inset: 0;
   background: url('img-wash.jpg') center 40%/cover no-repeat;
   opacity: 0.55;
 }
-.header-overlay {
+.hero-overlay {
   position: absolute; inset: 0;
   background: linear-gradient(to bottom, rgba(166,56,46,0.28) 0%, rgba(80,20,15,0.38) 100%);
 }
@@ -66,7 +72,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 .q-section + .q-section {
   border-top: 1px solid var(--border);
 }
-
 .q-num {
   font-family: 'Anton', sans-serif;
   font-size: 11px;
@@ -140,15 +145,33 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 </head>
 <body>
 
-<nav class="top-nav">
-  <a href="index.html" class="back-link">← Back</a>
-  <a href="tel:4058822277" class="nav-phone">(405) 882-2277</a>
-</nav>
+<!-- Header -->
+<header class="site-header">
+  <div class="hd-brand">Suds Monkey</div>
+  <a href="index.html" class="hd-logo" style="position:absolute;left:50%;transform:translateX(-50%);">
+    <div class="hd-logo-img">
+      <img src="logo.png" alt="Suds Monkey" onerror="this.style.display='none';this.parentNode.textContent='🐒'">
+    </div>
+  </a>
+  <div style="position:relative;">
+    <button class="hd-burger" id="hdBurger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="hd-menu" id="hdMenu">
+      <a href="index.html">Home</a>
+      <a href="calendar.html">Book Online</a>
+      <a href="game.html">Mini Game</a>
+      <a href="tel:4058822277">Contact</a>
+    </nav>
+  </div>
+</header>
 
-<div class="header">
-  <div class="header-bg"></div>
-  <div class="header-overlay"></div>
+<!-- Hero — image only, no text -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
 </div>
+<div class="hero-spacer"></div>
 
 <!-- Q1: Property type -->
 <section class="q-section" id="q1">
@@ -178,14 +201,31 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 </section>
 
 <script>
+  function toggleMenu() {
+    document.getElementById('hdMenu').classList.toggle('open');
+  }
+
   let selectedType = null;
 
   function selectType(type) {
     selectedType = type;
-    document.querySelectorAll('.tile').forEach(t => t.classList.remove('sel'));
+    document.querySelectorAll('.mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + type).classList.add('sel');
-    // Next question will scroll here once built
   }
+
+  // Sync hero top to sit below the fixed header, spacer keeps content below both
+  (function(){
+    const header = document.querySelector('.site-header');
+    const hero = document.querySelector('.hero');
+    const spacer = document.querySelector('.hero-spacer');
+    function sync(){
+      const hh = header.offsetHeight;
+      hero.style.top = hh + 'px';
+      spacer.style.height = (hh + hero.offsetHeight) + 'px';
+    }
+    sync();
+    window.addEventListener('orientationchange', function(){ setTimeout(sync, 200); });
+  })();
 </script>
 </body>
 </html>
