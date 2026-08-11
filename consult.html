@@ -89,28 +89,53 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   line-height: 1.5;
 }
 
-/* Property type tiles */
-.tile-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  max-width: 440px;
-}
-.tile {
+/* Multiple choice card */
+.mc-card {
   background: var(--white);
   border: 1.5px solid var(--border);
-  border-radius: 16px;
-  padding: 22px 12px;
-  text-align: center;
+  border-radius: var(--radius);
+  overflow: hidden;
+  max-width: 440px;
+}
+.mc-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.12s;
+  border-bottom: 1px solid var(--border);
   user-select: none;
 }
-.tile:hover { border-color: var(--orange); background: #FEF8F7; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(245,110,100,0.12); }
-.tile.sel { background: var(--orange); border-color: var(--orange); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(245,110,100,0.25); }
-.tile.sel .tile-name { color: #fff; }
-.tile-emoji { font-size: 30px; display: block; margin-bottom: 8px; line-height: 1; }
-.tile-name { font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; color: var(--dark); line-height: 1.25; }
+.mc-option:last-child { border-bottom: none; }
+.mc-option:hover { background: #FEF8F7; }
+.mc-option.sel { background: var(--orange); border-color: var(--orange); }
+.mc-option.sel .mc-label { color: #fff; }
+.mc-option.sel .mc-dot { border-color: #fff; background: #fff; }
+.mc-option.sel .mc-dot::after { opacity: 1; }
+.mc-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--dark);
+}
+.mc-dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.12s;
+}
+.mc-dot::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--orange);
+  opacity: 0;
+  transition: opacity 0.12s;
+}
 </style>
 </head>
 <body>
@@ -130,30 +155,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   <div class="q-num">01</div>
   <h2 class="q-head">What type of property?</h2>
   <p class="q-sub">We'll tailor the scope to your situation.</p>
-  <div class="tile-grid">
-    <div class="tile" id="tile-office" onclick="selectType('office')">
-      <span class="tile-emoji">🏢</span>
-      <div class="tile-name">Office</div>
+  <div class="mc-card">
+    <div class="mc-option" id="tile-office" onclick="selectType('office')">
+      <span class="mc-label">Office</span><span class="mc-dot"></span>
     </div>
-    <div class="tile" id="tile-restaurant" onclick="selectType('restaurant')">
-      <span class="tile-emoji">🍽️</span>
-      <div class="tile-name">Restaurant</div>
+    <div class="mc-option" id="tile-restaurant" onclick="selectType('restaurant')">
+      <span class="mc-label">Restaurant</span><span class="mc-dot"></span>
     </div>
-    <div class="tile" id="tile-retail" onclick="selectType('retail')">
-      <span class="tile-emoji">🛍️</span>
-      <div class="tile-name">Retail</div>
+    <div class="mc-option" id="tile-retail" onclick="selectType('retail')">
+      <span class="mc-label">Retail</span><span class="mc-dot"></span>
     </div>
-    <div class="tile" id="tile-medical" onclick="selectType('medical')">
-      <span class="tile-emoji">🏥</span>
-      <div class="tile-name">Medical</div>
+    <div class="mc-option" id="tile-medical" onclick="selectType('medical')">
+      <span class="mc-label">Medical</span><span class="mc-dot"></span>
     </div>
-    <div class="tile" id="tile-warehouse" onclick="selectType('warehouse')">
-      <span class="tile-emoji">📦</span>
-      <div class="tile-name">Warehouse</div>
+    <div class="mc-option" id="tile-warehouse" onclick="selectType('warehouse')">
+      <span class="mc-label">Warehouse</span><span class="mc-dot"></span>
     </div>
-    <div class="tile" id="tile-other" onclick="selectType('other')">
-      <span class="tile-emoji">🏗️</span>
-      <div class="tile-name">Other</div>
+    <div class="mc-option" id="tile-other" onclick="selectType('other')">
+      <span class="mc-label">Other</span><span class="mc-dot"></span>
     </div>
   </div>
 </section>
