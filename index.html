@@ -606,32 +606,17 @@ document.addEventListener('click', function(e){
     var box = document.getElementById('vid-expand');
     var expVid = document.getElementById('vid-exp-v');
     var bd  = document.getElementById('vid-backdrop');
-    var activeSlot = null, activeStrip = null, closeCb = null, closeStartCb = null;
-
-    function nearestSlot(){
-      if(!activeStrip) return null;
-      var slots = activeStrip.querySelectorAll('.glass-video-slot');
-      var sr = activeStrip.getBoundingClientRect();
-      var sc = sr.left + sr.width / 2;
-      var best = null, bestDist = Infinity;
-      slots.forEach(function(s){
-        var r = s.getBoundingClientRect();
-        if(r.right < sr.left - 20 || r.left > sr.right + 20) return;
-        var dist = Math.abs((r.left + r.width / 2) - sc);
-        if(dist < bestDist){ bestDist = dist; best = s; }
-      });
-      return best;
-    }
+    var activeSlot = null, closeCb = null, closeStartCb = null;
 
     function close(){
       if(!activeSlot) return;
       bd.classList.remove('show');
       expVid.pause();
-      if(closeStartCb){ closeStartCb(); closeStartCb = null; } // freeze strip now
-      var target = nearestSlot();
-      activeSlot = null; activeStrip = null;
-      if(target){
-        var r = target.getBoundingClientRect();
+      var slot = activeSlot;
+      activeSlot = null;
+
+      function collapseNow(){
+        var r = slot.getBoundingClientRect();
         box.style.top    = r.top    + 'px';
         box.style.left   = r.left   + 'px';
         box.style.width  = r.width  + 'px';
@@ -643,11 +628,10 @@ document.addEventListener('click', function(e){
           expVid.src = ''; expVid.load();
           if(closeCb){ closeCb(); closeCb = null; }
         });
-      } else {
-        box.style.display = 'none';
-        expVid.src = ''; expVid.load();
-        if(closeCb){ closeCb(); closeCb = null; }
       }
+
+      if(closeStartCb){ closeStartCb(collapseNow); closeStartCb = null; }
+      else { collapseNow(); }
     }
 
     bd.addEventListener('click', close);
@@ -656,9 +640,8 @@ document.addEventListener('click', function(e){
 
     return {
       isOpen: function(){ return activeSlot !== null; },
-      open: function(slot, stripEl, onClose, onCloseStart){
+      open: function(slot, onClose, onCloseStart){
         activeSlot = slot;
-        activeStrip = stripEl;
         closeCb = onClose;
         closeStartCb = onCloseStart;
         var r = slot.getBoundingClientRect();
@@ -692,7 +675,8 @@ document.addEventListener('click', function(e){
     let xPos = setWidth;
     let autoOn = false, dir = 1, startX = 0, startY = 0, lastTouchX = 0;
     let inertia = 0, recentMoves = [], swipeAxis = null;
-    let centerState = null, videoPlaying = false;
+    let centerState = null, returnState = null, videoPlaying = false;
+    let openTarget = 0;
 
     function clamp(){
       while(xPos >= setWidth * 2)       xPos -= setWidth;
@@ -709,13 +693,32 @@ document.addEventListener('click', function(e){
         if(Math.abs(diff) < 0.5){
           xPos = centerState.target; clamp(); render();
           var cs = centerState; centerState = null;
+          openTarget = xPos;
           videoExpand.open(
-            cs.slot, el,
-            function(){ videoPlaying = false; },  // onCloseEnd: resume strip
-            function(){ videoPlaying = true;  }   // onCloseStart: freeze strip
+            cs.slot,
+            function(){ videoPlaying = false; returnState = null; },
+            function(collapseNow){
+              videoPlaying = true;
+              // Normalize target to shortest path from current xPos
+              var t = openTarget;
+              while(t - xPos >  setWidth / 2) t -= setWidth;
+              while(xPos - t >  setWidth / 2) t += setWidth;
+              returnState = { target: t, onDone: collapseNow };
+            }
           );
         } else {
           xPos += diff * 0.1; clamp(); render();
+        }
+        return;
+      }
+      if(returnState){
+        var rdiff = returnState.target - xPos;
+        if(Math.abs(rdiff) < 0.5){
+          xPos = returnState.target; clamp(); render();
+          var cb = returnState.onDone; returnState = null;
+          if(cb) cb();
+        } else {
+          xPos += rdiff * 0.12; clamp(); render();
         }
         return;
       }
