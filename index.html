@@ -225,16 +225,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .testi-name { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 900; color: var(--dark); }
 .testi-loc { font-size: 12px; color: var(--mid); }
 
-/* ── Video thumbnail in strip ───── */
-.glass-video-thumb { position: relative; cursor: pointer; }
-.play-badge {
-  position: absolute; bottom: 8px; right: 8px;
-  width: 30px; height: 30px; border-radius: 50%;
-  background: rgba(0,0,0,0.58); backdrop-filter: blur(4px);
+/* ── Video slot in strip ─────────── */
+.glass-video-thumb { cursor: pointer; }
+.glass-video-slot {
+  background: var(--dark); flex-direction: column; gap: 8px;
+}
+.vslot-icon {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.32);
   display: flex; align-items: center; justify-content: center;
   pointer-events: none;
 }
-.play-badge svg { width: 13px; height: 13px; fill: #fff; }
+.vslot-icon svg { width: 18px; height: 18px; fill: #fff; margin-left: 3px; }
+.vslot-label {
+  font-family: 'Nunito', sans-serif; font-weight: 900;
+  font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: rgba(255,255,255,0.55); pointer-events: none;
+}
 
 /* ── Video modal ─────────────────── */
 #video-modal {
@@ -387,30 +395,36 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       <a href="calculator.html" class="glass-cta">Tap the residential button to see your package pricing.</a>
       <div class="glass-scroll">
         <div class="glass-track">
+          <!-- Set 1 -->
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><img src="IMG_4505.jpeg" alt="Watch video"><div class="play-badge"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></div></div>
+          <div class="glass-photo"><img src="IMG_4505.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_7328.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4092.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div>
+          <!-- Set 2 -->
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><img src="IMG_4505.jpeg" alt="Watch video"><div class="play-badge"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></div></div>
+          <div class="glass-photo"><img src="IMG_4505.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_7328.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4092.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div>
+          <!-- Set 3 -->
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><img src="IMG_4505.jpeg" alt="Watch video"><div class="play-badge"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></div></div>
+          <div class="glass-photo"><img src="IMG_4505.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_7328.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4092.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div>
         </div>
       </div>
     </div>
@@ -612,7 +626,7 @@ document.addEventListener('click', function(e){
   startHero();
 
   // ── Photo strip setup (shared logic for res + commercial) ─
-  const setWidth = 1840; // 8 photos × (220 + 10)px
+  const setWidth = 2070; // 9 items × (220 + 10)px
   let activeStrip = null;
   const visibleStrips = new Set();
   const stripRatios = new Map(); // ctrl → latest intersectionRatio
