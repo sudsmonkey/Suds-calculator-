@@ -134,12 +134,8 @@
   .quick-q select:focus { border-color: var(--orange); }
   .slider-wrap { position: relative; }
   .slider-wrap.locked input[type="range"] { opacity: 0.35; pointer-events: none; }
-  @keyframes backdropUnblur {
-    from { backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); background: rgba(0,0,0,0.62); }
-    to   { backdrop-filter: blur(3px);  -webkit-backdrop-filter: blur(3px);  background: rgba(0,0,0,0.45); }
-  }
-  #calibrateOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
-  #calibrateOverlay.visible { display: flex; animation: backdropUnblur 28s cubic-bezier(0.4,0,0.2,1) forwards; }
+  #calibrateOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.58); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); z-index: 100; justify-content: center; align-items: center; padding: 16px; transition: backdrop-filter 1s ease, -webkit-backdrop-filter 1s ease, background 1s ease; }
+  #calibrateOverlay.visible { display: flex; }
   .calibrate-box { background: var(--white); border-radius: var(--radius); padding: 32px 28px; width: 100%; max-width: 380px; min-height: 380px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
   .calibrate-box h2 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 20px; color: var(--orange); margin-bottom: 6px; }
   .calibrate-box p { font-size: 13px; color: var(--mid); margin-bottom: 4px; }
@@ -1157,6 +1153,7 @@
   let hasScreens = false;
   let screenLocation = null;
   let calibrateCurrentStep = '1';
+  var STEP_BLUR = {'1':28,'2':22,'2b':20,'3':15,'3b':13,'3c':11,'4':8,'5':5,'6':3,'6b':3,'Storm':1,'Loading':1};
   function showCalibrateStep(id) {
     document.querySelectorAll('.calibrate-step').forEach(el => el.classList.remove('active'));
     const el = document.getElementById('calibrateStep' + id);
@@ -1167,7 +1164,13 @@
     const noForward = ['7','Loading','Storm','Quote'];
     document.getElementById('calibrateForward').classList.toggle('visible', recalibrating && !noForward.includes(id));
     calibrateCurrentStep = id;
-
+    var blur = STEP_BLUR[id] !== undefined ? STEP_BLUR[id] : 2;
+    var overlay = document.getElementById('calibrateOverlay');
+    if(overlay) {
+      overlay.style.backdropFilter = 'blur(' + blur + 'px)';
+      overlay.style.webkitBackdropFilter = 'blur(' + blur + 'px)';
+      overlay.style.background = 'rgba(0,0,0,' + (0.35 + blur / 28 * 0.23) + ')';
+    }
   }
   function calibrateGoBack() {
     const PREV = {'2':'1','2b':'2','3':'2','3b':'3','3c':'3','4':'3c','5':'4','6':'5','6b':'6','Storm':'5','Quote':'3c'};
