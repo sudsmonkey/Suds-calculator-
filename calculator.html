@@ -134,8 +134,12 @@
   .quick-q select:focus { border-color: var(--orange); }
   .slider-wrap { position: relative; }
   .slider-wrap.locked input[type="range"] { opacity: 0.35; pointer-events: none; }
-  #calibrateOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
-  #calibrateOverlay.visible { display: flex; }
+  @keyframes backdropUnblur {
+    from { backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); background: rgba(0,0,0,0.62); }
+    to   { backdrop-filter: blur(3px);  -webkit-backdrop-filter: blur(3px);  background: rgba(0,0,0,0.45); }
+  }
+  #calibrateOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
+  #calibrateOverlay.visible { display: flex; animation: backdropUnblur 2.4s cubic-bezier(0.4,0,0.2,1) forwards; }
   .calibrate-box { background: var(--white); border-radius: var(--radius); padding: 32px 28px; width: 100%; max-width: 380px; min-height: 380px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
   .calibrate-box h2 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 20px; color: var(--orange); margin-bottom: 6px; }
   .calibrate-box p { font-size: 13px; color: var(--mid); margin-bottom: 4px; }
