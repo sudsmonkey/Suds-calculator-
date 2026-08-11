@@ -1153,7 +1153,7 @@
   let hasScreens = false;
   let screenLocation = null;
   let calibrateCurrentStep = '1';
-  var STEP_BLUR = {'1':28,'2':22,'2b':20,'3':15,'3b':13,'3c':11,'4':8,'5':4,'6':1,'6b':1,'Storm':0,'Loading':0};
+  var STEP_BLUR = {'1':28,'2':22,'2b':20,'3':15,'3b':13,'3c':11,'4':8,'5':4,'6':1,'6b':1,'Storm':0,'Loading':4};
   function showCalibrateStep(id) {
     document.querySelectorAll('.calibrate-step').forEach(el => el.classList.remove('active'));
     const el = document.getElementById('calibrateStep' + id);
@@ -1313,7 +1313,11 @@
         if (i === dots.length - 1) {
           setTimeout(() => {
             cancelAnimationFrame(rafId);
-            setTimeout(() => { document.getElementById('calibAllSet').style.display = 'block'; }, 1100);
+            setTimeout(() => {
+              document.getElementById('calibAllSet').style.display = 'block';
+              var ov = document.getElementById('calibrateOverlay');
+              if(ov){ ov.style.backdropFilter='blur(0px)'; ov.style.webkitBackdropFilter='blur(0px)'; ov.style.background='rgba(0,0,0,0.32)'; }
+            }, 1100);
           }, 320);
         }
       }, t);
