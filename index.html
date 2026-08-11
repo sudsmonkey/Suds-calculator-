@@ -229,14 +229,21 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .glass-video-thumb { cursor: pointer; }
 .glass-video-slot {
   background: url('IMG_0858.jpeg') center/cover no-repeat;
-  flex-direction: column; gap: 8px; position: relative;
+  position: relative;
 }
 .glass-video-slot::after {
   content: ''; position: absolute; inset: 0; border-radius: inherit;
-  background: rgba(0,0,0,0.32);
+  background: rgba(0,0,0,0.32); pointer-events: none;
 }
+.glass-video-slot.playing::after { display: none; }
+.vslot-overlay {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 8px;
+  position: relative; z-index: 1; width: 100%; height: 100%;
+}
+.glass-video-slot.playing .vslot-overlay { display: none; }
 .vslot-icon {
-  width: 48px; height: 48px; border-radius: 50%; z-index: 1;
+  width: 48px; height: 48px; border-radius: 50%;
   background: rgba(255,255,255,0.18);
   border: 2px solid rgba(255,255,255,0.55);
   display: flex; align-items: center; justify-content: center;
@@ -244,27 +251,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 }
 .vslot-icon svg { width: 18px; height: 18px; fill: #fff; margin-left: 3px; }
 .vslot-label {
-  font-family: 'Nunito', sans-serif; font-weight: 900; z-index: 1;
+  font-family: 'Nunito', sans-serif; font-weight: 900;
   font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
   color: rgba(255,255,255,0.85); pointer-events: none;
 }
+.vslot-video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; border-radius: inherit; display: none; z-index: 2;
+}
+.glass-video-slot.playing .vslot-video { display: block; }
 
-/* ── Video modal ─────────────────── */
-#video-modal {
-  display: none; position: fixed; inset: 0; z-index: 9999;
-  background: rgba(0,0,0,0.88);
-  align-items: center; justify-content: center;
-}
-#video-modal.open { display: flex; }
-#modal-video {
-  max-width: 92vw; max-height: 80vh;
-  border-radius: 14px; outline: none;
-}
-#video-close {
-  position: absolute; top: 18px; right: 20px;
-  color: #fff; font-size: 30px; line-height: 1;
-  cursor: pointer; background: none; border: none; padding: 4px 8px;
-}
 
 /* ── CTA band ────────────────────── */
 .cta-band { background: var(--dark); padding: 40px 20px; text-align: center; }
@@ -409,7 +405,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline controls preload="none"></video></div>
           <!-- Set 2 -->
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
@@ -419,7 +415,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline controls preload="none"></video></div>
           <!-- Set 3 -->
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
@@ -429,7 +425,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline controls preload="none"></video></div>
         </div>
       </div>
     </div>
@@ -559,11 +555,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   <div class="footer-copy">© 2025 Suds Monkey. All rights reserved.</div>
 </footer>
 
-<!-- Video lightbox modal -->
-<div id="video-modal">
-  <button id="video-close" aria-label="Close video">✕</button>
-  <video id="modal-video" controls playsinline></video>
-</div>
 
 <script>
 function toggleMenu(){
@@ -575,44 +566,42 @@ document.addEventListener('click', function(e){
   }
 });
 
-// ── Video modal ──────────────────────────────────────────
+// ── Inline video slots ───────────────────────────────────
 (function(){
-  const modal    = document.getElementById('video-modal');
-  const vid      = document.getElementById('modal-video');
-  const closeBtn = document.getElementById('video-close');
-
-  function closeModal(){
-    modal.classList.remove('open');
-    vid.pause();
-    vid.removeAttribute('src');
-    vid.load();
+  function stopAllSlots(){
+    document.querySelectorAll('.glass-video-slot.playing').forEach(function(slot){
+      slot.classList.remove('playing');
+      var v = slot.querySelector('.vslot-video');
+      if(v){ v.pause(); v.currentTime = 0; }
+    });
   }
 
-  closeBtn.addEventListener('click', closeModal);
-  modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
-
-  function openVideo(src){
-    vid.src = src;
-    vid.play().catch(function(){});
-    modal.classList.add('open');
-  }
-
-  // Tap detection on video thumbs
-  document.querySelectorAll('.glass-video-thumb').forEach(function(thumb){
+  document.querySelectorAll('.glass-video-slot').forEach(function(slot){
+    var vid = slot.querySelector('.vslot-video');
+    if(!vid) return;
     var tapX, tapY;
-    thumb.addEventListener('touchstart', function(e){
+
+    slot.addEventListener('touchstart', function(e){
       tapX = e.touches[0].clientX; tapY = e.touches[0].clientY;
     }, { passive: true });
-    thumb.addEventListener('touchend', function(e){
+
+    slot.addEventListener('touchend', function(e){
+      if(slot.classList.contains('playing')) return; // let native controls handle it
       var dx = Math.abs(e.changedTouches[0].clientX - tapX);
       var dy = Math.abs(e.changedTouches[0].clientY - tapY);
       if(dx < 10 && dy < 10){
-        e.preventDefault(); // stop the ghost click that fires 300ms later
-        openVideo(thumb.dataset.video);
+        e.preventDefault();
+        stopAllSlots();
+        slot.classList.add('playing');
+        vid.play().catch(function(){});
       }
     }, { passive: false });
-    thumb.addEventListener('click', function(){ // desktop fallback
-      openVideo(thumb.dataset.video);
+
+    slot.addEventListener('click', function(){ // desktop fallback
+      if(slot.classList.contains('playing')) return;
+      stopAllSlots();
+      slot.classList.add('playing');
+      vid.play().catch(function(){});
     });
   });
 })();
