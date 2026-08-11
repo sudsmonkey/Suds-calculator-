@@ -456,9 +456,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
         fetch(SB_URL+'/rest/v1/blocked_slots?select=date,time&date=gte.'+from+'&date=lte.'+to,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
       ]);
       const bk=bR.ok?await bR.json():[],bl=blR.ok?await blR.json():[];
-      const map={}, cs=t=>t&&(t.includes(':15')||t.includes(':45'));
-      bk.forEach(r=>{if(r.date_iso&&cs(r.time))map[r.date_iso]=(map[r.date_iso]||0)+1;});
-      bl.forEach(r=>{if(r.date&&cs(r.time))map[r.date]=(map[r.date]||0)+1;});
+      const map={}, isPC=consultPkg.includes('Phone'), cs=t=>t&&(t.includes(':15')||t.includes(':45'));
+      bk.forEach(r=>{if(r.date_iso&&(!isPC||cs(r.time)))map[r.date_iso]=(map[r.date_iso]||0)+1;});
+      bl.forEach(r=>{if(r.date&&(!isPC||cs(r.time)))map[r.date]=(map[r.date]||0)+1;});
       calMonthAvail=map;
     } catch(e){calMonthAvail={};}
   }
@@ -488,7 +488,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
       const date=new Date(calYear,calMonth,d);date.setHours(0,0,0,0);
       const ds=calYear+'-'+pad(calMonth+1)+'-'+pad(d);
       const el=document.createElement('div');
-      const taken=calMonthAvail[ds]||0, dayTotal=getSlots(ds).length;
+      const taken=calMonthAvail[ds]||0, dayTotal=consultPkg.includes('Phone')?getSlots(ds).length:2;
       if(date<calToday||date.getDay()===0||date.getDay()===6) el.className='cal-day disabled';
       else if(taken>=dayTotal) el.className='cal-day full-booked';
       else if(taken===dayTotal-1){el.className='cal-day partial';el.onclick=()=>selectCalDate(ds);}
@@ -504,7 +504,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     calSelectedDate=ds; calSelectedTime=null;
     document.querySelectorAll('#calGrid .cal-day.selected').forEach(e=>e.classList.remove('selected'));
     const de=document.querySelector('#calGrid [data-date="'+ds+'"]');if(de)de.classList.add('selected');
-    const grid=document.getElementById('timeGrid'), sk=getSlots(ds);
+    const grid=document.getElementById('timeGrid'), sk=consultPkg.includes('Phone')?getSlots(ds):['8:00 AM','1:00 PM'];
     grid.innerHTML=''; grid.style.gridTemplateColumns=sk.length===3?'1fr 1fr 1fr':'1fr 1fr';
     sk.forEach(slot=>{const e=document.createElement('div');e.className='time-slot booked';e.style.opacity='0.3';e.style.cursor='default';e.innerHTML='<div class="time-main">'+slot+'</div><div class="time-sub">Checking…</div>';grid.appendChild(e);});
     await fetchTakenSlots(ds);
@@ -515,8 +515,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   function renderTimeSlots() {
     const grid=document.getElementById('timeGrid');
     grid.innerHTML='';
-    const dur=consultPkg.includes('Site')?'~1 hr':'~30 min';
-    const slots=calSelectedDate?getSlots(calSelectedDate):_CM.slice(0,2);
+    const isPC=consultPkg.includes('Phone');
+    const dur=isPC?'~30 min':'~3 hrs';
+    const slots=calSelectedDate?(isPC?getSlots(calSelectedDate):['8:00 AM','1:00 PM']):['8:00 AM','1:00 PM'];
     grid.style.gridTemplateColumns=slots.length===3?'1fr 1fr 1fr':'1fr 1fr';
     if(!calSelectedDate){slots.forEach(s=>{const e=document.createElement('div');e.className='time-slot booked';e.style.opacity='0.3';e.style.cursor='default';e.innerHTML='<div class="time-main">'+s+'</div><div class="time-sub">—</div>';grid.appendChild(e);});return;}
     slots.forEach(slot=>{
