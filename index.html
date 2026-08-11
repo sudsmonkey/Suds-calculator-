@@ -607,9 +607,12 @@ document.addEventListener('click', function(e){
     var expVid = document.getElementById('vid-exp-v');
     var bd  = document.getElementById('vid-backdrop');
     var activeSlot = null, closeCb = null, closeStartCb = null;
+    var halfwayTimer = null, halfwayCb = null;
 
     function close(){
       if(!activeSlot) return;
+      if(halfwayTimer){ clearTimeout(halfwayTimer); halfwayTimer = null; }
+      halfwayCb = null;
       bd.classList.remove('show');
       expVid.pause();
       var slot = activeSlot;
@@ -640,10 +643,11 @@ document.addEventListener('click', function(e){
 
     return {
       isOpen: function(){ return activeSlot !== null; },
-      open: function(slot, onClose, onCloseStart){
+      open: function(slot, onClose, onCloseStart, onHalfway){
         activeSlot = slot;
         closeCb = onClose;
         closeStartCb = onCloseStart;
+        halfwayCb = onHalfway || null;
         var r = slot.getBoundingClientRect();
         box.classList.remove('anim');
         box.style.top    = r.top    + 'px';
@@ -663,6 +667,14 @@ document.addEventListener('click', function(e){
         box.style.width  = w + 'px';
         box.style.height = h + 'px';
         expVid.src = slot.dataset.video;
+        expVid.addEventListener('loadedmetadata', function(){
+          if(halfwayCb && expVid.duration && isFinite(expVid.duration)){
+            halfwayTimer = setTimeout(function(){
+              halfwayTimer = null;
+              if(halfwayCb){ halfwayCb(); halfwayCb = null; }
+            }, expVid.duration * 500);
+          }
+        }, { once: true });
         expVid.play().catch(function(){});
       }
     };
@@ -676,7 +688,7 @@ document.addEventListener('click', function(e){
     let autoOn = false, dir = 1, startX = 0, startY = 0, lastTouchX = 0;
     let inertia = 0, recentMoves = [], swipeAxis = null;
     let centerState = null, returnState = null, videoPlaying = false;
-    let openTarget = 0, overlayOpen = false, videoScrolled = 0, videoScrollPaused = false;
+    let openTarget = 0;
 
     function clamp(){
       while(xPos >= setWidth * 2)       xPos -= setWidth;
@@ -695,17 +707,17 @@ document.addEventListener('click', function(e){
           var cs = centerState; centerState = null;
           dir = cs.dir;
           openTarget = xPos;
-          overlayOpen = true; videoScrolled = 0; videoScrollPaused = false;
           videoExpand.open(
             cs.slot,
-            function(){ overlayOpen = false; videoScrolled = 0; videoScrollPaused = false; videoPlaying = false; returnState = null; },
+            function(){ videoPlaying = false; returnState = null; },
             function(collapseNow){
               videoPlaying = true;
               var t = openTarget;
               while(t - xPos >  setWidth / 2) t -= setWidth;
               while(xPos - t >  setWidth / 2) t += setWidth;
               returnState = { target: t, onDone: collapseNow };
-            }
+            },
+            function(){ dir = -dir; }
           );
         } else {
           xPos += diff * 0.1; clamp(); render();
@@ -723,24 +735,14 @@ document.addEventListener('click', function(e){
         }
         return;
       }
-      if(videoPlaying || videoScrollPaused || !autoOn) return;
-      var step = dir * 0.5 + inertia;
-      if(overlayOpen){
-        videoScrolled += Math.abs(step);
-        if(videoScrolled >= setWidth){
-          // One full cycle done — card is back in original position; snap and freeze
-          videoScrollPaused = true; inertia = 0;
-          xPos = openTarget; clamp(); render();
-          return;
-        }
-      }
-      xPos += step;
+      if(videoPlaying || !autoOn) return;
+      xPos += dir * 0.5 + inertia;
       if(Math.abs(inertia) > 0.05) inertia *= 0.955; else inertia = 0;
       clamp(); render();
     })();
 
     el.addEventListener('touchstart', function(e){
-      if(centerState || videoPlaying) return;
+      if(centerState || videoPlaying || videoExpand.isOpen()) return;
       startX = lastTouchX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
       swipeAxis = null;
