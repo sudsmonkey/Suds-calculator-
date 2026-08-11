@@ -704,7 +704,7 @@ document.addEventListener('click', function(e){
               var t = openTarget;
               while(t - xPos >  setWidth / 2) t -= setWidth;
               while(xPos - t >  setWidth / 2) t += setWidth;
-              returnState = { target: t, onDone: collapseNow, returnDir: t >= xPos ? 1 : -1 };
+              returnState = { target: t, onDone: collapseNow };
             }
           );
         } else {
@@ -717,7 +717,6 @@ document.addEventListener('click', function(e){
         if(Math.abs(rdiff) < 0.5){
           xPos = returnState.target; clamp(); render();
           var rs = returnState; returnState = null;
-          dir = rs.returnDir;
           if(rs.onDone) rs.onDone();
         } else {
           xPos += rdiff * 0.07; clamp(); render();
