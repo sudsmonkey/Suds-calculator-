@@ -531,13 +531,14 @@ document.addEventListener('click', function(e){
 
     render();
 
-    setInterval(function(){
+    (function loop(){
+      requestAnimationFrame(loop);
       if(!autoOn) return;
-      xPos += dir + inertia;
-      if(Math.abs(inertia) > 0.1) inertia *= 0.92; else inertia = 0;
+      xPos += dir * 0.5 + inertia;
+      if(Math.abs(inertia) > 0.05) inertia *= 0.955; else inertia = 0;
       clamp();
       render();
-    }, 30);
+    })();
 
     el.addEventListener('touchstart', function(e){
       startX = lastTouchX = e.touches[0].clientX;
@@ -561,8 +562,8 @@ document.addEventListener('click', function(e){
         const a = recentMoves[0], b = recentMoves[recentMoves.length - 1];
         const dt = b.t - a.t;
         if(dt > 0){
-          const vel = -(b.x - a.x) / dt * 30;
-          inertia = Math.max(-60, Math.min(60, vel - dir)); // capped to prevent gap overshoot
+          const vel = -(b.x - a.x) / dt * (1000/60); // px per 60fps frame
+          inertia = Math.max(-30, Math.min(30, vel - dir * 0.5));
         }
       }
       recentMoves = [];
