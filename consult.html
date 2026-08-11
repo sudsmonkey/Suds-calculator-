@@ -269,9 +269,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   </div>
 </section>
 
-<!-- Photo break -->
-<div id="photo-break" style="display:none; height: 220px; background: url('img-wash.jpg') center 40%/cover no-repeat; position: relative; z-index: 1;"></div>
-
 <!-- CTAs -->
 <section class="q-section" id="cta-section" style="display:none; background: var(--white);">
   <h2 class="q-head" style="margin-bottom: 6px;">How would you like to connect?</h2>
@@ -314,7 +311,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     selectedService = val;
     document.querySelectorAll('#q3 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + val).classList.add('sel');
-    document.getElementById('photo-break').style.display = 'block';
     const cta = document.getElementById('cta-section');
     cta.style.display = 'block';
     setTimeout(() => cta.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
