@@ -1175,7 +1175,7 @@
     document.querySelectorAll('#calibrateStep1 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     updatePrices();
-    setTimeout(() => { showCalibrateStep('2'); startCalScroll(); }, 1100);
+    setTimeout(() => showCalibrateStep('2'), 1100);
   }
   function selectScreens(value, btn) {
     document.querySelectorAll('#calibrateStep2 .story-btn').forEach(b => b.classList.remove('active'));
@@ -1393,6 +1393,7 @@
     if(document.body.classList.contains('storm-mode')) return;
     showCalibrateStep('1');
     document.getElementById('calibrateOverlay').classList.add('visible');
+    setTimeout(startCalScroll, 300);
   }
   function closeCalibrateOverlay(){
     document.getElementById('calibrateOverlay').classList.remove('visible');
