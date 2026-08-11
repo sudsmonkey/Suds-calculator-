@@ -230,20 +230,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .glass-video-slot {
   background: url('IMG_0858.jpeg') center/cover no-repeat;
   position: relative;
-  transition: transform 0.35s ease;
 }
-.glass-video-slot.playing { transform: scale(1.18); z-index: 10; }
 .glass-video-slot::after {
   content: ''; position: absolute; inset: 0; border-radius: inherit;
   background: rgba(0,0,0,0.32); pointer-events: none;
 }
-.glass-video-slot.playing::after { display: none; }
 .vslot-overlay {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; gap: 8px;
   position: relative; z-index: 1; width: 100%; height: 100%;
 }
-.glass-video-slot.playing .vslot-overlay { display: none; }
 .vslot-icon {
   width: 48px; height: 48px; border-radius: 50%;
   background: rgba(255,255,255,0.18);
@@ -257,11 +253,26 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
   color: rgba(255,255,255,0.85); pointer-events: none;
 }
-.vslot-video {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; border-radius: inherit; display: none; z-index: 2;
+
+/* ── Video expand overlay ────────── */
+#vid-backdrop {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(0,0,0,0.28);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  opacity: 0; pointer-events: none; transition: opacity 0.35s ease;
 }
-.glass-video-slot.playing .vslot-video { display: block; }
+#vid-backdrop.show { opacity: 1; pointer-events: auto; }
+#vid-expand {
+  position: fixed; z-index: 401; display: none;
+  border-radius: 16px; overflow: hidden; background: #000;
+}
+#vid-expand.anim {
+  transition: top 0.42s cubic-bezier(0.25,1.35,0.5,1),
+              left 0.42s cubic-bezier(0.25,1.35,0.5,1),
+              width 0.42s cubic-bezier(0.25,1.35,0.5,1),
+              height 0.42s cubic-bezier(0.25,1.35,0.5,1);
+}
+#vid-exp-v { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 
 /* ── CTA band ────────────────────── */
@@ -407,7 +418,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline preload="none"></video></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
           <!-- Set 2 -->
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
@@ -417,7 +428,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline preload="none"></video></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
           <!-- Set 3 -->
           <div class="glass-photo"><img src="IMG_0831.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_2845.jpeg" alt="Residential windows"></div>
@@ -427,7 +438,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <div class="glass-photo"><img src="IMG_4096.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_4218.jpeg" alt="Residential windows"></div>
           <div class="glass-photo"><img src="IMG_5560.jpeg" alt="Residential windows"></div>
-          <div class="glass-photo glass-video-thumb glass-video-slot"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div><video class="vslot-video" src="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov" playsinline preload="none"></video></div>
+          <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
         </div>
       </div>
     </div>
@@ -558,6 +569,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 </footer>
 
 
+<div id="vid-backdrop"></div>
+<div id="vid-expand"><video id="vid-exp-v" playsinline preload="none"></video></div>
+
 <script>
 function toggleMenu(){
   document.getElementById('hdMenu').classList.toggle('open');
@@ -588,6 +602,61 @@ document.addEventListener('click', function(e){
   const visibleStrips = new Set();
   const stripRatios = new Map(); // ctrl → latest intersectionRatio
 
+  var videoExpand = (function(){
+    var box = document.getElementById('vid-expand');
+    var expVid = document.getElementById('vid-exp-v');
+    var bd  = document.getElementById('vid-backdrop');
+    var activeSlot = null, closeCb = null;
+
+    function close(){
+      if(!activeSlot) return;
+      bd.classList.remove('show');
+      expVid.pause();
+      var r = activeSlot.getBoundingClientRect();
+      activeSlot = null;
+      box.style.top    = r.top    + 'px';
+      box.style.left   = r.left   + 'px';
+      box.style.width  = r.width  + 'px';
+      box.style.height = r.height + 'px';
+      box.addEventListener('transitionend', function done(e){
+        if(e.propertyName !== 'width') return;
+        box.removeEventListener('transitionend', done);
+        box.style.display = 'none';
+        expVid.src = ''; expVid.load();
+        if(closeCb){ closeCb(); closeCb = null; }
+      });
+    }
+
+    bd.addEventListener('click', close);
+    box.addEventListener('click', close);
+    expVid.addEventListener('ended', function(){ setTimeout(close, 600); });
+
+    return {
+      open: function(slot, onClose){
+        activeSlot = slot;
+        closeCb = onClose;
+        var r = slot.getBoundingClientRect();
+        box.classList.remove('anim');
+        box.style.top    = r.top    + 'px';
+        box.style.left   = r.left   + 'px';
+        box.style.width  = r.width  + 'px';
+        box.style.height = r.height + 'px';
+        box.style.display = 'block';
+        bd.classList.add('show');
+        box.offsetHeight; // force reflow
+        var w = Math.round(window.innerWidth * 0.88);
+        var h = Math.round(w * r.height / r.width);
+        box.classList.add('anim');
+        box.style.top    = Math.round((window.innerHeight - h) / 2) + 'px';
+        box.style.left   = Math.round((window.innerWidth  - w) / 2) + 'px';
+        box.style.width  = w + 'px';
+        box.style.height = h + 'px';
+        expVid.src = slot.dataset.video;
+        expVid.play().catch(function(){});
+      }
+    };
+  })();
+
   function setupStrip(el){
     const track = el.querySelector('.glass-track');
     if(!track) return;
@@ -611,10 +680,9 @@ document.addEventListener('click', function(e){
         var diff = centerState.target - xPos;
         if(Math.abs(diff) < 0.5){
           xPos = centerState.target; clamp(); render();
-          centerState.slot.classList.add('playing');
-          centerState.vid.play().catch(function(){});
+          var cs = centerState; centerState = null;
           videoPlaying = true;
-          centerState = null;
+          videoExpand.open(cs.slot, function(){ videoPlaying = false; });
         } else {
           xPos += diff * 0.1; clamp(); render();
         }
@@ -677,8 +745,6 @@ document.addEventListener('click', function(e){
 
     // ── Video slots ──────────────────────────────────────
     el.querySelectorAll('.glass-video-slot').forEach(function(slot){
-      var vid = slot.querySelector('.vslot-video');
-      if(!vid) return;
       var vtapX, vtapY;
 
       function activateSlot(){
@@ -688,34 +754,25 @@ document.addEventListener('click', function(e){
         while(target >= setWidth * 2) target -= setWidth;
         while(target < setWidth * 0.5) target += setWidth;
         inertia = 0;
-        centerState = { target: target, slot: slot, vid: vid };
-      }
-
-      function deactivateSlot(){
-        slot.classList.remove('playing');
-        vid.pause(); vid.currentTime = 0;
-        videoPlaying = false;
+        centerState = { target: target, slot: slot };
       }
 
       slot.addEventListener('touchstart', function(e){
-        if(slot.classList.contains('playing')) return;
+        if(videoPlaying) return;
         vtapX = e.touches[0].clientX; vtapY = e.touches[0].clientY;
       }, { passive: true });
 
       slot.addEventListener('touchend', function(e){
-        if(slot.classList.contains('playing')) return;
+        if(videoPlaying) return;
         var dx = Math.abs(e.changedTouches[0].clientX - vtapX);
         var dy = Math.abs(e.changedTouches[0].clientY - vtapY);
         if(dx < 10 && dy < 10){ e.preventDefault(); activateSlot(); }
       }, { passive: false });
 
       slot.addEventListener('click', function(){
-        if(slot.classList.contains('playing')) return;
+        if(videoPlaying) return;
         activateSlot();
       });
-
-      vid.addEventListener('click', function(){ deactivateSlot(); });
-      vid.addEventListener('ended', function(){ setTimeout(deactivateSlot, 600); });
     });
 
     const ctrl = {
