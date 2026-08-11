@@ -569,8 +569,14 @@
   }
 
 
+  /* Wizard entry animation */
+  @keyframes calBoxIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   /* Wizard step slide transitions */
-  .calibrate-box { overflow: hidden; }
+  .calibrate-box { overflow: hidden; animation: calBoxIn 0.32s cubic-bezier(0.16,1,0.3,1) both; }
   @keyframes wizSlideInRight {
     from { transform: translateX(100%); opacity: 0; }
     to   { transform: translateX(0);    opacity: 1; }
@@ -1167,7 +1173,7 @@
     document.querySelectorAll('#calibrateStep1 .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     updatePrices();
-    setTimeout(() => showCalibrateStep('2'), 1100);
+    setTimeout(() => { showCalibrateStep('2'); startCalScroll(); }, 1100);
   }
   function selectScreens(value, btn) {
     document.querySelectorAll('#calibrateStep2 .story-btn').forEach(b => b.classList.remove('active'));
@@ -1385,7 +1391,6 @@
     if(document.body.classList.contains('storm-mode')) return;
     showCalibrateStep('1');
     document.getElementById('calibrateOverlay').classList.add('visible');
-    startCalScroll();
   }
   function closeCalibrateOverlay(){
     document.getElementById('calibrateOverlay').classList.remove('visible');
@@ -2819,7 +2824,7 @@ let currentPkg = null;
   document.addEventListener('DOMContentLoaded', function() {
     const _params = new URLSearchParams(window.location.search);
     if (!_params.get('pkg') && !calibrated) {
-      setTimeout(openCalibrate, 300);
+      openCalibrate();
     }
   });
 
