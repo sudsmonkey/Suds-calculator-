@@ -23,6 +23,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    opacity: 0;
+    transition: opacity 0.35s ease;
   }
   .page-bg {
     position: fixed; top: 0; left: 0; right: 0; z-index: -1;
@@ -2826,6 +2828,11 @@ let currentPkg = null;
     if (!_params.get('pkg') && !calibrated) {
       openCalibrate();
     }
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        document.body.style.opacity = '1';
+      });
+    });
   });
 
   document.addEventListener('DOMContentLoaded', function() {
