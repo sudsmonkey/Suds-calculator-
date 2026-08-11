@@ -258,7 +258,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 #vid-backdrop {
   position: fixed; inset: 0; z-index: 400;
   background: rgba(0,0,0,0.28);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
   opacity: 0; pointer-events: none; transition: opacity 0.35s ease;
 }
 #vid-backdrop.show { opacity: 1; pointer-events: auto; }
@@ -646,9 +646,11 @@ document.addEventListener('click', function(e){
         box.offsetHeight; // force reflow
         var w = Math.round(window.innerWidth * 0.88);
         var h = Math.round(w * r.height / r.width);
+        var cx = r.left + r.width  / 2;
+        var cy = r.top  + r.height / 2;
         box.classList.add('anim');
-        box.style.top    = Math.round((window.innerHeight - h) / 2) + 'px';
-        box.style.left   = Math.round((window.innerWidth  - w) / 2) + 'px';
+        box.style.top    = Math.round(cy - h / 2) + 'px';
+        box.style.left   = Math.round(cx - w / 2) + 'px';
         box.style.width  = w + 'px';
         box.style.height = h + 'px';
         expVid.src = slot.dataset.video;
