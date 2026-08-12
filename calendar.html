@@ -18,7 +18,8 @@
     --shadow: 0 2px 16px rgba(245,110,100,0.10);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; padding-top: 5px; }
+  body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; }
+  #scrollGhost { height: 6px; pointer-events: none; }
 
   .header { background: #111; padding: 60px 24px 60px; text-align: center; position: fixed; left: 0; right: 0; overflow: hidden; z-index: 100; }
   .header-bg { position: absolute; inset: 0; background: url('img-res-tree.jpg') center 40%/cover no-repeat; display: none; }
@@ -151,7 +152,7 @@
 </style>
 </head>
 <body>
-
+<div id="scrollGhost" aria-hidden="true"></div>
 <nav class="top-nav"><a href="/Suds-calculator-/" class="back-link">← Back</a></nav>
 <div class="header">
   <div class="header-bg"></div>
@@ -625,6 +626,8 @@
     else if (v.length >= 1) v = '(' + v;
     e.target.value = v;
   });
+
+  window.addEventListener('load', function() { window.scrollTo(0, 1); });
 
   function syncHero() {
     var nav = document.querySelector('.top-nav');
