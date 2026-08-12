@@ -7,6 +7,7 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Barlow+Condensed:ital,wght@1,800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { overflow-x: hidden; }
   :root {
     --orange: #F56E64; --orangelight: #F6ECDE; --orangeborder: #F56E64;
     --mint: #9ED9C0; --cream: #FDF9F5;
@@ -19,7 +20,6 @@
     min-height: 100vh;
     display: flex; flex-direction: column; align-items: center;
     padding: 32px 16px 60px;
-    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -2880,9 +2880,12 @@ let currentPkg = null;
         if (window.innerWidth >= 900) { openDesktopGame(); return; }
         const sq3k = document.getElementById('sq3000Section');
         if (!sq3k) return;
-        document.documentElement.appendChild(sq3k);
         sq3k.style.display = 'block';
-        document.body.style.overflow = 'hidden';
+        var _sy = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = -_sy + 'px';
+        document.body.style.width = '100%';
+        document.body._gameScrollY = _sy;
         initSq3000();
         sq3k.addEventListener('pointerdown', function() { startSq3000Tutorial(); }, { once: true, passive: true });
       });
@@ -2908,8 +2911,11 @@ let currentPkg = null;
     const sq3k = document.getElementById('sq3000Section');
     if (!sq3k) return;
     sq3k.style.display = 'none';
-    document.body.insertBefore(sq3k, document.body.firstChild);
-    document.body.style.overflow = '';
+    var sy = document.body._gameScrollY || 0;
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, sy);
   }
 
 
