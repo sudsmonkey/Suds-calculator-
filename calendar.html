@@ -17,7 +17,7 @@
     --radius: 20px;
     --shadow: 0 2px 16px rgba(245,110,100,0.10);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; }
   .header { background: #111; padding: 60px 24px 60px; text-align: center; position: fixed; left: 0; right: 0; overflow: hidden; z-index: 100; }
   .header-bg { position: absolute; inset: 0; background: url('img-res-tree.jpg') center 40%/cover no-repeat; display: none; }
@@ -45,13 +45,13 @@
   .calendar-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); box-shadow: var(--shadow); }
   .month-nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid #F5EDE4; }
   .month-nav button { background: none; border: none; cursor: pointer; color: var(--orange); font-size: 22px; font-weight: 900; padding: 4px 10px; border-radius: 8px; transition: background 0.15s; line-height: 1; }
-  .month-nav button:hover { background: #FDF0EF; }
+  @media (hover: hover) { .month-nav button:hover { background: #FDF0EF; } }
   .month-name { font-size: 17px; font-weight: 900; color: var(--dark); }
   .day-headers { display: grid; grid-template-columns: repeat(7, 1fr); padding: 8px 12px 4px; }
   .day-header { text-align: center; font-size: 11px; font-weight: 700; color: var(--mid); letter-spacing: 0.05em; }
   .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 4px 12px 16px; }
-  .cal-day { width: 100%; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; color: var(--dark); position: relative; }
-  .cal-day:hover:not(.disabled):not(.empty) { background: #FDF0EF; }
+  .cal-day { width: 100%; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; color: var(--dark); position: relative; }
+  @media (hover: hover) { .cal-day:hover:not(.disabled):not(.empty) { background: #FDF0EF; } }
   .cal-day.empty, .cal-day.disabled { cursor: default; }
   .cal-day.disabled { color: #DDD3C4; }
   .cal-day.selected { background: var(--orange) !important; color: #fff; }
@@ -71,8 +71,8 @@
   /* Time slots */
   .time-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
   .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .time-slot { border: 1.5px solid var(--orangeborder); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: border-color 0.15s; }
-  .time-slot:hover:not(.booked) { border-color: var(--orange); background: #FDF0EF; }
+  .time-slot { border: 1.5px solid var(--orangeborder); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: border-color 0.15s; -webkit-tap-highlight-color: transparent; }
+  @media (hover: hover) { .time-slot:hover:not(.booked) { border-color: var(--orange); background: #FDF0EF; } }
   .time-slot.selected, .time-slot.selected:hover { background: var(--dark); border-color: var(--dark); }
   .time-slot.selected .time-main, .time-slot.selected:hover .time-main { color: #fff; }
   .time-slot.selected .time-sub, .time-slot.selected:hover .time-sub { color: rgba(255,255,255,0.8); }

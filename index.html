@@ -22,7 +22,7 @@
   --shadow: 0 2px 20px rgba(166,56,46,0.08);
   --max: 640px;
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); -webkit-font-smoothing: antialiased; }
 
@@ -117,9 +117,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   pointer-events: none;
 }
 .path-card > * { position: relative; z-index: 1; }
-.path-card:hover {
-  background: rgba(255,255,255,0.22);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .path-card:hover {
+    background: rgba(255,255,255,0.22);
+    transform: translateY(-1px);
+  }
 }
 .path-overlay { }
 .path-icon { display: none; }
