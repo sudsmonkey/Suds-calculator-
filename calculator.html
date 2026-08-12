@@ -494,9 +494,10 @@
   .bonus-sub { font-size:13px; color:var(--mid); line-height:1.6; margin-bottom:24px; }
   .bonus-yes { display:block; width:100%; padding:14px; border-radius:50px; border:none; background:var(--orange); color:#fff; font-family:'Nunito',sans-serif; font-size:16px; font-weight:900; cursor:pointer; margin-bottom:10px; }
   .bonus-no { display:block; width:100%; padding:12px; border-radius:50px; border:none; background:transparent; color:var(--mid); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; }
-  #desktopGameModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+  #desktopGameModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 300; align-items: center; justify-content: center; padding: 0; }
   #desktopGameModal.visible { display: flex; }
-  .desktop-game-inner { background: var(--white); border-radius: var(--radius); overflow: hidden; max-width: 620px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
+  .desktop-game-inner { background: var(--white); border-radius: 0; overflow: hidden; max-width: 620px; width: 100%; max-height: 100vh; overflow-y: auto; position: relative; }
+  @media (min-width: 620px) { #desktopGameModal { padding: 20px; } .desktop-game-inner { border-radius: var(--radius); max-height: 90vh; } }
   .desktop-game-close { position: sticky; top: 0; right: 0; float: right; background: none; border: none; cursor: pointer; font-size: 22px; color: var(--mid); padding: 8px 12px; line-height: 1; }
   .desktop-game-close:hover { color: var(--dark); }
   #refBanner { display:none; background:var(--mint); border-radius:12px; padding:10px 14px; margin-bottom:14px; font-size:13px; font-weight:700; color:#2a6b52; text-align:center; }
@@ -1006,9 +1007,6 @@
   </div>
 
   <section id="sq3000Section" style="display:none; width:100%; padding:0 0 12px;">
-    <div style="text-align:right; padding: 6px 4px 0;">
-      <button onclick="document.getElementById('sq3000Section').style.display='none'; document.getElementById('playSq3000Btn').style.display='block';" style="background:none; border:none; cursor:pointer; font-size:20px; color:var(--mid); opacity:0.5; line-height:1; padding:4px 8px;" aria-label="Close game">&times;</button>
-    </div>
   <div class="stage" id="stage">
     <h1>Squeege Master 3000<span style="font-size:0.4em;vertical-align:super;margin-left:2px;">&trade;</span></h1>
     <div style="display:flex;gap:8px;justify-content:center;width:100%;">
@@ -2874,16 +2872,7 @@ let currentPkg = null;
 
     const playBtn = document.getElementById('playSq3000Btn');
     if (playBtn) {
-      playBtn.addEventListener('click', function() {
-        playBtn.style.display = 'none';
-        const sq3kEl = document.getElementById('sq3000Section');
-        if (sq3kEl) {
-          sq3kEl.style.display = 'block';
-          initSq3000();
-          sq3kEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          setTimeout(startSq3000Tutorial, 800);
-        }
-      });
+      playBtn.addEventListener('click', openDesktopGame);
     }
   });
 
