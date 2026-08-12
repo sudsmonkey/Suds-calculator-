@@ -2881,6 +2881,7 @@ let currentPkg = null;
         if (window.innerWidth >= 900) { openDesktopGame(); return; }
         const sq3k = document.getElementById('sq3000Section');
         if (!sq3k) return;
+        document.documentElement.appendChild(sq3k);
         sq3k.style.display = 'block';
         document.body.style.overflow = 'hidden';
         initSq3000();
@@ -2906,7 +2907,9 @@ let currentPkg = null;
   }
   function closeGame() {
     const sq3k = document.getElementById('sq3000Section');
-    if (sq3k) sq3k.style.display = 'none';
+    if (!sq3k) return;
+    sq3k.style.display = 'none';
+    document.body.insertBefore(sq3k, document.body.firstChild);
     document.body.style.overflow = '';
   }
 
