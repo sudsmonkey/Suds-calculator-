@@ -2881,16 +2881,9 @@ let currentPkg = null;
         const sq3k = document.getElementById('sq3000Section');
         if (!sq3k) return;
         sq3k.style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        sq3k.scrollIntoView({ behavior: 'smooth', block: 'start' });
         initSq3000();
-        setTimeout(function() {
-          var fired = false;
-          function triggerTutorial() { if (fired) return; fired = true; startSq3000Tutorial(); }
-          document.getElementById('glassCanvas').addEventListener('touchstart', triggerTutorial, { once: true, passive: true });
-          document.getElementById('toggleCanvas').addEventListener('touchstart', triggerTutorial, { once: true, passive: true });
-          document.getElementById('applicatorBtn').addEventListener('touchstart', triggerTutorial, { once: true, passive: true });
-          document.getElementById('squeegeeBtn').addEventListener('touchstart', triggerTutorial, { once: true, passive: true });
-        }, 600);
+        sq3k.addEventListener('pointerdown', function() { startSq3000Tutorial(); }, { once: true, passive: true });
       });
     }
   });
@@ -2904,14 +2897,7 @@ let currentPkg = null;
     sq3k.style.display = 'block';
     modal.classList.add('visible');
     initSq3000();
-    setTimeout(function() {
-      var fired = false;
-      function triggerTutorial() { if (fired) return; fired = true; startSq3000Tutorial(); }
-      document.getElementById('glassCanvas').addEventListener('touchstart', triggerTutorial, { once: true, passive: true });
-      document.getElementById('toggleCanvas').addEventListener('touchstart', triggerTutorial, { once: true, passive: true });
-      document.getElementById('applicatorBtn').addEventListener('touchstart', triggerTutorial, { once: true, passive: true });
-      document.getElementById('squeegeeBtn').addEventListener('touchstart', triggerTutorial, { once: true, passive: true });
-    }, 600);
+    sq3k.addEventListener('pointerdown', function() { startSq3000Tutorial(); }, { once: true, passive: true });
   }
   function closeDesktopGame() {
     const modal = document.getElementById('desktopGameModal');
