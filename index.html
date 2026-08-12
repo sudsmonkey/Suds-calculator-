@@ -956,13 +956,35 @@ document.addEventListener('click', function(e){
   const header = document.querySelector('.site-header');
   const hero = document.querySelector('.hero');
   const spacer = document.querySelector('.hero-spacer');
+  const residential = document.querySelectorAll('.wrap')[1];
+  let pinned = true;
+
   function sync(){
-    const hh = header.offsetHeight;
-    hero.style.top = hh + 'px';
-    spacer.style.height = (hh + hero.offsetHeight) + 'px';
+    const nh = header.offsetHeight;
+    hero.style.top = nh + 'px';
+    spacer.style.height = (nh + hero.offsetHeight) + 'px';
   }
+
+  function onScroll(){
+    const nh = header.offsetHeight, hh = hero.offsetHeight;
+    const threshold = nh + hh;
+    const resTop = residential.getBoundingClientRect().top;
+    if(pinned && resTop <= threshold){
+      hero.style.position = 'relative';
+      hero.style.top = '';
+      spacer.style.height = '0px';
+      window.scrollTo(0, window.scrollY - nh - hh);
+      pinned = false;
+    } else if(!pinned && resTop > threshold + 10){
+      hero.style.position = '';
+      sync();
+      window.scrollTo(0, window.scrollY + nh + hh);
+      pinned = true;
+    }
+  }
+
   sync();
-  // Only re-sync on orientation change, not on scroll-triggered resize (URL bar hide/show)
+  window.addEventListener('scroll', onScroll, {passive: true});
   window.addEventListener('orientationchange', function(){ setTimeout(sync, 200); });
 })();
 
