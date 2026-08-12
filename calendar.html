@@ -19,8 +19,6 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; }
-  #scrollGhost { height: 6px; pointer-events: none; }
-
   .header { background: #111; padding: 60px 24px 60px; text-align: center; position: fixed; left: 0; right: 0; overflow: hidden; z-index: 100; }
   .header-bg { position: absolute; inset: 0; background: url('img-res-tree.jpg') center 40%/cover no-repeat; display: none; }
   .header-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(166,56,46,0.28) 0%, rgba(80,20,15,0.38) 100%); z-index: 0; }
@@ -165,7 +163,6 @@
 </div>
 
 <div id="heroSpacer"></div>
-<div id="scrollGhost" aria-hidden="true"></div>
 <div class="content">
 
   <div class="section-label">Pick a Date</div>
@@ -631,13 +628,10 @@
     var nav = document.querySelector('.top-nav');
     var hdr = document.querySelector('.header');
     var spacer = document.getElementById('heroSpacer');
-    var ghost = document.getElementById('scrollGhost');
     if (!nav || !hdr || !spacer) return;
     var navH = nav.getBoundingClientRect().height;
     hdr.style.top = navH + 'px';
     spacer.style.height = (navH + hdr.getBoundingClientRect().height) + 'px';
-    var ghostH = ghost ? ghost.getBoundingClientRect().height : 0;
-    window.scrollTo(0, ghostH);
   }
   document.fonts.ready.then(syncHero);
   window.addEventListener('load', syncHero);
