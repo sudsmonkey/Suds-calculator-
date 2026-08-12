@@ -472,7 +472,7 @@
     selectedTime = slot;
     document.querySelectorAll('#timeGrid .time-slot').forEach(el => el.classList.remove('selected'));
     const el = document.querySelector('#timeGrid [data-slot="' + slot + '"]');
-    if (el) el.classList.add('selected');
+    if (el) { el.classList.add('selected'); void el.offsetWidth; }
     document.getElementById('summaryDate').textContent = MONTHS[currentMonth] + ' ' + parseInt(selectedDate.split('-')[2]) + ', ' + currentYear;
     document.getElementById('summaryTime').textContent = slot;
     updateBtn();
