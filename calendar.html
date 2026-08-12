@@ -479,7 +479,7 @@
       var hdr = document.querySelector('.header');
       var navH = nav ? nav.getBoundingClientRect().height : 40;
       var hdrH = hdr ? hdr.getBoundingClientRect().height : 300;
-      var top = target.getBoundingClientRect().top + window.pageYOffset - navH;
+      var top = target.getBoundingClientRect().top + window.pageYOffset - navH + 4;
       window.scrollTo({ top: top, behavior: 'smooth' });
     }, 100);
   }
