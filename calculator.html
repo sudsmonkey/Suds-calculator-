@@ -494,10 +494,9 @@
   .bonus-sub { font-size:13px; color:var(--mid); line-height:1.6; margin-bottom:24px; }
   .bonus-yes { display:block; width:100%; padding:14px; border-radius:50px; border:none; background:var(--orange); color:#fff; font-family:'Nunito',sans-serif; font-size:16px; font-weight:900; cursor:pointer; margin-bottom:10px; }
   .bonus-no { display:block; width:100%; padding:12px; border-radius:50px; border:none; background:transparent; color:var(--mid); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; }
-  #desktopGameModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 300; align-items: center; justify-content: center; padding: 0; }
+  #desktopGameModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
   #desktopGameModal.visible { display: flex; }
-  .desktop-game-inner { background: var(--white); border-radius: 0; overflow: hidden; max-width: 620px; width: 100%; max-height: 100vh; overflow-y: auto; position: relative; }
-  @media (min-width: 620px) { #desktopGameModal { padding: 20px; } .desktop-game-inner { border-radius: var(--radius); max-height: 90vh; } }
+  .desktop-game-inner { background: var(--white); border-radius: var(--radius); overflow: hidden; max-width: 620px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
   .desktop-game-close { position: sticky; top: 0; right: 0; float: right; background: none; border: none; cursor: pointer; font-size: 22px; color: var(--mid); padding: 8px 12px; line-height: 1; }
   .desktop-game-close:hover { color: var(--dark); }
   #refBanner { display:none; background:var(--mint); border-radius:12px; padding:10px 14px; margin-bottom:14px; font-size:13px; font-weight:700; color:#2a6b52; text-align:center; }
@@ -631,7 +630,7 @@
 </head>
 <body>
 
-<section id="sq3000Section" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:200; overflow-y:auto; background:var(--cream);">
+<section id="sq3000Section" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9000; overflow-y:auto; background:var(--cream);">
   <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px 0;">
     <button onclick="closeGame()" style="background:none; border:none; cursor:pointer; font-family:'Nunito',sans-serif; font-size:13px; font-weight:900; color:var(--mid); padding:4px 0; display:flex; align-items:center; gap:4px;">← Back</button>
   </div>
