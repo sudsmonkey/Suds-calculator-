@@ -7,7 +7,6 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&family=Barlow+Condensed:ital,wght@1,800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { overflow-x: hidden; }
   :root {
     --orange: #F56E64; --orangelight: #F6ECDE; --orangeborder: #F56E64;
     --mint: #9ED9C0; --cream: #FDF9F5;
@@ -20,6 +19,7 @@
     min-height: 100vh;
     display: flex; flex-direction: column; align-items: center;
     padding: 32px 16px 60px;
+    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -630,7 +630,7 @@
 </head>
 <body>
 
-<section id="sq3000Section" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9000; overflow-y:auto; background:var(--cream);">
+<section id="sq3000Section" style="display:none; width:100%; background:var(--cream); padding: 0 0 20px;">
   <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px 0;">
     <button onclick="closeGame()" style="background:none; border:none; cursor:pointer; font-family:'Nunito',sans-serif; font-size:13px; font-weight:900; color:var(--mid); padding:4px 0; display:flex; align-items:center; gap:4px;">← Back</button>
   </div>
@@ -2881,11 +2881,7 @@ let currentPkg = null;
         const sq3k = document.getElementById('sq3000Section');
         if (!sq3k) return;
         sq3k.style.display = 'block';
-        var _sy = window.scrollY;
-        document.body.style.position = 'fixed';
-        document.body.style.top = -_sy + 'px';
-        document.body.style.width = '100%';
-        document.body._gameScrollY = _sy;
+        sq3k.scrollIntoView({ behavior: 'smooth', block: 'start' });
         initSq3000();
         sq3k.addEventListener('pointerdown', function() { startSq3000Tutorial(); }, { once: true, passive: true });
       });
@@ -2911,11 +2907,8 @@ let currentPkg = null;
     const sq3k = document.getElementById('sq3000Section');
     if (!sq3k) return;
     sq3k.style.display = 'none';
-    var sy = document.body._gameScrollY || 0;
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    window.scrollTo(0, sy);
+    const btn = document.getElementById('playSq3000Btn');
+    if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
 
