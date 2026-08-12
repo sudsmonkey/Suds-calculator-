@@ -422,19 +422,41 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   let selectedType = null;
   let selectedStories = null;
 
+  function hideFrom(ids) {
+    ids.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  }
+
   function selectType(type) {
+    if (selectedType === type) {
+      selectedType = null;
+      document.getElementById('tile-' + type).classList.remove('sel');
+      hideFrom(['q2','q3','photo-section','cta-section','cal-embed']);
+      selectedStories = null; selectedService = null;
+      return;
+    }
     selectedType = type;
     document.querySelectorAll('#q1 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + type).classList.add('sel');
+    hideFrom(['q3','photo-section','cta-section','cal-embed']);
+    selectedStories = null; selectedService = null;
     const q2 = document.getElementById('q2');
     q2.style.display = 'block';
     setTimeout(() => q2.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   }
 
   function selectStories(val) {
+    if (selectedStories === val) {
+      selectedStories = null;
+      document.getElementById('tile-' + val).classList.remove('sel');
+      hideFrom(['q3','photo-section','cta-section','cal-embed']);
+      selectedService = null;
+      return;
+    }
     selectedStories = val;
     document.querySelectorAll('#q2 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + val).classList.add('sel');
+    hideFrom(['photo-section','cta-section','cal-embed']);
+    selectedService = null;
     const q3 = document.getElementById('q3');
     q3.style.display = 'block';
     setTimeout(() => q3.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
@@ -443,9 +465,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   let selectedService = null;
 
   function selectService(val) {
+    if (selectedService === val) {
+      selectedService = null;
+      document.getElementById('tile-' + val).classList.remove('sel');
+      hideFrom(['photo-section','cta-section','cal-embed']);
+      return;
+    }
     selectedService = val;
     document.querySelectorAll('#q3 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + val).classList.add('sel');
+    hideFrom(['cta-section','cal-embed']);
     const ps = document.getElementById('photo-section');
     ps.style.display = 'block';
     setTimeout(() => ps.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
