@@ -298,6 +298,8 @@
 
   const today = new Date();
   today.setHours(0,0,0,0);
+  const maxDate = new Date(today);
+  maxDate.setDate(maxDate.getDate() + 25);
 
   let currentYear = today.getFullYear();
   let currentMonth = today.getMonth();
@@ -389,7 +391,7 @@
       const taken = monthAvailability[dateStr] || 0;
       const dayTotal = isConsult ? getConsultSlots(dateStr).length : SLOTS.length;
 
-      if (isPast || isWeekend) {
+      if (isPast || isWeekend || date > maxDate) {
         el.className = 'cal-day disabled';
       } else if (taken >= dayTotal) {
         el.className = 'cal-day full-booked';
