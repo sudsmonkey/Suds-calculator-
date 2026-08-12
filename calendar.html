@@ -473,7 +473,7 @@
     document.getElementById('summaryTime').textContent = slot;
     updateBtn();
     setTimeout(function() {
-      var target = document.getElementById('timeSection');
+      var target = document.querySelector('#timeSection .time-card') || document.getElementById('timeSection');
       if (!target) return;
       var nav = document.querySelector('.top-nav');
       var hdr = document.querySelector('.header');
