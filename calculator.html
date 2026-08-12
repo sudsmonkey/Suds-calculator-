@@ -631,7 +631,7 @@
 </head>
 <body>
 
-<section id="sq3000Section" style="display:none; width:100%; background:var(--cream); position:relative; z-index:1;">
+<section id="sq3000Section" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:200; overflow-y:auto; background:var(--cream);">
   <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px 0;">
     <button onclick="closeGame()" style="background:none; border:none; cursor:pointer; font-family:'Nunito',sans-serif; font-size:13px; font-weight:900; color:var(--mid); padding:4px 0; display:flex; align-items:center; gap:4px;">← Back</button>
   </div>
@@ -2882,8 +2882,7 @@ let currentPkg = null;
         const sq3k = document.getElementById('sq3000Section');
         if (!sq3k) return;
         sq3k.style.display = 'block';
-        window._gameScrollY = window.scrollY;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.body.style.overflow = 'hidden';
         initSq3000();
         setTimeout(startSq3000Tutorial, 800);
       });
@@ -2908,8 +2907,7 @@ let currentPkg = null;
   function closeGame() {
     const sq3k = document.getElementById('sq3000Section');
     if (sq3k) sq3k.style.display = 'none';
-    const prev = window._gameScrollY || 0;
-    window.scrollTo({ top: prev, behavior: 'smooth' });
+    document.body.style.overflow = '';
   }
 
 
