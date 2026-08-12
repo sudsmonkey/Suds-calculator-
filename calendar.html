@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Suds Monkey — Book Your Clean</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@400;700;900&family=Barlow+Condensed:ital,wght@1,800&display=swap" rel="stylesheet">
 <style>
   :root {
     --orange: #F56E64;
@@ -20,24 +20,32 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; }
 
-  .header { background: #111; padding: 60px 24px 60px; text-align: center; position: relative; overflow: hidden; }
-  .header-bg { position: absolute; inset: 0; background: url('img-res-tree.jpg') center 40%/cover no-repeat; display: none; }
-  .header-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(166,56,46,0.28) 0%, rgba(80,20,15,0.38) 100%); z-index: 0; }
-  .header > *:not(.header-bg):not(.header-overlay) { position: relative; z-index: 1; }
-  .top-nav { background: var(--white); border-bottom: 1px solid #F0E8DE; padding: 10px 16px; }
-  .back-link { color: var(--mid); font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
-  .back-link:hover { color: var(--dark); }
-  .header-phone { position: absolute; top: 14px; right: 16px; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 700; text-decoration: none; }
-  .header-phone:hover { color: #fff; }
-  .header-logo { width: 70px; height: 70px; border-radius: 50%; background: #F7F1EC; border: 3px solid var(--mint); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; overflow: hidden; }
-  .header-logo img { width: 100%; height: 100%; object-fit: cover; }
-  .header h1 { color: #fff; font-size: 22px; font-weight: 900; }
-  .header p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }
-  .pkg-pill { background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 50px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; }
+  /* Header */
+  .site-header { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: rgba(100,30,22,0.97); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 8px 20px; min-height: 76px; display: flex; align-items: center; justify-content: space-between; }
+  .hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; }
+  .hd-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .hd-logo-img img { width: 62px; height: 62px; object-fit: contain; filter: brightness(0) invert(1); }
+  .hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
+  .hd-burger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.2s; }
+  .hd-menu { display: none; position: absolute; top: 100%; right: 0; background: #fff; border: 1px solid #EDE5DC; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 180px; overflow: hidden; }
+  .hd-menu.open { display: block; }
+  .hd-menu a { display: block; padding: 13px 18px; font-size: 14px; font-weight: 700; color: var(--dark); text-decoration: none; border-bottom: 1px solid #EDE5DC; font-family: 'Nunito', sans-serif; }
+  .hd-menu a:last-child { border-bottom: none; }
+  .hd-menu a:hover { background: #FDF0EF; color: var(--orange); }
+
+  /* Hero */
+  .hero { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: #111; overflow: hidden; padding: 32px 20px 24px; text-align: center; }
+  .hero-bg { position: absolute; inset: 0; background: url('img-res-tree.jpg') center 40%/cover no-repeat; opacity: 0.55; }
+  .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(166,56,46,0.28) 0%, rgba(80,20,15,0.38) 100%); }
+  .hero-content { position: relative; z-index: 1; }
+  .hero-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-style: italic; font-weight: 800; font-size: 14px; color: var(--mint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+  .hero-content h1 { font-family: 'Anton', sans-serif; font-size: 42px; line-height: 1.05; color: #fff; margin-bottom: 12px; text-wrap: balance; text-transform: uppercase; }
+  .pkg-pill { background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 50px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 8px; }
   .pkg-pill span { color: #fff; font-size: 13px; font-weight: 700; }
   .pkg-pill .pkg-price { background: #fff; color: var(--dark); border-radius: 50px; padding: 2px 10px; font-size: 12px; font-weight: 900; }
+  .hero-spacer { flex-shrink: 0; }
 
-  .content { padding: 20px 16px 40px; max-width: 440px; margin: 0 auto; }
+  .content { padding: 20px 16px 40px; max-width: 440px; margin: 0 auto; position: relative; z-index: 1; }
   .section-label { font-size: 11px; font-weight: 900; color: var(--mid); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; margin-top: 24px; }
   .section-label:first-child { margin-top: 0; }
 
@@ -151,17 +159,37 @@
 </head>
 <body>
 
-<nav class="top-nav"><a href="/Suds-calculator-/" class="back-link">← Back</a></nav>
-<div class="header">
-  <div class="header-bg"></div>
-  <div class="header-overlay"></div>
-  <h1>Book Your Clean</h1>
-  <p>Suds Monkey Window Cleaning</p>
-  <div class="pkg-pill">
-    <span id="pillPkgName">Package</span>
-    <span class="pkg-price" id="pillPkgPrice">—</span>
+<header class="site-header">
+  <div class="hd-brand">Suds Monkey</div>
+  <a href="index.html" class="hd-logo" style="position:absolute;left:50%;transform:translateX(-50%);">
+    <div class="hd-logo-img"><img src="logo.png" alt="Suds Monkey" onerror="this.style.display='none'"></div>
+  </a>
+  <div style="position:relative;">
+    <button class="hd-burger" id="hdBurger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="hd-menu" id="hdMenu">
+      <a href="index.html">Home</a>
+      <a href="calendar.html">Book Online</a>
+      <a href="consult.html">Commercial</a>
+      <a href="tel:4058822277">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Residential</div>
+    <h1>Book Your Clean</h1>
+    <div class="pkg-pill">
+      <span id="pillPkgName">Package</span>
+      <span class="pkg-price" id="pillPkgPrice">—</span>
+    </div>
   </div>
 </div>
+<div class="hero-spacer"></div>
 
 <div class="content">
 
@@ -623,6 +651,28 @@
     else if (v.length >= 1) v = '(' + v;
     e.target.value = v;
   });
+
+  function toggleMenu() {
+    document.getElementById('hdMenu').classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#hdBurger') && !e.target.closest('#hdMenu')) {
+      document.getElementById('hdMenu').classList.remove('open');
+    }
+  });
+
+  (function syncHero() {
+    const hdr = document.querySelector('.site-header');
+    const hero = document.querySelector('.hero');
+    const spacer = document.querySelector('.hero-spacer');
+    function sync() {
+      const hh = hdr.offsetHeight;
+      hero.style.top = hh + 'px';
+      spacer.style.height = (hh + hero.offsetHeight) + 'px';
+    }
+    sync();
+    window.addEventListener('resize', sync);
+  })();
 
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrEnJzvM5RCL_Y_TOymjadeQdmgB1swI8&libraries=places&callback=initAutocomplete" async defer></script>
