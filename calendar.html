@@ -298,6 +298,7 @@
 
   const today = new Date();
   today.setHours(0,0,0,0);
+  const isAdmin = sessionStorage.getItem('suds_admin') === '1';
   const maxDate = new Date(today);
   maxDate.setDate(maxDate.getDate() + 25);
 
@@ -391,7 +392,7 @@
       const taken = monthAvailability[dateStr] || 0;
       const dayTotal = isConsult ? getConsultSlots(dateStr).length : SLOTS.length;
 
-      if (isPast || isWeekend || date > maxDate) {
+      if (isPast || isWeekend || (!isAdmin && date > maxDate)) {
         el.className = 'cal-day disabled';
       } else if (taken >= dayTotal) {
         el.className = 'cal-day full-booked';
