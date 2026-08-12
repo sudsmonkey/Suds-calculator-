@@ -473,13 +473,13 @@
     document.getElementById('summaryTime').textContent = slot;
     updateBtn();
     setTimeout(function() {
-      var info = document.getElementById('infoSection');
-      if (!info) return;
+      var target = document.getElementById('infoFirstName') || document.getElementById('infoSection');
+      if (!target) return;
       var nav = document.querySelector('.top-nav');
       var hdr = document.querySelector('.header');
       var navH = nav ? nav.getBoundingClientRect().height : 40;
       var hdrH = hdr ? hdr.getBoundingClientRect().height : 300;
-      var top = info.getBoundingClientRect().top + window.pageYOffset - (navH + hdrH + 16);
+      var top = target.getBoundingClientRect().top + window.pageYOffset - (navH + hdrH + 8);
       window.scrollTo({ top: top, behavior: 'smooth' });
     }, 100);
   }
