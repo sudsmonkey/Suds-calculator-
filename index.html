@@ -51,10 +51,22 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
 /* ── Hero ─────────────────────────── */
 .hero {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   background: var(--dark);
   padding: 32px 20px 24px;
   text-align: center;
   overflow: hidden;
+  z-index: 100;
+}
+.hero.unpinned {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  z-index: auto;
 }
 .hero-slide {
   position: absolute; inset: 0;
@@ -948,15 +960,60 @@ document.addEventListener('click', function(e){
 })();
 
 (function(){
-  const header = document.querySelector('.site-header');
-  const hero = document.querySelector('.hero');
-  const spacer = document.querySelector('.hero-spacer');
-  function sync(){
-    hero.style.marginTop = header.offsetHeight + 'px';
-    if (spacer) spacer.style.height = '0px';
+  var header = document.querySelector('.site-header');
+  var hero = document.querySelector('.hero');
+  var spacer = document.querySelector('.hero-spacer');
+  var wraps = document.querySelectorAll('.wrap');
+  var residentialWrap = wraps[1];
+  var pinned = true;
+
+  function navH(){ return header.offsetHeight; }
+  function heroH(){ return hero.offsetHeight; }
+
+  function pin(){
+    var nh = navH(), hh = heroH();
+    hero.classList.remove('unpinned');
+    hero.style.top = nh + 'px';
+    spacer.style.height = (nh + hh) + 'px';
+    pinned = true;
   }
-  sync();
-  window.addEventListener('orientationchange', function(){ setTimeout(sync, 200); });
+
+  function unpin(){
+    var nh = navH(), hh = heroH();
+    hero.classList.add('unpinned');
+    hero.style.top = '';
+    spacer.style.height = '0px';
+    window.scrollTo(0, window.scrollY - nh - hh);
+    pinned = false;
+  }
+
+  function repin(){
+    var nh = navH(), hh = heroH();
+    hero.classList.remove('unpinned');
+    hero.style.top = nh + 'px';
+    spacer.style.height = (nh + hh) + 'px';
+    window.scrollTo(0, window.scrollY + nh + hh);
+    pinned = true;
+  }
+
+  function onScroll(){
+    var resTop = residentialWrap.getBoundingClientRect().top;
+    var threshold = navH() + heroH();
+    if(pinned && resTop <= threshold){
+      unpin();
+    } else if(!pinned && resTop > threshold + 10){
+      repin();
+    }
+  }
+
+  pin();
+  window.addEventListener('scroll', onScroll, {passive: true});
+  window.addEventListener('resize', function(){
+    if(pinned){ hero.style.top = navH()+'px'; spacer.style.height = (navH()+heroH())+'px'; }
+  });
+  window.addEventListener('orientationchange', function(){ setTimeout(function(){
+    if(pinned){ hero.style.top = navH()+'px'; spacer.style.height = (navH()+heroH())+'px'; }
+  }, 200); });
 })();
 
 </script>
