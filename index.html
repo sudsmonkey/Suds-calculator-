@@ -52,9 +52,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 /* ── Hero ─────────────────────────── */
 .hero {
   background: var(--dark);
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
   padding: 32px 20px 24px;
   text-align: center;
   overflow: hidden;
+  -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0);
+  will-change: transform;
 }
 .hero-slide {
   position: absolute; inset: 0;
@@ -952,10 +957,12 @@ document.addEventListener('click', function(e){
   const hero = document.querySelector('.hero');
   const spacer = document.querySelector('.hero-spacer');
   function sync(){
-    hero.style.marginTop = header.offsetHeight + 'px';
-    if (spacer) spacer.style.height = '0px';
+    const hh = header.offsetHeight;
+    hero.style.top = hh + 'px';
+    spacer.style.height = (hh + hero.offsetHeight) + 'px';
   }
   sync();
+  // Only re-sync on orientation change, not on scroll-triggered resize (URL bar hide/show)
   window.addEventListener('orientationchange', function(){ setTimeout(sync, 200); });
 })();
 
