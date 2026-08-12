@@ -324,8 +324,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     <div class="photo-drop-sub">Building exterior, windows, access points</div>
   </div>
   <div class="photo-thumbs" id="photoThumbs"></div>
-  <p onclick="showCTAs()" style="display:inline-block; font-family:'Nunito',sans-serif; font-size:16px; font-weight:900; color:var(--dark); text-decoration:underline; cursor:pointer; margin-top:20px;">Continue</p>
-  <p class="photo-skip" onclick="showCTAs()">Skip for now</p>
+  <div style="display:flex; flex-direction:column; align-items:center; gap:6px; margin-top:20px;">
+    <p onclick="showCTAs()" style="font-family:'Nunito',sans-serif; font-size:16px; font-weight:900; color:var(--mid); text-decoration:underline; cursor:pointer;">Continue</p>
+    <p class="photo-skip" onclick="showCTAs()">Skip for now</p>
+  </div>
 </section>
 
 <!-- CTAs -->
