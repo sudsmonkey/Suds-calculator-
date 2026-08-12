@@ -203,20 +203,20 @@
         <div class="info-row-split">
           <div class="info-field">
             <label>First Name</label>
-            <input type="text" id="infoFirstName" placeholder="Jane">
+            <input type="text" id="infoFirstName" placeholder="Jane" oninput="updateBtn()">
           </div>
           <div class="info-field">
             <label>Last Name</label>
-            <input type="text" id="infoLastName" placeholder="Smith">
+            <input type="text" id="infoLastName" placeholder="Smith" oninput="updateBtn()">
           </div>
         </div>
         <div class="info-field">
           <label>Phone</label>
-          <input type="tel" id="infoPhone" placeholder="(555) 000-0000" autocomplete="tel">
+          <input type="tel" id="infoPhone" placeholder="(555) 000-0000" autocomplete="tel" oninput="updateBtn()">
         </div>
         <div class="info-field">
           <label>Email</label>
-          <input type="email" id="infoEmail" placeholder="jane@email.com">
+          <input type="email" id="infoEmail" placeholder="jane@email.com" oninput="updateBtn()">
         </div>
         <div class="info-field">
           <label>Address (optional)</label>
@@ -487,7 +487,12 @@
   }
 
   function updateBtn() {
-    document.getElementById('bookBtn').disabled = !(selectedDate && selectedTime);
+    const firstName = (document.getElementById('infoFirstName').value || '').trim();
+    const lastName  = (document.getElementById('infoLastName').value  || '').trim();
+    const phone     = (document.getElementById('infoPhone').value     || '').trim();
+    const email     = (document.getElementById('infoEmail').value     || '').trim();
+    const ready = selectedDate && selectedTime && firstName && lastName && phone && email;
+    document.getElementById('bookBtn').disabled = !ready;
   }
 
   async function prevMonth() {
