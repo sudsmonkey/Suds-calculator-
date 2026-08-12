@@ -152,7 +152,6 @@
 </style>
 </head>
 <body>
-<div id="scrollGhost" aria-hidden="true"></div>
 <nav class="top-nav"><a href="/Suds-calculator-/" class="back-link">← Back</a></nav>
 <div class="header">
   <div class="header-bg"></div>
@@ -166,6 +165,7 @@
 </div>
 
 <div id="heroSpacer"></div>
+<div id="scrollGhost" aria-hidden="true"></div>
 <div class="content">
 
   <div class="section-label">Pick a Date</div>
@@ -627,16 +627,17 @@
     e.target.value = v;
   });
 
-  window.addEventListener('load', function() { window.scrollTo(0, 1); });
-
   function syncHero() {
     var nav = document.querySelector('.top-nav');
     var hdr = document.querySelector('.header');
     var spacer = document.getElementById('heroSpacer');
+    var ghost = document.getElementById('scrollGhost');
     if (!nav || !hdr || !spacer) return;
     var navH = nav.getBoundingClientRect().height;
     hdr.style.top = navH + 'px';
     spacer.style.height = (navH + hdr.getBoundingClientRect().height) + 'px';
+    var ghostH = ghost ? ghost.getBoundingClientRect().height : 0;
+    window.scrollTo(0, ghostH);
   }
   document.fonts.ready.then(syncHero);
   window.addEventListener('load', syncHero);
