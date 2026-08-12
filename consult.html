@@ -484,6 +484,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   const SB_KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const calToday = new Date(); calToday.setHours(0,0,0,0);
+  const calMaxDate = new Date(calToday); calMaxDate.setDate(calMaxDate.getDate() + 25);
   let calYear = calToday.getFullYear(), calMonth = calToday.getMonth();
   let calSelectedDate = null, calSelectedTime = null;
   let calTaken = new Set(), calMonthAvail = {}, consultPkg = '';
@@ -542,7 +543,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
       const ds=calYear+'-'+pad(calMonth+1)+'-'+pad(d);
       const el=document.createElement('div');
       const taken=calMonthAvail[ds]||0, dayTotal=consultPkg.includes('Phone')?getSlots(ds).length:2;
-      if(date<calToday||date.getDay()===0||date.getDay()===6) el.className='cal-day disabled';
+      if(date<calToday||date.getDay()===0||date.getDay()===6||date>calMaxDate) el.className='cal-day disabled';
       else if(taken>=dayTotal) el.className='cal-day full-booked';
       else if(taken===dayTotal-1){el.className='cal-day partial';el.onclick=()=>selectCalDate(ds);}
       else{el.className='cal-day has-slots';el.onclick=()=>selectCalDate(ds);}
