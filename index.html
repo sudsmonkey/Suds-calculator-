@@ -972,13 +972,12 @@ document.addEventListener('click', function(e){
     if(pinned && resTop <= threshold){
       hero.style.position = 'relative';
       hero.style.top = '';
-      spacer.style.height = '0px';
-      window.scrollTo(0, window.scrollY - nh - hh);
+      spacer.style.height = nh + 'px';
       pinned = false;
     } else if(!pinned && resTop > threshold + 10){
       hero.style.position = '';
-      sync();
-      window.scrollTo(0, window.scrollY + nh + hh);
+      hero.style.top = nh + 'px';
+      spacer.style.height = (nh + hh) + 'px';
       pinned = true;
     }
   }
