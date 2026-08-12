@@ -468,6 +468,7 @@
   }
 
   function selectTime(slot) {
+    const firstPick = !selectedTime;
     selectedTime = slot;
     document.querySelectorAll('#timeGrid .time-slot').forEach(el => el.classList.remove('selected'));
     const el = document.querySelector('#timeGrid [data-slot="' + slot + '"]');
@@ -475,13 +476,11 @@
     document.getElementById('summaryDate').textContent = MONTHS[currentMonth] + ' ' + parseInt(selectedDate.split('-')[2]) + ', ' + currentYear;
     document.getElementById('summaryTime').textContent = slot;
     updateBtn();
-    setTimeout(function() {
+    if (firstPick) setTimeout(function() {
       var target = document.getElementById('timeSection');
       if (!target) return;
       var nav = document.querySelector('.top-nav');
-      var hdr = document.querySelector('.header');
       var navH = nav ? nav.getBoundingClientRect().height : 40;
-      var hdrH = hdr ? hdr.getBoundingClientRect().height : 300;
       var top = target.getBoundingClientRect().top + window.pageYOffset - navH + 4;
       window.scrollTo({ top: top, behavior: 'smooth' });
     }, 100);
