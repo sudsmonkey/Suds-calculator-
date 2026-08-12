@@ -970,14 +970,12 @@ document.addEventListener('click', function(e){
     const threshold = nh + hh;
     const resTop = residential.getBoundingClientRect().top;
     if(pinned && resTop <= threshold){
-      hero.style.position = 'relative';
-      hero.style.top = '';
-      spacer.style.height = nh + 'px';
+      hero.style.position = 'absolute';
+      hero.style.top = (window.scrollY + nh) + 'px';
       pinned = false;
     } else if(!pinned && resTop > threshold + 10){
       hero.style.position = '';
       hero.style.top = nh + 'px';
-      spacer.style.height = (nh + hh) + 'px';
       pinned = true;
     }
   }
