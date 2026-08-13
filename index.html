@@ -50,11 +50,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .hd-logo-img.masked {
   width: 62px; height: 62px;
   background-color: var(--orange);
-  -webkit-mask: url('logo.png') center / contain no-repeat;
-  mask: url('logo.png') center / contain no-repeat;
+    /* logo.png is 1206x975 with the monkey face at x284-897, y96-634 and the
+       wordmark below it. Crop the mask to the face only: scale 62/614, so the
+       full image lands at 121.8x98.5 and the face fills the 62px box. */
+    -webkit-mask-image: url('logo.png'); mask-image: url('logo.png');
+    -webkit-mask-repeat: no-repeat;     mask-repeat: no-repeat;
+    -webkit-mask-size: 121.8px 98.5px;  mask-size: 121.8px 98.5px;
+    -webkit-mask-position: -28.7px -5.9px; mask-position: -28.7px -5.9px;
 }
 .hd-logo-img.masked img { visibility: hidden; }
 .hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: var(--orange); text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; }
+.hd-brand-sub { display: block; font-family: 'Nunito', sans-serif; font-style: normal; font-weight: 900; font-size: 8px; letter-spacing: 0.22em; margin-top: 3px; }
 .hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
 /* `all 0.2s` drives the burger's own animation; the later background-color
    entry wins for that one property, keeping it in step with the header fade. */
@@ -398,7 +404,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
 <!-- Header -->
 <header class="site-header">
-  <div class="hd-brand">Suds Monkey</div>
+  <div class="hd-brand">Suds Monkey<span class="hd-brand-sub">Window Cleaning</span></div>
   <a href="index.html" class="hd-logo" style="position:absolute;left:50%;transform:translateX(-50%);">
     <div class="hd-logo-img">
       <img src="logo.png" alt="Suds Monkey" onload="this.parentNode.classList.add('masked')" onerror="this.style.display='none';this.parentNode.textContent='🐒'">
