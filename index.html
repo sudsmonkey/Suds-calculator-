@@ -705,12 +705,14 @@ function launchGame() {
       window.addEventListener('resize', measure);
       window.addEventListener('orientationchange', function(){ setTimeout(measure, 250); });
     };
-    // Scroll the embed to just below the fixed header. `block: 'start'` would
-    // put its top edge at viewport 0, tucking the game's tool buttons behind
-    // the header.
+    // Land with the divider above the teaser flush under the fixed header, so
+    // the "Squeege Master 3000" title stays in view above the game.
     setTimeout(() => {
       const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--navH')) || 0;
-      const top = embed.getBoundingClientRect().top + window.scrollY - navH - 8;
+      const teaser = btn.closest('.wrap');
+      const prev = teaser && teaser.previousElementSibling;
+      const anchor = (prev && prev.classList.contains('divider')) ? prev : (teaser || embed);
+      const top = anchor.getBoundingClientRect().top + window.scrollY - navH;
       window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     }, 60);
   } else {
