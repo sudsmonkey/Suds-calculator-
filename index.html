@@ -119,7 +119,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 }
 .truck-band-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(166,56,46,0.55) 0%, rgba(80,20,15,0.65) 100%);
+  /* The hero's gradient at 15% strength — 85% of the tint taken out, so the
+     truck reads as a photo rather than a coral wash. The hero's own overlay
+     is a separate rule and keeps its full values. */
+  background: linear-gradient(to bottom, rgba(166,56,46,0.08) 0%, rgba(80,20,15,0.10) 100%);
   z-index: 0;
 }
 .hero-overlay {
