@@ -32,7 +32,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   background: rgba(255,255,255,0.97);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  /* No hard rule — a soft lift instead. Invisible against the hero photo,
+     but enough to separate the white bar from the cream page below it. */
   border-bottom: none;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
   padding: 8px 20px;
   min-height: 76px;
   display: flex; align-items: center; justify-content: space-between;
