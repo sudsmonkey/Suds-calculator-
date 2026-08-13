@@ -1501,11 +1501,17 @@ html, body {
 
   skipBtn.addEventListener('click', finish);
 
-  // Start after the game has had a moment to render
-  setTimeout(() => {
+  // Start on the player's first tap inside the game — never automatically
+  let started = false;
+  function startTutorial() {
+    if (started) return;
+    started = true;
     overlay.classList.add('active');
     showStep(0);
-  }, 800);
+  }
+  setTimeout(() => {
+    document.addEventListener('pointerdown', startTutorial, { once: true });
+  }, 400);
 })();
 </script>
 </body>
