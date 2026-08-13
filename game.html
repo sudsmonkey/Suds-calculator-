@@ -1188,7 +1188,7 @@ html, body {
   transition: background 0.3s;
 }
 #tutorialOverlay.active #tutorialScrim {
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.30);
 }
 #tutorialSpotlight {
   position: absolute;
@@ -1200,7 +1200,7 @@ html, body {
    scoped to the active tutorial — unscoped it painted over the whole game
    even when the tutorial was never started. */
 #tutorialOverlay.active #tutorialSpotlight {
-  box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.30);
 }
 #tutorialCard {
   position: absolute;
@@ -1506,11 +1506,26 @@ html, body {
 
   skipBtn.addEventListener('click', finish);
 
-  // Start on the player's first tap inside the game — never automatically
   let started = false;
+
+  // Keep the dimming inside the game card, rounded corners and all, instead
+  // of washing the full frame as a square. Every tutorial target lives inside
+  // .stage, so clipping here never hides a highlight.
+  function clipToStage() {
+    const stageEl = document.querySelector('.stage');
+    if (!stageEl) return;
+    const s = stageEl.getBoundingClientRect();
+    const radius = getComputedStyle(stageEl).borderRadius || '20px';
+    overlay.style.clipPath =
+      `inset(${s.top}px ${window.innerWidth - s.right}px ${window.innerHeight - s.bottom}px ${s.left}px round ${radius})`;
+  }
+  window.addEventListener('resize', () => { if (started) clipToStage(); });
+
+  // Start on the player's first tap inside the game — never automatically
   function startTutorial() {
     if (started) return;
     started = true;
+    clipToStage();
     overlay.classList.add('active');
     showStep(0);
   }
