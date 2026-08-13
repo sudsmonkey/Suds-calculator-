@@ -41,7 +41,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   padding: 8px 20px;
   min-height: 76px;
   display: flex; align-items: center; justify-content: space-between;
-  transition: background-color 0.35s ease, border-color 0.35s ease;
+  transition: background-color 1s ease, border-color 1s ease;
 }
 .site-header.solid { background: rgba(100,30,22,0.97); border-bottom-color: transparent; }
 .site-header.solid .hd-brand { color: #fff; }
@@ -59,11 +59,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   /* Same seven filter functions in the same order as the .solid state, so the
      two can interpolate — a mismatched list would snap instead of fading. */
   filter: brightness(0) invert(28%) sepia(40%) saturate(1900%) hue-rotate(343deg) brightness(96%) contrast(88%);
-  transition: filter 0.35s ease;
+  transition: filter 1s ease;
 }
-.hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: var(--dark); text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; transition: color 0.35s ease; }
+.hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: var(--dark); text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; transition: color 1s ease; }
 .hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
-.hd-burger span { display: block; width: 22px; height: 2px; background: var(--dark); border-radius: 2px; transition: all 0.2s; }
+/* `all 0.2s` drives the burger's own animation; the later background-color
+   entry wins for that one property, keeping it in step with the header fade. */
+.hd-burger span { display: block; width: 22px; height: 2px; background: var(--dark); border-radius: 2px; transition: all 0.2s, background-color 1s ease; }
 .hd-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 180px; overflow: hidden; }
 .hd-menu.open { display: block; }
 .hd-menu a { display: block; padding: 13px 18px; font-size: 14px; font-weight: 700; color: var(--dark); text-decoration: none; border-bottom: 1px solid var(--border); font-family: 'Nunito', sans-serif; }
