@@ -98,6 +98,35 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   z-index: 0;
 }
 .hero-slide.active { opacity: 1; }
+
+/* Closing band — bookends the hero between the maintenance copy and the game
+   teaser, reusing the hero's photo, gradient and tagline. Plain block in
+   normal flow, so it has no interaction with the hero's sticky behaviour. */
+.truck-band {
+  position: relative;
+  background: var(--dark);
+  padding: 56px 20px;
+  text-align: center;
+  overflow: hidden;
+}
+.truck-band-photo {
+  position: absolute; inset: 0;
+  background-image: url('img-truck.jpg');
+  background-size: cover;
+  background-position: center 35%;
+  background-repeat: no-repeat;
+  z-index: 0;
+}
+.truck-band-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(166,56,46,0.55) 0%, rgba(80,20,15,0.65) 100%);
+  z-index: 0;
+}
+.truck-band-inner { position: relative; z-index: 1; }
+.truck-band h2 {
+  font-family: 'Anton', sans-serif; font-size: 42px; line-height: 1.05;
+  color: #fff; margin: 0; text-transform: uppercase; text-wrap: balance;
+}
 .hero-overlay {
   position: absolute; inset: 0;
   background: linear-gradient(to bottom, rgba(166,56,46,0.55) 0%, rgba(80,20,15,0.65) 100%);
@@ -345,6 +374,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
 @media (min-width: 480px) {
   .hero h1 { font-size: 50px; }
+  .truck-band h2 { font-size: 50px; }
   .services-grid { grid-template-columns: repeat(3, 1fr); }
 }
 </style>
@@ -590,7 +620,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   </div>
 </div>
 
-<div class="divider"></div>
+<!-- Closing band — bookends the hero, and separates the service sections
+     from the game teaser -->
+<section class="truck-band">
+  <div class="truck-band-photo"></div>
+  <div class="truck-band-overlay"></div>
+  <div class="truck-band-inner">
+    <div class="hero-eyebrow">Oklahoma City Metro</div>
+    <h2>When Service<br>Evolves</h2>
+  </div>
+</section>
 
 <!-- Mini game teaser -->
 <div class="wrap">
