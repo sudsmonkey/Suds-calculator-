@@ -11,14 +11,50 @@
     --orange: #F56E64; --orangelight: #F6ECDE; --orangeborder: #F56E64;
     --mint: #9ED9C0; --cream: #FDF9F5;
     --white: #FFFFFF; --offwhite: #FFFFFF; --dark: #A6382E; --mid: #7C7268; --radius: 20px;
+    --border: #E8DDD6;
   }
+  /* Keep scrollIntoView targets clear of the fixed header rather than patching
+     each call site. */
+  html { scroll-padding-top: 84px; }
+
+  /* Site header, matching the other pages. Sits below the calibrate overlay
+     (100) and the modals (200/300) so they still cover the whole screen. */
+  .site-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 90;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    padding: 8px 20px;
+    min-height: 76px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: var(--orange); text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; }
+  .hd-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .hd-logo-img { display: flex; align-items: center; }
+  .hd-logo-img img { width: 62px; height: 62px; object-fit: contain; }
+  .hd-logo-img.masked {
+    width: 62px; height: 62px;
+    background-color: var(--orange);
+    -webkit-mask: url('logo.png') center / contain no-repeat;
+    mask: url('logo.png') center / contain no-repeat;
+  }
+  .hd-logo-img.masked img { visibility: hidden; }
+  .hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
+  .hd-burger span { display: block; width: 22px; height: 2px; background: var(--orange); border-radius: 2px; transition: all 0.2s; }
+  .hd-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 180px; overflow: hidden; }
+  .hd-menu.open { display: block; }
+  .hd-menu a { display: block; padding: 13px 18px; font-size: 14px; font-weight: 700; color: var(--dark); text-decoration: none; border-bottom: 1px solid var(--border); font-family: 'Nunito', sans-serif; }
+  .hd-menu a:last-child { border-bottom: none; }
+  .hd-menu a:hover { background: #FDF0EF; color: var(--orange); }
   body {
     background: transparent;
     font-family: 'DM Sans', sans-serif;
     color: var(--dark);
     min-height: 100vh;
     display: flex; flex-direction: column; align-items: center;
-    padding: 32px 16px 60px;
+    /* Top padding clears the fixed header (76px) plus the original 32px */
+    padding: 108px 16px 60px;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -629,6 +665,27 @@
 </style>
 </head>
 <body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="hd-brand">Suds Monkey</div>
+  <a href="index.html" class="hd-logo" style="position:absolute;left:50%;transform:translateX(-50%);">
+    <div class="hd-logo-img">
+      <img src="logo.png" alt="Suds Monkey" onload="this.parentNode.classList.add('masked')" onerror="this.style.display='none';this.parentNode.textContent='🐒'">
+    </div>
+  </a>
+  <div style="position:relative;">
+    <button class="hd-burger" id="hdBurger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="hd-menu" id="hdMenu">
+      <a href="index.html">Home</a>
+      <a href="consult.html">Commercial</a>
+      <a href="game.html">Mini Game</a>
+      <a href="tel:4058822277">Contact</a>
+    </nav>
+  </div>
+</header>
 
 <section id="sq3000Section" style="display:none; width:100%; background:var(--cream); padding: 0 0 20px;">
   <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px 0;">
@@ -3288,6 +3345,16 @@ function startSq3000Tutorial() {
   overlay.classList.add('active');
   showStep(0);
 }
+
+// Header menu, same behaviour as the other pages
+function toggleMenu() {
+  document.getElementById('hdMenu').classList.toggle('open');
+}
+document.addEventListener('click', function(e){
+  if (!e.target.closest('#hdBurger') && !e.target.closest('#hdMenu')) {
+    document.getElementById('hdMenu').classList.remove('open');
+  }
+});
 </script>
 </body>
 </html>
