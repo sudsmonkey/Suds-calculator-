@@ -28,6 +28,13 @@
     padding: 8px 20px;
     min-height: 76px;
     display: flex; align-items: center; justify-content: space-between;
+    /* This page styles the bare `header` element for its own branding block
+       (flex-direction: column, max-width: 500px, centred text). Those land on
+       this bar too, so every one of them is overridden explicitly. */
+    flex-direction: row;
+    width: auto; max-width: none;
+    text-align: left;
+    margin-bottom: 0;
   }
   .hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: var(--orange); text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; }
   .hd-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
