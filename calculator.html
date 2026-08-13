@@ -127,29 +127,27 @@
     width: 110px;
     height: 110px;
     border-radius: 50%;
-    background: #FFFFFF;
-    border: 3px solid var(--mint);
+    /* Just the bubble on the coral block — no disc, ring or glow behind it */
+    background: transparent;
+    border: none;
+    box-shadow: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 12px rgba(240,128,128,0.2);
     overflow: hidden;
   }
   .logo-circle img.logo {
-    /* Crop to the monkey face so the card does not repeat the wordmark that is
-       already in the header. logo.png is 1206x975 with the face at x284-897,
-       y96-634; scaling the whole image to 196px puts the face at ~100px, and
-       the offset brings the face's centre to the circle's centre. The circle's
-       overflow: hidden does the cropping. */
-    width: 196px;
+    /* The bubble sits on a cream field in IMG_0876.jpeg, and its own interior is
+       nearly that same cream, so colour-keying would eat the bubble. It is a
+       clean circle instead, so the round clip does the work: the image is
+       780x827 with the bubble 678px across centred at (394,437). Scaling it to
+       112px inside the 110px circle lands the crop 1px inside the rim, which
+       removes any cream fringe while keeping the rim itself. */
+    width: 128.9px;
     height: auto;
     max-width: none;
     flex-shrink: 0;
-    transform: translate(2px, 20px);
-    /* The wordmark starts at y672 of 975 (69%). Clip everything below the face
-       band so no sliver of it can reach the circle's lower edge. */
-    clip-path: inset(0 0 34% 0);
-    filter: brightness(0) saturate(100%) invert(20%) sepia(90%) saturate(600%) hue-rotate(338deg) brightness(95%);
+    transform: translate(-0.7px, -3.9px);
   }
   .suds-title { font-family: "Nunito", sans-serif; font-weight: 900; font-style: italic; font-size: 38px; color: #A6382E; margin: 0 0 4px; letter-spacing: -0.5px; text-align: center; }
   .header-body {
@@ -969,7 +967,7 @@
   <div class="header-card pkg slider-pkg">
   <div class="header-hero">
     <div class="logo-circle">
-      <img class="logo" src="logo.png" alt="Suds Monkey" onerror="this.parentNode.style.fontSize='32px';this.parentNode.textContent='🐒'">
+      <img class="logo" src="IMG_0876.jpeg" alt="" onerror="this.parentNode.style.fontSize='32px';this.parentNode.textContent='🫧'">
     </div>
   </div>
   <div class="header-body">
