@@ -99,12 +99,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 }
 .hero-slide.active { opacity: 1; }
 
-/* Photo band between the maintenance copy and the game teaser — purely
-   decorative, no copy. Reuses the hero's truck shot and overlay gradient, but
-   is a plain block in normal flow with no bearing on the hero's sticky pin. */
+/* Photo band between the maintenance copy and the game teaser — the hero
+   again, minus the copy: same truck shot, same overlay gradient, and the
+   hero's height as a fixed 216px. Plain block in normal flow, so it has no
+   bearing on the hero's sticky pin. */
 .truck-band {
   position: relative;
-  height: 112px;
+  height: 216px;
   background: var(--dark);
   overflow: hidden;
 }
