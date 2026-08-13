@@ -37,7 +37,7 @@
     margin-bottom: 0;
   }
   .hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: var(--orange); text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; text-align: center; }
-  .hd-brand-sub { display: block; font-family: 'Nunito', sans-serif; font-style: normal; font-weight: 900; font-size: 8px; letter-spacing: 0.22em; margin-top: 3px; }
+  .hd-brand-sub { display: block; font-family: 'Nunito', sans-serif; font-style: normal; font-weight: 900; font-size: 8px; letter-spacing: 0.22em; margin-top: 3px; /* letter-spacing adds a trailing gap after the last letter (1.76px here vs 0.68px on the line above), so centred boxes leave the visible ink 1.5px left. Nudge it back onto the wordmark's optical centre. */ position: relative; left: 1.5px; }
   .hd-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
   .hd-logo-img { display: flex; align-items: center; }
   .hd-logo-img img { width: 62px; height: 62px; object-fit: contain; }
