@@ -136,10 +136,19 @@
     overflow: hidden;
   }
   .logo-circle img.logo {
-    width: 90%;
-    height: 90%;
-    object-fit: contain;
-    object-position: center;
+    /* Crop to the monkey face so the card does not repeat the wordmark that is
+       already in the header. logo.png is 1206x975 with the face at x284-897,
+       y96-634; scaling the whole image to 196px puts the face at ~100px, and
+       the offset brings the face's centre to the circle's centre. The circle's
+       overflow: hidden does the cropping. */
+    width: 196px;
+    height: auto;
+    max-width: none;
+    flex-shrink: 0;
+    transform: translate(2px, 20px);
+    /* The wordmark starts at y672 of 975 (69%). Clip everything below the face
+       band so no sliver of it can reach the circle's lower edge. */
+    clip-path: inset(0 0 34% 0);
     filter: brightness(0) saturate(100%) invert(20%) sepia(90%) saturate(600%) hue-rotate(338deg) brightness(95%);
   }
   .suds-title { font-family: "Nunito", sans-serif; font-weight: 900; font-style: italic; font-size: 38px; color: #A6382E; margin: 0 0 4px; letter-spacing: -0.5px; text-align: center; }
