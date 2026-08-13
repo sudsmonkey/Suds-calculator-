@@ -27,40 +27,18 @@ html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); -webkit-font-smoothing: antialiased; }
 
 /* ── Header ─────────────────────── */
-/* White over the hero, dark once the hero is behind you. The swap is a
-   crossfade triggered by an IntersectionObserver — no scroll handler, and a
-   colour landing a frame late is invisible, unlike a position would be. */
 .site-header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
   background: rgba(255,255,255,0.97);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  min-height: 76px;
-  position: fixed;
-}
-/* Both copies share the bar's layout so the two palettes line up pixel for
-   pixel — any drift would show as a seam while the wipe passes. */
-.hdr-layer {
-  display: flex; align-items: center; justify-content: space-between;
+  /* One fixed coral rule, always on. It separates the white bar from the cream
+     page without a state change that could come to rest half applied. */
+  border-bottom: 1px solid var(--orange);
   padding: 8px 20px;
   min-height: 76px;
+  display: flex; align-items: center; justify-content: space-between;
 }
-/* White on a cream page needs an edge, or the bar dissolves into the content
-   once you scroll past the hero. Drawn inside the box so the coral layer
-   covers it as the wipe travels, instead of it fading separately. */
-.hdr-base { box-shadow: inset 0 -1px 0 var(--border); }
-.hdr-solid {
-  position: absolute; inset: 0;
-  pointer-events: none;
-  background: rgba(245,110,100,0.97);
-  /* Revealed upward, driven entirely by --wipe from the hero's position. No
-     transition: the edge only moves when the page moves, which is what makes
-     the change unnoticeable — nothing animates on its own. */
-  clip-path: inset(calc(100% - var(--wipe, 0%)) 0 0 0);
-}
-.hdr-solid .hd-brand { color: #fff; }
-.hdr-solid .hd-burger span { background: #fff; }
-.hdr-solid .hd-logo-img.masked { background-color: #fff; }
 .hd-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .hd-logo-img { display: flex; align-items: center; }
 .hd-logo-img img { width: 62px; height: 62px; object-fit: contain; }
@@ -417,14 +395,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 </head>
 <body>
 
-<!-- Header. Two stacked copies of the same bar: the base layer is the real,
-     interactive one; the coral layer is a purely visual duplicate revealed by
-     a clip edge that travels upward, so the colour change wipes like a
-     squeegee pull rather than fading everywhere at once. The duplicate is
-     aria-hidden, carries no ids, and ignores pointer events, so the burger
-     and links keep working off the layer underneath. -->
+<!-- Header -->
 <header class="site-header">
- <div class="hdr-layer hdr-base">
   <div class="hd-brand">Suds Monkey</div>
   <a href="index.html" class="hd-logo" style="position:absolute;left:50%;transform:translateX(-50%);">
     <div class="hd-logo-img">
@@ -442,18 +414,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       <a href="tel:4058822277">Contact</a>
     </nav>
   </div>
- </div>
- <div class="hdr-layer hdr-solid" aria-hidden="true">
-  <div class="hd-brand">Suds Monkey</div>
-  <span class="hd-logo" style="position:absolute;left:50%;transform:translateX(-50%);">
-    <div class="hd-logo-img">
-      <img src="logo.png" alt="" onload="this.parentNode.classList.add('masked')">
-    </div>
-  </span>
-  <div style="position:relative;">
-    <span class="hd-burger"><span></span><span></span><span></span></span>
-  </div>
- </div>
 </header>
 
 <!-- Hero — sticks until the end of .hero-zone (the divider before Residential) -->
@@ -1130,35 +1090,6 @@ document.addEventListener('click', function(e){
   function syncNavHeight(){
     document.documentElement.style.setProperty('--navH', header.offsetHeight + 'px');
   }
-
-  // Reveal the coral layer in step with the hero sliding up behind the bar:
-  // --wipe goes 0% to 100% over exactly the header's own height, so the colour
-  // change is carried by the scroll rather than by an animation of its own.
-  //
-  // This does read scroll position every frame, which the hero pinning
-  // deliberately does not. The difference is what a late frame costs: there a
-  // stale position opened a visible gap, here the clip edge is a few pixels
-  // off inside a moving band and cannot be seen.
-  const hero = document.querySelector('.hero');
-  let ticking = false;
-
-  function updateWipe(){
-    ticking = false;
-    if (!hero) return;
-    const navH = header.offsetHeight || 1;
-    const heroBottom = hero.getBoundingClientRect().bottom;
-    // 0 while the hero still covers the bar, 1 once it has cleared the top
-    const p = Math.min(1, Math.max(0, 1 - heroBottom / navH));
-    header.style.setProperty('--wipe', (p * 100).toFixed(2) + '%');
-  }
-
-  function onScroll(){
-    if (!ticking) { ticking = true; requestAnimationFrame(updateWipe); }
-  }
-
-  updateWipe();
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', updateWipe);
 
   syncNavHeight();
   window.addEventListener('load', syncNavHeight);
