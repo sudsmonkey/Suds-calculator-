@@ -2883,7 +2883,7 @@ let currentPkg = null;
         sq3k.style.display = 'block';
         sq3k.scrollIntoView({ behavior: 'smooth', block: 'start' });
         initSq3000();
-        setTimeout(function(){ sq3k.addEventListener('pointerdown', function() { startSq3000Tutorial(); }, { once: true, passive: true }); }, 1000);
+        (function(){ var done=false; function go(){ if(done)return; done=true; startSq3000Tutorial(); } document.getElementById('glassCanvas').addEventListener('touchstart',go,{once:true,passive:true}); document.getElementById('toggleCanvas').addEventListener('touchstart',go,{once:true,passive:true}); })();
       });
     }
   });
@@ -2897,7 +2897,7 @@ let currentPkg = null;
     sq3k.style.display = 'block';
     modal.classList.add('visible');
     initSq3000();
-    setTimeout(function(){ sq3k.addEventListener('pointerdown', function() { startSq3000Tutorial(); }, { once: true, passive: true }); }, 1000);
+    (function(){ var done=false; function go(){ if(done)return; done=true; startSq3000Tutorial(); } document.getElementById('glassCanvas').addEventListener('touchstart',go,{once:true,passive:true}); document.getElementById('toggleCanvas').addEventListener('touchstart',go,{once:true,passive:true}); })();
   }
   function closeDesktopGame() {
     const modal = document.getElementById('desktopGameModal');
