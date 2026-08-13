@@ -29,20 +29,28 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 /* ── Header ─────────────────────── */
 .site-header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  background: rgba(100,30,22,0.97);
+  background: rgba(255,255,255,0.97);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border-bottom: none;
+  /* White on a cream page needs an edge, or the bar dissolves into the
+     content once you scroll past the hero. */
+  border-bottom: 1px solid var(--border);
   padding: 8px 20px;
   min-height: 76px;
   display: flex; align-items: center; justify-content: space-between;
 }
 .hd-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .hd-logo-img { display: flex; align-items: center; }
-.hd-logo-img img { width: 62px; height: 62px; object-fit: contain; filter: brightness(0) invert(1); }
-.hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; }
+/* Logo is a flat silhouette, so it gets recoloured with a filter chain rather
+   than a second asset. Measured output is rgb(161,68,35) against the --dark
+   token of rgb(166,56,46). */
+.hd-logo-img img {
+  width: 62px; height: 62px; object-fit: contain;
+  filter: brightness(0) invert(28%) sepia(40%) saturate(1900%) hue-rotate(343deg) brightness(96%) contrast(88%);
+}
+.hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: var(--dark); text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; }
 .hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
-.hd-burger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.2s; }
+.hd-burger span { display: block; width: 22px; height: 2px; background: var(--dark); border-radius: 2px; transition: all 0.2s; }
 .hd-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 180px; overflow: hidden; }
 .hd-menu.open { display: block; }
 .hd-menu a { display: block; padding: 13px 18px; font-size: 14px; font-weight: 700; color: var(--dark); text-decoration: none; border-bottom: 1px solid var(--border); font-family: 'Nunito', sans-serif; }
