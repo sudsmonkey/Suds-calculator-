@@ -23,66 +23,6 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; color: var(--ink); }
 
-  /* ── Login gate ── */
-  #loginGate {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .login-card {
-    background: var(--white);
-    border: 1.5px solid var(--border);
-    border-radius: 24px;
-    padding: 40px 32px;
-    width: 100%;
-    max-width: 360px;
-    box-shadow: var(--shadow);
-    text-align: center;
-  }
-  .login-logo {
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    background: var(--light);
-    border: 3px solid var(--mint);
-    margin: 0 auto 20px;
-    overflow: hidden;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .login-logo img { width: 100%; height: 100%; object-fit: cover; }
-  .login-title { font-size: 20px; font-weight: 900; color: var(--dark); margin-bottom: 4px; }
-  .login-sub { font-size: 13px; color: var(--mid); margin-bottom: 28px; }
-  .login-card input[type="password"] {
-    width: 100%;
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 15px;
-    color: var(--ink);
-    background: var(--cream);
-    outline: none;
-    text-align: center;
-    letter-spacing: 0.1em;
-    margin-bottom: 12px;
-  }
-  .login-card input[type="password"]:focus { border-color: var(--orange); }
-  .login-btn {
-    width: 100%;
-    padding: 13px;
-    border-radius: 50px;
-    border: none;
-    background: var(--orange);
-    color: #fff;
-    font-family: 'Nunito', sans-serif;
-    font-size: 15px;
-    font-weight: 900;
-    cursor: pointer;
-    box-shadow: 0 4px 0 var(--dark);
-  }
-  .login-err { font-size: 13px; color: var(--dark); margin-top: 12px; display: none; }
-
   /* ── Dashboard shell ── */
   #adminDash { display: none; }
 
@@ -95,17 +35,6 @@
   }
   .top-bar-title { color: #fff; font-size: 17px; font-weight: 900; }
   .top-bar-sub { color: rgba(255,255,255,0.8); font-size: 12px; }
-  .logout-btn {
-    background: rgba(255,255,255,0.2);
-    border: 1.5px solid rgba(255,255,255,0.4);
-    border-radius: 50px;
-    padding: 6px 14px;
-    color: #fff;
-    font-family: 'Nunito', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-  }
 
   /* ── Tabs ── */
   .tabs {
@@ -289,22 +218,6 @@
 </head>
 <body>
 
-<!-- ─────────── Login gate ─────────── -->
-<div id="loginGate">
-  <div class="login-card">
-    <div class="login-logo">
-      <img src="suds_logo.png" onerror="this.style.display='none';this.parentNode.textContent='🐒'">
-    </div>
-    <div class="login-title">Admin Access</div>
-    <div class="login-sub">Suds Monkey — Internal Dashboard</div>
-    <form id="loginForm">
-      <input type="password" id="passInput" placeholder="Enter password" autocomplete="current-password">
-      <button type="submit" class="login-btn">Enter →</button>
-      <div class="login-err" id="loginErr">Incorrect password — try again.</div>
-    </form>
-  </div>
-</div>
-
 <!-- ─────────── Admin dashboard ─────────── -->
 <div id="adminDash">
   <div class="top-bar">
@@ -312,7 +225,6 @@
       <div class="top-bar-title">Suds Monkey Admin</div>
       <div class="top-bar-sub" id="todayLabel"></div>
     </div>
-    <button class="logout-btn" onclick="logout()">Log out</button>
   </div>
 
   <div class="tabs">
@@ -369,43 +281,25 @@
 
 <script>
   // ── Config ──────────────────────────────
-  const ADMIN_PASSWORD = 'SudsAdmin2025'; // Change this to your own password
   const SUPABASE_URL   = 'https://ykjkcegpwiqhpfcgkwro.supabase.co';
   const SUPABASE_KEY   = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
   const SLOTS          = ['8:00 AM', '1:00 PM'];
   const MONTHS = ['January','February','March','April','May','June',
                   'July','August','September','October','November','December'];
 
-  // ── Auth ────────────────────────────────
+  // ── Startup ─────────────────────────────
+  // The password gate has been removed, so the dashboard opens straight away.
   function init() {
-    if (sessionStorage.getItem('suds_admin') === '1') showDash();
+    showDash();
   }
 
-  document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    if (document.getElementById('passInput').value === ADMIN_PASSWORD) {
-      sessionStorage.setItem('suds_admin', '1');
-      showDash();
-    } else {
-      document.getElementById('loginErr').style.display = 'block';
-      document.getElementById('passInput').value = '';
-      document.getElementById('passInput').focus();
-    }
-  });
-
   function showDash() {
-    document.getElementById('loginGate').style.display = 'none';
     document.getElementById('adminDash').style.display = 'block';
     const now = new Date();
     document.getElementById('todayLabel').textContent =
       MONTHS[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
     renderAdminCal();
     loadBookings();
-  }
-
-  function logout() {
-    sessionStorage.removeItem('suds_admin');
-    location.reload();
   }
 
   // ── Tabs ────────────────────────────────
