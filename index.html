@@ -1001,15 +1001,22 @@ document.addEventListener('click', function(e){
     spacer.style.height = (nh + hero.offsetHeight) + 'px';
   }
 
+  // Scroll position at which the hero unpinned. Re-pinning at exactly the
+  // same offset keeps the hero continuous — any gap between the two
+  // thresholds shows as a flash of page content under the header.
+  let unpinY = 0;
+
   function onScroll(){
     const nh = header.offsetHeight, hh = hero.offsetHeight;
-    const threshold = nh + hh;
-    const resTop = residential.getBoundingClientRect().top;
-    if(pinned && resTop <= threshold){
-      hero.style.position = 'absolute';
-      hero.style.top = (window.scrollY + nh) + 'px';
-      pinned = false;
-    } else if(!pinned && resTop > threshold + 10){
+    if(pinned){
+      const resTop = residential.getBoundingClientRect().top;
+      if(resTop <= nh + hh){
+        unpinY = window.scrollY;
+        hero.style.position = 'absolute';
+        hero.style.top = (unpinY + nh) + 'px';
+        pinned = false;
+      }
+    } else if(window.scrollY <= unpinY){
       hero.style.position = '';
       hero.style.top = nh + 'px';
       pinned = true;
