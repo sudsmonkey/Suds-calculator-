@@ -2883,7 +2883,6 @@ let currentPkg = null;
         sq3k.style.display = 'block';
         sq3k.scrollIntoView({ behavior: 'smooth', block: 'start' });
         initSq3000();
-        sq3k.addEventListener('pointerdown', function() { startSq3000Tutorial(); }, { once: true, passive: true });
       });
     }
   });
@@ -2897,7 +2896,6 @@ let currentPkg = null;
     sq3k.style.display = 'block';
     modal.classList.add('visible');
     initSq3000();
-    sq3k.addEventListener('pointerdown', function() { startSq3000Tutorial(); }, { once: true, passive: true });
   }
   function closeDesktopGame() {
     const modal = document.getElementById('desktopGameModal');
