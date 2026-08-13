@@ -1193,9 +1193,14 @@ html, body {
 #tutorialSpotlight {
   position: absolute;
   border-radius: 14px;
-  box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
   transition: all 0.35s cubic-bezier(.4,0,.2,1);
   pointer-events: none;
+}
+/* The cut-out ring is what darkens everything around the spotlight. Keep it
+   scoped to the active tutorial — unscoped it painted over the whole game
+   even when the tutorial was never started. */
+#tutorialOverlay.active #tutorialSpotlight {
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
 }
 #tutorialCard {
   position: absolute;
