@@ -27,9 +27,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   background: rgba(255,255,255,0.97);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  /* One fixed coral rule, always on. It separates the white bar from the cream
-     page without a state change that could come to rest half applied. */
-  border-bottom: 1px solid var(--orange);
+  /* No hard rule — a soft lift instead. Invisible against the hero photo,
+     but enough to separate the white bar from the cream page below it. */
+  border-bottom: none;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
   padding: 8px 20px;
   min-height: 76px;
   display: flex; align-items: center; justify-content: space-between;
