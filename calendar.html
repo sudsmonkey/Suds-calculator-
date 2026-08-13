@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Suds Monkey — Book Your Clean</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --orange: #F56E64;
@@ -14,6 +14,7 @@
     --dark: #A6382E;
     --mid: #7C7268;
     --white: #FFFFFF;
+    --border: #E8DDD6;
     --radius: 20px;
     --shadow: 0 2px 16px rgba(245,110,100,0.10);
   }
@@ -23,9 +24,42 @@
   .header-bg { position: absolute; inset: 0; background: url('img-res-tree.jpg') center 40%/cover no-repeat; display: none; }
   .header-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(166,56,46,0.28) 0%, rgba(80,20,15,0.38) 100%); z-index: 0; }
   .header > *:not(.header-bg):not(.header-overlay) { position: relative; z-index: 1; }
-  .top-nav { background: var(--white); border-bottom: 1px solid #F0E8DE; padding: 10px 16px; position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
-  .back-link { color: var(--mid); font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
-  .back-link:hover { color: var(--dark); }
+  /* Site header, matching index.html and consult.html */
+  .site-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    /* No hard rule — a soft lift instead. Invisible against the hero photo,
+       but enough to separate the white bar from the cream page below it. */
+    border-bottom: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    padding: 8px 20px;
+    min-height: 76px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: var(--orange); text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; }
+  .hd-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .hd-logo-img { display: flex; align-items: center; }
+  .hd-logo-img img { width: 62px; height: 62px; object-fit: contain; }
+  /* The logo is painted by masking its silhouette and filling with a colour
+     token, not by filtering, so it is exactly --orange. The class is added
+     from JS once the file has loaded, so a missing logo falls back to the
+     emoji rather than a solid coral block. */
+  .hd-logo-img.masked {
+    width: 62px; height: 62px;
+    background-color: var(--orange);
+    -webkit-mask: url('logo.png') center / contain no-repeat;
+    mask: url('logo.png') center / contain no-repeat;
+  }
+  .hd-logo-img.masked img { visibility: hidden; }
+  .hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
+  .hd-burger span { display: block; width: 22px; height: 2px; background: var(--orange); border-radius: 2px; transition: all 0.2s; }
+  .hd-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 180px; overflow: hidden; }
+  .hd-menu.open { display: block; }
+  .hd-menu a { display: block; padding: 13px 18px; font-size: 14px; font-weight: 700; color: var(--dark); text-decoration: none; border-bottom: 1px solid var(--border); font-family: 'Nunito', sans-serif; }
+  .hd-menu a:last-child { border-bottom: none; }
+  .hd-menu a:hover { background: #FDF0EF; color: var(--orange); }
   .header-phone { position: absolute; top: 14px; right: 16px; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 700; text-decoration: none; }
   .header-phone:hover { color: #fff; }
   .header-logo { width: 70px; height: 70px; border-radius: 50%; background: #F7F1EC; border: 3px solid var(--mint); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; overflow: hidden; }
@@ -150,7 +184,26 @@
 </style>
 </head>
 <body>
-<nav class="top-nav"><a href="/Suds-calculator-/" class="back-link">← Back</a></nav>
+<!-- Header -->
+<header class="site-header">
+  <div class="hd-brand">Suds Monkey</div>
+  <a href="index.html" class="hd-logo" style="position:absolute;left:50%;transform:translateX(-50%);">
+    <div class="hd-logo-img">
+      <img src="logo.png" alt="Suds Monkey" onload="this.parentNode.classList.add('masked')" onerror="this.style.display='none';this.parentNode.textContent='🐒'">
+    </div>
+  </a>
+  <div style="position:relative;">
+    <button class="hd-burger" id="hdBurger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="hd-menu" id="hdMenu">
+      <a href="calculator.html">Residential Quote</a>
+      <a href="consult.html">Commercial</a>
+      <a href="game.html">Mini Game</a>
+      <a href="tel:4058822277">Contact</a>
+    </nav>
+  </div>
+</header>
 <div class="header">
   <div class="header-bg"></div>
   <div class="header-overlay"></div>
@@ -479,7 +532,7 @@
     if (firstPick) setTimeout(function() {
       var target = document.getElementById('timeSection');
       if (!target) return;
-      var nav = document.querySelector('.top-nav');
+      var nav = document.querySelector('.site-header');
       var navH = nav ? nav.getBoundingClientRect().height : 40;
       var top = target.getBoundingClientRect().top + window.pageYOffset - navH + 4;
       window.scrollTo({ top: top, behavior: 'smooth' });
@@ -642,7 +695,7 @@
   });
 
   function syncHero() {
-    var nav = document.querySelector('.top-nav');
+    var nav = document.querySelector('.site-header');
     var hdr = document.querySelector('.header');
     var spacer = document.getElementById('heroSpacer');
     if (!nav || !hdr || !spacer) return;
@@ -653,6 +706,16 @@
   document.fonts.ready.then(syncHero);
   window.addEventListener('load', syncHero);
   window.addEventListener('resize', syncHero);
+
+  // Header menu, same behaviour as the other pages
+  function toggleMenu() {
+    document.getElementById('hdMenu').classList.toggle('open');
+  }
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('#hdBurger') && !e.target.closest('#hdMenu')) {
+      document.getElementById('hdMenu').classList.remove('open');
+    }
+  });
 
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrEnJzvM5RCL_Y_TOymjadeQdmgB1swI8&libraries=places&callback=initAutocomplete" async defer></script>
