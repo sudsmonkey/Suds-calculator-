@@ -50,10 +50,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .hd-menu a:hover { background: #FDF0EF; color: var(--orange); }
 
 /* ── Hero ─────────────────────────── */
+/* The hero pins under the header while "How it works" slides beneath it,
+   then scrolls away when the next section arrives. This is `sticky` rather
+   than JS-toggled positioning so the browser enforces it on the compositor —
+   a scroll handler always lags a fast flick, and any lag shows as a gap
+   between the header and the hero. */
+.hero-zone {
+  padding-top: var(--navH, 76px);
+}
 .hero {
   background: var(--dark);
-  position: fixed;
-  top: 0; left: 0; right: 0;
+  position: sticky;
+  top: var(--navH, 76px);
   z-index: 100;
   padding: 32px 20px 24px;
   text-align: center;
@@ -345,7 +353,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   </div>
 </header>
 
-<!-- Hero -->
+<!-- Hero — sticks until the end of .hero-zone (the divider before Residential) -->
+<div class="hero-zone">
 <section class="hero">
   <div class="hero-slide active" style="background-image:url('img-hero.jpg')"></div>
   <div class="hero-slide" style="background-image:url('img-wash.jpg')"></div>
@@ -365,8 +374,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
     </a>
   </div>
 </section>
-<div class="hero-spacer"></div>
-
 
 <!-- How it works -->
 <div class="wrap">
@@ -401,6 +408,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 </div>
 
 <div class="divider"></div>
+</div><!-- /.hero-zone -->
 
 <!-- Services -->
 <div class="wrap">
@@ -989,43 +997,21 @@ document.addEventListener('click', function(e){
 })();
 
 (function(){
+  // The hero pins via `position: sticky` (see .hero-zone / .hero). All this
+  // does is publish the real header height so the sticky offset matches it.
+  // Deliberately NOT tied to scroll — a scroll handler cannot keep up with a
+  // fast flick, which is what used to flash a gap under the header.
   const header = document.querySelector('.site-header');
-  const hero = document.querySelector('.hero');
-  const spacer = document.querySelector('.hero-spacer');
-  const residential = document.querySelectorAll('.wrap')[1];
-  let pinned = true;
 
-  function sync(){
-    const nh = header.offsetHeight;
-    hero.style.top = nh + 'px';
-    spacer.style.height = (nh + hero.offsetHeight) + 'px';
+  function syncNavHeight(){
+    document.documentElement.style.setProperty('--navH', header.offsetHeight + 'px');
   }
 
-  // Scroll position at which the hero unpinned. Re-pinning at exactly the
-  // same offset keeps the hero continuous — any gap between the two
-  // thresholds shows as a flash of page content under the header.
-  let unpinY = 0;
-
-  function onScroll(){
-    const nh = header.offsetHeight, hh = hero.offsetHeight;
-    if(pinned){
-      const resTop = residential.getBoundingClientRect().top;
-      if(resTop <= nh + hh){
-        unpinY = window.scrollY;
-        hero.style.position = 'absolute';
-        hero.style.top = (unpinY + nh) + 'px';
-        pinned = false;
-      }
-    } else if(window.scrollY <= unpinY){
-      hero.style.position = '';
-      hero.style.top = nh + 'px';
-      pinned = true;
-    }
-  }
-
-  sync();
-  window.addEventListener('scroll', onScroll, {passive: true});
-  window.addEventListener('orientationchange', function(){ setTimeout(sync, 200); });
+  syncNavHeight();
+  window.addEventListener('load', syncNavHeight);
+  window.addEventListener('resize', syncNavHeight);
+  window.addEventListener('orientationchange', function(){ setTimeout(syncNavHeight, 200); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncNavHeight);
 })();
 
 </script>
