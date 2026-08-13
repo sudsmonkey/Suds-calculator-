@@ -24,19 +24,33 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 /* Header */
 .site-header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  background: rgba(100,30,22,0.97);
+  background: rgba(255,255,255,0.97);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  /* One fixed coral rule, always on. It separates the white bar from the cream
+     page without a state change that could come to rest half applied. */
+  border-bottom: 1px solid var(--orange);
   padding: 8px 20px;
   min-height: 76px;
   display: flex; align-items: center; justify-content: space-between;
 }
-.hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; }
+.hd-brand { font-family: 'Anton', sans-serif; font-size: 17px; color: var(--orange); text-transform: uppercase; letter-spacing: 0.04em; font-style: italic; line-height: 1; }
 .hd-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .hd-logo-img { display: flex; align-items: center; }
-.hd-logo-img img { width: 62px; height: 62px; object-fit: contain; filter: brightness(0) invert(1); }
+.hd-logo-img img { width: 62px; height: 62px; object-fit: contain; }
+/* The logo is painted by masking its silhouette and filling with a colour
+   token, not by filtering, so it is exactly --orange. The class is added from
+   JS once the file has loaded, so a missing logo falls back to the emoji
+   rather than a solid coral block. */
+.hd-logo-img.masked {
+  width: 62px; height: 62px;
+  background-color: var(--orange);
+  -webkit-mask: url('logo.png') center / contain no-repeat;
+  mask: url('logo.png') center / contain no-repeat;
+}
+.hd-logo-img.masked img { visibility: hidden; }
 .hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
-.hd-burger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.2s; }
+.hd-burger span { display: block; width: 22px; height: 2px; background: var(--orange); border-radius: 2px; transition: all 0.2s; }
 .hd-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 180px; overflow: hidden; }
 .hd-menu.open { display: block; }
 .hd-menu a { display: block; padding: 13px 18px; font-size: 14px; font-weight: 700; color: var(--dark); text-decoration: none; border-bottom: 1px solid var(--border); font-family: 'Nunito', sans-serif; }
@@ -225,7 +239,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   <div class="hd-brand">Suds Monkey</div>
   <a href="index.html" class="hd-logo" style="position:absolute;left:50%;transform:translateX(-50%);">
     <div class="hd-logo-img">
-      <img src="logo.png" alt="Suds Monkey" onerror="this.style.display='none';this.parentNode.textContent='🐒'">
+      <img src="logo.png" alt="Suds Monkey" onload="this.parentNode.classList.add('masked')" onerror="this.style.display='none';this.parentNode.textContent='🐒'">
     </div>
   </a>
   <div style="position:relative;">
