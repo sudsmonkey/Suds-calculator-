@@ -99,14 +99,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 }
 .hero-slide.active { opacity: 1; }
 
-/* Closing band — bookends the hero between the maintenance copy and the game
-   teaser, reusing the hero's photo, gradient and tagline. Plain block in
-   normal flow, so it has no interaction with the hero's sticky behaviour. */
+/* Photo band between the maintenance copy and the game teaser — purely
+   decorative, no copy. Reuses the hero's truck shot and overlay gradient, but
+   is a plain block in normal flow with no bearing on the hero's sticky pin. */
 .truck-band {
   position: relative;
+  height: 112px;
   background: var(--dark);
-  padding: 56px 20px;
-  text-align: center;
   overflow: hidden;
 }
 .truck-band-photo {
@@ -122,9 +121,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   background: linear-gradient(to bottom, rgba(166,56,46,0.55) 0%, rgba(80,20,15,0.65) 100%);
   z-index: 0;
 }
-.truck-band-inner { position: relative; z-index: 1; }
-/* No tagline here, so drop the eyebrow's trailing gap and let it sit centred */
-.truck-band .hero-eyebrow { margin-bottom: 0; }
 .hero-overlay {
   position: absolute; inset: 0;
   background: linear-gradient(to bottom, rgba(166,56,46,0.55) 0%, rgba(80,20,15,0.65) 100%);
@@ -617,14 +613,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   </div>
 </div>
 
-<!-- Closing band — bookends the hero, and separates the service sections
-     from the game teaser -->
-<section class="truck-band">
+<!-- Photo band separating the service sections from the game teaser -->
+<section class="truck-band" aria-hidden="true">
   <div class="truck-band-photo"></div>
   <div class="truck-band-overlay"></div>
-  <div class="truck-band-inner">
-    <div class="hero-eyebrow">Oklahoma City Metro</div>
-  </div>
 </section>
 
 <!-- Mini game teaser -->
