@@ -1238,7 +1238,6 @@
     setTimeout(startCalibrationLoad, 2000);
   }
   function startCalibrationLoad() {
-    startCalScrollHome();
     showCalibrateStep('Loading');
     const dots = Array.from(document.querySelectorAll('.calib-spinner span'));
     dots.forEach(d => { d.style.animation = 'none'; });
@@ -1312,8 +1311,6 @@
     else { uncommonFeatures = uncommonFeatures.filter(v => v !== value); }
   }
   let calibrated = false;
-  let calScrollId = null;
-  let calScrollDir = 1;
   let wizBubbles = [];
   let wizBubbleInterval = null;
 
@@ -1333,45 +1330,6 @@
     setTimeout(() => { b.remove(); wizBubbles = wizBubbles.filter(x => x !== b); }, dur * 1000);
   }
 
-  function startCalScroll(){
-    return;
-    if(window.matchMedia('(min-width: 900px)').matches) {
-      spawnWizBubble(); spawnWizBubble(); spawnWizBubble();
-      wizBubbleInterval = setInterval(spawnWizBubble, 3200);
-      return;
-    }
-    if(calScrollId) return;
-    function step(){
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if(maxScroll <= 0){ calScrollId = null; return; }
-      window.scrollBy(0, 0.5 * calScrollDir);
-      if(window.scrollY >= maxScroll - 1) calScrollDir = -1;
-      if(window.scrollY <= 1) calScrollDir = 1;
-      calScrollId = requestAnimationFrame(step);
-    }
-    calScrollId = requestAnimationFrame(step);
-  }
-  function startCalScrollHome(){
-    stopCalScroll();
-    if(window.matchMedia('(min-width: 900px)').matches) return;
-    const startY = window.scrollY;
-    if(startY <= 0) return;
-    const duration = 9800;
-    const t0 = performance.now();
-    function step(now){
-      const p = Math.min((now - t0) / duration, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
-      window.scrollTo(0, startY * (1 - eased));
-      if(p < 1) calScrollId = requestAnimationFrame(step);
-      else calScrollId = null;
-    }
-    calScrollId = requestAnimationFrame(step);
-  }
-  function stopCalScroll(){
-    if(calScrollId){ cancelAnimationFrame(calScrollId); calScrollId = null; }
-    if(wizBubbleInterval){ clearInterval(wizBubbleInterval); wizBubbleInterval = null; }
-    wizBubbles.forEach(b => b.remove()); wizBubbles = [];
-  }
   // Nothing to open any more — the questions are the page. Kept because several
   // call sites (deep links, the re-calibrate link) still ask for "the wizard".
   function openCalibrate(){
@@ -1379,7 +1337,8 @@
     if(document.body.classList.contains('storm-mode')) return;
     advanceTo('calibrateStepSize');
   }
-  function closeCalibrateOverlay(){ stopCalScroll(); }
+  // Nothing left to tear down; kept so the old call sites stay valid.
+  function closeCalibrateOverlay(){}
   function openContactForm(){
     // TODO: wire up contact form
   }
