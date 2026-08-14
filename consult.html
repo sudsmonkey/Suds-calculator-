@@ -70,9 +70,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 .hd-menu a:hover { background: #FDF0EF; color: var(--orange); }
 
 /* Hero */
-/* The hero pins under the header while Q1 and Q2 scroll beneath it, then
-   releases when "What are you looking for?" arrives — the end of .hero-zone.
-   Sticky rather than fixed so the browser handles it on the compositor. */
+/* The hero pins under the header while Q1 scrolls beneath it, then releases
+   when "How many stories?" arrives — the end of .hero-zone. Sticky rather than
+   fixed so the browser handles it on the compositor. */
 .hero-zone { padding-top: var(--navH, 76px); }
 .hero {
   position: sticky;
@@ -302,6 +302,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 </section>
 
 <!-- Q2: Stories -->
+</div><!-- /.hero-zone -->
+
 <section class="q-section" id="q2">
   <h2 class="q-head">How many stories?</h2>
   <p class="q-sub">Height affects access equipment and pricing.</p>
@@ -319,8 +321,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 </section>
 
 <!-- Q3: Service type -->
-</div><!-- /.hero-zone -->
-
 <section class="q-section" id="q3">
   <h2 class="q-head">What are you looking for?</h2>
   <p class="q-sub">We'll put together the right scope for you.</p>
