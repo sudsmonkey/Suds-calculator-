@@ -63,3 +63,48 @@ footer.
   — a subdirectory on a shared domain, with a trailing hyphen in the path.
   Moving to a real domain would outweigh every on-page item on this list
   combined.
+
+---
+
+# Image weight / page speed
+
+Measured 2026-08-14. Page speed feeds search ranking, so it lives here too.
+
+**Not urgent.** On a normal connection the home page is fine; this only bites on
+a weak signal.
+
+| connection | result |
+|------------|--------|
+| good signal | loads in 0.4–3.8s |
+| weak LTE (1.6 Mbps, 150ms) | structure at 10s, full load **never completed in 90s** (27 of 55MB) |
+
+## The split that matters
+
+The images fall into two groups that must be treated differently. Measured
+displayed widths, not guesses:
+
+**Full-width backgrounds — leave alone.** `img-hero.jpg`, `img-wash.jpg`,
+`img-highrise.jpg`, `img-truck.jpg`, `img-res-tree.jpg`. These render at the
+full viewport width: 1920px on a big monitor, so up to 3840px for a retina
+screen. Shrinking these *would* visibly soften them on desktop. `img-hero.jpg`
+is already only 1400px and is arguably too small for a large display.
+
+**The residential photo strip — the entire problem.** All 17 `IMG_*.jpeg`
+files render at **220px wide on every screen size, desktop included** — they are
+thumbnails in a scrolling row. They are 4032px camera originals, roughly 18×
+oversized, and account for **~52MB of the home page's ~55MB**. Even allowing 2×
+for retina they need 440px. Re-saved at ~600px they would total around 1MB with
+nothing visible lost at any screen size.
+
+## To do
+
+1. **Re-save the 17 `IMG_*.jpeg` strip photos at ~600px wide.** Keep the
+   originals in the repo (they are real job photos) and point the pages at
+   web-sized copies. ~52MB → ~1MB.
+2. **Add `loading="lazy"`** below the fold. Currently 0 of 52 `<img>` tags on
+   `index.html` use it, so everything downloads immediately whether or not it is
+   near the viewport.
+3. **Delete three unused files**: `img-residential-windows.jpg` (5.9MB),
+   `img-commercial.jpg`, `img-residential.jpg`. Referenced by no page.
+
+Total repo image weight is 64.9MB across 27 files; 18 are over 2MB.
