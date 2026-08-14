@@ -189,7 +189,115 @@
   .quick-q select:focus { border-color: var(--orange); }
   .slider-wrap { position: relative; }
   .slider-wrap.locked input[type="range"] { opacity: 0.35; pointer-events: none; }
-  #calibrateOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.58); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); z-index: 100; justify-content: center; align-items: center; padding: 16px; opacity: 1; transition: opacity 0.38s ease, backdrop-filter 1s ease, -webkit-backdrop-filter 1s ease, background 1s ease; }
+  /* ── Hero ─────────────────────────
+     Same pin-and-release as the home and commercial pages: the hero sticks
+     under the header while the first question scrolls beneath it, then lets go
+     at "How many stories?" — the end of .hero-zone. */
+  .hero-zone { padding-top: var(--navH, 76px); }
+  .hero {
+    position: sticky;
+    top: var(--navH, 76px);
+    z-index: 90;
+    background: #111;
+    overflow: hidden;
+    padding: 32px 20px 24px;
+    text-align: center;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: url('img-res-tree.jpg') center 45%/cover no-repeat;
+    opacity: 0.55;
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(166,56,46,0.28) 0%, rgba(80,20,15,0.38) 100%);
+  }
+  .hero-content { position: relative; z-index: 1; }
+  .hero-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-style: italic; font-weight: 800; font-size: 14px;
+    color: var(--mint); letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .hero-content h1 {
+    font-family: 'Anton', sans-serif; font-size: 42px; line-height: 1.05;
+    color: #fff; margin-bottom: 0; text-wrap: balance; text-transform: uppercase;
+  }
+
+  /* ── Question sections ────────────
+     The wizard used to be a fixed overlay showing one step at a time. It is now
+     a stacked page like the commercial consult: every question is on the page,
+     answering one scrolls to the next, and you can move around freely. */
+  .q-section {
+    position: relative;
+    z-index: 1;
+    background: var(--cream);
+    padding: 40px 20px 48px;
+  }
+  .q-section + .q-section { border-top: 1px solid var(--border); }
+  .q-section h2 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 22px; font-weight: 900;
+    color: var(--orange);
+    margin-bottom: 4px; line-height: 1.2;
+  }
+  .q-section > p {
+    font-size: 13px; color: var(--mid);
+    margin-bottom: 22px; line-height: 1.5;
+    max-width: 440px;
+  }
+  .q-section .quick-q { max-width: 440px; }
+  .q-section .input-label { display: block; margin-bottom: 10px; }
+  /* Follow-ups open underneath the question that triggered them rather than
+     replacing it, so the answer above stays visible and editable. */
+  .sub-q {
+    display: none;
+    max-width: 440px;
+    margin-top: 22px; padding-top: 20px;
+    border-top: 1px dashed var(--border);
+  }
+  .sub-q.open { display: block; animation: subQIn 0.32s ease both; }
+  @keyframes subQIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  .sub-q h3 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px; font-weight: 900;
+    color: var(--dark); margin-bottom: 4px;
+  }
+  .sub-q > p { font-size: 13px; color: var(--mid); margin-bottom: 16px; line-height: 1.5; }
+
+  /* The size question is full-bleed, not a card: the coral band and the slider
+     both run the whole width of the screen. .q-section keeps its side padding
+     for the heading, so these two break out of it. */
+  #calibrateStepSize { padding-left: 0; padding-right: 0; }
+  #calibrateStepSize > h2, #calibrateStepSize > p { padding-left: 20px; padding-right: 20px; }
+  #calibrateStepSize .quick-q { max-width: none; }
+  .size-band { background: var(--orange); padding: 26px 20px 30px; width: 100%; }
+  .size-band .slider-section { max-width: none; margin: 0; padding: 0; }
+  .size-band .input-label { color: rgba(255,255,255,0.88); }
+  .size-band .sqft-display { color: #fff; }
+  .size-band .sqft-display span { color: rgba(255,255,255,0.8); }
+  .size-band .range-labels { color: rgba(255,255,255,0.78); }
+  .size-band .recalibrate-link { color: rgba(255,255,255,0.85); }
+  .size-band .recalibrate-link span { color: #fff; }
+
+  /* body is a centred flex column with side padding (the package row depends on
+     it). The question bands break out of that to run edge to edge. */
+  body > .hero-zone, body > .q-section { width: 100vw; margin-left: calc(50% - 50vw); align-self: stretch; }
+  /* .hero-zone's own padding-top clears the fixed header, so body must not
+     double it up. */
+  body { padding-top: 0 !important; }
+
+  /* Terminal branches (storm / in-person quote / the calibrating animation)
+     stay hidden until the answers route to them. */
+  .q-terminal { display: none; }
+  .q-terminal.open { display: block; }
+
+  /* Packages only exist once the questions are done — they populate at the
+     bottom of the flow rather than sitting there blurred the whole time. */
+  #pkgSection { display: none; }
+  body.calibrated #pkgSection { display: block; }
+
+  #calibrateOverlayLegacy { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.58); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); z-index: 100; justify-content: center; align-items: center; padding: 16px; opacity: 1; transition: opacity 0.38s ease, backdrop-filter 1s ease, -webkit-backdrop-filter 1s ease, background 1s ease; }
   #calibrateOverlay.visible { display: flex; }
   .calibrate-box { background: var(--white); border-radius: var(--radius); padding: 32px 28px; width: 100%; max-width: 380px; min-height: 380px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
   .calibrate-box h2 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 20px; color: var(--orange); margin-bottom: 6px; }
@@ -748,17 +856,39 @@
 </div>
 
 
-<div id="calibrateOverlay">
-  <div class="calibrate-box">
-    <div class="calibrate-progress">
-      <button type="button" class="calibrate-back" id="calibrateBack" onclick="calibrateGoBack()">←</button>
-      <span class="calibrate-step-label" id="calibrateStepLabel">Question 1 of 7</span>
-      <button type="button" class="calibrate-forward" id="calibrateForward" onclick="calibrateGoForward()">→</button>
-    </div>
+<!-- Hero — pins under the header while the first question scrolls beneath it,
+     then releases at "How many stories?" (the end of .hero-zone). -->
+<div class="hero-zone">
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Oklahoma City</div>
+    <h1>Let's get<br>your price</h1>
+  </div>
+</section>
 
-    <div class="calibrate-step active" id="calibrateStep1">
-      <h2><span class="calibrate-icon"></span>Let's Get Your Price</h2>
-      <p>Answer a few questions and toggle your home size to see package pricing.</p>
+<section class="q-section" id="calibrateStepSize">
+  <h2>How big is your home?</h2>
+  <p>Slide to your square footage. You can come back and adjust it any time &mdash; prices move with it.</p>
+  <div class="quick-q">
+      <div class="size-band">
+      <div class="slider-section">
+        <span class="input-label">Home Square Footage</span>
+        <div class="sqft-display" id="sqftDisplay">1,500 <span>sq ft</span></div>
+        <div class="slider-wrap" id="sliderWrap">
+          <input type="range" id="sqftSlider" min="500" max="6000" value="1500" step="50">
+        </div>
+        <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
+        <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="q-section" id="calibrateStep1">
+      <h2><span class="calibrate-icon"></span>How many stories?</h2>
+      <p>Height changes how we reach the glass, so it moves the price.</p>
       <div class="quick-q" style="margin-top:18px;">
         <span class="input-label">How many stories is your home?</span>
         <div class="story-btns">
@@ -767,9 +897,11 @@
           <button type="button" class="story-btn" data-stories="3" onclick="selectStories(3,this)">3+ Stories</button>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="calibrate-step" id="calibrateStep2">
+    </div><!-- /.hero-zone : hero lets go here, after the first two questions -->
+
+<section class="q-section" id="calibrateStep2">
       <h2><span class="calibrate-icon"></span>Screens</h2>
       <p>Window screens will need to be removed and replaced during cleaning.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -779,10 +911,9 @@
           <button type="button" class="story-btn" onclick="selectScreens('no',this)">No</button>
         </div>
       </div>
-    </div>
-
-    <div class="calibrate-step" id="calibrateStep2b">
-      <h2><span class="calibrate-icon"></span>Screens</h2>
+    
+      <div class="sub-q" id="calibrateStep2b">
+      <h3>Where do they come out?</h3>
       <p>This helps us know how to plan for screen removal.</p>
       <div class="quick-q" style="margin-top:18px;">
         <span class="input-label">Are they removed from inside or outside?</span>
@@ -793,9 +924,13 @@
         </div>
       </div>
       <p class="unsure-screen-note" id="unsureScreenNote" style="display:none;margin-top:14px;font-size:13px;color:var(--mid);line-height:1.5;">A $50 charge will be removed from your onsite invoice if screens are removable from the outside.</p>
-    </div>
+    
+      </div>
+    </section>
 
-    <div class="calibrate-step" id="calibrateStep3">
+    
+
+    <section class="q-section" id="calibrateStep3">
       <h2><span class="calibrate-icon"></span>Window Type</h2>
       <p>French pane windows have multiple small panes divided by grids or muntins on the <strong style="color:var(--dark);">outside</strong> of the glass.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -806,19 +941,22 @@
           <button type="button" class="story-btn" onclick="selectFrenchPane('other',this)">Other</button>
         </div>
       </div>
-    </div>
-
-
-    <div class="calibrate-step" id="calibrateStep3b">
-      <h2><span class="calibrate-icon"></span>Window Type</h2>
+    
+      <div class="sub-q" id="calibrateStep3b">
+      <h3>How many?</h3>
       <p>Are more than 75% of your windows French pane?</p>
       <div class="story-btns" style="margin-top:18px;">
         <button type="button" class="story-btn" onclick="selectFrenchPaneOther('yes',this)">Yes</button>
         <button type="button" class="story-btn" onclick="selectFrenchPaneOther('no',this)">No</button>
       </div>
-    </div>
+    
+      </div>
+    </section>
 
-    <div class="calibrate-step" id="calibrateStep3c">
+
+    
+
+    <section class="q-section" id="calibrateStep3c">
       <h2><span class="calibrate-icon"></span>Storm Windows</h2>
       <p>We specialize in storm windows across historic and other neighborhoods. Our Storm Package covers both layers of glass and the space between — and when most windows have storms, the additional surfaces are typically included.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -828,9 +966,9 @@
           <button type="button" class="story-btn" onclick="selectStormQ('yes',this)">Yes</button>
         </div>
       </div>
-    </div>
+    </section>
 
-        <div class="calibrate-step" id="calibrateStep4">
+        <section class="q-section" id="calibrateStep4">
       <h2><span class="calibrate-icon"></span>Cleaning History</h2>
       <p>This helps us know what to expect when we arrive.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -841,9 +979,9 @@
         </div>
       </div>
       <input type="hidden" id="cleanFreq" value="">
-    </div>
+    </section>
 
-    <div class="calibrate-step" id="calibrateStep5">
+    <section class="q-section" id="calibrateStep5">
       <h2><span class="calibrate-icon"></span>Your Neighborhood</h2>
       <p>Some historic homes have special window types that can affect pricing.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -853,9 +991,9 @@
           <button type="button" class="story-btn" onclick="selectHistoric('yes',this)">Yes</button>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="calibrate-step" id="calibrateStep5b">
+    <section class="q-section q-terminal" id="calibrateStep5b">
       <h2><span class="calibrate-icon"></span>Storm Windows</h2>
       <p>Storm windows are a secondary window installed over the original for insulation.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -865,9 +1003,9 @@
           <button type="button" class="story-btn" onclick="selectStormWindows('no',this)">No</button>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="calibrate-step" id="calibrateStep6">
+    <section class="q-section" id="calibrateStep6">
       <h2><span class="calibrate-icon"></span>Anything Unusual?</h2>
       <p>These features can affect access and pricing.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -877,10 +1015,9 @@
           <button type="button" class="story-btn" onclick="selectUncommonFeatures('some',this)">Yes, I have some</button>
         </div>
       </div>
-    </div>
-
-    <div class="calibrate-step" id="calibrateStep6b">
-      <h2><span class="calibrate-icon"></span>Which ones?</h2>
+    
+      <div class="sub-q" id="calibrateStep6b">
+      <h3>Which ones?</h3>
       <p>Select all that apply.</p>
       <div class="quick-q" style="margin-top:18px;">
         <div class="story-btns" style="flex-direction:column;gap:8px;">
@@ -930,26 +1067,30 @@
         <p style="margin-top:12px;font-size:12px;color:var(--mid);line-height:1.5;">All items can be priced on-site.</p>
         <div class='pkg-btn-wrap' style='margin-top:16px;'><button type='button' class='story-btn' style='background:var(--orange);color:#fff;border-color:var(--orange);width:100%;' onclick="startCalibrationLoad()">Next →</button></div>
       </div>
-    </div>
+    
+      </div>
+    </section>
 
-    <div class="calibrate-step" id="calibrateStepLoading">
+    
+
+    <section class="q-section q-terminal" id="calibrateStepLoading">
       <h2 style="text-align:center;margin-bottom:0;">Calibrating Suds</h2>
       <div class="calib-spinner">
         <span></span><span></span><span></span><span></span><span></span>
       </div>
       <p id="calibAllSet" style="display:none;text-align:center;font-size:14px;font-weight:700;color:var(--dark);margin-top:8px;line-height:1.5;">All set! Toggle the slider to explore your estimate.</p>
-    </div>
+    </section>
 
-    <div class="calibrate-step" id="calibrateStepStorm">
+    <section class="q-section q-terminal" id="calibrateStepStorm">
       <h2><span class="calibrate-icon"></span>Storm Windows — You're in the Right Place</h2>
       <p>We specialize in storm windows across historic and other neighborhoods. Our Storm Package covers both layers of glass and the space between — and when most windows have storms, the additional surfaces are typically included.</p>
       <p style="margin-top:10px;font-size:12px;color:var(--mid);line-height:1.5;font-style:italic;">Final pricing and scheduling are confirmed in person.</p>
       <div class="pkg-btn-wrap" id="btn-wrap-storm-cta" style="margin-top:20px;">
         <button type="button" class="story-btn" style="background:var(--orange);color:#fff;border-color:var(--orange);width:100%;" onclick="stormWithBubbles()">See My Package →</button>
       </div>
-    </div>
+    </section>
 
-    <div class="calibrate-step" id="calibrateStepQuote">
+    <section class="q-section q-terminal" id="calibrateStepQuote">
       <h2><span class="calibrate-icon"></span>Let's Talk In Person</h2>
       <p>Historic homes take an in-person estimate so we can give you an accurate quote.</p>
       <p style="margin-top:10px;color:var(--mid);">We'd love to see your home firsthand — reach out and we'll get you on the schedule.</p>
@@ -957,12 +1098,11 @@
         <a href="tel:4058822277" class="story-btn" style="text-align:center;text-decoration:none;display:block;">📞 Call Us</a>
         <button type="button" class="story-btn" onclick="openContactForm()">✉️ Send a Message</button>
       </div>
-    </div>
+    </section>
 
-  </div>
-</div>
-
-
+<!-- Packages populate here once the questions are done. No section
+     background: they sit straight on the page. -->
+<div id="pkgSection">
 <div class="packages-wrap">
 <button class="pkg-arrow pkg-arrow-left" id="pkgArrowLeft" aria-label="Scroll left">&#8249;</button>
 <button class="pkg-arrow pkg-arrow-right" id="pkgArrowRight" aria-label="Scroll right">&#8250;</button>
@@ -980,15 +1120,6 @@
   <div class="brand-tagline">for monkey business</div>
   <div class="brand-tagline-small">(but no monkey business)</div>
   
-  </div>
-    <div class="slider-section">
-    <span class="input-label">Home Square Footage</span>
-    <div class="sqft-display" id="sqftDisplay">1,500 <span>sq ft</span></div>
-    <div class="slider-wrap locked" id="sliderWrap">
-      <input type="range" id="sqftSlider" min="500" max="6000" value="1500" step="50" disabled>
-    </div>
-    <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
-    <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
   </div>
   <button class="game-btn pkg-btn" onclick="openDesktopGame()">Play Squeege Master 3000™</button>
 </div>
@@ -1216,6 +1347,7 @@
     <p style="margin-top:16px;text-align:center;font-size:11px;letter-spacing:0.03em;"><span style="font-family:'Nunito',sans-serif;color:#F4A9A6;">Powered by Monkey Intelligence </span><span style="font-family:'Barlow Condensed',sans-serif;font-style:italic;font-weight:800;font-size:13px;color:#A6382E;letter-spacing:0.05em;">MI</span></p>
   </div>
 </div>
+</div><!-- /#pkgSection -->
 
 
 <script>
@@ -1231,23 +1363,41 @@
   let screenLocation = null;
   let calibrateCurrentStep = '1';
   var STEP_BLUR = {'1':28,'2':22,'2b':20,'3':15,'3b':13,'3c':11,'4':8,'5':4,'6':1,'6b':1,'Storm':0,'Loading':0.5};
+  // The wizard is a stacked page now, not an overlay: the main questions are all
+  // present, follow-ups open underneath the question that triggered them, and
+  // terminal branches unhide. "Showing" a step therefore means revealing it if
+  // it is conditional and scrolling it into view.
   function showCalibrateStep(id) {
-    document.querySelectorAll('.calibrate-step').forEach(el => el.classList.remove('active'));
     const el = document.getElementById('calibrateStep' + id);
-    if(el) el.classList.add('active');
-    const LABELS = {'1':'Question 1 of 7','2':'Question 2 of 7','2b':'Question 2 of 7','3':'Question 3 of 7','3b':'Question 3 of 7','3c':'Question 4 of 7','4':'Question 5 of 7','5':'Question 6 of 7','6':'Question 7 of 7','6b':'Question 7 of 7'};
-    document.getElementById('calibrateStepLabel').textContent = LABELS[id] || '';
-    document.getElementById('calibrateBack').classList.toggle('visible', id !== '1' && id !== 'Loading');
-    const noForward = ['7','Loading','Storm','Quote'];
-    document.getElementById('calibrateForward').classList.toggle('visible', recalibrating && !noForward.includes(id));
+    if (!el) return;
+    if (el.classList.contains('sub-q') || el.classList.contains('q-terminal')) el.classList.add('open');
     calibrateCurrentStep = id;
-    var blur = STEP_BLUR[id] !== undefined ? STEP_BLUR[id] : 2;
-    var overlay = document.getElementById('calibrateOverlay');
-    if(overlay) {
-      overlay.style.backdropFilter = 'blur(' + blur + 'px)';
-      overlay.style.webkitBackdropFilter = 'blur(' + blur + 'px)';
-      overlay.style.background = 'rgba(0,0,0,' + (0.35 + blur / 28 * 0.23) + ')';
-    }
+    advanceTo('calibrateStep' + id);
+  }
+  function closeSub(id) {
+    const el = document.getElementById('calibrateStep' + id);
+    if (el) el.classList.remove('open');
+  }
+  // Lands a section under the fixed chrome. How much chrome is in the way
+  // depends on where we land: while the hero is still stuck it covers the band
+  // under the header; past .hero-zone only the header is left.
+  function advanceTo(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    setTimeout(() => {
+      const header = document.querySelector('.site-header');
+      const hero = document.querySelector('.hero');
+      const zone = document.querySelector('.hero-zone');
+      const navH = header ? header.offsetHeight : 0;
+      const elTop = el.getBoundingClientRect().top + window.scrollY;
+      let y = elTop - navH - 16;
+      if (hero && zone) {
+        const heroH = hero.offsetHeight;
+        const zoneBottom = zone.getBoundingClientRect().bottom + window.scrollY;
+        if (y <= zoneBottom - heroH - navH) y = elTop - navH - heroH - 16;
+      }
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }, 60);
   }
   function calibrateGoBack() {
     const PREV = {'2':'1','2b':'2','3':'2','3b':'3','3c':'3','4':'3c','5':'4','6':'5','6b':'6','Storm':'5','Quote':'3c'};
@@ -1262,10 +1412,10 @@
     setTimeout(() => showCalibrateStep('2'), 1100);
   }
   function selectScreens(value, btn) {
-    document.querySelectorAll('#calibrateStep2 .story-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#calibrateStep2 > .quick-q .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     hasScreens = (value === 'yes');
-    if(value === 'no') { screenLocation = null; }
+    if(value === 'no') { screenLocation = null; closeSub('2b'); }
     setTimeout(() => showCalibrateStep(value === 'yes' ? '2b' : '3'), 1100);
   }
   function selectScreensLoc(value, btn) {
@@ -1278,9 +1428,9 @@
     setTimeout(() => { if(note) note.style.display = 'none'; showCalibrateStep('3'); }, delay);
   }
   function selectFrenchPane(value, btn) {
-    document.querySelectorAll('#calibrateStep3 .story-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#calibrateStep3 > .quick-q .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    if(value !== 'other') { frenchPaneMajority = false; frenchPaneFlatSurcharge = (value === 'some-front') ? 25 : 0; }
+    if(value !== 'other') { frenchPaneMajority = false; frenchPaneFlatSurcharge = (value === 'some-front') ? 25 : 0; closeSub('3b'); }
     setTimeout(() => showCalibrateStep(value === 'other' ? '3b' : '3c'), 1100);
   }
   function selectFrenchPaneOther(value, btn) {
@@ -1317,10 +1467,10 @@
     setTimeout(() => showCalibrateStep(value === 'yes' ? 'Storm' : '6'), 1100);
   }
   function selectUncommonFeatures(value, btn) {
-    document.querySelectorAll('#calibrateStep6 .story-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#calibrateStep6 > .quick-q .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     if(value === 'some') { setTimeout(() => showCalibrateStep('6b'), 1100); }
-    else { setTimeout(startCalibrationLoad, 1100); }
+    else { closeSub('6b'); setTimeout(startCalibrationLoad, 1100); }
   }
   let uncommonFeatures = [];
   let interestedServices = [];
@@ -1391,7 +1541,6 @@
           setTimeout(() => {
             cancelAnimationFrame(rafId);
             setTimeout(() => { document.getElementById('calibAllSet').style.display = 'block'; }, 1100);
-            setTimeout(() => { var ov=document.getElementById('calibrateOverlay'); if(ov){ov.style.backdropFilter='blur(0px)';ov.style.webkitBackdropFilter='blur(0px)';ov.style.background='rgba(0,0,0,0.32)';} }, 1100);
           }, 320);
         }
       }, t);
@@ -1436,6 +1585,7 @@
   }
 
   function startCalScroll(){
+    return;
     if(window.matchMedia('(min-width: 900px)').matches) {
       spawnWizBubble(); spawnWizBubble(); spawnWizBubble();
       wizBubbleInterval = setInterval(spawnWizBubble, 3200);
@@ -1473,20 +1623,14 @@
     if(wizBubbleInterval){ clearInterval(wizBubbleInterval); wizBubbleInterval = null; }
     wizBubbles.forEach(b => b.remove()); wizBubbles = [];
   }
+  // Nothing to open any more — the questions are the page. Kept because several
+  // call sites (deep links, the re-calibrate link) still ask for "the wizard".
   function openCalibrate(){
     if(calibrated) return;
     if(document.body.classList.contains('storm-mode')) return;
-    showCalibrateStep('1');
-    document.getElementById('calibrateOverlay').classList.add('visible');
-    setTimeout(startCalScroll, 300);
+    advanceTo('calibrateStepSize');
   }
-  function closeCalibrateOverlay(){
-    var ov = document.getElementById('calibrateOverlay');
-    ov.style.opacity = '0';
-    ov.style.pointerEvents = 'none';
-    setTimeout(function(){ ov.classList.remove('visible'); ov.style.opacity=''; ov.style.pointerEvents=''; }, 400);
-    stopCalScroll();
-  }
+  function closeCalibrateOverlay(){ stopCalScroll(); }
   function openContactForm(){
     // TODO: wire up contact form
   }
@@ -1498,9 +1642,6 @@
       btn.classList.add('bouncing');
       btn.addEventListener('animationend', () => btn.classList.remove('bouncing'), { once: true });
     }
-    if(document.getElementById('calibrateOverlay').classList.contains('visible')) return;
-    if(e.target.closest('#playSq3000Btn') || e.target.closest('#sq3000Section')) return;
-    openCalibrate();
   });
 
   function completeCalibration(){
@@ -1515,8 +1656,13 @@
     document.getElementById('sqftSlider').disabled = false;
     document.getElementById('sliderWrap').classList.remove('locked');
     updatePrices();
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    // The calibrating panel was a step in the flow; retire it once it is done.
+    const load = document.getElementById('calibrateStepLoading');
+    if (load) load.classList.remove('open');
     closeCalibrateOverlay();
+    // The packages appear at the bottom of the flow, so go to them rather than
+    // jumping back to the top of the page.
+    requestAnimationFrame(() => advanceTo('pkgSection'));
     try {
       sessionStorage.setItem('suds_cal', JSON.stringify({
         stories: selectedStories,
@@ -1566,11 +1712,8 @@
     sessionStorage.removeItem('suds_cal');
     document.body.classList.remove('calibrated');
     document.body.classList.remove('storm-mode');
-    document.getElementById('sqftSlider').disabled = true;
-    document.getElementById('sliderWrap').classList.add('locked');
-    showCalibrateStep('1');
-    document.getElementById('calibrateOverlay').classList.add('visible');
-    startCalScroll();
+    // The slider stays live: it is the first question now, not a locked readout.
+    showCalibrateStep('Size');
   }
   function roundToNine(n,skipZeroTens){const r=Math.round(n);const ones=r%10;let p=ones<=5?r-ones-1:r+(9-ones);if(!skipZeroTens&&Math.floor(p/10)%10===0)p-=10;return p;}
   function fmt(n){return roundToNine(n).toLocaleString();}
@@ -2913,11 +3056,17 @@ let currentPkg = null;
     });
   })();
 
+  (function(){
+    const header = document.querySelector('.site-header');
+    if (!header) return;
+    const publish = () => document.documentElement.style.setProperty('--navH', header.offsetHeight + 'px');
+    publish();
+    window.addEventListener('resize', publish);
+    if (window.ResizeObserver) new ResizeObserver(publish).observe(header);
+  })();
+
   document.addEventListener('DOMContentLoaded', function() {
     const _params = new URLSearchParams(window.location.search);
-    if (!_params.get('pkg') && !calibrated) {
-      openCalibrate();
-    }
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
         document.body.style.opacity = '1';
