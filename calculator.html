@@ -640,24 +640,6 @@
   </div>
 </section>
 
-<section class="q-section" id="calibrateStepSize">
-  <h2>How big is your home?</h2>
-  <p>Slide to your square footage. You can come back and adjust it any time &mdash; prices move with it.</p>
-  <div class="quick-q">
-      <div class="size-band">
-      <div class="slider-section">
-        <span class="input-label">Home Square Footage</span>
-        <div class="sqft-display" id="sqftDisplay">1,500 <span>sq ft</span></div>
-        <div class="slider-wrap" id="sliderWrap">
-          <input type="range" id="sqftSlider" min="500" max="6000" value="1500" step="50">
-        </div>
-        <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
-        <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section class="q-section" id="calibrateStep1">
       <h2><span class="calibrate-icon"></span>How many stories?</h2>
       <p>Height changes how we reach the glass, so it moves the price.</p>
@@ -671,7 +653,6 @@
       </div>
     </section>
 
-    </div><!-- /.hero-zone : hero lets go here, after the first two questions -->
 
 <section class="q-section" id="calibrateStep2">
       <h2><span class="calibrate-icon"></span>Screens</h2>
@@ -702,7 +683,9 @@
 
     
 
-    <section class="q-section" id="calibrateStep3">
+    </div><!-- /.hero-zone : hero lets go here, after the first two questions -->
+
+<section class="q-section" id="calibrateStep3">
       <h2><span class="calibrate-icon"></span>Window Type</h2>
       <p>French pane windows have multiple small panes divided by grids or muntins on the <strong style="color:var(--dark);">outside</strong> of the glass.</p>
       <div class="quick-q" style="margin-top:18px;">
@@ -871,6 +854,26 @@
         <button type="button" class="story-btn" onclick="openContactForm()">✉️ Send a Message</button>
       </div>
     </section>
+
+<!-- Size sits last: answer the questions, then dial in square footage with the
+     packages directly underneath so prices move as you slide. -->
+<section class="q-section" id="calibrateStepSize">
+  <h2>How big is your home?</h2>
+  <p>Slide to your square footage. You can come back and adjust it any time &mdash; prices move with it.</p>
+  <div class="quick-q">
+      <div class="size-band">
+      <div class="slider-section">
+        <span class="input-label">Home Square Footage</span>
+        <div class="sqft-display" id="sqftDisplay">1,500 <span>sq ft</span></div>
+        <div class="slider-wrap" id="sliderWrap">
+          <input type="range" id="sqftSlider" min="500" max="6000" value="1500" step="50">
+        </div>
+        <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
+        <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- Packages populate here once the questions are done. No section
      background: they sit straight on the page. -->
@@ -1404,7 +1407,9 @@
     closeCalibrateOverlay();
     // The packages appear at the bottom of the flow, so go to them rather than
     // jumping back to the top of the page.
-    requestAnimationFrame(() => advanceTo('pkgSection'));
+    // Land on the size band: it is the last thing to set, and the packages sit
+    // directly beneath it so prices move as you slide.
+    requestAnimationFrame(() => advanceTo('calibrateStepSize'));
     try {
       sessionStorage.setItem('suds_cal', JSON.stringify({
         stories: selectedStories,
