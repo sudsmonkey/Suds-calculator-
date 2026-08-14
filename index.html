@@ -134,8 +134,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   overflow: hidden;
 }
 /* The game takes over the page when it's open — drop the pin so the band can't
-   sit on top of the game canvas. */
-body.game-open .truck-band { position: static; }
+   sit on top of the game canvas. Must be `relative`, not `static`: the photo and
+   overlay inside are `position:absolute; inset:0`, so a static band stops being
+   their containing block and they anchor somewhere else entirely, leaving the
+   band as a slab of its own background colour. `top` is deliberately left at
+   76px — relative positioning still honours it, which drops the band down over
+   the top of the game teaser. That overlap is intentional. */
+body.game-open .truck-band { position: relative; }
 .truck-band-photo {
   position: absolute; inset: 0;
   background-image: url('img-truck.jpg');
