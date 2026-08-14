@@ -237,6 +237,10 @@
   .packages { display: flex; flex-direction: column; gap: 36px; width: 100%; max-width: 500px; }
   .pkg { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 6px 22px rgba(100,30,22,0.22); transition: transform 0.15s, box-shadow 0.15s; display: flex; flex-direction: column; }
   .pkg:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(100,30,22,0.30); }
+  /* The slider card keeps the shadow but drops the hairline: its top half is
+     the coral block, and a grey line running down the side of it clashes.
+     Needs .pkg.header-card to outrank the .pkg rule that supplies the border. */
+  .pkg.header-card { border: none; }
   .pkg.selected { }
 
   /* Storm Package — coral hero, everything else identical */
