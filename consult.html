@@ -18,7 +18,15 @@
   --radius: 20px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* Keep scrollIntoView targets clear of the fixed chrome. Both the header and
+     the hero are fixed here — the hero occupies 76..258 of the viewport and
+     content scrolls beneath it — so the clearance is the hero's bottom, not the
+     header's. Padding only to the header left headings hidden behind the hero,
+     which read as the question being skipped. */
+  scroll-padding-top: 274px;
+}
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-font-smoothing: antialiased; }
 
 /* Header */
