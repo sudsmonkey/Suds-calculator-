@@ -301,7 +301,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 </section>
 
 <!-- Q2: Stories -->
-<section class="q-section" id="q2" style="display:none;">
+<section class="q-section" id="q2">
   <div class="q-num">02</div>
   <h2 class="q-head">How many stories?</h2>
   <p class="q-sub">Height affects access equipment and pricing.</p>
@@ -319,7 +319,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 </section>
 
 <!-- Q3: Service type -->
-<section class="q-section" id="q3" style="display:none;">
+<section class="q-section" id="q3">
   <div class="q-num">03</div>
   <h2 class="q-head">What are you looking for?</h2>
   <p class="q-sub">We'll put together the right scope for you.</p>
@@ -334,7 +334,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 </section>
 
 <!-- Photo upload -->
-<section class="q-section" id="photo-section" style="display:none; background: var(--white);">
+<section class="q-section" id="photo-section" style="background: var(--white);">
   <div class="q-num">04</div>
   <h2 class="q-head">Got any photos?</h2>
   <p class="q-sub">Totally optional — helps us visualize the job before we connect.</p>
@@ -345,14 +345,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     <div class="photo-drop-sub">Building exterior, windows, access points</div>
   </div>
   <div class="photo-thumbs" id="photoThumbs"></div>
-  <div style="display:flex; flex-direction:column; align-items:center; gap:6px; margin-top:20px;">
-    <p onclick="showCTAs()" style="font-family:'Nunito',sans-serif; font-size:16px; font-weight:900; color:var(--mid); text-decoration:underline; cursor:pointer;">Continue</p>
-    <p class="photo-skip" onclick="showCTAs()">Skip for now</p>
-  </div>
 </section>
 
 <!-- CTAs -->
-<section class="q-section" id="cta-section" style="display:none; background: var(--cream);">
+<section class="q-section" id="cta-section" style="background: var(--cream);">
   <h2 class="q-head" style="margin-bottom: 6px;">How would you like to connect?</h2>
   <p class="q-sub" style="margin-bottom: 28px;">We'll take it from there and put a scope together for you.</p>
   <div style="display: flex; flex-direction: column; gap: 12px; max-width: 440px;">
@@ -433,36 +429,30 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     if (selectedType === type) {
       selectedType = null;
       document.getElementById('tile-' + type).classList.remove('sel');
-      hideFrom(['q2','q3','photo-section','cta-section','cal-embed']);
+      hideFrom(['cal-embed']);
       selectedStories = null; selectedService = null;
       return;
     }
     selectedType = type;
     document.querySelectorAll('#q1 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + type).classList.add('sel');
-    hideFrom(['q3','photo-section','cta-section','cal-embed']);
+    hideFrom(['cal-embed']);
     selectedStories = null; selectedService = null;
-    const q2 = document.getElementById('q2');
-    q2.style.display = 'block';
-    setTimeout(() => q2.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   }
 
   function selectStories(val) {
     if (selectedStories === val) {
       selectedStories = null;
       document.getElementById('tile-' + val).classList.remove('sel');
-      hideFrom(['q3','photo-section','cta-section','cal-embed']);
+      hideFrom(['cal-embed']);
       selectedService = null;
       return;
     }
     selectedStories = val;
     document.querySelectorAll('#q2 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + val).classList.add('sel');
-    hideFrom(['photo-section','cta-section','cal-embed']);
+    hideFrom(['cal-embed']);
     selectedService = null;
-    const q3 = document.getElementById('q3');
-    q3.style.display = 'block';
-    setTimeout(() => q3.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   }
 
   let selectedService = null;
@@ -471,22 +461,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     if (selectedService === val) {
       selectedService = null;
       document.getElementById('tile-' + val).classList.remove('sel');
-      hideFrom(['photo-section','cta-section','cal-embed']);
+      hideFrom(['cal-embed']);
       return;
     }
     selectedService = val;
     document.querySelectorAll('#q3 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + val).classList.add('sel');
-    hideFrom(['cta-section','cal-embed']);
-    const ps = document.getElementById('photo-section');
-    ps.style.display = 'block';
-    setTimeout(() => ps.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
-  }
-
-  function showCTAs() {
-    const cta = document.getElementById('cta-section');
-    cta.style.display = 'block';
-    setTimeout(() => cta.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    hideFrom(['cal-embed']);
   }
 
   function handlePhotos(input) {
