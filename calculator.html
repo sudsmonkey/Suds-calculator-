@@ -123,8 +123,8 @@
     position: relative;
   }
   .logo-circle {
-    width: 110px;
-    height: 110px;
+    width: 94px;
+    height: 94px;
     border-radius: 50%;
     /* Just the bubble on the coral block — no disc, ring or glow behind it */
     background: transparent;
@@ -140,13 +140,15 @@
        nearly that same cream, so colour-keying would eat the bubble. It is a
        clean circle instead, so the round clip does the work: the image is
        780x827 with the bubble 678px across centred at (394,437). Scaling it to
-       112px inside the 110px circle lands the crop 1px inside the rim, which
-       removes any cream fringe while keeping the rim itself. */
-    width: 128.9px;
+       96px inside the 94px circle lands the crop 1px inside the rim, which
+       removes any cream fringe while keeping the rim itself. The circle has to
+       shrink with the bubble — leave it larger and the clip stops cutting at
+       the rim, exposing the cream field around it. */
+    width: 110.4px;
     height: auto;
     max-width: none;
     flex-shrink: 0;
-    transform: translate(-0.7px, -3.9px);
+    transform: translate(-0.6px, -3.3px);
   }
   .suds-title { font-family: "Nunito", sans-serif; font-weight: 900; font-style: italic; font-size: 38px; color: #A6382E; margin: 0 0 4px; letter-spacing: -0.5px; text-align: center; }
   .header-body {
