@@ -20,12 +20,9 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html {
   scroll-behavior: smooth;
-  /* Keep scrollIntoView targets clear of the fixed chrome. Both the header and
-     the hero are fixed here — the hero occupies 76..258 of the viewport and
-     content scrolls beneath it — so the clearance is the hero's bottom, not the
-     header's. Padding only to the header left headings hidden behind the hero,
-     which read as the question being skipped. */
-  scroll-padding-top: 274px;
+  /* Clears the fixed header for any anchor scrolling. The questions use
+     advanceTo(), which works out the hero's overlap for itself. */
+  scroll-padding-top: 92px;
 }
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-font-smoothing: antialiased; }
 
@@ -73,9 +70,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 .hd-menu a:hover { background: #FDF0EF; color: var(--orange); }
 
 /* Hero */
+/* The hero pins under the header while Q1 and Q2 scroll beneath it, then
+   releases when "What are you looking for?" arrives — the end of .hero-zone.
+   Sticky rather than fixed so the browser handles it on the compositor. */
+.hero-zone { padding-top: var(--navH, 76px); }
 .hero {
-  position: fixed;
-  top: 0; left: 0; right: 0;
+  position: sticky;
+  top: var(--navH, 76px);
   z-index: 100;
   background: #111;
   overflow: hidden;
@@ -264,6 +265,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 </header>
 
 <!-- Hero -->
+<div class="hero-zone">
 <div class="hero">
   <div class="hero-bg"></div>
   <div class="hero-overlay"></div>
@@ -272,7 +274,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     <h1>When service<br>evolves</h1>
   </div>
 </div>
-<div class="hero-spacer"></div>
 
 <!-- Q1: Property type -->
 <section class="q-section" id="q1">
@@ -318,6 +319,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 </section>
 
 <!-- Q3: Service type -->
+</div><!-- /.hero-zone -->
+
 <section class="q-section" id="q3">
   <h2 class="q-head">What are you looking for?</h2>
   <p class="q-sub">We'll put together the right scope for you.</p>
@@ -421,9 +424,28 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   // Answering scrolls on to the next question. Every section is already on
   // screen, so this moves the page rather than revealing anything — you can
   // still scroll freely and answer in any order.
+  //
+  // How much chrome sits over the target depends on where we land: while the
+  // hero is still stuck it covers the band under the header, but past the end
+  // of .hero-zone it has scrolled away and only the header is in the way.
   function advanceTo(id) {
     const el = document.getElementById(id);
-    if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    if (!el) return;
+    setTimeout(() => {
+      const header = document.querySelector('.site-header');
+      const hero = document.querySelector('.hero');
+      const zone = document.querySelector('.hero-zone');
+      const navH = header ? header.offsetHeight : 0;
+      const elTop = el.getBoundingClientRect().top + window.scrollY;
+      let y = elTop - navH - 16;
+      if (hero && zone) {
+        const heroH = hero.offsetHeight;
+        const zoneBottom = zone.getBoundingClientRect().bottom + window.scrollY;
+        // the hero stays stuck while scrollY <= zoneBottom - heroH - navH
+        if (y <= zoneBottom - heroH - navH) y = elTop - navH - heroH - 16;
+      }
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }, 60);
   }
 
   function hideFrom(ids) {
@@ -649,18 +671,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     });
   });
 
-  // Sync hero top to sit below the fixed header, spacer keeps content below both
+  // The hero pins via position: sticky. This only publishes the real header
+  // height so the sticky offset and the zone's padding match it.
   (function(){
     const header = document.querySelector('.site-header');
-    const hero = document.querySelector('.hero');
-    const spacer = document.querySelector('.hero-spacer');
-    function sync(){
-      const hh = header.offsetHeight;
-      hero.style.top = hh + 'px';
-      spacer.style.height = (hh + hero.offsetHeight) + 'px';
+    function syncNavHeight(){
+      document.documentElement.style.setProperty('--navH', header.offsetHeight + 'px');
     }
-    sync();
-    window.addEventListener('orientationchange', function(){ setTimeout(sync, 200); });
+    syncNavHeight();
+    window.addEventListener('load', syncNavHeight);
+    window.addEventListener('resize', syncNavHeight);
+    window.addEventListener('orientationchange', function(){ setTimeout(syncNavHeight, 200); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncNavHeight);
   })();
 </script>
 </body>
