@@ -410,6 +410,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   let selectedType = null;
   let selectedStories = null;
 
+  // Answering scrolls on to the next question. Every section is already on
+  // screen, so this moves the page rather than revealing anything — you can
+  // still scroll freely and answer in any order.
+  function advanceTo(id) {
+    const el = document.getElementById(id);
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  }
+
   function hideFrom(ids) {
     ids.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
   }
@@ -427,6 +435,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     document.getElementById('tile-' + type).classList.add('sel');
     hideFrom(['cal-embed']);
     selectedStories = null; selectedService = null;
+    advanceTo('q2');
   }
 
   function selectStories(val) {
@@ -442,6 +451,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     document.getElementById('tile-' + val).classList.add('sel');
     hideFrom(['cal-embed']);
     selectedService = null;
+    advanceTo('q3');
   }
 
   let selectedService = null;
@@ -457,6 +467,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     document.querySelectorAll('#q3 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + val).classList.add('sel');
     hideFrom(['cal-embed']);
+    advanceTo('photo-section');
   }
 
   function handlePhotos(input) {
