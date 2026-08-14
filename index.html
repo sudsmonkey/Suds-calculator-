@@ -309,6 +309,17 @@ body.game-open .truck-band { position: relative; top: auto; }
 
 
 /* ── Testimonials ────────────────── */
+/* Package cards pin while the homeowner reviews scroll up underneath them, then
+   release at Commercial so that section reads as its own fresh start. Needs an
+   opaque background: the reviews pass directly beneath, and the cards sit at
+   the same .wrap inset as the reviews so nothing bleeds at the edges. */
+.pkg-pin {
+  position: sticky;
+  top: var(--navH, 76px);
+  z-index: 40;
+  background: var(--cream);
+  padding: 14px 20px 18px;
+}
 .testi-grid { display: flex; flex-direction: column; gap: 10px; }
 .testi-card {
   /* Neutral hairline rather than no border: the card is white on cream, so
@@ -545,11 +556,14 @@ body.game-open .truck-band { position: relative; top: auto; }
     </div>
 
 
-    <!-- Package teaser -->
-    <div style="padding: 32px 20px 20px;">
+    <!-- Packages pin over the reviews below, releasing at Commercial. -->
+    <div class="pkg-zone">
+    <div style="padding: 32px 20px 0;">
       <div class="section-tag">Our Packages</div>
       <div class="section-heading">Find the right fit for your home</div>
       <p class="section-sub">Packages to fit your needs.</p>
+    </div>
+    <div class="pkg-pin">
       <div style="display:flex; gap:12px; justify-content:center;">
 
         <a href="calculator.html" style="flex:1; max-width:120px; display:flex; flex-direction:column; align-items:center; gap:10px; text-decoration:none; background:#fff; border-radius:18px; padding:18px 10px 16px; box-shadow:0 2px 14px rgba(166,56,46,0.09); border:1px solid var(--border);">
@@ -597,6 +611,7 @@ body.game-open .truck-band { position: relative; top: auto; }
         </div>
       </div>
     </div>
+    </div><!-- /.pkg-zone -->
 
     <div class="glass-section">
       <div class="glass-type">Commercial</div>
