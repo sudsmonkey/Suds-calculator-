@@ -126,11 +126,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
    hero's height as a fixed 216px. Plain block in normal flow, so it has no
    bearing on the hero's sticky pin. */
 .truck-band {
-  position: relative;
+  position: sticky;
+  top: var(--navH, 76px);
+  z-index: 50;
   height: 216px;
   background: var(--dark);
   overflow: hidden;
 }
+/* The game takes over the page when it's open — drop the pin so the band can't
+   sit on top of the game canvas. */
+body.game-open .truck-band { position: static; }
 .truck-band-photo {
   position: absolute; inset: 0;
   background-image: url('img-truck.jpg');
@@ -356,7 +361,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
 
 /* ── CTA band ────────────────────── */
-.cta-band { background: var(--dark); padding: 40px 20px; text-align: center; }
+/* Rides OVER the pinned truck band (z-index 50) instead of under it. The band
+   stays pinned to the bottom of the page, so without this the CTA's headline
+   would scroll underneath the photo and never be readable. */
+.cta-band { background: var(--dark); padding: 40px 20px; text-align: center; position: relative; z-index: 60; }
 .cta-band h2 {
   font-family: 'Anton', sans-serif; font-size: 30px;
   color: #fff; margin-bottom: 10px; line-height: 1.1;
@@ -641,7 +649,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   </div>
 </div>
 
-<!-- Photo band separating the service sections from the game teaser -->
+<!-- Photo band separating the service sections from the game teaser. Pins under
+     the header and stays pinned to the bottom of the page — everything below it
+     scrolls underneath. The zone runs to the end of the document on purpose: it
+     would otherwise release with ~136px of scroll left, which reads as a glitch
+     rather than a transition. While the game is open the band un-sticks
+     (body.game-open) so it never hangs over the game. -->
+<div class="truck-zone">
 <section class="truck-band" aria-hidden="true">
   <div class="truck-band-photo"></div>
   <div class="truck-band-overlay"></div>
@@ -696,6 +710,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   </nav>
   <div class="footer-copy">© 2025 Suds Monkey. All rights reserved.</div>
 </footer>
+</div><!-- /.truck-zone -->
 
 
 <div id="vid-backdrop"></div>
@@ -718,6 +733,7 @@ function launchGame() {
     frame.style.height = Math.max(700, Math.round(window.innerHeight * 0.9)) + 'px';
     frame.src = 'game.html';
     embed.style.display = 'block';
+    document.body.classList.add('game-open');
     // Collapse the teaser copy and the Play button so the game sits directly
     // under the title. The corner × in the embed is the way back out.
     document.getElementById('gameSub').style.display = 'none';
@@ -773,6 +789,7 @@ function launchGame() {
   } else {
     if (frame._sizeObserver) { frame._sizeObserver.disconnect(); frame._sizeObserver = null; }
     embed.style.display = 'none';
+    document.body.classList.remove('game-open');
     frame.src = '';
     frame.style.height = '';
     // Restore the teaser before scrolling to it — a hidden element has no box
