@@ -365,38 +365,41 @@ body.game-open .truck-band { position: relative; }
 #vid-exp-v { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 
-/* ── CTA band ────────────────────── */
-/* Rides OVER the pinned truck band (z-index 50) instead of under it. The band
-   stays pinned to the bottom of the page, so without this the CTA's headline
-   would scroll underneath the photo and never be readable. */
-.cta-band { background: var(--dark); padding: 40px 20px; text-align: center; position: relative; z-index: 60; }
-.cta-band h2 {
-  font-family: 'Anton', sans-serif; font-size: 30px;
-  color: #fff; margin-bottom: 10px; line-height: 1.1;
+/* ── Thank-you band ──────────────── */
+/* The payoff at the end of the scroll. Rides OVER the pinned truck band
+   (z-index 50) rather than under it, so it folds up over the photo instead of
+   sliding beneath it — that fold is the whole point of the section.
+   Deliberately asks for nothing: no CTAs, no links. The footer below carries
+   the quote/commercial/phone paths. */
+.thanks-band {
+  background: var(--dark); padding: 52px 24px 56px; text-align: center;
+  position: relative; z-index: 60;
 }
-.cta-band p { font-size: 14px; color: rgba(255,255,255,0.65); margin-bottom: 22px; line-height: 1.6; }
-.area-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 28px; }
-.area-tag {
-  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 50px; padding: 5px 14px;
-  font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.75);
+.thanks-mark {
+  font-family: 'Barlow Condensed', sans-serif; font-style: italic; font-weight: 800;
+  font-size: 84px; line-height: 0.6; color: rgba(255,255,255,0.22);
+  margin-bottom: 14px; user-select: none;
 }
-.area-tag.hl { background: var(--mint); border-color: var(--mint); color: var(--dark); }
-.btn-cta {
-  display: inline-block; background: var(--orange); color: #fff;
-  font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 900;
-  border-radius: 50px; padding: 14px 34px; text-decoration: none;
-  box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: opacity 0.15s;
+.thanks-quote {
+  max-width: 480px; margin: 0 auto 26px;
+  font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 400;
+  line-height: 1.7; color: rgba(255,255,255,0.9);
 }
-.btn-cta:hover { opacity: 0.88; }
-.cta-or { font-size: 13px; color: rgba(255,255,255,0.35); margin: 14px 0 10px; }
-.btn-cta-alt {
-  display: inline-block; color: rgba(255,255,255,0.65);
-  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
-  text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.25);
-  transition: color 0.15s;
+.thanks-quote p { margin: 0 0 14px; }
+.thanks-quote p:last-child { margin-bottom: 0; }
+.thanks-rule {
+  width: 40px; height: 2px; background: var(--mint);
+  margin: 0 auto 18px; border-radius: 2px; opacity: 0.8;
 }
-.btn-cta-alt:hover { color: #fff; }
+.thanks-sign {
+  font-family: 'Anton', sans-serif; font-size: 24px; letter-spacing: 0.5px;
+  color: #fff; line-height: 1; margin-bottom: 7px;
+}
+.thanks-role {
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
 
 /* ── Footer ──────────────────────── */
 .footer { background: var(--ink); padding: 28px 20px; text-align: center; }
@@ -682,26 +685,19 @@ body.game-open .truck-band { position: relative; }
   <iframe id="gameFrame" src="" style="width:100%; border:none; display:block;" scrolling="no"></iframe>
 </div>
 
-<!-- CTA + Service area -->
-<div class="cta-band">
-  <h2>SERVING THE OKC METRO</h2>
-  <p>Residential and commercial service across the full Oklahoma City area.</p>
-  <div class="area-tags">
-    <span class="area-tag">Oklahoma City</span>
-    <span class="area-tag">Edmond</span>
-    <span class="area-tag">Moore</span>
-    <span class="area-tag">Norman</span>
-    <span class="area-tag">Yukon</span>
-    <span class="area-tag">Mustang</span>
-    <span class="area-tag">Midwest City</span>
-    <span class="area-tag">Bethany</span>
-    <span class="area-tag">Piedmont</span>
-    <span class="area-tag">Choctaw</span>
-  </div>
-  <a href="calculator.html" class="btn-cta">Get Your Free Quote</a>
-  <div class="cta-or">or</div>
-  <a href="consult.html" style="display:inline-block; background:var(--mint); color:var(--dark); font-family:'Nunito',sans-serif; font-size:15px; font-weight:900; border-radius:50px; padding:12px 28px; text-decoration:none; box-shadow:0 4px 0 rgba(0,0,0,0.18);">Book a commercial consult</a>
-</div>
+<!-- Thank-you band — folds up over the pinned truck photo at the end of the
+     scroll. No CTAs here on purpose. -->
+<section class="thanks-band">
+  <div class="thanks-mark" aria-hidden="true">&ldquo;</div>
+  <blockquote class="thanks-quote">
+    <p>However you got here, thank you for the time you just spent on my site.</p>
+    <p>I built every page of it myself, between jobs and after long days on a ladder, so you could see honest prices and real openings instead of waiting on a callback that might never come.</p>
+    <p>That you looked at all means more than you'd think.</p>
+  </blockquote>
+  <div class="thanks-rule" aria-hidden="true"></div>
+  <div class="thanks-sign">Levi</div>
+  <div class="thanks-role">Owner &middot; Suds Monkey Window Cleaning</div>
+</section>
 
 <!-- Footer -->
 <footer class="footer">
