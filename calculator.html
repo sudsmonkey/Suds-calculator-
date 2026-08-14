@@ -196,7 +196,19 @@
   #calibrateStepSize { padding-left: 0; padding-right: 0; }
   #calibrateStepSize > h2, #calibrateStepSize > p { padding-left: 20px; padding-right: 20px; }
   #calibrateStepSize .quick-q { max-width: none; }
-  .size-band { background: var(--orange); padding: 26px 20px 30px; width: 100%; }
+  /* The band pins under the header and the package cards ride up OVER it.
+     body is the flex column holding the whole page, so making the band a direct
+     child of it gives the pin a zone that runs to the bottom without disturbing
+     how the package row is centred. */
+  .size-band {
+    background: var(--orange);
+    padding: 26px 20px 30px;
+    position: sticky;
+    top: var(--navH, 76px);
+    z-index: 5;
+    align-self: stretch;
+    width: 100vw; margin-left: calc(50% - 50vw);
+  }
   .size-band .slider-section { max-width: none; margin: 0; padding: 0; }
   .size-band .input-label { color: rgba(255,255,255,0.88); }
   .size-band .sqft-display { color: #fff; }
@@ -219,7 +231,8 @@
 
   /* Packages only exist once the questions are done — they populate at the
      bottom of the flow rather than sitting there blurred the whole time. */
-  #pkgSection { display: none; }
+  /* Rides over the pinned size band rather than under it. */
+  #pkgSection { display: none; position: relative; z-index: 20; }
   body.calibrated #pkgSection { display: block; }
 
   #calibrateOverlayLegacy { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.58); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); z-index: 100; justify-content: center; align-items: center; padding: 16px; opacity: 1; transition: opacity 0.38s ease, backdrop-filter 1s ease, -webkit-backdrop-filter 1s ease, background 1s ease; }
@@ -860,8 +873,9 @@
 <section class="q-section" id="calibrateStepSize">
   <h2>How big is your home?</h2>
   <p>Slide to your square footage. You can come back and adjust it any time &mdash; prices move with it.</p>
-  <div class="quick-q">
-      <div class="size-band">
+</section>
+
+<div class="size-band">
       <div class="slider-section">
         <span class="input-label">Home Square Footage</span>
         <div class="sqft-display" id="sqftDisplay">1,500 <span>sq ft</span></div>
@@ -871,9 +885,8 @@
         <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
         <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
       </div>
-    </div>
-  </div>
-</section>
+</div>
+
 
 <!-- Packages populate here once the questions are done. No section
      background: they sit straight on the page. -->
@@ -1360,9 +1373,6 @@
     document.getElementById('sqftSlider').disabled = false;
     document.getElementById('sliderWrap').classList.remove('locked');
     updatePrices();
-    // The calibrating panel was a step in the flow; retire it once it is done.
-    const load = document.getElementById('calibrateStepLoading');
-    if (load) load.classList.remove('open');
     closeCalibrateOverlay();
     // The packages appear at the bottom of the flow, so go to them rather than
     // jumping back to the top of the page.
