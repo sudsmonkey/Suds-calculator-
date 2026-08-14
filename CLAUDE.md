@@ -15,6 +15,13 @@ Always push to both: the first deploys to GitHub Pages (live site), the second k
 
 **Development branch:** `claude/calculator-visibility-4e46v0`
 
+## Deferred work
+
+`SEO-BACKLOG.md` holds audited SEO gaps (structured data, Open Graph, per-page
+meta) parked until the design passes are done. Read it before touching `<head>`
+on any page, or before re-adding the city-name list that used to sit above the
+footer on `index.html`.
+
 ## Architecture
 
 Four standalone HTML files — all CSS and JS are inlined. No framework, no bundler, no shared modules.
