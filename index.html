@@ -302,6 +302,28 @@ body.game-open .truck-band { position: relative; top: auto; }
   display: block; text-decoration: none;
 }
 .glass-cta:hover { color: var(--orange); }
+
+/* Residential heading + subtext pin under the header while the photo strip
+   scrolls underneath, releasing at the end of .glass-section — exactly where
+   the package pin (z-index 40) takes over, so the two never compete. */
+.res-pin {
+  position: sticky;
+  top: var(--navH, 76px);
+  z-index: 30;
+  background: var(--cream);
+  padding: 18px 0 16px;
+}
+
+/* Commercial heading + subtext pin the same way. The zone spans the photo
+   strip AND the commercial reviews — .comm-zone wraps both — releasing right
+   as "One Time Cleans" arrives. */
+.comm-pin {
+  position: sticky;
+  top: var(--navH, 76px);
+  z-index: 30;
+  background: var(--cream);
+  padding: 18px 0 16px;
+}
 .glass-photo-label {
   font-size: 11px; color: var(--mid); font-weight: 600; opacity: 0.45; letter-spacing: 0.04em;
 }
@@ -517,8 +539,10 @@ body.game-open .truck-band { position: relative; top: auto; }
 <div class="wrap">
   <div class="section">
     <div class="glass-section">
+      <div class="res-pin">
       <div class="glass-type">Residential</div>
       <p class="glass-body"><span class="glass-lead">With speed and precision</span> Suds Monkey leaves your windows spotless. We've mastered a 100-year-old squeegee technique alongside modern pure water systems, leaving <span class="glass-em">transformational results</span> for homeowners and their valued guests.</p>
+      </div>
       <div class="glass-scroll">
         <div class="glass-track">
           <!-- Set 1 -->
@@ -613,9 +637,17 @@ body.game-open .truck-band { position: relative; top: auto; }
     </div>
     </div><!-- /.pkg-zone -->
 
-    <div class="glass-section">
+    <!-- Commercial heading + subtext pin over the photo strip and the reviews
+         below, releasing at One Time Cleans. comm-pin must be a DIRECT child of
+         .comm-zone — sticky's containing block is its immediate parent, so
+         nesting it inside .glass-section (as first attempted) confined the pin
+         to just the photo strip and released it before the reviews even
+         arrived. .glass-section's class carries over for its margin-bottom. -->
+    <div class="comm-zone glass-section">
+      <div class="comm-pin">
       <div class="glass-type">Commercial</div>
       <p class="glass-body"><span class="glass-lead">From small boutiques to large medical facilities,</span> Suds Monkey delivers <span class="glass-em">reliable, consistent service</span> to OKC business owners and managers across the metro and surrounding states. Our trained technicians are skilled at <span class="glass-em">working at height</span> on larger projects and are always mindful of keeping disruption to a minimum for facilities and retail customers alike.</p>
+      </div>
       <a href="consult.html" class="glass-cta">Tap here to schedule a consultation or site visit to your property.</a>
       <div class="glass-scroll" id="commScroll">
         <div class="glass-track">
@@ -645,7 +677,6 @@ body.game-open .truck-band { position: relative; top: auto; }
           <div class="glass-photo"><img src="IMG_9876.jpeg" alt="Commercial windows"></div>
         </div>
       </div>
-    </div>
 
     <!-- Commercial review snap-ins -->
     <div style="padding: 28px 0 36px;">
@@ -665,6 +696,7 @@ body.game-open .truck-band { position: relative; top: auto; }
         </div>
       </div>
     </div>
+    </div><!-- /.comm-zone -->
 
     <div class="glass-section">
       <div class="glass-type">One Time Cleans</div>
