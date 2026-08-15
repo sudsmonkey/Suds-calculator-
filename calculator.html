@@ -210,6 +210,26 @@
     width: 100vw; margin-left: calc(50% - 50vw);
   }
   .size-band .slider-section { max-width: none; margin: 0; padding: 0; }
+
+  /* The default rail fills coral, which is invisible on a coral band — sliding
+     right looked like the rail collapsing behind the knob. On the band the fill
+     is white and the remainder is a translucent white, so the whole rail reads
+     at any value. */
+  .size-band input[type="range"] {
+    background: linear-gradient(to right,
+      #fff 0%, #fff var(--pct, 20%),
+      rgba(255,255,255,0.35) var(--pct, 20%));
+  }
+  .size-band input[type="range"]::-webkit-slider-thumb {
+    background: #fff;
+    border: 3px solid #fff;
+    box-shadow: 0 1px 6px rgba(120,30,22,0.45);
+  }
+  .size-band input[type="range"]::-moz-range-thumb {
+    background: #fff;
+    border: 3px solid #fff;
+    box-shadow: 0 1px 6px rgba(120,30,22,0.45);
+  }
   .size-band .input-label { color: rgba(255,255,255,0.88); }
   .size-band .sqft-display { color: #fff; }
   .size-band .sqft-display span { color: rgba(255,255,255,0.8); }
