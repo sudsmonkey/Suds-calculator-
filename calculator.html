@@ -302,7 +302,9 @@
   body.calibrated .recalibrate-link { display: block; }
 
   /* Package cards */
-  .packages { display: flex; flex-direction: column; gap: 36px; width: 100%; max-width: 500px; }
+  /* Inset a touch so the cards sit slightly narrower than the coral band above
+     them. border-box, so the padding narrows the cards without moving the row. */
+  .packages { display: flex; flex-direction: column; gap: 36px; width: 100%; max-width: 500px; padding: 0 14px; }
   .pkg { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 6px 22px rgba(100,30,22,0.22); transition: transform 0.15s, box-shadow 0.15s; display: flex; flex-direction: column; }
   .pkg:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(100,30,22,0.30); }
   .pkg.selected { }
@@ -545,7 +547,9 @@
     .checkout-card, .note-wrap { max-width: 600px; }
     .addons-section { min-height: 150px; }
     .slider-section { padding-bottom: 9px; }
-    .packages { padding-bottom: 0; }
+    /* The column inset does not apply here: desktop cards are a fixed 300px in a
+       horizontal scroll row, so the padding would only shift the row. */
+    .packages { padding-bottom: 0; padding-left: 0; padding-right: 0; }
     .game-btn { display: block; margin-top: auto; width: calc(100% - 48px); margin-bottom: 24px; background: #F5EFE6; color: #3d3530; box-shadow: 0 4px 0 #C4B8AC, inset 0 1px 0 rgba(255,255,255,0.7); }
     .game-btn:active { box-shadow: 0 1px 0 #C4B8AC, inset 0 1px 0 rgba(255,255,255,0.7); }
     #btn-wrap-silver .pkg-btn { background: var(--orange) !important; box-shadow: 0 4px 0 #C06060, inset 0 1px 0 rgba(255,255,255,0.2) !important; }
