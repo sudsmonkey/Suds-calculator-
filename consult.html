@@ -302,8 +302,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 </section>
 
 <!-- Q2: Stories -->
-</div><!-- /.hero-zone -->
-
 <section class="q-section" id="q2">
   <h2 class="q-head">How many stories?</h2>
   <p class="q-sub">Height affects access equipment and pricing.</p>
@@ -334,6 +332,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   </div>
 </section>
 
+</div><!-- /.hero-zone : hero lets go here, after Q1-Q3 -->
+
 <!-- Photo upload -->
 <section class="q-section" id="photo-section" style="background: var(--white);">
   <h2 class="q-head">Got any photos?</h2>
@@ -358,7 +358,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 </section>
 
 <!-- Inline calendar -->
-<section id="cal-embed" style="display:none;" class="cal-section">
+<section id="cal-embed" class="cal-section">
   <div class="cal-wrap">
     <div class="sec-label">Pick a Date</div>
     <div class="calendar-card">
@@ -456,7 +456,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     if (selectedType === type) {
       selectedType = null;
       document.getElementById('tile-' + type).classList.remove('sel');
-      hideFrom(['cal-embed']);
       selectedStories = null; selectedService = null;
       return;
     }
@@ -472,7 +471,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     if (selectedStories === val) {
       selectedStories = null;
       document.getElementById('tile-' + val).classList.remove('sel');
-      hideFrom(['cal-embed']);
       selectedService = null;
       return;
     }
@@ -490,7 +488,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     if (selectedService === val) {
       selectedService = null;
       document.getElementById('tile-' + val).classList.remove('sel');
-      hideFrom(['cal-embed']);
       return;
     }
     selectedService = val;
@@ -630,17 +627,22 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   async function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}await renderCalendar();}
   async function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}await renderCalendar();}
 
+  // The calendar is already on the page; picking a type just relabels it and
+  // re-renders — Site Visit and Phone Consultation have different slot counts
+  // per day (see renderCalendar/renderTimeSlots), so this is still load-bearing,
+  // not just cosmetic.
   function bookConsult(pkg) {
     consultPkg=pkg;
     document.getElementById('summaryPkg').textContent=pkg;
     const embed=document.getElementById('cal-embed');
-    embed.style.display='block';
     setTimeout(()=>embed.scrollIntoView({behavior:'smooth',block:'start'}),60);
     renderCalendar();
     renderTimeSlots();
   }
 
   document.addEventListener('DOMContentLoaded', function(){
+    renderCalendar();
+    renderTimeSlots();
     document.getElementById('bookBtn').addEventListener('click', async function(){
       const btn=this;
       const fn=(document.getElementById('infoFirstName').value||'').trim();
