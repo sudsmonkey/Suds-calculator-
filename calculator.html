@@ -199,16 +199,13 @@
   #calibrateStepSize { padding-left: 0; padding-right: 0; }
   #calibrateStepSize > h2, #calibrateStepSize > p { padding-left: 20px; padding-right: 20px; }
   #calibrateStepSize .quick-q { max-width: none; }
-  /* The band pins under the header and the package cards ride up OVER it.
-     body is the flex column holding the whole page, so making the band a direct
-     child of it gives the pin a zone that runs to the bottom without disturbing
-     how the package row is centred. */
+  /* Unpinned for now — it scrolls with the page like any other step. It is a
+     direct child of body so it can still break out to full width; the z-index
+     on .q-terminal and #pkgSection is what let content ride over it while it
+     was sticky, and is harmless now. */
   .size-band {
     background: var(--orange);
     padding: 26px 20px 30px;
-    position: sticky;
-    top: var(--navH, 76px);
-    z-index: 5;
     align-self: stretch;
     width: 100vw; margin-left: calc(50% - 50vw);
   }
@@ -249,7 +246,8 @@
 
   /* Terminal branches (storm / in-person quote / the calibrating animation)
      stay hidden until the answers route to them. */
-  .q-terminal { display: none; }
+  /* Ride over the pinned size band rather than under it, same as #pkgSection. */
+  .q-terminal { display: none; position: relative; z-index: 20; }
   .q-terminal.open { display: block; }
 
   /* Packages only exist once the questions are done — they populate at the
@@ -258,6 +256,8 @@
      the first card room to breathe off the band — matched to the 36px gap the
      cards keep between themselves. */
   #pkgSection { display: none; position: relative; z-index: 20; margin-top: 36px; }
+  /* Closes out the questions; pointless once the packages are on the page. */
+  body.calibrated #calibrateStepSizeGo { display: none; }
   body.calibrated #pkgSection { display: block; }
 
   #calibrateOverlayLegacy { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.58); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); z-index: 100; justify-content: center; align-items: center; padding: 16px; opacity: 1; transition: opacity 0.38s ease, backdrop-filter 1s ease, -webkit-backdrop-filter 1s ease, background 1s ease; }
@@ -863,13 +863,40 @@
           </div>
         </div>
         <p style="margin-top:12px;font-size:12px;color:var(--mid);line-height:1.5;">All items can be priced on-site.</p>
-        <div class='pkg-btn-wrap' style='margin-top:16px;'><button type='button' class='story-btn' style='background:var(--orange);color:#fff;border-color:var(--orange);width:100%;' onclick="startCalibrationLoad()">Next →</button></div>
+        <div class='pkg-btn-wrap' style='margin-top:16px;'><button type='button' class='story-btn' style='background:var(--orange);color:#fff;border-color:var(--orange);width:100%;' onclick="advanceTo('calibrateStepSize')">Next →</button></div>
       </div>
     
       </div>
     </section>
 
     
+
+<section class="q-section" id="calibrateStepSize">
+  <h2>How big is your home?</h2>
+  <p>Slide to your square footage. You can come back and adjust it any time &mdash; prices move with it.</p>
+</section>
+
+<div class="size-band">
+      <div class="slider-section">
+        <span class="input-label">Home Square Footage</span>
+        <div class="sqft-display" id="sqftDisplay">1,500 <span>sq ft</span></div>
+        <div class="slider-wrap" id="sliderWrap">
+          <input type="range" id="sqftSlider" min="500" max="6000" value="1500" step="50">
+        </div>
+        <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
+        <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
+      </div>
+</div>
+
+
+<!-- Packages populate here once the questions are done. No section
+     background: they sit straight on the page. -->
+
+<section class="q-section" id="calibrateStepSizeGo">
+  <div class="quick-q">
+    <button type="button" class="story-btn" style="background:var(--orange);color:#fff;border-color:var(--orange);width:100%;" onclick="startCalibrationLoad()">See My Packages &rarr;</button>
+  </div>
+</section>
 
     <section class="q-section q-terminal" id="calibrateStepLoading">
       <h2 style="text-align:center;margin-bottom:0;">Calibrating Suds</h2>
@@ -900,26 +927,6 @@
 
 <!-- Size sits last: answer the questions, then dial in square footage with the
      packages directly underneath so prices move as you slide. -->
-<section class="q-section" id="calibrateStepSize">
-  <h2>How big is your home?</h2>
-  <p>Slide to your square footage. You can come back and adjust it any time &mdash; prices move with it.</p>
-</section>
-
-<div class="size-band">
-      <div class="slider-section">
-        <span class="input-label">Home Square Footage</span>
-        <div class="sqft-display" id="sqftDisplay">1,500 <span>sq ft</span></div>
-        <div class="slider-wrap" id="sliderWrap">
-          <input type="range" id="sqftSlider" min="500" max="6000" value="1500" step="50">
-        </div>
-        <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
-        <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
-      </div>
-</div>
-
-
-<!-- Packages populate here once the questions are done. No section
-     background: they sit straight on the page. -->
 <div id="pkgSection">
 <div class="packages-wrap">
 <button class="pkg-arrow pkg-arrow-left" id="pkgArrowLeft" aria-label="Scroll left">&#8249;</button>
@@ -1263,7 +1270,7 @@
     document.querySelectorAll('#calibrateStep6 > .quick-q .story-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     if(value === 'some') { setTimeout(() => showCalibrateStep('6b'), 1100); }
-    else { closeSub('6b'); setTimeout(startCalibrationLoad, 1100); }
+    else { closeSub('6b'); setTimeout(() => advanceTo('calibrateStepSize'), 1100); }
   }
   let uncommonFeatures = [];
   let interestedServices = [];
@@ -1378,7 +1385,7 @@
   function openCalibrate(){
     if(calibrated) return;
     if(document.body.classList.contains('storm-mode')) return;
-    advanceTo('calibrateStepSize');
+    advanceTo('calibrateStep1');
   }
   // Nothing left to tear down; kept so the old call sites stay valid.
   function closeCalibrateOverlay(){}
@@ -1406,9 +1413,7 @@
     closeCalibrateOverlay();
     // The packages appear at the bottom of the flow, so go to them rather than
     // jumping back to the top of the page.
-    // Land on the size band: it is the last thing to set, and the packages sit
-    // directly beneath it so prices move as you slide.
-    requestAnimationFrame(() => advanceTo('calibrateStepSize'));
+    requestAnimationFrame(() => advanceTo('pkgSection'));
     try {
       sessionStorage.setItem('suds_cal', JSON.stringify({
         stories: selectedStories,
@@ -1454,8 +1459,8 @@
     sessionStorage.removeItem('suds_cal');
     document.body.classList.remove('calibrated');
     document.body.classList.remove('storm-mode');
-    // The slider stays live: it is the first question now, not a locked readout.
-    showCalibrateStep('Size');
+    // Re-answering starts at the top; the slider stays live throughout.
+    showCalibrateStep('1');
   }
   function roundToNine(n,skipZeroTens){const r=Math.round(n);const ones=r%10;let p=ones<=5?r-ones-1:r+(9-ones);if(!skipZeroTens&&Math.floor(p/10)%10===0)p-=10;return p;}
   function fmt(n){return roundToNine(n).toLocaleString();}
