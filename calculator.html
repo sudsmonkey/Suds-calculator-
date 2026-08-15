@@ -196,7 +196,10 @@
   /* The size question is full-bleed, not a card: the coral band and the slider
      both run the whole width of the screen. .q-section keeps its side padding
      for the heading, so these two break out of it. */
-  #calibrateStepSize { padding-left: 0; padding-right: 0; }
+  /* The coral band butts straight onto this section, so its tail padding and the
+     sub-line's bottom margin were both just gap between the copy and the slider. */
+  #calibrateStepSize { padding-left: 0; padding-right: 0; padding-bottom: 20px; }
+  #calibrateStepSize > p { margin-bottom: 0; }
   #calibrateStepSize > h2, #calibrateStepSize > p { padding-left: 20px; padding-right: 20px; }
   #calibrateStepSize .quick-q { max-width: none; }
   /* Unpinned for now — it scrolls with the page like any other step. It is a
@@ -872,7 +875,7 @@
     
 
 <section class="q-section" id="calibrateStepSize">
-  <h2>How big is your home?</h2>
+  <h2><span class="calibrate-icon"></span>How big is your home?</h2>
   <p>Slide to your square footage. You can come back and adjust it any time &mdash; prices move with it.</p>
 </section>
 
