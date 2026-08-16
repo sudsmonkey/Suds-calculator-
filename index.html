@@ -91,6 +91,26 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 }
 #gameClose:active { transform: translateY(1px); box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
 
+/* The game box carries the ending while it's open. The truck band drops its
+   pin so it can't sit over the game (see body.game-open .truck-band below),
+   which would otherwise leave nothing pinned and kill the fold at the end of
+   the scroll — so the game box takes the pin instead, and the thank-you band
+   and footer ride up over it exactly as they do over the truck photo.
+
+   .game-pinned is set from JS and only while the game actually fits the space
+   under the header. Pinning something taller than that would clip its bottom
+   with no way to scroll down to it — the game's own controls would end up off
+   screen. */
+#gameEmbed { width: 100%; background: var(--cream); position: relative; }
+body.game-pinned #gameEmbed {
+  position: sticky;
+  top: var(--navH, 76px);
+  z-index: 50;
+}
+/* The footer is static, so it would paint underneath a z-indexed sticky game.
+   Lift it to the thank-you band's layer so it folds up over the game too. */
+body.game-pinned .footer { position: relative; z-index: 60; }
+
 /* The hero pins under the header while "How it works" slides beneath it,
    then scrolls away when the next section arrives. This is `sticky` rather
    than JS-toggled positioning so the browser enforces it on the compositor —
@@ -701,7 +721,7 @@ body.game-open .truck-band { position: relative; top: auto; }
 </div>
 
 <!-- Game embed -->
-<div id="gameEmbed" style="display:none; width:100%; background:var(--cream); position:relative;">
+<div id="gameEmbed" style="display:none;">
   <button id="gameClose" onclick="launchGame()" aria-label="Close game" title="Close game">&times;</button>
   <iframe id="gameFrame" src="" style="width:100%; border:none; display:block;" scrolling="no"></iframe>
 </div>
@@ -743,6 +763,22 @@ function toggleMenu(){
   document.getElementById('hdMenu').classList.toggle('open');
 }
 
+// Pins the game box under the header so the thank-you band and footer fold up
+// over it, the same ending the truck photo gives when the game is closed. Only
+// pins while the game fits the space under the header: a taller game would have
+// its bottom — controls included — clipped off screen with no way to reach it.
+function updateGamePin() {
+  const embed = document.getElementById('gameEmbed');
+  if (!embed || !document.body.classList.contains('game-open')) {
+    document.body.classList.remove('game-pinned');
+    return;
+  }
+  const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--navH')) || 0;
+  const fits = embed.getBoundingClientRect().height <= window.innerHeight - navH;
+  document.body.classList.toggle('game-pinned', fits);
+}
+window.addEventListener('resize', updateGamePin);
+
 function launchGame() {
   const embed = document.getElementById('gameEmbed');
   const frame = document.getElementById('gameFrame');
@@ -760,13 +796,14 @@ function launchGame() {
     // under the title. The corner × in the embed is the way back out.
     document.getElementById('gameSub').style.display = 'none';
     btn.style.display = 'none';
+    updateGamePin();
     // Size the iframe to the game's real content height. The game sizes its
     // canvases in JS after load, so a single measurement on 'load' comes up
     // short and clips the game — re-measure until the layout settles.
     frame.onload = function() {
       let doc;
       try { doc = frame.contentDocument; } catch(e) { doc = null; }
-      if (!doc) { frame.style.height = '700px'; return; }
+      if (!doc) { frame.style.height = '700px'; updateGamePin(); return; }
 
       function measure() {
         const sect = doc.getElementById('sq3000Section');
@@ -784,6 +821,7 @@ function launchGame() {
         if (Math.abs(target - (parseInt(frame.style.height, 10) || 0)) > 2) {
           frame.style.height = target + 'px';
         }
+        updateGamePin();
       }
 
       measure();
@@ -812,6 +850,7 @@ function launchGame() {
     if (frame._sizeObserver) { frame._sizeObserver.disconnect(); frame._sizeObserver = null; }
     embed.style.display = 'none';
     document.body.classList.remove('game-open');
+    document.body.classList.remove('game-pinned');
     frame.src = '';
     frame.style.height = '';
     // Restore the teaser before scrolling to it — a hidden element has no box
