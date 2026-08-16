@@ -189,6 +189,29 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 /* ── Calendar embed ──────────────── */
 .cal-section { position: relative; z-index: 150; background: var(--cream); padding: 40px 20px 60px; border-top: 1px solid var(--border); }
 .cal-wrap { max-width: 440px; }
+
+/* Greyed out until the questions above are answered and a consultation type is
+   picked — otherwise you can start booking a slot before we know what it's
+   for. The note sits outside .cal-wrap so the grey filter never touches it. */
+.cal-lock-note {
+  display: none;
+  max-width: 440px;
+  margin: 0 auto 18px;
+  padding: 12px 16px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  font-size: 13px;
+  color: var(--mid);
+  line-height: 1.5;
+  text-align: center;
+}
+#cal-embed.locked .cal-lock-note { display: block; }
+#cal-embed.locked .cal-wrap {
+  filter: grayscale(0.9) opacity(0.5);
+  pointer-events: none;
+  user-select: none;
+}
 .sec-label { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--orange); margin-bottom: 10px; margin-top: 28px; }
 .sec-label:first-child { margin-top: 0; }
 .calendar-card { background: var(--white); border: 1.5px solid #F0A9A5; border-radius: var(--radius); }
@@ -359,6 +382,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 
 <!-- Inline calendar -->
 <section id="cal-embed" class="cal-section">
+  <div class="cal-lock-note" id="calLockNote">Answer the questions above and pick a consultation type to unlock booking.</div>
   <div class="cal-wrap">
     <div class="sec-label">Pick a Date</div>
     <div class="calendar-card">
@@ -457,6 +481,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
       selectedType = null;
       document.getElementById('tile-' + type).classList.remove('sel');
       selectedStories = null; selectedService = null;
+      updateCalLock();
       return;
     }
     selectedType = type;
@@ -464,6 +489,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     document.getElementById('tile-' + type).classList.add('sel');
     hideFrom(['cal-embed']);
     selectedStories = null; selectedService = null;
+    updateCalLock();
     advanceTo('q2');
   }
 
@@ -472,6 +498,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
       selectedStories = null;
       document.getElementById('tile-' + val).classList.remove('sel');
       selectedService = null;
+      updateCalLock();
       return;
     }
     selectedStories = val;
@@ -479,6 +506,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     document.getElementById('tile-' + val).classList.add('sel');
     hideFrom(['cal-embed']);
     selectedService = null;
+    updateCalLock();
     advanceTo('q3');
   }
 
@@ -488,6 +516,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     if (selectedService === val) {
       selectedService = null;
       document.getElementById('tile-' + val).classList.remove('sel');
+      updateCalLock();
       return;
     }
     selectedService = val;
@@ -624,6 +653,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 
   function updateBookBtn(){document.getElementById('bookBtn').disabled=!(calSelectedDate&&calSelectedTime);}
 
+  // Locked until Q1-Q3 are answered and a consultation type is picked.
+  function updateCalLock() {
+    const unlocked = selectedType && selectedStories && selectedService && consultPkg;
+    document.getElementById('cal-embed').classList.toggle('locked', !unlocked);
+  }
+
   async function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}await renderCalendar();}
   async function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}await renderCalendar();}
 
@@ -634,6 +669,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   function bookConsult(pkg) {
     consultPkg=pkg;
     document.getElementById('summaryPkg').textContent=pkg;
+    updateCalLock();
     const embed=document.getElementById('cal-embed');
     setTimeout(()=>embed.scrollIntoView({behavior:'smooth',block:'start'}),60);
     renderCalendar();
@@ -643,6 +679,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   document.addEventListener('DOMContentLoaded', function(){
     renderCalendar();
     renderTimeSlots();
+    updateCalLock();
     document.getElementById('bookBtn').addEventListener('click', async function(){
       const btn=this;
       const fn=(document.getElementById('infoFirstName').value||'').trim();
