@@ -497,9 +497,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   // hero is still stuck it covers the band under the header, but past the end
   // of .hero-zone it has scrolled away and only the header is in the way.
   //
-  // The 100ms is a hold: the tile's selected state lands, the page sits still
+  // The 120ms is a hold: the tile's selected state lands, the page sits still
   // for a beat, then the scroll starts. Native smooth-scroll does the moving.
-  const ADVANCE_HOLD_MS = 100;
+  const ADVANCE_HOLD_MS = 120;
 
   function advanceTo(id) {
     const el = document.getElementById(id);
