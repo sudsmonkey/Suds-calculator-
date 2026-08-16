@@ -239,8 +239,6 @@
   .size-band .sqft-display { color: #fff; }
   .size-band .sqft-display span { color: rgba(255,255,255,0.8); }
   .size-band .range-labels { color: rgba(255,255,255,0.78); }
-  .size-band .recalibrate-link { color: rgba(255,255,255,0.85); }
-  .size-band .recalibrate-link span { color: #fff; }
 
   /* body is a centred flex column with side padding (the package row depends on
      it). The question bands break out of that to run edge to edge. */
@@ -305,9 +303,6 @@
   @keyframes bubblePop { 0%,80%,100%{transform:scale(0.6);opacity:0.45} 40%{transform:scale(1.25);opacity:1} }
   @keyframes dotLock { from{transform:scale(0.6);opacity:0.45} to{transform:scale(1);opacity:1} }
   .calib-loading-label { text-align:center; font-size:13px; color:var(--mid); margin-top:4px; }
-  .recalibrate-link { display: none; margin-top: 10px; text-align: center; font-size: 12px; color: var(--mid); cursor: pointer; }
-  .recalibrate-link span { color: var(--orange); text-decoration: underline; }
-  body.calibrated .recalibrate-link { display: block; }
 
   /* Package cards */
   /* Inset a touch so the cards sit slightly narrower than the coral band above
@@ -889,7 +884,6 @@
           <input type="range" id="sqftSlider" min="500" max="6000" value="1500" step="50">
         </div>
         <div class="range-labels"><span>500 sq ft</span><span>6,000 sq ft</span></div>
-        <div class="recalibrate-link" onclick="reCalibrate()">Not right? <span>Re-calibrate</span></div>
       </div>
 </div>
 
