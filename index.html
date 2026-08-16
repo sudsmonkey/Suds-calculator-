@@ -97,6 +97,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
    the scroll — so the game box takes the pin instead, and the thank-you band
    and footer ride up over it exactly as they do over the truck photo.
 
+   It pins on the control box, not on the box itself: --gamePinTop is the
+   header height less the distance from the top of the embed down to the tool
+   buttons inside the iframe, so the game rides that bit further up and the
+   controls come to rest flush against the header. Measured in JS because the
+   distance is the game's own padding, on the far side of an iframe.
+
    .game-pinned is set from JS and only while the game actually fits the space
    under the header. Pinning something taller than that would clip its bottom
    with no way to scroll down to it — the game's own controls would end up off
@@ -104,7 +110,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 #gameEmbed { width: 100%; background: var(--cream); position: relative; }
 body.game-pinned #gameEmbed {
   position: sticky;
-  top: var(--navH, 76px);
+  top: var(--gamePinTop, var(--navH, 76px));
   z-index: 50;
 }
 /* The footer is static, so it would paint underneath a z-indexed sticky game.
@@ -767,15 +773,36 @@ function toggleMenu(){
 // over it, the same ending the truck photo gives when the game is closed. Only
 // pins while the game fits the space under the header: a taller game would have
 // its bottom — controls included — clipped off screen with no way to reach it.
+// The pin lands on the control box rather than on the top of the embed. The
+// gap between the two is the game's own section and stage padding, inside the
+// iframe, so it has to be measured rather than assumed — a same-origin frame
+// makes that a straight read.
+function gameControlOffset(embed) {
+  const frame = document.getElementById('gameFrame');
+  if (!frame) return 0;
+  let doc;
+  try { doc = frame.contentDocument; } catch (e) { doc = null; }
+  const btn = doc && doc.getElementById('applicatorBtn');
+  const row = btn && btn.parentElement;
+  if (!row) return 0;
+  const frameTop = frame.getBoundingClientRect().top - embed.getBoundingClientRect().top;
+  return Math.max(0, Math.round(frameTop + row.getBoundingClientRect().top));
+}
+
 function updateGamePin() {
   const embed = document.getElementById('gameEmbed');
   if (!embed || !document.body.classList.contains('game-open')) {
     document.body.classList.remove('game-pinned');
+    document.documentElement.style.removeProperty('--gamePinTop');
     return;
   }
   const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--navH')) || 0;
-  const fits = embed.getBoundingClientRect().height <= window.innerHeight - navH;
-  document.body.classList.toggle('game-pinned', fits);
+  const offset = gameControlOffset(embed);
+  document.documentElement.style.setProperty('--gamePinTop', (navH - offset) + 'px');
+  // What's left on screen once it sticks is the box minus the part that rides
+  // up behind the header, so that's what has to fit.
+  const visible = embed.getBoundingClientRect().height - offset;
+  document.body.classList.toggle('game-pinned', visible <= window.innerHeight - navH);
 }
 window.addEventListener('resize', updateGamePin);
 
@@ -850,7 +877,7 @@ function launchGame() {
     if (frame._sizeObserver) { frame._sizeObserver.disconnect(); frame._sizeObserver = null; }
     embed.style.display = 'none';
     document.body.classList.remove('game-open');
-    document.body.classList.remove('game-pinned');
+    updateGamePin();
     frame.src = '';
     frame.style.height = '';
     // Restore the teaser before scrolling to it — a hidden element has no box
