@@ -496,6 +496,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   // How much chrome sits over the target depends on where we land: while the
   // hero is still stuck it covers the band under the header, but past the end
   // of .hero-zone it has scrolled away and only the header is in the way.
+  //
+  // The 100ms is a hold: the tile's selected state lands, the page sits still
+  // for a beat, then the scroll starts. Native smooth-scroll does the moving.
+  const ADVANCE_HOLD_MS = 100;
 
   function advanceTo(id) {
     const el = document.getElementById(id);
@@ -514,7 +518,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
         if (y <= zoneBottom - heroH - navH) y = elTop - navH - heroH - 16;
       }
       window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-    }, 60);
+    }, ADVANCE_HOLD_MS);
   }
 
   function selectType(type) {
