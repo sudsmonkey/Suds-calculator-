@@ -489,6 +489,34 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   // How much chrome sits over the target depends on where we land: while the
   // hero is still stuck it covers the band under the header, but past the end
   // of .hero-zone it has scrolled away and only the header is in the way.
+  // Every scroll on this page uses this instead of native smooth-scroll: a
+  // genuine 100ms hold (no movement at all) before it starts moving, then a
+  // cubic ease-out — quick off the hold, decelerating the rest of the way so
+  // it settles into place rather than stopping abruptly. Duration scales with
+  // distance (~1ms/px) the way native smooth-scroll already did, clamped so
+  // very short and very long scrolls both stay sensible.
+  const SCROLL_HOLD_MS = 100;
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  let scrollAnimGen = 0;
+  function scrollPageTo(targetY) {
+    targetY = Math.max(0, targetY);
+    const gen = ++scrollAnimGen;
+    const startY = window.scrollY;
+    const delta = targetY - startY;
+    if (Math.abs(delta) < 1) return;
+    const duration = Math.min(550, Math.max(260, Math.round(Math.abs(delta))));
+    const start = performance.now();
+    function step(now) {
+      if (gen !== scrollAnimGen) return;
+      const elapsed = now - start;
+      if (elapsed < SCROLL_HOLD_MS) { requestAnimationFrame(step); return; }
+      const t = Math.min(1, (elapsed - SCROLL_HOLD_MS) / duration);
+      window.scrollTo(0, startY + delta * easeOutCubic(t));
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
   function advanceTo(id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -505,7 +533,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
         // the hero stays stuck while scrollY <= zoneBottom - heroH - navH
         if (y <= zoneBottom - heroH - navH) y = elTop - navH - heroH - 16;
       }
-      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      scrollPageTo(y);
     }, 60);
   }
 
@@ -758,7 +786,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
         if(res.ok||res.status===201){
           btn.style.display='none';
           document.getElementById('infoSection').querySelectorAll('.info-card,.summary-card,.sec-label').forEach(e=>e.style.display='none');
-          const s=document.getElementById('bookSuccess');s.style.display='block';s.scrollIntoView({behavior:'smooth',block:'center'});
+          const s=document.getElementById('bookSuccess');s.style.display='block';const sr=s.getBoundingClientRect();scrollPageTo(sr.top+window.scrollY-(innerHeight-sr.height)/2);
         } else {btn.disabled=false;btn.textContent='Confirm Booking';alert('Something went wrong. Please call us at (405) 882-2277.');}
       } catch(e){btn.disabled=false;btn.textContent='Confirm Booking';alert('Connection error. Please try again.');}
     });
