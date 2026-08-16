@@ -183,7 +183,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 .photo-drop-label { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 15px; color: var(--dark); margin-top: 10px; }
 .photo-drop-sub { font-size: 13px; color: var(--mid); margin-top: 4px; }
 .photo-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; max-width: 440px; }
-.photo-thumb { width: 72px; height: 72px; border-radius: 10px; object-fit: cover; border: 1.5px solid var(--border); }
+.photo-thumb-wrap { position: relative; width: 72px; height: 72px; }
+.photo-thumb { width: 100%; height: 100%; border-radius: 10px; object-fit: cover; border: 1.5px solid var(--border); display: block; }
+.photo-thumb-wrap.uploading .photo-thumb { opacity: 0.45; }
+.photo-thumb-wrap.uploading::after { content: ''; position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border: 2px solid var(--border); border-top-color: var(--orange); border-radius: 50%; animation: photoSpin 0.7s linear infinite; }
+.photo-thumb-wrap.failed .photo-thumb { opacity: 0.5; border-color: #E85D5D; }
+.photo-thumb-wrap.failed::after { content: '!'; position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; background: #E85D5D; color: #fff; border-radius: 50%; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+@keyframes photoSpin { to { transform: rotate(360deg); } }
 .photo-skip { font-size: 13px; color: var(--mid); text-align: center; margin-top: 10px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 
 /* ── Calendar embed ──────────────── */
@@ -568,15 +574,44 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     advanceTo('photo-section');
   }
 
+  const SB_PHOTO_BUCKET = 'consult-photos';
+  let uploadedPhotoUrls = [];
+  let activePhotoUploads = 0;
+
   function handlePhotos(input) {
     const thumbs = document.getElementById('photoThumbs');
-    thumbs.innerHTML = '';
     Array.from(input.files).forEach(file => {
+      const wrap = document.createElement('div');
+      wrap.className = 'photo-thumb-wrap uploading';
       const img = document.createElement('img');
       img.src = URL.createObjectURL(file);
       img.className = 'photo-thumb';
-      thumbs.appendChild(img);
+      wrap.appendChild(img);
+      thumbs.appendChild(wrap);
+      uploadPhoto(file, wrap);
     });
+    input.value = '';
+  }
+
+  async function uploadPhoto(file, wrap) {
+    activePhotoUploads++;
+    try {
+      const ext = (file.name.split('.').pop() || 'jpg').replace(/[^a-zA-Z0-9]/g, '') || 'jpg';
+      const path = Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + ext;
+      const res = await fetch(SB_URL + '/storage/v1/object/' + SB_PHOTO_BUCKET + '/' + path, {
+        method: 'POST',
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': file.type || 'application/octet-stream' },
+        body: file
+      });
+      if (!res.ok) throw new Error('upload failed');
+      uploadedPhotoUrls.push(SB_URL + '/storage/v1/object/public/' + SB_PHOTO_BUCKET + '/' + path);
+      wrap.classList.remove('uploading');
+    } catch (e) {
+      wrap.classList.remove('uploading');
+      wrap.classList.add('failed');
+    } finally {
+      activePhotoUploads--;
+    }
   }
 
   // ── Calendar embed ───────────────────────────────────
@@ -762,9 +797,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
       const ad=(document.getElementById('infoAddress').value||'').trim();
       const nt=(document.getElementById('infoNotes').value||'').trim();
       if(!fn||!ln||!ph||!em||!ad){alert('Please fill in your name, phone, email, and property address before confirming.');return;}
+      if(activePhotoUploads>0){alert('Your photos are still uploading — give it a second and try again.');return;}
       btn.disabled=true;btn.textContent='Booking…';
       const[y,m,d]=calSelectedDate.split('-');
-      const booking={first_name:fn,last_name:ln,email:em,phone:ph,address:ad,package:consultPkg,total:'$0',date:MONTHS[parseInt(m)-1]+' '+parseInt(d)+', '+y,date_iso:calSelectedDate,time:calSelectedTime,notes:nt||null};
+      const booking={first_name:fn,last_name:ln,email:em,phone:ph,address:ad,package:consultPkg,total:'$0',date:MONTHS[parseInt(m)-1]+' '+parseInt(d)+', '+y,date_iso:calSelectedDate,time:calSelectedTime,notes:nt||null,photo_urls:uploadedPhotoUrls.length?uploadedPhotoUrls.join(','):null};
       try {
         const res=await fetch(SB_URL+'/rest/v1/bookings',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},body:JSON.stringify(booking)});
         if(res.ok||res.status===201){
