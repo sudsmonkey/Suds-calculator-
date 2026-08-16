@@ -552,7 +552,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
         // the hero stays stuck while scrollY <= zoneBottom - heroH - navH
         if (y <= zoneBottom - heroH - navH) y = elTop - navH - heroH - 16;
       }
-      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      scrollPageTo(y);
     }, 60);
   }
 
