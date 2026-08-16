@@ -696,9 +696,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   // re-renders — Site Visit and Phone Consultation have different slot counts
   // per day (see renderCalendar/renderTimeSlots), so this is still load-bearing,
   // not just cosmetic.
-  function spawnCtaBubbles(wrapId) {
+  // onDone fires once the LAST bubble has actually finished, not on a guessed
+  // delay -- so whatever calls this can wait for the burst to be seen before
+  // moving the page (the scroll in bookConsult below).
+  function spawnCtaBubbles(wrapId, onDone) {
     const wrap = document.getElementById(wrapId);
-    if (!wrap) return;
+    if (!wrap) { if (onDone) onDone(); return; }
     const count = 10;
     for (let i = 0; i < count; i++) {
       setTimeout(() => {
@@ -709,9 +712,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
         b.style.height = size + 'px';
         b.style.left = (15 + Math.random() * 70) + '%';
         b.style.bottom = '6px';
-        b.style.animationDuration = (0.6 + Math.random() * 0.8) + 's';
+        const dur = 0.6 + Math.random() * 0.8;
+        b.style.animationDuration = dur + 's';
         wrap.appendChild(b);
-        setTimeout(() => b.remove(), 1500);
+        setTimeout(() => {
+          b.remove();
+          if (i === count - 1 && onDone) onDone();
+        }, dur * 1000 + 80);
       }, i * 55);
     }
   }
@@ -721,12 +728,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     document.getElementById('summaryPkg').textContent=pkg;
     document.getElementById('ctaBtnSite').classList.toggle('picked', pkg==='Site Visit');
     document.getElementById('ctaBtnPhone').classList.toggle('picked', pkg==='Phone Consultation');
-    spawnCtaBubbles(pkg==='Site Visit' ? 'ctaWrapSite' : 'ctaWrapPhone');
     updateCalLock();
-    const embed=document.getElementById('cal-embed');
-    setTimeout(()=>embed.scrollIntoView({behavior:'smooth',block:'start'}),60);
     renderCalendar();
     renderTimeSlots();
+    const embed=document.getElementById('cal-embed');
+    spawnCtaBubbles(pkg==='Site Visit' ? 'ctaWrapSite' : 'ctaWrapPhone', () => {
+      embed.scrollIntoView({behavior:'smooth',block:'start'});
+    });
   }
 
   document.addEventListener('DOMContentLoaded', function(){
