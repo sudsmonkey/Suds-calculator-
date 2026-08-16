@@ -472,10 +472,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     }, 60);
   }
 
-  function hideFrom(ids) {
-    ids.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
-  }
-
   function selectType(type) {
     if (selectedType === type) {
       selectedType = null;
@@ -487,7 +483,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     selectedType = type;
     document.querySelectorAll('#q1 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + type).classList.add('sel');
-    hideFrom(['cal-embed']);
     selectedStories = null; selectedService = null;
     updateCalLock();
     advanceTo('q2');
@@ -504,7 +499,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     selectedStories = val;
     document.querySelectorAll('#q2 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + val).classList.add('sel');
-    hideFrom(['cal-embed']);
     selectedService = null;
     updateCalLock();
     advanceTo('q3');
@@ -522,7 +516,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     selectedService = val;
     document.querySelectorAll('#q3 .mc-option').forEach(t => t.classList.remove('sel'));
     document.getElementById('tile-' + val).classList.add('sel');
-    hideFrom(['cal-embed']);
     advanceTo('photo-section');
   }
 
