@@ -761,7 +761,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
       const em=(document.getElementById('infoEmail').value||'').trim();
       const ad=(document.getElementById('infoAddress').value||'').trim();
       const nt=(document.getElementById('infoNotes').value||'').trim();
-      if(!fn||!ln||!ph||!em){alert('Please fill in your name, phone, and email before confirming.');return;}
+      if(!fn||!ln||!ph||!em||!ad){alert('Please fill in your name, phone, email, and property address before confirming.');return;}
       btn.disabled=true;btn.textContent='Booking…';
       const[y,m,d]=calSelectedDate.split('-');
       const booking={first_name:fn,last_name:ln,email:em,phone:ph,address:ad,package:consultPkg,total:'$0',date:MONTHS[parseInt(m)-1]+' '+parseInt(d)+', '+y,date_iso:calSelectedDate,time:calSelectedTime,notes:nt||null};

@@ -282,8 +282,8 @@
           <input type="email" id="infoEmail" placeholder="jane@email.com" oninput="updateBtn()">
         </div>
         <div class="info-field">
-          <label>Address (optional)</label>
-          <input type="text" id="infoAddress" placeholder="123 Main St" autocomplete="off">
+          <label>Address</label>
+          <input type="text" id="infoAddress" placeholder="123 Main St" autocomplete="off" oninput="updateBtn()">
         </div>
         <div class="info-field">
           <label>Notes (optional)</label>
@@ -554,7 +554,8 @@
     const lastName  = (document.getElementById('infoLastName').value  || '').trim();
     const phone     = (document.getElementById('infoPhone').value     || '').trim();
     const email     = (document.getElementById('infoEmail').value     || '').trim();
-    const ready = selectedDate && selectedTime && firstName && lastName && phone && email;
+    const address   = (document.getElementById('infoAddress').value   || '').trim();
+    const ready = selectedDate && selectedTime && firstName && lastName && phone && email && address;
     document.getElementById('bookBtn').disabled = !ready;
   }
 
@@ -583,6 +584,10 @@
     autocomplete.addListener('place_changed', function() {
       const place = autocomplete.getPlace();
       if (place.formatted_address) input.value = place.formatted_address;
+      // Setting .value in script doesn't fire `input`, and the address now
+      // gates the button — without this, picking a suggestion instead of
+      // typing the whole thing leaves Confirm Booking greyed out.
+      updateBtn();
     });
   }
   function gm_authFailure() {
