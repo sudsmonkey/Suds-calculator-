@@ -466,7 +466,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
           </div>
           <div class="info-field"><label>Phone</label><input type="tel" id="infoPhone" placeholder="(555) 000-0000" autocomplete="tel"></div>
           <div class="info-field"><label>Email</label><input type="email" id="infoEmail" placeholder="jane@email.com"></div>
-          <div class="info-field"><label>Property Address</label><input type="text" id="infoAddress" placeholder="123 Main St"></div>
+          <div class="info-field"><label>Property Address</label><input type="text" id="infoAddress" placeholder="123 Main St" autocomplete="off"></div>
           <div class="info-field"><label>Notes (optional)</label><textarea id="infoNotes" placeholder="Property details, questions, anything helpful..."></textarea></div>
         </div>
       </div>
@@ -832,6 +832,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     window.addEventListener('orientationchange', function(){ setTimeout(syncNavHeight, 200); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncNavHeight);
   })();
+
+  function initAutocomplete() {
+    const input = document.getElementById('infoAddress');
+    if (!input || !window.google) return;
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+      types: ['address'],
+      fields: ['formatted_address']
+    });
+    autocomplete.addListener('place_changed', function() {
+      const place = autocomplete.getPlace();
+      if (place.formatted_address) input.value = place.formatted_address;
+    });
+  }
+  function gm_authFailure() {
+    const input = document.getElementById('infoAddress');
+    if (input) input.autocomplete = 'street-address';
+  }
 </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrEnJzvM5RCL_Y_TOymjadeQdmgB1swI8&libraries=places&callback=initAutocomplete" async defer></script>
 </body>
 </html>
