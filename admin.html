@@ -774,12 +774,29 @@
     const placeId = document.getElementById('placeIdInput').value.trim();
     const statusEl = document.getElementById('fetchStatus');
     if (!placeId) { statusEl.className = 'status-msg err'; statusEl.textContent = 'Enter a Place ID first.'; return; }
+    if (/^https?:\/\//i.test(placeId)) {
+      statusEl.className = 'status-msg err';
+      statusEl.textContent = "That looks like a Maps URL, not a Place ID. Use \"Find your Place ID →\" above — it should start with something like ChIJ...";
+      return;
+    }
     localStorage.setItem(PLACE_ID_KEY, placeId);
     const svc = ensurePlacesService();
     if (!svc) { statusEl.className = 'status-msg err'; statusEl.textContent = "Google Maps hasn't loaded yet — wait a second and try again."; return; }
     const btn = document.getElementById('fetchReviewsBtn');
     btn.disabled = true; btn.textContent = 'Fetching…';
+    statusEl.className = 'status-msg'; statusEl.textContent = '';
+    let settled = false;
+    const timeoutId = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      btn.disabled = false; btn.textContent = 'Fetch Reviews from Google';
+      statusEl.className = 'status-msg err';
+      statusEl.textContent = "Google never responded after 10s -- likely the Places API isn't enabled for this key in Google Cloud Console, or the key's referrer restrictions are blocking this page. Check the browser console for a red Google Maps error for specifics.";
+    }, 10000);
     svc.getDetails({ placeId, fields: ['reviews', 'rating', 'user_ratings_total', 'name'] }, function(place, status) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
       btn.disabled = false; btn.textContent = 'Fetch Reviews from Google';
       if (status !== google.maps.places.PlacesServiceStatus.OK || !place) {
         statusEl.className = 'status-msg err';
