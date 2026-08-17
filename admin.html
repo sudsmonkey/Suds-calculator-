@@ -214,6 +214,45 @@
   #fullDayBtn:hover { opacity: 0.85; }
   #fullDayBtn.block-all   { background: var(--orange); color: #fff; }
   #fullDayBtn.unblock-all { background: var(--light);  color: var(--dark); border: 1.5px solid var(--border); }
+
+  /* ── Reviews panel ── */
+  .field-row { margin-bottom: 14px; }
+  .field-row label { display: block; font-size: 12px; font-weight: 700; color: var(--mid); margin-bottom: 5px; }
+  .field-row input[type=text], .field-row textarea, .field-row select {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; font-family: 'Nunito', sans-serif; font-size: 14px;
+    color: var(--ink); background: var(--white);
+  }
+  .field-row textarea { resize: vertical; min-height: 64px; }
+  .field-inline { display: flex; gap: 8px; }
+  .field-inline > * { flex: 1; }
+  .btn {
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 900;
+    border-radius: 50px; padding: 10px 18px; cursor: pointer; border: none;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--orange); color: #fff; }
+  .btn-secondary { background: var(--light); color: var(--dark); border: 1.5px solid var(--border); }
+  .find-place-link { display: inline-block; font-size: 12px; color: var(--orange); font-weight: 700; margin-top: 8px; text-decoration: none; }
+  .find-place-link:hover { text-decoration: underline; }
+  .status-msg { font-size: 12px; font-weight: 700; margin-top: 8px; }
+  .status-msg.ok { color: var(--dark-mint); }
+  .status-msg.err { color: var(--dark); }
+  .review-card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); }
+  .review-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .review-stars { color: var(--orange); font-size: 14px; letter-spacing: 1px; }
+  .review-src { font-size: 10px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid); }
+  .review-text { font-size: 13px; color: var(--ink); line-height: 1.55; font-style: italic; margin-bottom: 8px; }
+  .review-author { font-size: 12px; font-weight: 900; color: var(--dark); }
+  .review-time { font-size: 11px; color: var(--mid); margin-bottom: 10px; }
+  .review-controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .review-feature-toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer; }
+  .review-feature-toggle input { width: 16px; height: 16px; accent-color: var(--orange); }
+  .review-bucket-select { font-size: 12px; padding: 5px 8px; border-radius: 8px; border: 1.5px solid var(--border); font-family: 'Nunito', sans-serif; }
+  .review-remove { font-size: 11px; color: var(--mid); text-decoration: underline; cursor: pointer; background: none; border: none; font-family: 'Nunito', sans-serif; }
+  #codeOutput { width: 100%; min-height: 260px; font-family: 'Menlo','Consolas',monospace; font-size: 11px; border: 1.5px solid var(--border); border-radius: 10px; padding: 12px; margin-top: 10px; color: var(--ink); }
 </style>
 </head>
 <body>
@@ -231,6 +270,7 @@
     <div class="tab active" onclick="switchTab('block')">Block Slots</div>
     <div class="tab" onclick="switchTab('bookings')">Bookings</div>
     <div class="tab" onclick="switchTab('consults')">Consults</div>
+    <div class="tab" onclick="switchTab('reviews')">Reviews</div>
   </div>
 
   <!-- Block Slots panel -->
@@ -277,7 +317,60 @@
     </div>
     <div id="consultsList"></div>
   </div>
+
+  <!-- Reviews panel -->
+  <div class="panel" id="panelReviews">
+    <div class="section-label">Pull from Google</div>
+    <div class="field-row">
+      <label for="placeIdInput">Google Place ID</label>
+      <input type="text" id="placeIdInput" placeholder="ChIJ...">
+      <a class="find-place-link" href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener">Find your Place ID →</a>
+    </div>
+    <button class="btn btn-primary" id="fetchReviewsBtn" onclick="fetchGoogleReviews()">Fetch Reviews from Google</button>
+    <div class="status-msg" id="fetchStatus"></div>
+    <div class="status-msg ok" id="aggStatus" style="margin-top:4px;"></div>
+
+    <div class="section-label">Add a review manually</div>
+    <div class="field-row field-inline">
+      <div>
+        <label for="manRating">Rating</label>
+        <select id="manRating">
+          <option value="5">★★★★★ (5)</option>
+          <option value="4">★★★★ (4)</option>
+          <option value="3">★★★ (3)</option>
+          <option value="2">★★ (2)</option>
+          <option value="1">★ (1)</option>
+        </select>
+      </div>
+      <div>
+        <label for="manBucket">Show under</label>
+        <select id="manBucket">
+          <option value="residential">Residential</option>
+          <option value="commercial">Commercial</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <label for="manAuthor">Author name (as shown on Google)</label>
+      <input type="text" id="manAuthor" placeholder="Jane Smith">
+    </div>
+    <div class="field-row">
+      <label for="manText">Review text</label>
+      <textarea id="manText" placeholder="Paste the real review text here..."></textarea>
+    </div>
+    <button class="btn btn-secondary" onclick="addManualReview()">Add Review</button>
+
+    <div class="section-label">Reviews (check to feature on site)</div>
+    <div id="reviewsList"></div>
+
+    <div class="section-label">Generate code</div>
+    <button class="btn btn-primary" onclick="generateReviewCode()">Generate HTML + Schema Markup</button>
+    <button class="btn btn-secondary" id="copyCodeBtn" onclick="copyReviewCode()" style="display:none; margin-left:8px;">Copy to Clipboard</button>
+    <textarea id="codeOutput" readonly style="display:none;"></textarea>
+  </div>
 </div>
+
+<div id="placesDummy" style="display:none;"></div>
 
 <script>
   // ── Config ──────────────────────────────
@@ -303,15 +396,16 @@
   }
 
   // ── Tabs ────────────────────────────────
-  const PANEL_MAP = { block: 'panelBlock', bookings: 'panelBookings', consults: 'panelConsults' };
+  const PANEL_MAP = { block: 'panelBlock', bookings: 'panelBookings', consults: 'panelConsults', reviews: 'panelReviews' };
 
   function switchTab(name) {
-    const tabNames = ['block', 'bookings', 'consults'];
+    const tabNames = ['block', 'bookings', 'consults', 'reviews'];
     document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', tabNames[i] === name));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById(PANEL_MAP[name]).classList.add('active');
     if (name === 'bookings') loadBookings();
     if (name === 'consults') loadConsults();
+    if (name === 'reviews') initReviewsPanel();
   }
 
   // ── Admin calendar ───────────────────────
@@ -643,7 +737,202 @@
     }
   }
 
+  // ── Reviews tool ──────────────────────────
+  // Google's Places API hard-caps Place Details at 5 reviews, always its
+  // "most relevant" pick -- there is no API path to more than that, so
+  // manual entry exists alongside the fetch for anything beyond the cap.
+  const REVIEWS_KEY = 'suds_reviews_v1';
+  const PLACE_ID_KEY = 'suds_place_id';
+  const AGG_KEY = 'suds_reviews_agg';
+  let placesService = null;
+
+  function loadReviews() {
+    try { return JSON.parse(localStorage.getItem(REVIEWS_KEY)) || []; } catch(e) { return []; }
+  }
+  function saveReviews(list) { localStorage.setItem(REVIEWS_KEY, JSON.stringify(list)); }
+  function loadAgg() {
+    try { return JSON.parse(localStorage.getItem(AGG_KEY)) || null; } catch(e) { return null; }
+  }
+  function saveAgg(agg) { localStorage.setItem(AGG_KEY, JSON.stringify(agg)); }
+
+  function initReviewsPanel() {
+    const savedPlaceId = localStorage.getItem(PLACE_ID_KEY);
+    if (savedPlaceId) document.getElementById('placeIdInput').value = savedPlaceId;
+    const agg = loadAgg();
+    document.getElementById('aggStatus').textContent = agg ? `Google: ${agg.rating}★ average across ${agg.user_ratings_total} reviews` : '';
+    renderReviewsList();
+  }
+
+  function ensurePlacesService() {
+    if (placesService) return placesService;
+    if (!window.google || !window.google.maps || !window.google.maps.places) return null;
+    placesService = new google.maps.places.PlacesService(document.getElementById('placesDummy'));
+    return placesService;
+  }
+
+  function fetchGoogleReviews() {
+    const placeId = document.getElementById('placeIdInput').value.trim();
+    const statusEl = document.getElementById('fetchStatus');
+    if (!placeId) { statusEl.className = 'status-msg err'; statusEl.textContent = 'Enter a Place ID first.'; return; }
+    localStorage.setItem(PLACE_ID_KEY, placeId);
+    const svc = ensurePlacesService();
+    if (!svc) { statusEl.className = 'status-msg err'; statusEl.textContent = "Google Maps hasn't loaded yet — wait a second and try again."; return; }
+    const btn = document.getElementById('fetchReviewsBtn');
+    btn.disabled = true; btn.textContent = 'Fetching…';
+    svc.getDetails({ placeId, fields: ['reviews', 'rating', 'user_ratings_total', 'name'] }, function(place, status) {
+      btn.disabled = false; btn.textContent = 'Fetch Reviews from Google';
+      if (status !== google.maps.places.PlacesServiceStatus.OK || !place) {
+        statusEl.className = 'status-msg err';
+        statusEl.textContent = 'Could not fetch (status: ' + status + '). Double-check the Place ID.';
+        return;
+      }
+      saveAgg({ rating: place.rating, user_ratings_total: place.user_ratings_total, name: place.name });
+      document.getElementById('aggStatus').textContent = `Google: ${place.rating}★ average across ${place.user_ratings_total} reviews`;
+      const existing = loadReviews();
+      const existingGoogleIds = new Set(existing.filter(r => r.source === 'google').map(r => r.id));
+      const fetched = (place.reviews || []).map(r => ({
+        id: 'g_' + r.time, source: 'google', rating: r.rating, text: r.text,
+        author: r.author_name, time: r.relative_time_description,
+        bucket: 'residential', featured: false
+      }));
+      const newOnes = fetched.filter(r => !existingGoogleIds.has(r.id));
+      saveReviews(existing.concat(newOnes));
+      renderReviewsList();
+      statusEl.className = 'status-msg ok';
+      statusEl.textContent = `Fetched ${fetched.length} review(s) from Google (its hard cap — ${newOnes.length} new).`;
+    });
+  }
+
+  function addManualReview() {
+    const author = document.getElementById('manAuthor').value.trim();
+    const text = document.getElementById('manText').value.trim();
+    const rating = parseInt(document.getElementById('manRating').value, 10);
+    const bucket = document.getElementById('manBucket').value;
+    if (!author || !text) { alert('Enter both an author name and the review text.'); return; }
+    const list = loadReviews();
+    list.push({ id: 'm_' + Date.now(), source: 'manual', rating, text, author, time: '', bucket, featured: false });
+    saveReviews(list);
+    document.getElementById('manAuthor').value = '';
+    document.getElementById('manText').value = '';
+    renderReviewsList();
+  }
+
+  function renderReviewsList() {
+    const list = loadReviews();
+    const container = document.getElementById('reviewsList');
+    if (!list.length) { container.innerHTML = '<div class="empty-state">No reviews yet — fetch from Google or add one manually.</div>'; return; }
+    container.innerHTML = '';
+    list.forEach(r => {
+      const card = document.createElement('div');
+      card.className = 'review-card';
+      card.innerHTML = `
+        <div class="review-top">
+          <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+          <div class="review-src">${r.source === 'google' ? 'Google' : 'Manual'}</div>
+        </div>
+        <div class="review-text">"${esc(r.text)}"</div>
+        <div class="review-author">${esc(r.author)}</div>
+        <div class="review-time">${esc(r.time || '')}</div>
+        <div class="review-controls">
+          <label class="review-feature-toggle">
+            <input type="checkbox" ${r.featured ? 'checked' : ''} onchange="toggleFeatured('${r.id}', this.checked)">
+            Feature on site
+          </label>
+          <select class="review-bucket-select" onchange="setBucket('${r.id}', this.value)">
+            <option value="residential" ${r.bucket === 'residential' ? 'selected' : ''}>Residential</option>
+            <option value="commercial" ${r.bucket === 'commercial' ? 'selected' : ''}>Commercial</option>
+          </select>
+          <button class="review-remove" onclick="removeReview('${r.id}')">Remove</button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function toggleFeatured(id, val) {
+    const list = loadReviews();
+    const r = list.find(r => r.id === id);
+    if (r) r.featured = val;
+    saveReviews(list);
+  }
+  function setBucket(id, val) {
+    const list = loadReviews();
+    const r = list.find(r => r.id === id);
+    if (r) r.bucket = val;
+    saveReviews(list);
+  }
+  function removeReview(id) {
+    saveReviews(loadReviews().filter(r => r.id !== id));
+    renderReviewsList();
+  }
+
+  function generateReviewCode() {
+    const list = loadReviews().filter(r => r.featured);
+    const out = document.getElementById('codeOutput');
+    const copyBtn = document.getElementById('copyCodeBtn');
+    if (!list.length) {
+      out.style.display = 'block';
+      out.value = 'No reviews checked as "Feature on site" yet.';
+      copyBtn.style.display = 'none';
+      return;
+    }
+    const cardHtml = bucket => list.filter(r => r.bucket === bucket).map(r =>
+`        <div class="testi-card">
+          <div class="testi-stars">${'★'.repeat(r.rating)}</div>
+          <div class="testi-quote">"${esc(r.text)}"</div>
+          <div class="testi-name">${esc(r.author)}</div>
+        </div>`).join('\n');
+
+    const agg = loadAgg();
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'HomeAndConstructionBusiness',
+      name: (agg && agg.name) || 'Suds Monkey Window Cleaning',
+      telephone: '+1-405-882-2277',
+      url: 'https://sudsmonkey.github.io/Suds-calculator-/',
+      review: list.map(r => ({
+        '@type': 'Review',
+        author: { '@type': 'Person', name: r.author },
+        reviewRating: { '@type': 'Rating', ratingValue: String(r.rating), bestRating: '5' },
+        reviewBody: r.text
+      }))
+    };
+    if (agg && agg.rating) {
+      schema.aggregateRating = { '@type': 'AggregateRating', ratingValue: String(agg.rating), reviewCount: String(agg.user_ratings_total) };
+    }
+    // A review containing the literal closing script-tag sequence would
+    // otherwise end the tag early when pasted into index.html -- \/ is valid
+    // JSON and renders identically, so this is safe to do unconditionally.
+    const schemaJson = JSON.stringify(schema, null, 2).replace(/<\/script/gi, '<\\/script');
+
+    out.style.display = 'block';
+    out.value =
+`/* ── Paste into index.html's "What homeowners say" .testi-grid ── */
+${cardHtml('residential') || '  (none checked for Residential)'}
+
+/* ── Paste into index.html's "What businesses say" .testi-grid ── */
+${cardHtml('commercial') || '  (none checked for Commercial)'}
+
+<!-- ── Paste this whole block into index.html's <head> ── -->
+<script type="application/ld+json">
+${schemaJson}
+<\/script>`;
+    copyBtn.style.display = 'inline-block';
+  }
+
+  function copyReviewCode() {
+    const out = document.getElementById('codeOutput');
+    out.select();
+    navigator.clipboard.writeText(out.value).then(() => {
+      const btn = document.getElementById('copyCodeBtn');
+      const old = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = old; }, 1500);
+    });
+  }
+
   init();
 </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrEnJzvM5RCL_Y_TOymjadeQdmgB1swI8&libraries=places" async defer></script>
 </body>
 </html>
