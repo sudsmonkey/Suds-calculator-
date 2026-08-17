@@ -1150,6 +1150,15 @@
 
 
 <script>
+  function toggleMenu() {
+    document.getElementById('hdMenu').classList.toggle('open');
+  }
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('#hdBurger') && !e.target.closest('#hdMenu')){
+      document.getElementById('hdMenu').classList.remove('open');
+    }
+  });
+
   let RATES = { lemur: 0.08, gorilla: 0.11, silver: 0.13 };
   let SCREEN_PRICE = 50, TRACKS_PRICE = 50, MIRROR_PRICE = 10;
   const STORY_SURCHARGE = { 1: 0, 2: 25, 3: 50 };

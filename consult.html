@@ -491,6 +491,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   function toggleMenu() {
     document.getElementById('hdMenu').classList.toggle('open');
   }
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('#hdBurger') && !e.target.closest('#hdMenu')){
+      document.getElementById('hdMenu').classList.remove('open');
+    }
+  });
 
   let selectedType = null;
   let selectedStories = null;
