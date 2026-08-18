@@ -74,14 +74,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
    when "How many stories?" arrives — the end of .hero-zone. Sticky rather than
    fixed so the browser handles it on the compositor. */
 .hero-zone { padding-top: var(--navH, 76px); }
+/* Fixed 175px rather than however tall the copy happens to be, so this band
+   and the calendar's come out the same depth. Contents are centred in it
+   instead of hanging off a top padding. */
 .hero {
   position: sticky;
   top: var(--navH, 76px);
   z-index: 100;
   background: #111;
   overflow: hidden;
-  height: 210px;
-  padding: 32px 20px 24px;
+  height: 175px;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   text-align: center;
 }
 .hero-content { position: relative; z-index: 1; }
