@@ -311,6 +311,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 .info-field input, .info-field textarea { width: 100%; border: 1.5px solid #DDD3C4; border-radius: 10px; padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--dark); background: var(--cream); outline: none; transition: border 0.15s; }
 .info-field input:focus, .info-field textarea:focus { border-color: var(--orange); }
 .info-field textarea { resize: none; height: 70px; }
+.opt-in-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 4px; }
+.opt-in-row input[type=checkbox] { width: 18px; height: 18px; min-width: 18px; margin-top: 1px; accent-color: var(--orange); }
+.opt-in-row label { font-size: 12px; color: var(--mid); line-height: 1.5; }
 .summary-card { background: var(--white); border: 1.5px solid #F0A9A5; border-radius: var(--radius); padding: 16px; }
 .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #F5EDE4; font-size: 14px; }
 .summary-row:last-child { border-bottom: none; padding-top: 10px; }
@@ -475,6 +478,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
           <div class="info-field"><label>Email</label><input type="email" id="infoEmail" placeholder="jane@email.com"></div>
           <div class="info-field"><label>Property Address</label><input type="text" id="infoAddress" placeholder="123 Main St" autocomplete="off"></div>
           <div class="info-field"><label>Notes (optional)</label><textarea id="infoNotes" placeholder="Property details, questions, anything helpful..."></textarea></div>
+          <div class="opt-in-row">
+            <input type="checkbox" id="optInAppointment" checked>
+            <label for="optInAppointment">Text me updates about my appointment (confirmations &amp; reminders).</label>
+          </div>
+          <div class="opt-in-row">
+            <input type="checkbox" id="optInMarketing">
+            <label for="optInMarketing">Send me promotions and special offers by email or text.</label>
+          </div>
         </div>
       </div>
 
@@ -820,11 +831,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
       const em=(document.getElementById('infoEmail').value||'').trim();
       const ad=(document.getElementById('infoAddress').value||'').trim();
       const nt=(document.getElementById('infoNotes').value||'').trim();
+      const smsOptIn=document.getElementById('optInAppointment').checked;
+      const marketingOptIn=document.getElementById('optInMarketing').checked;
       if(!fn||!ln||!ph||!em||!ad){alert('Please fill in your name, phone, email, and property address before confirming.');return;}
       if(activePhotoUploads>0){alert('Your photos are still uploading — give it a second and try again.');return;}
       btn.disabled=true;btn.textContent='Booking…';
       const[y,m,d]=calSelectedDate.split('-');
-      const booking={first_name:fn,last_name:ln,email:em,phone:ph,address:ad,package:consultPkg,total:'$0',date:MONTHS[parseInt(m)-1]+' '+parseInt(d)+', '+y,date_iso:calSelectedDate,time:calSelectedTime,notes:nt||null,photo_urls:uploadedPhotoUrls.length?uploadedPhotoUrls.join(','):null};
+      const booking={first_name:fn,last_name:ln,email:em,phone:ph,address:ad,package:consultPkg,total:'$0',date:MONTHS[parseInt(m)-1]+' '+parseInt(d)+', '+y,date_iso:calSelectedDate,time:calSelectedTime,notes:nt||null,photo_urls:uploadedPhotoUrls.length?uploadedPhotoUrls.join(','):null,sms_opt_in:smsOptIn,marketing_opt_in:marketingOptIn};
       try {
         const res=await fetch(SB_URL+'/rest/v1/bookings',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},body:JSON.stringify(booking)});
         if(res.ok||res.status===201){

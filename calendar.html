@@ -132,6 +132,9 @@
   .info-field input, .info-field textarea { width: 100%; border: 1.5px solid #DDD3C4; border-radius: 10px; padding: 10px 12px; font-family: 'Nunito', sans-serif; font-size: 16px; color: var(--dark); background: var(--cream); outline: none; transition: border 0.15s; }
   .info-field input:focus, .info-field textarea:focus { border-color: var(--orange); }
   .info-field textarea { resize: none; height: 70px; }
+  .opt-in-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 4px; }
+  .opt-in-row input[type=checkbox] { width: 18px; height: 18px; min-width: 18px; margin-top: 1px; accent-color: var(--orange); }
+  .opt-in-row label { font-size: 12px; color: var(--mid); line-height: 1.5; }
 
   /* Summary */
   .summary-card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
@@ -289,6 +292,14 @@
         <div class="info-field">
           <label>Notes (optional)</label>
           <textarea id="infoNotes" placeholder="Gate code, dogs, anything we should know..."></textarea>
+        </div>
+        <div class="opt-in-row">
+          <input type="checkbox" id="optInAppointment" checked>
+          <label for="optInAppointment">Text me updates about my appointment (confirmations &amp; reminders).</label>
+        </div>
+        <div class="opt-in-row">
+          <input type="checkbox" id="optInMarketing">
+          <label for="optInMarketing">Send me promotions and special offers by email or text.</label>
         </div>
       </div>
     </div>
@@ -635,6 +646,8 @@
     const email     = (document.getElementById('infoEmail').value     || '').trim();
     const address   = (document.getElementById('infoAddress').value   || '').trim();
     const notes     = (document.getElementById('infoNotes').value     || '').trim();
+    const optInAppointment = document.getElementById('optInAppointment').checked;
+    const optInMarketing   = document.getElementById('optInMarketing').checked;
     const date      = document.getElementById('summaryDate').textContent;
     const time      = document.getElementById('summaryTime').textContent;
     const pkgName   = document.getElementById('summaryPkgName').textContent;
@@ -665,7 +678,9 @@
       time:         time,
       add_ons:      addons ? addons.replace(/,/g, ' | ') : null,
       notes:        notes  || null,
-      monkey_bonus: shared === 'yes' ? 'Referral discount applied (-$25)' : null
+      monkey_bonus: shared === 'yes' ? 'Referral discount applied (-$25)' : null,
+      sms_opt_in:       optInAppointment,
+      marketing_opt_in: optInMarketing
     };
 
     function showSuccess() {
