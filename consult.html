@@ -629,6 +629,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
   // ── Calendar embed ───────────────────────────────────
   const SB_URL = 'https://ykjkcegpwiqhpfcgkwro.supabase.co';
   const SB_KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
+  const CONFIRMATION_FN_URL = SB_URL + '/functions/v1/send-booking-confirmation';
+
+  // Fire-and-forget: the booking itself already succeeded, so a slow or
+  // failed confirmation email should never block or fail the customer's
+  // success screen.
+  function sendConfirmationEmail(b) {
+    fetch(CONFIRMATION_FN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SB_KEY, 'apikey': SB_KEY },
+      body: JSON.stringify({ email: b.email, date_iso: b.date_iso, time: b.time, package: b.package })
+    }).catch(function(err) { console.error('Confirmation email request failed:', err); });
+  }
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const calToday = new Date(); calToday.setHours(0,0,0,0);
   const calMaxDate = new Date(calToday); calMaxDate.setDate(calMaxDate.getDate() + 25);
@@ -819,6 +831,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
           btn.style.display='none';
           document.getElementById('infoSection').querySelectorAll('.info-card,.summary-card,.sec-label').forEach(e=>e.style.display='none');
           const s=document.getElementById('bookSuccess');s.style.display='block';const sr=s.getBoundingClientRect();window.scrollTo({top:Math.max(0,sr.top+window.scrollY-(innerHeight-sr.height)/2),behavior:'smooth'});
+          sendConfirmationEmail(booking);
         } else {btn.disabled=false;btn.textContent='Confirm Booking';alert('Something went wrong. Please call us at (405) 882-2277.');}
       } catch(e){btn.disabled=false;btn.textContent='Confirm Booking';alert('Connection error. Please try again.');}
     });

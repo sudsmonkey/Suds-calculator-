@@ -375,6 +375,7 @@
 
   const SUPABASE_URL = 'https://ykjkcegpwiqhpfcgkwro.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
+  const CONFIRMATION_FN_URL = SUPABASE_URL + '/functions/v1/send-booking-confirmation';
 
   async function fetchMonthAvailability(year, month) {
     const pad = n => String(n).padStart(2,'0');
@@ -675,6 +676,17 @@
       success.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
+    // Fire-and-forget: the booking itself already succeeded, so a slow or
+    // failed confirmation email should never block or fail the customer's
+    // success screen.
+    function sendConfirmationEmail(b) {
+      fetch(CONFIRMATION_FN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY, 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email: b.email, date_iso: b.date_iso, time: b.time, package: b.package })
+      }).catch(function(err) { console.error('Confirmation email request failed:', err); });
+    }
+
     try {
       const res = await fetch(SUPABASE_URL + '/rest/v1/bookings', {
         method: 'POST',
@@ -688,6 +700,7 @@
       });
       if (res.ok || res.status === 201) {
         showSuccess();
+        sendConfirmationEmail(booking);
       } else {
         const err = await res.json().catch(() => ({}));
         console.error('Booking error:', err);
