@@ -369,9 +369,6 @@
   .pkg-btn { display: block; width: 100%; padding: 14px 0; border-radius: 50px; border: none; background: var(--orange); color: var(--white); font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 900; cursor: pointer; transition: opacity 0.15s, box-shadow 0.1s, transform 0.1s; box-shadow: 0 4px 0 #C06060, inset 0 1px 0 rgba(255,255,255,0.2); }
   .pkg-btn:hover { opacity: 0.88; }
   .pkg-btn:active { box-shadow: 0 1px 0 #C06060, inset 0 1px 0 rgba(255,255,255,0.2); transform: translateY(3px); }
-  #btn-wrap-silver .pkg-btn { box-shadow: 0 4px 0 #6BB89A, inset 0 1px 0 rgba(255,255,255,0.25); }
-  #btn-wrap-silver .pkg-btn:active { box-shadow: 0 1px 0 #6BB89A, inset 0 1px 0 rgba(255,255,255,0.25); transform: translateY(3px); }
-  #btn-wrap-silver .pkg-btn.selected { background: #6BB89A; border-color: var(--mint); box-shadow: 0 4px 0 #4A9E7A, inset 0 1px 0 rgba(255,255,255,0.2); }
   @keyframes selectFlip {
     0%   { transform: scale(1) rotate(0deg); }
     25%  { transform: scale(1.06) rotate(-2deg); }
@@ -559,9 +556,6 @@
     .packages { padding-bottom: 0; padding-left: 0; padding-right: 0; }
     .game-btn { display: block; margin-top: auto; width: calc(100% - 48px); margin-bottom: 24px; background: #F5EFE6; color: #3d3530; box-shadow: 0 4px 0 #C4B8AC, inset 0 1px 0 rgba(255,255,255,0.7); }
     .game-btn:active { box-shadow: 0 1px 0 #C4B8AC, inset 0 1px 0 rgba(255,255,255,0.7); }
-    #btn-wrap-silver .pkg-btn { background: var(--orange) !important; box-shadow: 0 4px 0 #C06060, inset 0 1px 0 rgba(255,255,255,0.2) !important; }
-    #btn-wrap-silver .pkg-btn:active { box-shadow: 0 1px 0 #C06060, inset 0 1px 0 rgba(255,255,255,0.2) !important; }
-    #btn-wrap-silver .pkg-btn.selected { background: var(--orange) !important; box-shadow: 0 4px 0 #C06060, inset 0 1px 0 rgba(255,255,255,0.2) !important; border-color: var(--orangeborder) !important; }
     .bubble-zone { position: relative; min-width: 900px; min-height: 480px; flex-shrink: 0; align-self: stretch; overflow: hidden; pointer-events: none; }
     .soap-bubble { position: absolute; border-radius: 50%; background: radial-gradient(circle at 30% 28%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 14%, rgba(180,225,255,0.65) 42%, rgba(245,110,100,0.28) 72%, rgba(158,217,192,0.5) 100%); border: 2.5px solid rgba(158,217,192,0.95); box-shadow: inset 4px 4px 10px rgba(255,255,255,1), inset -2px -2px 8px rgba(158,217,192,0.5), 0 4px 16px rgba(245,110,100,0.2); animation: bubbleFloat linear infinite; }
   }
