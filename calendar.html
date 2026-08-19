@@ -20,10 +20,11 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; }
-  /* Same padding recipe as the .hero on index.html and consult.html, so the
-     band is proportioned the same across all three pages. syncHero() measures
-     the result at runtime, so the spacer follows on its own. */
-  .header { background: #111; height: 210px; padding: 32px 20px 24px; text-align: center; position: fixed; left: 0; right: 0; overflow: hidden; z-index: 100; }
+  /* Fixed 175px, matching consult.html's hero, rather than however tall the
+     contents happen to be. Contents are centred in it instead of hanging off a
+     top padding. syncHero() measures the result at runtime, so the spacer and
+     the content offset follow on their own. */
+  .header { background: #111; height: 175px; padding: 0 20px; text-align: center; position: fixed; left: 0; right: 0; overflow: hidden; z-index: 100; display: flex; flex-direction: column; justify-content: center; }
   .header-bg { position: absolute; inset: 0; background: url('img-res-tree.jpg') center 40%/cover no-repeat; display: none; }
   .header-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(166,56,46,0.28) 0%, rgba(80,20,15,0.38) 100%); z-index: 0; }
   .header > *:not(.header-bg):not(.header-overlay) { position: relative; z-index: 1; }

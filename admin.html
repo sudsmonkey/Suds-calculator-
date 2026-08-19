@@ -215,10 +215,78 @@
   #fullDayBtn.block-all   { background: var(--orange); color: #fff; }
   #fullDayBtn.unblock-all { background: var(--light);  color: var(--dark); border: 1.5px solid var(--border); }
 
+  /* ── Range blocking ── */
+  .range-card {
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px;
+  }
+  .range-dates { display: flex; gap: 10px; }
+  .range-dates > div { flex: 1; min-width: 0; }
+  .range-dates label {
+    display: block; font-size: 11px; font-weight: 900; color: var(--mid);
+    letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 5px;
+  }
+  .range-dates input[type=date] {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 9px 10px; font-family: 'Nunito', sans-serif; font-size: 14px;
+    font-weight: 700; color: var(--ink); background: var(--white);
+  }
+  .range-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .range-actions .btn { flex: 1; margin: 0; }
+
+  /* ── Blocked-work entries ── */
+  /* Radio pills for job vs no-job. The input itself is hidden; the label is
+     the control, so the two read as a pair of buttons. */
+  .type-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .type-row input { position: absolute; opacity: 0; pointer-events: none; }
+  .type-row label {
+    flex: 1; text-align: center; cursor: pointer;
+    border: 1.5px solid var(--border); border-radius: 50px;
+    padding: 9px 10px; font-size: 12px; font-weight: 900;
+    color: var(--mid); background: var(--white); transition: all 0.15s;
+  }
+  .type-row input:checked + label { background: var(--orange); border-color: var(--orange); color: #fff; }
+
+  .work-card {
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 14px; margin-bottom: 10px;
+    box-shadow: var(--shadow);
+  }
+  .work-card.no-job { border-style: dashed; background: var(--light); }
+  .work-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .work-name { font-size: 15px; font-weight: 900; color: var(--dark); }
+  .work-when { font-size: 12px; color: var(--mid); margin-top: 3px; }
+  .work-amount { font-size: 16px; font-weight: 900; color: var(--dark-mint); white-space: nowrap; }
+  .work-del {
+    background: none; border: none; cursor: pointer; padding: 2px 6px;
+    color: var(--mid); font-size: 16px; font-weight: 900; line-height: 1;
+  }
+  .work-del:hover { color: var(--dark); }
+  .work-total {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--light); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px;
+    font-size: 13px; font-weight: 900; color: var(--dark);
+  }
+  .work-total span:last-child { font-size: 17px; color: var(--dark-mint); }
+  .sync-notice {
+    background: var(--light); border: 1.5px dashed var(--border);
+    border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px;
+    font-size: 12px; color: var(--mid); line-height: 1.5;
+  }
+  .sync-notice strong { color: var(--dark); }
+  .sync-notice code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; color: var(--dark); }
+  .sync-notice .btn { margin: 0; font-size: 12px; padding: 8px 14px; }
+
+  /* Contact links on the booking and consult cards — coloured and tappable,
+     but no underline, so the rows still read as plain lines of detail. */
+  .booking-row a { color: var(--orange); font-weight: 700; text-decoration: none; }
+  .booking-row a:hover { text-decoration: underline; }
+
   /* ── Reviews panel ── */
   .field-row { margin-bottom: 14px; }
   .field-row label { display: block; font-size: 12px; font-weight: 700; color: var(--mid); margin-bottom: 5px; }
-  .field-row input[type=text], .field-row textarea, .field-row select {
+  .field-row input[type=text], .field-row input[type=date], .field-row textarea, .field-row select {
     width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
     padding: 10px 12px; font-family: 'Nunito', sans-serif; font-size: 14px;
     color: var(--ink); background: var(--white);
@@ -298,6 +366,65 @@
       </div>
       <div class="slot-grid" id="slotGrid"></div>
     </div>
+
+    <!-- Block a run of days in one go, for a holiday or a job that spans a
+         week. Customer-booked slots inside the range are left alone. -->
+    <div class="section-label" style="margin-top:28px;">Block several days</div>
+    <div class="range-card">
+      <div class="range-dates">
+        <div>
+          <label for="rangeStart">From</label>
+          <input type="date" id="rangeStart">
+        </div>
+        <div>
+          <label for="rangeEnd">To</label>
+          <input type="date" id="rangeEnd">
+        </div>
+      </div>
+      <div class="range-actions">
+        <button class="btn btn-primary" id="rangeBlockBtn" onclick="blockRange()">Block Range</button>
+        <button class="btn btn-secondary" id="rangeUnblockBtn" onclick="unblockRange()">Unblock Range</button>
+      </div>
+      <div class="status-msg" id="rangeStatus"></div>
+    </div>
+
+    <!-- What the blocked time is actually for. Typed in by hand: these are
+         jobs booked off the site, or time out for something else entirely. -->
+    <div class="section-label" style="margin-top:28px;">What's the time for?</div>
+    <div class="range-card">
+      <div class="type-row">
+        <input type="radio" name="workType" id="workTypeJob" value="job" checked onchange="syncWorkForm()">
+        <label for="workTypeJob">Job</label>
+        <input type="radio" name="workType" id="workTypeNone" value="none" onchange="syncWorkForm()">
+        <label for="workTypeNone">No job</label>
+      </div>
+
+      <div class="field-row">
+        <label for="workName" id="workNameLabel">Name</label>
+        <input type="text" id="workName" placeholder="Jane Smith">
+      </div>
+      <div class="field-inline">
+        <div class="field-row" style="flex:1;">
+          <label for="workDate">Date</label>
+          <input type="date" id="workDate">
+        </div>
+        <div class="field-row" style="flex:1;">
+          <label for="workTime">Time</label>
+          <input type="text" id="workTime" placeholder="8:00 AM">
+        </div>
+      </div>
+      <div class="field-row" id="workAmountRow">
+        <label for="workAmount">Dollar amount</label>
+        <input type="text" id="workAmount" placeholder="$250" inputmode="decimal">
+      </div>
+      <button class="btn btn-primary" onclick="addWorkEntry()" style="width:100%;">Add to List</button>
+      <div class="status-msg" id="workStatus"></div>
+    </div>
+
+    <div class="section-label" style="margin-top:28px;">Blocked work</div>
+    <div id="workSync"></div>
+    <div id="workTotal"></div>
+    <div id="workList"></div>
   </div>
 
   <!-- Bookings panel -->
@@ -393,6 +520,15 @@
       MONTHS[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
     renderAdminCal();
     loadBookings();
+    // Both date pickers default to today, so a range is two taps rather than
+    // two full date entries.
+    const todayIso = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+    ['rangeStart', 'rangeEnd', 'workDate'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = todayIso;
+    });
+    syncWorkForm();
+    refreshWork();
   }
 
   // ── Tabs ────────────────────────────────
@@ -553,27 +689,40 @@
     await Promise.all(toUnblock.map(slot => unblockSlot(dateStr, slot, data.admin[slot])));
   }
 
+  // The bare network calls, shared by the single-slot buttons and the range
+  // tools. They report success rather than alerting, so a range can total up
+  // its failures instead of firing one dialog per day.
+  async function postBlock(dateStr, time) {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/blocked_slots', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({ date: dateStr, time: time })
+    });
+    if (!(res.ok || res.status === 201)) return false;
+    const rows = await res.json();
+    const id = Array.isArray(rows) && rows[0] ? rows[0].id : null;
+    if (!adminTakenSlots[dateStr]) adminTakenSlots[dateStr] = { customer: new Set(), admin: {} };
+    if (id) adminTakenSlots[dateStr].admin[time] = id;
+    return true;
+  }
+
+  async function deleteBlock(id) {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/blocked_slots?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    return res.ok;
+  }
+
   async function blockSlot(dateStr, time) {
     try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/blocked_slots', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify({ date: dateStr, time: time })
-      });
-      if (res.ok || res.status === 201) {
-        const rows = await res.json();
-        const id = Array.isArray(rows) && rows[0] ? rows[0].id : null;
-        if (!adminTakenSlots[dateStr]) adminTakenSlots[dateStr] = { customer: new Set(), admin: {} };
-        if (id) adminTakenSlots[dateStr].admin[time] = id;
-        renderSlots(dateStr);
-      } else {
-        alert('Failed to block slot. Check Supabase RLS policies.');
-      }
+      if (await postBlock(dateStr, time)) renderSlots(dateStr);
+      else alert('Failed to block slot. Check Supabase RLS policies.');
     } catch(e) {
       alert('Network error: ' + e.message);
     }
@@ -581,14 +730,7 @@
 
   async function unblockSlot(dateStr, time, id) {
     try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/blocked_slots?id=eq.' + id, {
-        method: 'DELETE',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY
-        }
-      });
-      if (res.ok) {
+      if (await deleteBlock(id)) {
         delete adminTakenSlots[dateStr].admin[time];
         renderSlots(dateStr);
       } else {
@@ -597,6 +739,375 @@
     } catch(e) {
       alert('Network error: ' + e.message);
     }
+  }
+
+  // ── Range blocking ───────────────────────
+  // Walks the range a day at a time. Each day's existing bookings are read
+  // first so customer-booked slots are skipped rather than double-booked —
+  // blocked_slots has no uniqueness constraint, so blindly posting would also
+  // pile up duplicate rows on days already blocked.
+  function isoAddDays(iso, n) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = new Date(y, m - 1, d + n);
+    return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+  }
+
+  function rangeDays(startIso, endIso) {
+    const out = [];
+    for (let d = startIso, guard = 0; guard < 400; guard++) {
+      out.push(d);
+      if (d === endIso) break;
+      d = isoAddDays(d, 1);
+    }
+    return out;
+  }
+
+  function readRange() {
+    const start = document.getElementById('rangeStart').value;
+    const end   = document.getElementById('rangeEnd').value;
+    const status = document.getElementById('rangeStatus');
+    if (!start || !end) { status.className = 'status-msg err'; status.textContent = 'Pick both dates first.'; return null; }
+    if (end < start)    { status.className = 'status-msg err'; status.textContent = 'The end date is before the start date.'; return null; }
+    return { start, end, days: rangeDays(start, end), status };
+  }
+
+  async function fetchDayState(dateStr) {
+    const [bRes, blRes] = await Promise.all([
+      fetch(SUPABASE_URL + '/rest/v1/bookings?select=time&date_iso=eq.' + dateStr, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      }),
+      fetch(SUPABASE_URL + '/rest/v1/blocked_slots?select=id,time&date=eq.' + dateStr, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      })
+    ]);
+    const booked  = bRes.ok  ? await bRes.json() : [];
+    const blocked = blRes.ok ? await blRes.json() : [];
+    return {
+      customer: new Set(booked.map(r => r.time)),
+      admin: Object.fromEntries(blocked.map(r => [r.time, r.id]))
+    };
+  }
+
+  function setRangeBusy(busy) {
+    document.getElementById('rangeBlockBtn').disabled = busy;
+    document.getElementById('rangeUnblockBtn').disabled = busy;
+  }
+
+  async function blockRange() {
+    const r = readRange();
+    if (!r) return;
+    setRangeBusy(true);
+    r.status.className = 'status-msg';
+    r.status.textContent = 'Blocking ' + r.days.length + ' day' + (r.days.length === 1 ? '' : 's') + '…';
+    let blocked = 0, skipped = 0, failed = 0;
+    try {
+      for (const day of r.days) {
+        const state = await fetchDayState(day);
+        adminTakenSlots[day] = state;
+        for (const slot of SLOTS) {
+          if (state.customer.has(slot)) { skipped++; continue; }
+          if (slot in state.admin) continue;
+          const ok = await postBlock(day, slot);
+          ok ? blocked++ : failed++;
+        }
+      }
+      r.status.className = failed ? 'status-msg err' : 'status-msg ok';
+      r.status.textContent = 'Blocked ' + blocked + ' slot' + (blocked === 1 ? '' : 's') +
+        (skipped ? ' · left ' + skipped + ' customer booking' + (skipped === 1 ? '' : 's') + ' alone' : '') +
+        (failed ? ' · ' + failed + ' failed' : '') + '.';
+      renderAdminCal();
+      if (adminSelectedDate) renderSlots(adminSelectedDate);
+    } catch(e) {
+      r.status.className = 'status-msg err';
+      r.status.textContent = 'Network error: ' + e.message;
+    }
+    setRangeBusy(false);
+  }
+
+  async function unblockRange() {
+    const r = readRange();
+    if (!r) return;
+    setRangeBusy(true);
+    r.status.className = 'status-msg';
+    r.status.textContent = 'Unblocking…';
+    let removed = 0, failed = 0;
+    try {
+      for (const day of r.days) {
+        const state = await fetchDayState(day);
+        adminTakenSlots[day] = state;
+        for (const slot of Object.keys(state.admin)) {
+          const ok = await deleteBlock(state.admin[slot]);
+          if (ok) { delete state.admin[slot]; removed++; } else failed++;
+        }
+      }
+      r.status.className = failed ? 'status-msg err' : 'status-msg ok';
+      r.status.textContent = 'Unblocked ' + removed + ' slot' + (removed === 1 ? '' : 's') +
+        (failed ? ' · ' + failed + ' failed' : '') + '.';
+      renderAdminCal();
+      if (adminSelectedDate) renderSlots(adminSelectedDate);
+    } catch(e) {
+      r.status.className = 'status-msg err';
+      r.status.textContent = 'Network error: ' + e.message;
+    }
+    setRangeBusy(false);
+  }
+
+  // ── Blocked-work entries ─────────────────
+  // These live in their own `blocked_work` table rather than on blocked_slots,
+  // which only has room for a date and a time. A separate table also keeps the
+  // public calendar's read path untouched — nothing out there needs to know
+  // what a block is for, only that the slot is gone.
+  //
+  // Until that table exists the whole feature falls back to localStorage, so
+  // entries typed in before the SQL is run are not lost: the first successful
+  // remote load pushes any local ones up and clears them. workSetupSql() below
+  // is the statement to run.
+  const WORK_KEY   = 'suds_blocked_work_v1';
+  const WORK_TABLE = 'blocked_work';
+  let workMode  = 'unknown';   // 'remote' once the table answers, 'local' if not
+  let workCache = [];
+
+  function loadLocalWork() {
+    try { return JSON.parse(localStorage.getItem(WORK_KEY)) || []; } catch(e) { return []; }
+  }
+  function saveLocalWork(list) { localStorage.setItem(WORK_KEY, JSON.stringify(list)); }
+
+  function sbHeaders(extra) {
+    return Object.assign({ 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }, extra || {});
+  }
+
+  // A row on the wire and an entry in the list are near enough the same shape;
+  // this keeps the rendering code from caring which store it came from.
+  function rowToEntry(r) {
+    return { id: String(r.id), type: r.kind === 'none' ? 'none' : 'job',
+             name: r.name || '', date: r.date || '', time: r.time || '',
+             amount: Number(r.amount) || 0 };
+  }
+  function entryToRow(e) {
+    return { date: e.date, time: e.time || null, name: e.name,
+             kind: e.type, amount: e.type === 'job' ? (e.amount || 0) : 0 };
+  }
+
+  async function refreshWork() {
+    if (workMode !== 'local') {
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?select=*&order=date.asc',
+                                { headers: sbHeaders() });
+        if (res.ok) {
+          const wasUnknown = workMode !== 'remote';
+          workMode = 'remote';
+          workCache = (await res.json()).map(rowToEntry);
+          if (wasUnknown) await migrateLocalWork();
+          renderWorkList();
+          return;
+        }
+        // 404 / PGRST205 means the table isn't there yet; anything else is
+        // worth seeing rather than silently swallowing.
+        if (res.status !== 404 && res.status !== 406) {
+          console.warn('blocked_work read failed:', res.status, await res.text());
+        }
+      } catch(e) {
+        console.warn('blocked_work unreachable:', e.message);
+      }
+      workMode = 'local';
+    }
+    workCache = loadLocalWork();
+    renderWorkList();
+  }
+
+  // One-way, once: anything typed in before the table existed goes up, then the
+  // local copy is cleared so the two can't drift.
+  async function migrateLocalWork() {
+    const local = loadLocalWork();
+    if (!local.length) return;
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE, {
+        method: 'POST',
+        headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+        body: JSON.stringify(local.map(entryToRow))
+      });
+      if (res.ok || res.status === 201) {
+        localStorage.removeItem(WORK_KEY);
+        workCache = workCache.concat((await res.json()).map(rowToEntry));
+      }
+    } catch(e) {
+      console.warn('Could not move local entries up:', e.message);
+    }
+  }
+
+  function workSetupSql() {
+    return [
+      'create table if not exists public.blocked_work (',
+      '  id uuid primary key default gen_random_uuid(),',
+      '  date date not null,',
+      '  time text,',
+      '  name text not null,',
+      "  kind text not null default 'job',",
+      '  amount numeric not null default 0,',
+      '  created_at timestamptz not null default now()',
+      ');',
+      'alter table public.blocked_work enable row level security;',
+      'create policy "anon read blocked_work"   on public.blocked_work for select to anon using (true);',
+      'create policy "anon insert blocked_work" on public.blocked_work for insert to anon with check (true);',
+      'create policy "anon delete blocked_work" on public.blocked_work for delete to anon using (true);'
+    ].join('\n');
+  }
+
+  function renderWorkSync() {
+    const el = document.getElementById('workSync');
+    if (!el) return;
+    if (workMode === 'remote') {
+      el.innerHTML = '<div class="status-msg ok" style="margin:0 0 10px;">Synced — these show up on any device you open the admin on.</div>';
+      return;
+    }
+    el.innerHTML = `<div class="sync-notice">
+        <div><strong>Saved on this browser only.</strong> The <code>blocked_work</code> table isn't there yet, so these entries won't follow you to another device.</div>
+        <button class="btn btn-secondary" style="margin-top:10px;" onclick="copyWorkSql(this)">Copy the SQL to create it</button>
+        <div style="font-size:11px; color:var(--mid); margin-top:6px;">Run it in Supabase → SQL Editor, then reload. Anything already in the list moves up on its own.</div>
+      </div>`;
+  }
+
+  function copyWorkSql(btn) {
+    const sql = workSetupSql();
+    const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy the SQL to create it'; }, 1800); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(sql).then(done).catch(() => window.prompt('Copy this SQL:', sql));
+    } else {
+      window.prompt('Copy this SQL:', sql);
+    }
+  }
+
+  function syncWorkForm() {
+    const isJob = document.getElementById('workTypeJob').checked;
+    document.getElementById('workAmountRow').style.display = isJob ? '' : 'none';
+    document.getElementById('workNameLabel').textContent = isJob ? 'Name' : 'What for?';
+    document.getElementById('workName').placeholder = isJob ? 'Jane Smith' : 'Dentist, family day, truck service…';
+  }
+
+  // Accepts "250", "$250", "1,250.50" — anything with a number in it.
+  function parseAmount(raw) {
+    const n = parseFloat(String(raw || '').replace(/[^0-9.]/g, ''));
+    return isFinite(n) ? n : 0;
+  }
+  function money(n) {
+    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  }
+
+  async function addWorkEntry() {
+    const status = document.getElementById('workStatus');
+    const isJob  = document.getElementById('workTypeJob').checked;
+    const name   = document.getElementById('workName').value.trim();
+    const date   = document.getElementById('workDate').value;
+    const time   = document.getElementById('workTime').value.trim();
+    const amount = parseAmount(document.getElementById('workAmount').value);
+
+    if (!name) { status.className = 'status-msg err'; status.textContent = isJob ? 'Add a name first.' : 'Say what the time is for.'; return; }
+    if (!date) { status.className = 'status-msg err'; status.textContent = 'Pick a date first.'; return; }
+
+    const entry = { type: isJob ? 'job' : 'none', name, date, time, amount: isJob ? amount : 0 };
+
+    if (workMode === 'remote') {
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE, {
+          method: 'POST',
+          headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+          body: JSON.stringify(entryToRow(entry))
+        });
+        if (!(res.ok || res.status === 201)) {
+          status.className = 'status-msg err';
+          status.textContent = 'Could not save — check the blocked_work RLS policies.';
+          return;
+        }
+        const rows = await res.json();
+        workCache.push(rowToEntry(Array.isArray(rows) ? rows[0] : rows));
+      } catch(e) {
+        status.className = 'status-msg err';
+        status.textContent = 'Network error: ' + e.message;
+        return;
+      }
+    } else {
+      entry.id = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+      workCache = loadLocalWork().concat(entry);
+      saveLocalWork(workCache);
+    }
+
+    document.getElementById('workName').value = '';
+    document.getElementById('workTime').value = '';
+    document.getElementById('workAmount').value = '';
+    status.className = 'status-msg ok';
+    status.textContent = 'Added.';
+    renderWorkList();
+  }
+
+  async function removeWorkEntry(id) {
+    if (workMode === 'remote') {
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?id=eq.' + encodeURIComponent(id),
+                                { method: 'DELETE', headers: sbHeaders() });
+        if (!res.ok) {
+          const status = document.getElementById('workStatus');
+          status.className = 'status-msg err';
+          status.textContent = 'Could not remove — check the blocked_work RLS policies.';
+          return;
+        }
+      } catch(e) {
+        const status = document.getElementById('workStatus');
+        status.className = 'status-msg err';
+        status.textContent = 'Network error: ' + e.message;
+        return;
+      }
+      workCache = workCache.filter(w => w.id !== id);
+    } else {
+      workCache = loadLocalWork().filter(w => w.id !== id);
+      saveLocalWork(workCache);
+    }
+    renderWorkList();
+  }
+
+  function prettyDate(iso) {
+    if (!iso) return '—';
+    const [y, m, d] = iso.split('-');
+    return MONTHS[parseInt(m,10)-1] + ' ' + parseInt(d,10) + ', ' + y;
+  }
+
+  function renderWorkList() {
+    renderWorkSync();
+    const list = workCache.slice().sort((a, b) => (a.date + (a.time||'')).localeCompare(b.date + (b.time||'')));
+    const listEl  = document.getElementById('workList');
+    const totalEl = document.getElementById('workTotal');
+
+    if (!list.length) {
+      totalEl.innerHTML = '';
+      listEl.innerHTML = '<div class="empty-state">Nothing added yet. Blocked jobs and days off you type in above show up here.</div>';
+      return;
+    }
+
+    const jobs  = list.filter(w => w.type === 'job');
+    const total = jobs.reduce((s, w) => s + (w.amount || 0), 0);
+    totalEl.innerHTML = `<div class="work-total">
+        <span>${jobs.length} job${jobs.length === 1 ? '' : 's'} blocked off</span>
+        <span>${money(total)}</span>
+      </div>`;
+
+    listEl.innerHTML = '';
+    list.forEach(w => {
+      const card = document.createElement('div');
+      card.className = 'work-card' + (w.type === 'none' ? ' no-job' : '');
+      const when = prettyDate(w.date) + (w.time ? ' · ' + esc(w.time) : '');
+      card.innerHTML = `
+        <div class="work-top">
+          <div style="min-width:0;">
+            <div class="work-name">${esc(w.name)}</div>
+            <div class="work-when">${when}${w.type === 'none' ? ' · no job' : ''}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            ${w.type === 'job' ? `<div class="work-amount">${money(w.amount || 0)}</div>` : ''}
+            <button class="work-del" title="Remove" data-id="${esc(w.id)}">&times;</button>
+          </div>
+        </div>`;
+      card.querySelector('.work-del').onclick = () => removeWorkEntry(w.id);
+      listEl.appendChild(card);
+    });
   }
 
   // ── Bookings list ────────────────────────
@@ -646,8 +1157,8 @@
             <div class="booking-date-badge">${esc(dateLabel)}</div>
           </div>
           <div class="booking-row">🕐 <strong>${esc(b.time || '—')}</strong></div>
-          ${b.phone ? `<div class="booking-row">📞 ${esc(b.phone)}</div>` : ''}
-          ${b.email ? `<div class="booking-row">✉️ ${esc(b.email)}</div>` : ''}
+          ${b.phone ? `<div class="booking-row">📞 ${telLink(b.phone)}</div>` : ''}
+          ${b.email ? `<div class="booking-row">✉️ ${mailLink(b.email)}</div>` : ''}
           ${b.address ? `<div class="booking-row">📍 ${esc(b.address)}</div>` : ''}
           ${b.notes ? `<div class="booking-row">💬 ${esc(b.notes)}</div>` : ''}
           <div class="booking-package">${esc(b.package || '—')}</div>
@@ -665,6 +1176,24 @@
 
   function esc(str) {
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Tap-to-call and tap-to-email on the cards. The visible text stays as it
+  // was typed; only the href is normalised — tel: wants bare digits, keeping a
+  // leading + for international. Both hrefs are built from a strict character
+  // whitelist rather than escaped after the fact, so nothing in the data can
+  // break out of the attribute; anything that fails the test renders as plain
+  // text instead of a broken link.
+  function telLink(phone) {
+    const digits = String(phone).replace(/[^\d+]/g, '');
+    if (!/^\+?\d{3,}$/.test(digits)) return esc(phone);
+    return '<a href="tel:' + digits + '">' + esc(phone) + '</a>';
+  }
+
+  function mailLink(email) {
+    const clean = String(email).trim();
+    if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(clean)) return esc(email);
+    return '<a href="mailto:' + clean + '">' + esc(clean) + '</a>';
   }
 
   // ── Consults list ────────────────────────
@@ -725,8 +1254,8 @@
           <div class="booking-row">🗓 <strong>${esc(b.date || '—')}${b.time ? ' · ' + esc(b.time) : ''}</strong></div>
           <div class="booking-row">🏢 ${esc(serviceLabel)}</div>
           ${b.sizing_info ? `<div class="booking-row">📐 ${esc(b.sizing_info)}</div>` : ''}
-          ${b.phone ? `<div class="booking-row">📞 ${esc(b.phone)}</div>` : ''}
-          ${b.email ? `<div class="booking-row">✉ ${esc(b.email)}</div>` : ''}
+          ${b.phone ? `<div class="booking-row">📞 ${telLink(b.phone)}</div>` : ''}
+          ${b.email ? `<div class="booking-row">✉ ${mailLink(b.email)}</div>` : ''}
           ${b.address ? `<div class="booking-row">📍 ${esc(b.address)}</div>` : ''}
           ${b.notes ? `<div class="booking-row">💬 ${esc(b.notes)}</div>` : ''}
         `;
