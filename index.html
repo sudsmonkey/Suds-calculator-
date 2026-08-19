@@ -446,6 +446,14 @@ body.game-open .truck-band { position: relative; top: auto; }
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4;
   overflow: hidden;
 }
+.testi-quote.expanded {
+  -webkit-line-clamp: unset; line-clamp: unset; overflow: visible;
+}
+.testi-readmore {
+  display: inline-block; background: none; border: none; padding: 0; margin: -8px 0 12px;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800; color: var(--orange);
+  cursor: pointer;
+}
 .testi-name { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 900; color: var(--dark); }
 .testi-loc { font-size: 12px; color: var(--mid); }
 
@@ -868,6 +876,24 @@ body.game-open .truck-band { position: relative; top: auto; }
 function toggleMenu(){
   document.getElementById('hdMenu').classList.toggle('open');
 }
+
+// Testimonial "Read more" -- only added to quotes the line-clamp is actually
+// truncating (scrollHeight > clientHeight), so short reviews that already
+// fit never get a pointless toggle.
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.testi-quote').forEach(function(q){
+    if (q.scrollHeight <= q.clientHeight + 1) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'testi-readmore';
+    btn.textContent = 'Read more';
+    btn.addEventListener('click', function(){
+      var expanded = q.classList.toggle('expanded');
+      btn.textContent = expanded ? 'Read less' : 'Read more';
+    });
+    q.insertAdjacentElement('afterend', btn);
+  });
+});
 
 // Pins the game box under the header so the thank-you band and footer fold up
 // over it, the same ending the truck photo gives when the game is closed. Only
