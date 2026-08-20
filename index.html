@@ -894,15 +894,15 @@ function toggleMenu(){
 }
 
 // A quick tactile bounce on tap before the mini package cards navigate to
-// the booking flow -- delays navigation just long enough (half the
-// animation) for the bounce to actually be visible instead of getting cut
-// off by the page unloading.
+// the booking flow -- lets the full 320ms bounce play out, then holds an
+// extra 180ms before navigating, so the animation is never cut off by the
+// page unloading.
 function bouncePkgMiniCard(el, e){
   e.preventDefault();
   el.classList.remove('bounce');
   void el.offsetWidth; // restart the animation if clicked again mid-bounce
   el.classList.add('bounce');
-  setTimeout(function(){ window.location.href = el.href; }, 160);
+  setTimeout(function(){ window.location.href = el.href; }, 320 + 180);
   return false;
 }
 
