@@ -8,9 +8,9 @@ Nothing here is urgent; none of it is blocking. Audited 2026-08-14.
 | Page | `<title>` | meta description | canonical | Open Graph | JSON-LD |
 |------|-----------|------------------|-----------|------------|---------|
 | `index.html` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `consult.html` | ✅ | ❌ | ❌ | ✅ | ❌ |
-| `calculator.html` | ✅ | ❌ | ❌ | ✅ | ❌ |
-| `calendar.html` | ✅ | ❌ | ❌ | ✅ | ❌ |
+| `consult.html` | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `calculator.html` | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `calendar.html` | ✅ | ✅ | ✅ | ✅ | ❌ |
 
 No `robots.txt`, no `sitemap.xml`.
 
@@ -61,7 +61,8 @@ footer.
    tag itself is still open — that's item 3 below).
 
 3. **Meta description + canonical on `consult.html`, `calculator.html`,
-   `calendar.html`** — mechanical, five minutes.
+   `calendar.html`** — ✅ **done.** Reused the same one-line descriptions
+   written for their Open Graph tags above.
 
 4. **`robots.txt` + `sitemap.xml`** — marginal for a four-page site, but cheap.
 
