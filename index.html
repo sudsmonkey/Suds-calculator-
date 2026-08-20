@@ -439,6 +439,16 @@ body.game-open .truck-band { position: relative; top: auto; }
   background: var(--cream);
   padding: 14px 20px 18px;
 }
+/* Same pin-over-reviews pattern as .pkg-pin, but for the commercial CTA +
+   gallery -- pins while the commercial reviews scroll underneath it,
+   releasing at One Time Cleans. */
+.comm-pin {
+  position: sticky;
+  top: var(--navH, 76px);
+  z-index: 40;
+  background: var(--cream);
+  padding: 14px 20px 18px;
+}
 @keyframes pkgMiniBounce {
   0%   { transform: scale(1); }
   35%  { transform: scale(0.93); }
@@ -764,6 +774,13 @@ body.game-open .truck-band { position: relative; top: auto; }
     <div class="glass-section">
       <div class="glass-type">Commercial</div>
       <p class="glass-body"><span class="glass-lead">From small boutiques to large medical facilities,</span> Suds Monkey delivers <span class="glass-em">reliable, consistent service</span> to OKC business owners and managers across the metro and surrounding states. Our trained technicians are skilled at <span class="glass-em">working at height</span> on larger projects and are always mindful of keeping disruption to a minimum for facilities and retail customers alike.</p>
+    </div>
+
+    <!-- Tap-here CTA + gallery pin over the commercial reviews below,
+         releasing at One Time Cleans. Same pattern as .pkg-zone/.pkg-pin
+         above. -->
+    <div class="comm-zone">
+    <div class="comm-pin">
       <a href="consult.html" class="glass-cta">Tap here to schedule a consultation or site visit to your property.</a>
       <div class="glass-scroll" id="commScroll">
         <div class="glass-track">
@@ -814,6 +831,7 @@ body.game-open .truck-band { position: relative; top: auto; }
         </div>
       </div>
     </div>
+    </div><!-- /.comm-zone -->
 
     <div class="glass-section">
       <div class="glass-type">One Time Cleans</div>
