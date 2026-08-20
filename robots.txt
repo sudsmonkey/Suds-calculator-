@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sudsmonkey.github.io/Suds-calculator-/sitemap.xml

@@ -64,7 +64,13 @@ footer.
    `calendar.html`** — ✅ **done.** Reused the same one-line descriptions
    written for their Open Graph tags above.
 
-4. **`robots.txt` + `sitemap.xml`** — marginal for a four-page site, but cheap.
+4. **`robots.txt` + `sitemap.xml`** — ✅ **done.** `robots.txt` allows
+   everything and points at the sitemap; `sitemap.xml` lists the four public
+   pages (`index.html`, `calculator.html`, `calendar.html`, `consult.html`).
+   `admin.html` is deliberately absent from both — it isn't linked from
+   anywhere, and naming it in a `Disallow` line would just advertise the URL
+   in a file anyone can read. `game.html` is left off the sitemap too — a
+   marketing toy, not something worth indexing for search intent.
 
 ## Outside the repo
 
