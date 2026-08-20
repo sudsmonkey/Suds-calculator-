@@ -25,6 +25,30 @@
 
   /* ── Dashboard shell ── */
   #adminDash { display: none; }
+  #loginGate {
+    display: flex; min-height: 100vh; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  #loginGate.hidden { display: none; }
+  .login-card {
+    background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 32px 28px; max-width: 320px; width: 100%; text-align: center;
+  }
+  .login-title { font-size: 18px; font-weight: 900; color: var(--dark); margin-bottom: 4px; }
+  .login-sub { font-size: 13px; color: var(--mid); margin-bottom: 20px; }
+  .login-card input[type=password] {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; font-family: 'Nunito', sans-serif; font-size: 15px;
+    color: var(--ink); text-align: center; margin-bottom: 12px; outline: none;
+  }
+  .login-card input[type=password]:focus { border-color: var(--orange); }
+  .login-btn {
+    width: 100%; background: var(--orange); color: #fff; border: none; border-radius: 50px;
+    padding: 12px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 900; cursor: pointer;
+  }
+  .login-btn:hover { opacity: 0.9; }
+  .login-error { color: var(--orange); font-size: 12px; font-weight: 700; margin-top: 10px; display: none; }
+  .login-error.visible { display: block; }
 
   .top-bar {
     background: var(--orange);
@@ -342,6 +366,17 @@
 </head>
 <body>
 
+<!-- ─────────── Login gate ─────────── -->
+<div id="loginGate">
+  <div class="login-card">
+    <div class="login-title">Suds Monkey Admin</div>
+    <div class="login-sub">Enter the password to continue.</div>
+    <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+    <button class="login-btn" onclick="checkPassword()">Enter</button>
+    <div class="login-error" id="loginError">Wrong password. Try again.</div>
+  </div>
+</div>
+
 <!-- ─────────── Admin dashboard ─────────── -->
 <div id="adminDash">
   <div class="top-bar">
@@ -525,9 +560,35 @@
                   'July','August','September','October','November','December'];
 
   // ── Startup ─────────────────────────────
-  // The password gate has been removed, so the dashboard opens straight away.
+  // Password gate: once entered correctly on a device, localStorage keeps it
+  // signed in indefinitely (unlike sessionStorage, this survives closing the
+  // tab/browser). Client-side only — not real security, just keeps casual
+  // visitors out.
+  const ADMIN_PASSWORD = 'Lux13lux31';
+
   function init() {
-    showDash();
+    if (localStorage.getItem('suds_admin') === '1') {
+      document.getElementById('loginGate').classList.add('hidden');
+      showDash();
+    } else {
+      document.getElementById('loginPassword').addEventListener('keydown', e => {
+        if (e.key === 'Enter') checkPassword();
+      });
+    }
+  }
+
+  function checkPassword() {
+    const input = document.getElementById('loginPassword');
+    const error = document.getElementById('loginError');
+    if (input.value === ADMIN_PASSWORD) {
+      localStorage.setItem('suds_admin', '1');
+      document.getElementById('loginGate').classList.add('hidden');
+      showDash();
+    } else {
+      error.classList.add('visible');
+      input.value = '';
+      input.focus();
+    }
   }
 
   function showDash() {
