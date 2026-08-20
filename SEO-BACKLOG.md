@@ -111,13 +111,19 @@ nothing visible lost at any screen size.
 
 ## To do
 
-1. **Re-save the 17 `IMG_*.jpeg` strip photos at ~600px wide.** Keep the
-   originals in the repo (they are real job photos) and point the pages at
-   web-sized copies. ~52MB → ~1MB.
-2. **Add `loading="lazy"`** below the fold. Currently 0 of 52 `<img>` tags on
-   `index.html` use it, so everything downloads immediately whether or not it is
-   near the viewport.
+1. **Re-save the 17 `IMG_*.jpeg` strip photos at ~600px wide.** — ✅ **done.**
+   15 files actually feed the strip (14 `<img>` + `IMG_0858.jpeg` as a video-slot
+   CSS background); resized copies live in `web/`, originals untouched in the
+   repo root. 48.7MB → 1.4MB.
+2. **Add `loading="lazy"`** below the fold. — ✅ **done.** All 42 gallery
+   `<img>` tags on `index.html` now carry it; verified in a headless browser
+   that images off-screen defer and everything loads correctly once scrolled
+   into view.
 3. **Delete three unused files**: `img-residential-windows.jpg` (5.9MB),
    `img-commercial.jpg`, `img-residential.jpg`. Referenced by no page.
+   **Also found two more while resizing**: `IMG_0790.jpeg` and `IMG_4218.jpeg`
+   are real job photos but aren't referenced anywhere either — not yet
+   deleted, flagging for a decision.
 
-Total repo image weight is 64.9MB across 27 files; 18 are over 2MB.
+Total repo image weight is 64.9MB across 27 files; 18 are over 2MB. (The
+`web/` folder above is new, on top of that total.)
