@@ -1478,6 +1478,22 @@
       name: (agg && agg.name) || 'Suds Monkey Window Cleaning',
       telephone: '+1-405-882-2277',
       url: 'https://sudsmonkey.github.io/Suds-calculator-/',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '125 NW 29th St',
+        addressLocality: 'Oklahoma City',
+        addressRegion: 'OK',
+        postalCode: '73103',
+        addressCountry: 'US'
+      },
+      areaServed: [
+        'Oklahoma City', 'Moore', 'Edmond', 'Nichols Hills', 'Warr Acres', 'Bethany',
+        'Midwest City', 'Choctaw', 'The Village', 'Yukon', 'Mustang', 'Piedmont'
+      ].map(name => ({ '@type': 'City', name })),
+      openingHoursSpecification: [
+        { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], opens: '08:00', closes: '17:00' },
+        { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Saturday', opens: '09:00', closes: '14:00' }
+      ],
       review: list.map(r => ({
         '@type': 'Review',
         author: { '@type': 'Person', name: r.author },
