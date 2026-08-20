@@ -699,6 +699,8 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY, 'apikey': SUPABASE_KEY },
         body: JSON.stringify({ email: b.email, date_iso: b.date_iso, time: b.time, package: b.package })
+      }).then(function(res) {
+        if (!res.ok) res.text().then(function(t) { console.error('Confirmation email request rejected:', res.status, t); });
       }).catch(function(err) { console.error('Confirmation email request failed:', err); });
     }
 
