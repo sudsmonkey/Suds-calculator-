@@ -119,11 +119,9 @@ nothing visible lost at any screen size.
    `<img>` tags on `index.html` now carry it; verified in a headless browser
    that images off-screen defer and everything loads correctly once scrolled
    into view.
-3. **Delete three unused files**: `img-residential-windows.jpg` (5.9MB),
-   `img-commercial.jpg`, `img-residential.jpg`. Referenced by no page.
-   **Also found two more while resizing**: `IMG_0790.jpeg` and `IMG_4218.jpeg`
-   are real job photos but aren't referenced anywhere either — not yet
-   deleted, flagging for a decision.
+3. **Delete unused files** — ✅ **done.** `img-residential-windows.jpg` (5.9MB),
+   `img-commercial.jpg`, `img-residential.jpg`, plus two more found while
+   resizing (`IMG_0790.jpeg`, `IMG_4218.jpeg`). None referenced by any page.
 
 Total repo image weight is 64.9MB across 27 files; 18 are over 2MB. (The
 `web/` folder above is new, on top of that total.)
