@@ -61,6 +61,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
     -webkit-mask-position: -28.7px -5.9px; mask-position: -28.7px -5.9px;
 }
 .hd-logo-img.masked img { visibility: hidden; }
+.weather-badge {
+  display: none; align-items: center; gap: 5px;
+  font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
+  color: var(--dark); white-space: nowrap;
+}
+.weather-badge .weather-icon { font-size: 20px; line-height: 1; }
 .hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
 .hd-burger span { display: block; width: 22px; height: 2px; background: var(--orange); border-radius: 2px; transition: all 0.2s; }
 .hd-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 180px; overflow: hidden; }
@@ -334,16 +340,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
       <img src="logo.png" alt="Suds Monkey" onload="this.parentNode.classList.add('masked')" onerror="this.style.display='none';this.parentNode.textContent='🐒'">
     </div>
   </a>
-  <div style="position:relative;">
-    <button class="hd-burger" id="hdBurger" onclick="toggleMenu()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-    <nav class="hd-menu" id="hdMenu">
-      <a href="index.html">Home</a>
-      <a href="calculator.html">Residential Quote</a>
-      <a href="game.html">Mini Game</a>
-      <a href="tel:4058822277">Contact</a>
-    </nav>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="weather-badge" id="weatherBadge"><span class="weather-icon" id="weatherIcon"></span><span id="weatherTemp"></span></div>
+    <div style="position:relative;">
+      <button class="hd-burger" id="hdBurger" onclick="toggleMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="hd-menu" id="hdMenu">
+        <a href="index.html">Home</a>
+        <a href="calculator.html">Residential Quote</a>
+        <a href="game.html">Mini Game</a>
+        <a href="tel:4058822277">Contact</a>
+      </nav>
+    </div>
   </div>
 </header>
 
@@ -514,6 +523,54 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
       document.getElementById('hdMenu').classList.remove('open');
     }
   });
+
+  // Header weather badge -- fixed to OKC, not geolocated (this is a local
+  // service, so OKC conditions are what matter regardless of where the visitor
+  // is browsing from). Open-Meteo needs no API key/signup, unlike every other
+  // weather API, which fits a static site with nowhere to hide a secret anyway.
+  // Cached in sessionStorage for 30 min so repeat page loads in one visit
+  // don't refetch. Hidden entirely on any failure, same as the availability
+  // pills elsewhere on the site.
+  (function(){
+    var OKC_LAT = 35.4676, OKC_LON = -97.5164;
+    var CACHE_KEY = 'suds_weather_v1';
+    var CACHE_MS = 30 * 60 * 1000;
+
+    var WEATHER_ICONS = {
+      0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+      45: '🌫️', 48: '🌫️',
+      51: '🌦️', 53: '🌦️', 55: '🌦️', 56: '🌦️', 57: '🌦️',
+      61: '🌧️', 63: '🌧️', 65: '🌧️', 66: '🌧️', 67: '🌧️',
+      71: '❄️', 73: '❄️', 75: '❄️', 77: '❄️', 85: '❄️', 86: '❄️',
+      80: '🌧️', 81: '🌧️', 82: '🌧️',
+      95: '⛈️', 96: '⛈️', 99: '⛈️'
+    };
+
+    function showWeather(tempF, code){
+      var icon = WEATHER_ICONS[code] || '🌡️';
+      document.getElementById('weatherIcon').textContent = icon;
+      document.getElementById('weatherTemp').textContent = Math.round(tempF) + '°';
+      document.getElementById('weatherBadge').style.display = 'flex';
+    }
+
+    try {
+      var cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+      if (cached && (Date.now() - cached.t) < CACHE_MS){
+        showWeather(cached.temp, cached.code);
+        return;
+      }
+    } catch(e) {}
+
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=' + OKC_LAT + '&longitude=' + OKC_LON + '&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=America%2FChicago')
+      .then(function(res){ return res.ok ? res.json() : Promise.reject(); })
+      .then(function(data){
+        var temp = data.current.temperature_2m;
+        var code = data.current.weather_code;
+        showWeather(temp, code);
+        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), temp: temp, code: code })); } catch(e) {}
+      })
+      .catch(function(){ /* badge stays hidden */ });
+  })();
 
   let selectedType = null;
   let selectedStories = null;
