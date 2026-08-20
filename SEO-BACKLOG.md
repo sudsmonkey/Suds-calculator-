@@ -7,10 +7,10 @@ Nothing here is urgent; none of it is blocking. Audited 2026-08-14.
 
 | Page | `<title>` | meta description | canonical | Open Graph | JSON-LD |
 |------|-----------|------------------|-----------|------------|---------|
-| `index.html` | ✅ | ✅ | ✅ | ❌ | ✅ |
-| `consult.html` | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `calculator.html` | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `calendar.html` | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `index.html` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `consult.html` | ✅ | ❌ | ❌ | ✅ | ❌ |
+| `calculator.html` | ✅ | ❌ | ❌ | ✅ | ❌ |
+| `calendar.html` | ✅ | ❌ | ❌ | ✅ | ❌ |
 
 No `robots.txt`, no `sitemap.xml`.
 
@@ -51,10 +51,14 @@ footer.
    `admin.html`, kept in sync) — edit the generator, not `<head>` directly,
    or the next regenerate drops any hand edits.
 
-2. **Open Graph + Twitter card tags on all four pages** — currently a shared
-   link renders as a bare URL with no preview. Matters more than it sounds for
-   a business that travels by word of mouth and text message. Needs a share
-   image; the truck photo (`img-truck.jpg`) is the obvious candidate.
+2. **Open Graph + Twitter card tags on all four pages** — ✅ **done.** Every
+   page carries `og:type`, `og:site_name`, `og:title`, `og:description`,
+   `og:url`, `og:image`, and the matching `twitter:*` tags
+   (`summary_large_image`). All four share `img-truck.jpg` as the preview
+   image. `og:description`/`twitter:description` reuse `index.html`'s
+   existing meta description; the other three pages got a one-line
+   description written fresh for this (their `<meta name="description">`
+   tag itself is still open — that's item 3 below).
 
 3. **Meta description + canonical on `consult.html`, `calculator.html`,
    `calendar.html`** — mechanical, five minutes.
