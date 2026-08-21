@@ -154,14 +154,7 @@
   --max: 640px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-/* scroll-padding-top matches where the pinned truck photo ends (header height
-   + the 216px band), so a `start` snap point lands right at the bottom edge
-   of the photo instead of at the literal top of the viewport. */
-html {
-  scroll-behavior: smooth;
-  scroll-snap-type: y proximity;
-  scroll-padding-top: calc(var(--navH, 76px) + 216px);
-}
+html { scroll-behavior: smooth; }
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); -webkit-font-smoothing: antialiased; }
 
 /* ── Header ─────────────────────── */
@@ -627,12 +620,6 @@ body.game-open .truck-band { position: relative; top: auto; }
 .thanks-band {
   background: var(--dark); padding: 52px 24px 56px; text-align: center;
   position: relative; z-index: 60;
-  /* Rests right under the truck photo instead of sliding straight through to
-     the footer -- a deliberate pause the visitor scrolls again to get past.
-     `proximity` (not `mandatory`) so it only catches a scroll that comes to
-     rest nearby, rather than fighting scroll everywhere else on the page. */
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
 }
 .thanks-mark {
   font-family: 'Barlow Condensed', sans-serif; font-style: italic; font-weight: 800;
@@ -663,7 +650,7 @@ body.game-open .truck-band { position: relative; top: auto; }
 /* ── Footer ──────────────────────── */
 /* Deeper at the bottom than the top — the extra 15px keeps the copyright line
    off the very edge of the page. */
-.footer { background: var(--ink); padding: 28px 20px 43px; text-align: center; scroll-snap-align: end; }
+.footer { background: var(--ink); padding: 28px 20px 43px; text-align: center; }
 .footer-brand { font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 900; color: rgba(255,255,255,0.85); margin-bottom: 4px; }
 .footer-meta { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
 .footer-nav { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
