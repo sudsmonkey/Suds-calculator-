@@ -1516,35 +1516,47 @@ document.addEventListener('click', function(e){
   var SUPABASE_KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
   var FADE_MS = 400, HOLD_MS = 4000;
 
+  // TEMP mockup data -- ticker_jobs doesn't exist in Supabase yet. Once the
+  // table is set up and admin.html has real jobs saved, delete this array and
+  // the `showJobs(DEMO_JOBS)` fallback call below; the real fetch already
+  // takes over automatically the moment it succeeds.
+  var DEMO_JOBS = ['Texas Tech Football Stadium', 'Downtown OKC High-Rise'];
+
+  function showJobs(jobs){
+    jobs = jobs.filter(function(j){ return j && j.trim(); });
+    if (!jobs.length) return;
+
+    var bar = document.getElementById('jobsTicker');
+    var text = document.getElementById('jobsTickerText');
+    bar.style.display = 'flex';
+    document.body.classList.add('has-ticker');
+
+    var i = 0;
+    text.textContent = jobs[0];
+    if (jobs.length > 1) {
+      setInterval(function(){
+        text.classList.add('fading');
+        setTimeout(function(){
+          i = (i + 1) % jobs.length;
+          text.textContent = jobs[i];
+          text.classList.remove('fading');
+        }, FADE_MS);
+      }, HOLD_MS);
+    }
+  }
+
   fetch(SUPABASE_URL + '/rest/v1/ticker_jobs?select=job_1,job_2,job_3&limit=1', {
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
   })
     .then(function(res){ return res.ok ? res.json() : Promise.reject(); })
     .then(function(rows){
       var row = rows && rows[0];
-      if (!row) return;
-      var jobs = [row.job_1, row.job_2, row.job_3].filter(function(j){ return j && j.trim(); });
-      if (!jobs.length) return;
-
-      var bar = document.getElementById('jobsTicker');
-      var text = document.getElementById('jobsTickerText');
-      bar.style.display = 'flex';
-      document.body.classList.add('has-ticker');
-
-      var i = 0;
-      text.textContent = jobs[0];
-      if (jobs.length > 1) {
-        setInterval(function(){
-          text.classList.add('fading');
-          setTimeout(function(){
-            i = (i + 1) % jobs.length;
-            text.textContent = jobs[i];
-            text.classList.remove('fading');
-          }, FADE_MS);
-        }, HOLD_MS);
-      }
+      if (!row) { showJobs(DEMO_JOBS); return; }
+      var jobs = [row.job_1, row.job_2, row.job_3];
+      if (!jobs.filter(function(j){ return j && j.trim(); }).length) { showJobs(DEMO_JOBS); return; }
+      showJobs(jobs);
     })
-    .catch(function(){ /* ticker stays hidden */ });
+    .catch(function(){ showJobs(DEMO_JOBS); /* TEMP -- see note above */ });
 })();
 </script>
 </body>
