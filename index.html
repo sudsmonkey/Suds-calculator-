@@ -215,6 +215,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   display: none;
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
   background: var(--border); color: var(--ink);
+  /* A deliberate accent line at the true bottom edge -- if Safari samples
+     the last pixel row for its own toolbar color, it picks up this orange
+     rather than the taupe bar above it, reading as an intentional boundary
+     instead of an accidental blend. */
+  border-bottom: 4px solid var(--orange);
   box-shadow: 0 -4px 14px rgba(0,0,0,0.12);
   padding: 10px 18px;
   align-items: center; justify-content: center;
