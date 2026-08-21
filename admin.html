@@ -391,6 +391,7 @@
     <div class="tab" onclick="switchTab('bookings')">Bookings</div>
     <div class="tab" onclick="switchTab('consults')">Consults</div>
     <div class="tab" onclick="switchTab('reviews')">Reviews</div>
+    <div class="tab" onclick="switchTab('ticker')">Ticker</div>
   </div>
 
   <!-- Block Slots panel -->
@@ -547,6 +548,32 @@
     <button class="btn btn-secondary" id="copyCodeBtn" onclick="copyReviewCode()" style="display:none; margin-left:8px;">Copy to Clipboard</button>
     <textarea id="codeOutput" readonly style="display:none;"></textarea>
   </div>
+
+  <!-- Ticker panel -->
+  <div class="panel" id="panelTicker">
+    <div class="section-label">Jobs in progress</div>
+    <div class="range-card">
+      <div style="font-size:12px; color:var(--mid); margin-bottom:14px; line-height:1.5;">
+        Shows on the home page as "Now Cleaning: ..." in a small bar at the
+        bottom of the screen. Fill in up to three; leave any blank to skip it.
+      </div>
+      <div class="field-row">
+        <label for="tickerJob1">Job 1</label>
+        <input type="text" id="tickerJob1" placeholder="Texas Tech Football Stadium">
+      </div>
+      <div class="field-row">
+        <label for="tickerJob2">Job 2</label>
+        <input type="text" id="tickerJob2" placeholder="">
+      </div>
+      <div class="field-row">
+        <label for="tickerJob3">Job 3</label>
+        <input type="text" id="tickerJob3" placeholder="">
+      </div>
+      <button class="btn btn-primary" onclick="saveTickerJobs()" style="width:100%;">Save</button>
+      <div class="status-msg" id="tickerStatus"></div>
+    </div>
+    <div id="tickerSync"></div>
+  </div>
 </div>
 
 <div id="placesDummy" style="display:none;"></div>
@@ -610,16 +637,17 @@
   }
 
   // ── Tabs ────────────────────────────────
-  const PANEL_MAP = { block: 'panelBlock', bookings: 'panelBookings', consults: 'panelConsults', reviews: 'panelReviews' };
+  const PANEL_MAP = { block: 'panelBlock', bookings: 'panelBookings', consults: 'panelConsults', reviews: 'panelReviews', ticker: 'panelTicker' };
 
   function switchTab(name) {
-    const tabNames = ['block', 'bookings', 'consults', 'reviews'];
+    const tabNames = ['block', 'bookings', 'consults', 'reviews', 'ticker'];
     document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', tabNames[i] === name));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById(PANEL_MAP[name]).classList.add('active');
     if (name === 'bookings') loadBookings();
     if (name === 'consults') loadConsults();
     if (name === 'reviews') initReviewsPanel();
+    if (name === 'ticker') loadTickerJobs();
   }
 
   // ── Admin calendar ───────────────────────
@@ -1186,6 +1214,154 @@
       card.querySelector('.work-del').onclick = () => removeWorkEntry(w.id);
       listEl.appendChild(card);
     });
+  }
+
+  // ── Jobs-in-progress ticker ──────────────
+  // Same remote-with-localStorage-fallback shape as blocked_work above, but
+  // it's a single settings row rather than a list: saving deletes whatever
+  // row is there and inserts a fresh one, so there's never more than one.
+  const TICKER_KEY   = 'suds_ticker_jobs_v1';
+  const TICKER_TABLE = 'ticker_jobs';
+  let tickerMode = 'unknown';   // 'remote' once the table answers, 'local' if not
+  let tickerRowId = null;
+
+  function loadLocalTicker() {
+    try { return JSON.parse(localStorage.getItem(TICKER_KEY)) || null; } catch(e) { return null; }
+  }
+  function saveLocalTicker(row) { localStorage.setItem(TICKER_KEY, JSON.stringify(row)); }
+
+  function fillTickerInputs(row) {
+    document.getElementById('tickerJob1').value = (row && row.job_1) || '';
+    document.getElementById('tickerJob2').value = (row && row.job_2) || '';
+    document.getElementById('tickerJob3').value = (row && row.job_3) || '';
+  }
+
+  async function loadTickerJobs() {
+    if (tickerMode !== 'local') {
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/' + TICKER_TABLE + '?select=*&limit=1', { headers: sbHeaders() });
+        if (res.ok) {
+          const wasUnknown = tickerMode !== 'remote';
+          tickerMode = 'remote';
+          const rows = await res.json();
+          const row = rows[0] || null;
+          tickerRowId = row ? row.id : null;
+          if (wasUnknown) await migrateLocalTicker(row);
+          fillTickerInputs(tickerRowId ? row : loadLocalTicker());
+          renderTickerSync();
+          return;
+        }
+        if (res.status !== 404 && res.status !== 406) {
+          console.warn('ticker_jobs read failed:', res.status, await res.text());
+        }
+      } catch(e) {
+        console.warn('ticker_jobs unreachable:', e.message);
+      }
+      tickerMode = 'local';
+    }
+    fillTickerInputs(loadLocalTicker());
+    renderTickerSync();
+  }
+
+  // One-way, once: if the table just became available and a local draft
+  // exists but nothing has been saved remotely yet, push the draft up.
+  async function migrateLocalTicker(existingRemoteRow) {
+    if (existingRemoteRow) return;
+    const local = loadLocalTicker();
+    if (!local) return;
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + TICKER_TABLE, {
+        method: 'POST',
+        headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+        body: JSON.stringify({ job_1: local.job_1 || null, job_2: local.job_2 || null, job_3: local.job_3 || null })
+      });
+      if (res.ok || res.status === 201) {
+        const rows = await res.json();
+        tickerRowId = Array.isArray(rows) && rows[0] ? rows[0].id : null;
+        localStorage.removeItem(TICKER_KEY);
+      }
+    } catch(e) {
+      console.warn('Could not move local ticker draft up:', e.message);
+    }
+  }
+
+  function tickerSetupSql() {
+    return [
+      'create table if not exists public.ticker_jobs (',
+      '  id uuid primary key default gen_random_uuid(),',
+      '  job_1 text,',
+      '  job_2 text,',
+      '  job_3 text,',
+      '  updated_at timestamptz not null default now()',
+      ');',
+      'alter table public.ticker_jobs enable row level security;',
+      'create policy "anon read ticker_jobs"   on public.ticker_jobs for select to anon using (true);',
+      'create policy "anon insert ticker_jobs" on public.ticker_jobs for insert to anon with check (true);',
+      'create policy "anon delete ticker_jobs" on public.ticker_jobs for delete to anon using (true);'
+    ].join('\n');
+  }
+
+  function renderTickerSync() {
+    const el = document.getElementById('tickerSync');
+    if (!el) return;
+    if (tickerMode === 'remote') {
+      el.innerHTML = '<div class="status-msg ok" style="margin-top:12px;">Synced — this is what shows on the live site.</div>';
+      return;
+    }
+    el.innerHTML = `<div class="sync-notice" style="margin-top:12px;">
+        <div><strong>Saved on this browser only.</strong> The <code>ticker_jobs</code> table isn't there yet, so this won't show on the actual site until it exists.</div>
+        <button class="btn btn-secondary" style="margin-top:10px;" onclick="copyTickerSql(this)">Copy the SQL to create it</button>
+        <div style="font-size:11px; color:var(--mid); margin-top:6px;">Run it in Supabase → SQL Editor, then reload. Your draft moves up on its own.</div>
+      </div>`;
+  }
+
+  function copyTickerSql(btn) {
+    const sql = tickerSetupSql();
+    const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy the SQL to create it'; }, 1800); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(sql).then(done).catch(() => window.prompt('Copy this SQL:', sql));
+    } else {
+      window.prompt('Copy this SQL:', sql);
+    }
+  }
+
+  async function saveTickerJobs() {
+    const status = document.getElementById('tickerStatus');
+    const row = {
+      job_1: document.getElementById('tickerJob1').value.trim() || null,
+      job_2: document.getElementById('tickerJob2').value.trim() || null,
+      job_3: document.getElementById('tickerJob3').value.trim() || null
+    };
+
+    if (tickerMode === 'remote') {
+      try {
+        if (tickerRowId) {
+          await fetch(SUPABASE_URL + '/rest/v1/' + TICKER_TABLE + '?id=eq.' + encodeURIComponent(tickerRowId),
+                      { method: 'DELETE', headers: sbHeaders() });
+        }
+        const res = await fetch(SUPABASE_URL + '/rest/v1/' + TICKER_TABLE, {
+          method: 'POST',
+          headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+          body: JSON.stringify(row)
+        });
+        if (!(res.ok || res.status === 201)) {
+          status.className = 'status-msg err';
+          status.textContent = 'Could not save — check the ticker_jobs RLS policies.';
+          return;
+        }
+        const rows = await res.json();
+        tickerRowId = Array.isArray(rows) && rows[0] ? rows[0].id : null;
+      } catch(e) {
+        status.className = 'status-msg err';
+        status.textContent = 'Network error: ' + e.message;
+        return;
+      }
+    } else {
+      saveLocalTicker(row);
+    }
+
+    status.className = 'status-msg ok';
+    status.textContent = 'Saved.';
   }
 
   // ── Bookings list ────────────────────────
