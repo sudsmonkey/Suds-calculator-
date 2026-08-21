@@ -207,17 +207,28 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .jobs-ticker {
   display: none;
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
-  background: var(--dark); color: #fff;
+  background: var(--cream); color: var(--ink);
+  /* A visible top edge + lifted shadow so this reads as its own bar rather
+     than blending into the browser's own bottom address bar on mobile. */
+  border-top: 2px solid var(--orange);
+  box-shadow: 0 -4px 14px rgba(0,0,0,0.12);
   padding: 10px 20px;
-  align-items: center; justify-content: center; gap: 10px;
-  text-align: center;
+  align-items: center; justify-content: center;
+}
+.jobs-ticker-inner {
+  /* Fixed-width row so the label never shifts position as job text changes
+     length between fades -- only the text side truncates in place. */
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; max-width: 480px;
 }
 .jobs-ticker-label {
+  flex: 0 0 auto;
   font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 10px;
-  letter-spacing: 0.08em; text-transform: uppercase; color: var(--mint);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--dark);
   white-space: nowrap;
 }
 .jobs-ticker-text {
+  flex: 1 1 auto; min-width: 0; text-align: left;
   font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   opacity: 1; transition: opacity 0.4s ease;
@@ -979,8 +990,10 @@ body.game-open .truck-band { position: relative; top: auto; }
 <div id="vid-expand"><video id="vid-exp-v" playsinline preload="none"></video></div>
 
 <div class="jobs-ticker" id="jobsTicker">
-  <span class="jobs-ticker-label">Jobs In Progress</span>
-  <span class="jobs-ticker-text" id="jobsTickerText"></span>
+  <div class="jobs-ticker-inner">
+    <span class="jobs-ticker-label">Jobs In Progress</span>
+    <span class="jobs-ticker-text" id="jobsTickerText"></span>
+  </div>
 </div>
 
 <script>
