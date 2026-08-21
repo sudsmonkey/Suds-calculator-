@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Without this, Safari on iOS auto-tints its own toolbar to match whatever
      color sits at the bottom of the page -- which was silently copying the
      ticker's own color every time it changed. Pinning it here stops that. -->
@@ -213,14 +213,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
    until admin.html has at least one job saved. */
 .jobs-ticker {
   display: none;
-  position: fixed; left: 0; right: 0; z-index: 150;
-  /* iOS reserves a strip at the bottom of the screen for its own chrome (the
-     home-indicator / toolbar area) -- env(safe-area-inset-bottom) is how a
-     page says "stop above that, don't render into it." Sitting flush at
-     bottom:0 meant we were rendering INTO that reserved system space, which
-     is what let Safari's own bar visually pick up our color. On a device
-     with no such reserved area this resolves to 0 and it's flush as before. */
-  bottom: env(safe-area-inset-bottom, 0px);
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
   background: var(--dark); color: #fff;
   box-shadow: 0 -4px 14px rgba(0,0,0,0.18);
   padding: 10px 18px;
