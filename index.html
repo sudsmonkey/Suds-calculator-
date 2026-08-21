@@ -206,13 +206,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
    until admin.html has at least one job saved. */
 .jobs-ticker {
   display: none;
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
+  position: fixed; left: 10px; right: 10px; bottom: 10px; z-index: 150;
   background: var(--cream); color: var(--ink);
-  /* A visible top edge + lifted shadow so this reads as its own bar rather
-     than blending into the browser's own bottom address bar on mobile. */
-  border-top: 2px solid var(--orange);
-  box-shadow: 0 -4px 14px rgba(0,0,0,0.12);
-  padding: 10px 20px;
+  /* Floats as its own inset card -- a shadow and border all the way around,
+     not just a top edge -- so there's always a visible gap around it. That
+     works regardless of what color a phone's own bottom bar happens to be,
+     rather than relying on a color contrast that can still blend. */
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+  padding: 10px 18px;
   align-items: center; justify-content: center;
 }
 .jobs-ticker-inner {
@@ -234,7 +237,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   opacity: 1; transition: opacity 0.4s ease;
 }
 .jobs-ticker-text.fading { opacity: 0; }
-body.has-ticker { padding-bottom: 40px; }
+body.has-ticker { padding-bottom: 58px; }
 .hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
 /* `all 0.2s` drives the burger's own animation; the later background-color
    entry wins for that one property, keeping it in step with the header fade. */
