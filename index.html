@@ -238,7 +238,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   opacity: 1; transition: opacity 0.4s ease;
 }
 .jobs-ticker-text.fading { opacity: 0; }
-body.has-ticker { padding-bottom: 37px; }
+/* No reserved space at the bottom for the ticker -- the page scrolls to its
+   real end and the footer passes underneath the fixed bar rather than
+   stopping short of it. */
 .hd-burger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
 /* `all 0.2s` drives the burger's own animation; the later background-color
    entry wins for that one property, keeping it in step with the header fade. */
@@ -1546,7 +1548,6 @@ document.addEventListener('click', function(e){
     var bar = document.getElementById('jobsTicker');
     var text = document.getElementById('jobsTickerText');
     bar.style.display = 'flex';
-    document.body.classList.add('has-ticker');
 
     var i = 0;
     text.textContent = jobs[0];
