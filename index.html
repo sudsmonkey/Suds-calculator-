@@ -207,11 +207,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .jobs-ticker {
   display: none;
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
-  background: var(--cream); color: var(--ink);
-  /* Flush with the bottom edge, square corners -- the top border + shadow
-     is what separates it from a phone's own bottom bar, not a gap. */
-  border-top: 2px solid var(--orange);
-  box-shadow: 0 -4px 14px rgba(0,0,0,0.12);
+  /* A dark, brand-colored bar rather than a light one -- flush with no gap,
+     but a color a phone's own (typically light) bottom bar won't match, so
+     it reads as its own thing without needing a border or a gap to prove it. */
+  background: var(--dark); color: #fff;
+  box-shadow: 0 -4px 14px rgba(0,0,0,0.18);
   padding: 10px 18px;
   align-items: center; justify-content: center;
 }
@@ -224,7 +224,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .jobs-ticker-label {
   flex: 0 0 auto;
   font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 10px;
-  letter-spacing: 0.08em; text-transform: uppercase; color: var(--dark);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--mint);
   white-space: nowrap;
 }
 .jobs-ticker-text {
