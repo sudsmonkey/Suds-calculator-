@@ -215,10 +215,22 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   display: none;
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
   background: var(--border); color: var(--ink);
-  border-bottom: 4px solid var(--orange);
   box-shadow: 0 -4px 14px rgba(0,0,0,0.12);
   padding: 10px 18px;
   align-items: center; justify-content: center;
+}
+/* The accent line as 3 segments with 2 gaps rather than one solid bar --
+   border-bottom can't do gaps, so this is a bottom-anchored pseudo-element
+   with hard color stops instead. */
+.jobs-ticker::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
+  background: linear-gradient(to right,
+    var(--orange) 0%, var(--orange) 31%,
+    transparent 31%, transparent 35%,
+    var(--orange) 35%, var(--orange) 65%,
+    transparent 65%, transparent 69%,
+    var(--orange) 69%, var(--orange) 100%);
 }
 .jobs-ticker-inner {
   /* Fixed-width row so the label never shifts position as job text changes
@@ -239,7 +251,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   display: block; text-align: left;
   font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  transform: translateY(0); transition: transform 0.35s ease;
+  transform: translateY(0); transition: transform 0.65s ease;
 }
 .jobs-ticker-text.no-transition { transition: none; }
 .jobs-ticker-text.slide-out-up { transform: translateY(-100%); }
@@ -1539,7 +1551,7 @@ document.addEventListener('click', function(e){
 (function(){
   var SUPABASE_URL = 'https://ykjkcegpwiqhpfcgkwro.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
-  var FADE_MS = 400, HOLD_MS = 4000;
+  var FADE_MS = 650, HOLD_MS = 4000;
 
   // TEMP mockup data -- ticker_jobs doesn't exist in Supabase yet. Once the
   // table is set up and admin.html has real jobs saved, delete this array and
