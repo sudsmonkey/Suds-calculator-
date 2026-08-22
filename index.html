@@ -238,8 +238,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   display: flex; align-items: center; gap: 10px;
   width: 100%; max-width: 480px;
 }
+.jobs-ticker-label-wrap {
+  flex: 0 0 auto; height: 12px; overflow: hidden; position: relative;
+}
 .jobs-ticker-label {
-  flex: 0 0 auto;
+  display: block;
   font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 10px;
   letter-spacing: 0.08em; text-transform: uppercase; color: var(--dark);
   white-space: nowrap;
@@ -251,11 +254,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   display: block; text-align: left;
   font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Shared slide mechanics for both the label (only moves when the whole
+   category switches) and the text (moves on every item within a category). */
+.jobs-ticker-label, .jobs-ticker-text {
   transform: translateY(0); transition: transform 0.65s ease;
 }
-.jobs-ticker-text.no-transition { transition: none; }
-.jobs-ticker-text.slide-out-up { transform: translateY(-100%); }
-.jobs-ticker-text.slide-in-from-below { transform: translateY(100%); }
+.jobs-ticker-label.no-transition, .jobs-ticker-text.no-transition { transition: none; }
+.jobs-ticker-label.slide-out-up, .jobs-ticker-text.slide-out-up { transform: translateY(-100%); }
+.jobs-ticker-label.slide-in-from-below, .jobs-ticker-text.slide-in-from-below { transform: translateY(100%); }
 /* No reserved space at the bottom for the ticker -- the page scrolls to its
    real end and the footer passes underneath the fixed bar rather than
    stopping short of it. */
@@ -1015,7 +1022,7 @@ body.game-open .truck-band { position: relative; top: auto; }
 
 <div class="jobs-ticker" id="jobsTicker">
   <div class="jobs-ticker-inner">
-    <span class="jobs-ticker-label">Sports</span>
+    <span class="jobs-ticker-label-wrap"><span class="jobs-ticker-label" id="jobsTickerLabel">Jobs In Progress</span></span>
     <span class="jobs-ticker-text-wrap"><span class="jobs-ticker-text" id="jobsTickerText"></span></span>
   </div>
 </div>
@@ -1547,41 +1554,61 @@ document.addEventListener('click', function(e){
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncNavHeight);
 })();
 
-// ── Jobs-in-progress ticker ──────────────
+// ── Jobs-in-progress / Sports ticker ──────
 (function(){
   var SUPABASE_URL = 'https://ykjkcegpwiqhpfcgkwro.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
   var FADE_MS = 650, HOLD_MS = 4000;
+  var ITEMS_PER_CATEGORY = 3;
 
-  // TEMP mockup data -- ticker_jobs doesn't exist in Supabase yet. Once the
-  // table is set up and admin.html has real jobs saved, delete this array and
-  // the `showJobs(DEMO_JOBS)` fallback call below; the real fetch already
-  // takes over automatically the moment it succeeds.
-  var DEMO_JOBS = ['Thunder def. Spurs 112-98 (W)', 'OU 24, Texas 17 - 3rd Qtr'];
+  // TEMP mockup data -- ticker_jobs doesn't exist in Supabase yet, and there's
+  // no real sports feed wired up. Once ticker_jobs is set up, the jobs
+  // category's items get replaced by the real fetch below; sports stays
+  // mocked until a real feed is built.
+  var DEMO_JOBS = ['Texas Tech Football Stadium', 'Downtown OKC High-Rise'];
+  var DEMO_SPORTS = ['Thunder def. Spurs 112-98 (W)', 'OU 24, Texas 17 - 3rd Qtr'];
 
-  function showJobs(jobs){
-    jobs = jobs.filter(function(j){ return j && j.trim(); });
-    if (!jobs.length) return;
+  var CATEGORIES = [
+    { label: 'Jobs In Progress', items: DEMO_JOBS },
+    { label: 'Sports', items: DEMO_SPORTS }
+  ];
 
+  function startTicker(){
     var bar = document.getElementById('jobsTicker');
-    var text = document.getElementById('jobsTickerText');
+    var labelEl = document.getElementById('jobsTickerLabel');
+    var textEl = document.getElementById('jobsTickerText');
     bar.style.display = 'flex';
 
-    var i = 0;
-    text.textContent = jobs[0];
-    if (jobs.length > 1) {
-      setInterval(function(){
-        text.classList.add('slide-out-up');
-        setTimeout(function(){
-          i = (i + 1) % jobs.length;
-          text.textContent = jobs[i];
-          text.classList.add('no-transition', 'slide-in-from-below');
-          text.classList.remove('slide-out-up');
-          void text.offsetWidth;
-          text.classList.remove('no-transition', 'slide-in-from-below');
-        }, FADE_MS);
-      }, HOLD_MS);
+    var catIndex = 0, itemIndex = 0, shownCount = 1;
+    labelEl.textContent = CATEGORIES[0].label;
+    textEl.textContent = CATEGORIES[0].items[0];
+
+    function slide(el, newContent){
+      el.classList.add('slide-out-up');
+      setTimeout(function(){
+        el.textContent = newContent;
+        el.classList.add('no-transition', 'slide-in-from-below');
+        el.classList.remove('slide-out-up');
+        void el.offsetWidth;
+        el.classList.remove('no-transition', 'slide-in-from-below');
+      }, FADE_MS);
     }
+
+    setInterval(function(){
+      var cat = CATEGORIES[catIndex];
+      if (shownCount >= ITEMS_PER_CATEGORY) {
+        shownCount = 1;
+        catIndex = (catIndex + 1) % CATEGORIES.length;
+        itemIndex = 0;
+        var nextCat = CATEGORIES[catIndex];
+        slide(labelEl, nextCat.label);
+        slide(textEl, nextCat.items[0]);
+      } else {
+        shownCount++;
+        itemIndex = (itemIndex + 1) % cat.items.length;
+        slide(textEl, cat.items[itemIndex]);
+      }
+    }, HOLD_MS);
   }
 
   fetch(SUPABASE_URL + '/rest/v1/ticker_jobs?select=job_1,job_2,job_3&limit=1', {
@@ -1590,12 +1617,11 @@ document.addEventListener('click', function(e){
     .then(function(res){ return res.ok ? res.json() : Promise.reject(); })
     .then(function(rows){
       var row = rows && rows[0];
-      if (!row) { showJobs(DEMO_JOBS); return; }
-      var jobs = [row.job_1, row.job_2, row.job_3];
-      if (!jobs.filter(function(j){ return j && j.trim(); }).length) { showJobs(DEMO_JOBS); return; }
-      showJobs(jobs);
+      var jobs = row ? [row.job_1, row.job_2, row.job_3].filter(function(j){ return j && j.trim(); }) : [];
+      if (jobs.length) CATEGORIES[0].items = jobs;
+      startTicker();
     })
-    .catch(function(){ showJobs(DEMO_JOBS); /* TEMP -- see note above */ });
+    .catch(function(){ startTicker(); /* TEMP -- falls back to DEMO_JOBS, see note above */ });
 })();
 </script>
 </body>
