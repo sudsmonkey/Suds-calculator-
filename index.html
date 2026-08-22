@@ -235,11 +235,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .jobs-ticker-inner {
   /* Fixed-width row so the label never shifts position as job text changes
      length between fades -- only the text side truncates in place. */
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 18px;
   width: 100%; max-width: 480px;
 }
 .jobs-ticker-label-wrap {
-  flex: 0 0 auto; height: 12px; overflow: hidden; position: relative;
+  /* Fixed to fit the longer of the two labels ("Jobs In Progress"), so the
+     content text always starts at the same point whichever category is
+     showing, instead of shifting with the shorter "Sports" label. */
+  flex: 0 0 116px; height: 12px; overflow: hidden; position: relative;
 }
 .jobs-ticker-label {
   display: block;
