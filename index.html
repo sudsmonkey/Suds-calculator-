@@ -214,12 +214,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 .jobs-ticker {
   display: none;
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
-  /* DIAGNOSTIC: hard 50/50 split, grey on top / orange on bottom, to see
-     which half Safari actually samples for its own toolbar color. Not a
-     final design -- revert to a single background once this tells us
-     something. Text contrast doesn't matter for this pass. */
-  background: linear-gradient(to bottom, #4A4A4A 90%, var(--orange) 90%);
-  color: var(--ink);
+  background: var(--border); color: var(--ink);
+  border-bottom: 4px solid var(--orangeborder);
   box-shadow: 0 -4px 14px rgba(0,0,0,0.12);
   padding: 10px 18px;
   align-items: center; justify-content: center;
