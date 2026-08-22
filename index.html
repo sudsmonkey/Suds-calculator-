@@ -232,13 +232,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   letter-spacing: 0.08em; text-transform: uppercase; color: var(--dark);
   white-space: nowrap;
 }
+.jobs-ticker-text-wrap {
+  flex: 1 1 auto; min-width: 0; height: 17px; overflow: hidden; position: relative;
+}
 .jobs-ticker-text {
-  flex: 1 1 auto; min-width: 0; text-align: left;
+  display: block; text-align: left;
   font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  opacity: 1; transition: opacity 0.4s ease;
+  transform: translateY(0); transition: transform 0.35s ease;
 }
-.jobs-ticker-text.fading { opacity: 0; }
+.jobs-ticker-text.no-transition { transition: none; }
+.jobs-ticker-text.slide-out-up { transform: translateY(-100%); }
+.jobs-ticker-text.slide-in-from-below { transform: translateY(100%); }
 /* No reserved space at the bottom for the ticker -- the page scrolls to its
    real end and the footer passes underneath the fixed bar rather than
    stopping short of it. */
@@ -999,7 +1004,7 @@ body.game-open .truck-band { position: relative; top: auto; }
 <div class="jobs-ticker" id="jobsTicker">
   <div class="jobs-ticker-inner">
     <span class="jobs-ticker-label">Jobs In Progress</span>
-    <span class="jobs-ticker-text" id="jobsTickerText"></span>
+    <span class="jobs-ticker-text-wrap"><span class="jobs-ticker-text" id="jobsTickerText"></span></span>
   </div>
 </div>
 
@@ -1554,11 +1559,14 @@ document.addEventListener('click', function(e){
     text.textContent = jobs[0];
     if (jobs.length > 1) {
       setInterval(function(){
-        text.classList.add('fading');
+        text.classList.add('slide-out-up');
         setTimeout(function(){
           i = (i + 1) % jobs.length;
           text.textContent = jobs[i];
-          text.classList.remove('fading');
+          text.classList.add('no-transition', 'slide-in-from-below');
+          text.classList.remove('slide-out-up');
+          void text.offsetWidth;
+          text.classList.remove('no-transition', 'slide-in-from-below');
         }, FADE_MS);
       }, HOLD_MS);
     }
