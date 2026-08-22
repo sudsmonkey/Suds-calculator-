@@ -386,6 +386,7 @@ body.game-open .truck-band { position: relative; top: auto; }
 .truck-band-photo {
   position: absolute; inset: 0;
   background-image: url('web/img-truck.jpg');
+  background-image: image-set(url('web/img-truck.webp') type('image/webp'), url('web/img-truck.jpg') type('image/jpeg'));
   background-size: cover;
   background-position: center 35%;
   background-repeat: no-repeat;
@@ -531,6 +532,7 @@ body.game-open .truck-band { position: relative; top: auto; }
   display: flex; align-items: center; justify-content: center;
   margin-right: 10px;
 }
+.glass-photo picture { display: block; width: 100%; height: 100%; }
 .glass-photo img { width: 100%; height: 100%; object-fit: cover; }
 .glass-cta {
   font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 900;
@@ -601,16 +603,20 @@ body.game-open .truck-band { position: relative; top: auto; }
 .glass-video-thumb { cursor: pointer; }
 .glass-video-slot {
   background: url('web/IMG_0858.jpeg') center/cover no-repeat;
+  background: image-set(url('web/IMG_0858.webp') type('image/webp'), url('web/IMG_0858.jpeg') type('image/jpeg')) center/cover no-repeat;
   position: relative;
 }
 .glass-video-slot.vslot-2 {
   background-image: url('video-thumb-2.jpg');
+  background-image: image-set(url('video-thumb-2.webp') type('image/webp'), url('video-thumb-2.jpg') type('image/jpeg'));
 }
 .glass-video-slot.vslot-3 {
   background-image: url('video-thumb-3.jpg');
+  background-image: image-set(url('video-thumb-3.webp') type('image/webp'), url('video-thumb-3.jpg') type('image/jpeg'));
 }
 .glass-video-slot.vslot-4 {
   background-image: url('video-thumb-4.jpg');
+  background-image: image-set(url('video-thumb-4.webp') type('image/webp'), url('video-thumb-4.jpg') type('image/jpeg'));
 }
 .glass-video-slot::after {
   content: ''; position: absolute; inset: 0; border-radius: inherit;
@@ -737,10 +743,10 @@ body.game-open .truck-band { position: relative; top: auto; }
 <!-- Hero — sticks until the end of .hero-zone (the divider before Residential) -->
 <div class="hero-zone">
 <section class="hero">
-  <div class="hero-slide active" style="background-image:url('img-hero.jpg')"></div>
-  <div class="hero-slide" style="background-image:url('img-wash.jpg')"></div>
-  <div class="hero-slide" style="background-image:url('img-highrise.jpg')"></div>
-  <div class="hero-slide" style="background-image:url('web/img-truck.jpg')"></div>
+  <div class="hero-slide active" style="background-image:url('img-hero.jpg');background-image:image-set(url('img-hero.webp') type('image/webp'), url('img-hero.jpg') type('image/jpeg'))"></div>
+  <div class="hero-slide" style="background-image:url('img-wash.jpg');background-image:image-set(url('img-wash.webp') type('image/webp'), url('img-wash.jpg') type('image/jpeg'))"></div>
+  <div class="hero-slide" style="background-image:url('img-highrise.jpg');background-image:image-set(url('img-highrise.webp') type('image/webp'), url('img-highrise.jpg') type('image/jpeg'))"></div>
+  <div class="hero-slide" style="background-image:url('web/img-truck.jpg');background-image:image-set(url('web/img-truck.webp') type('image/webp'), url('web/img-truck.jpg') type('image/jpeg'))"></div>
   <div class="hero-overlay"></div>
   <div class="hero-eyebrow">Oklahoma City</div>
   <h1>When Service<br>Evolves</h1>
@@ -800,34 +806,34 @@ body.game-open .truck-band { position: relative; top: auto; }
       <div class="glass-scroll">
         <div class="glass-track">
           <!-- Set 1 -->
-          <div class="glass-photo"><img src="web/IMG_0831.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_2845.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_4505.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_7328.jpeg" alt="Residential windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_0831.webp" type="image/webp"><img src="web/IMG_0831.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_2845.webp" type="image/webp"><img src="web/IMG_2845.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4505.webp" type="image/webp"><img src="web/IMG_4505.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_7328.webp" type="image/webp"><img src="web/IMG_7328.jpeg" alt="Residential windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot vslot-2" data-video="copy_BD26FF6F-FA5C-4194-8320-110E01CD1655.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
-          <div class="glass-photo"><img src="web/IMG_4092.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_4096.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_5560.jpeg" alt="Residential windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4092.webp" type="image/webp"><img src="web/IMG_4092.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4096.webp" type="image/webp"><img src="web/IMG_4096.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_5560.webp" type="image/webp"><img src="web/IMG_5560.jpeg" alt="Residential windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
           <!-- Set 2 -->
-          <div class="glass-photo"><img src="web/IMG_0831.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_2845.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_4505.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_7328.jpeg" alt="Residential windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_0831.webp" type="image/webp"><img src="web/IMG_0831.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_2845.webp" type="image/webp"><img src="web/IMG_2845.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4505.webp" type="image/webp"><img src="web/IMG_4505.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_7328.webp" type="image/webp"><img src="web/IMG_7328.jpeg" alt="Residential windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot vslot-2" data-video="copy_BD26FF6F-FA5C-4194-8320-110E01CD1655.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
-          <div class="glass-photo"><img src="web/IMG_4092.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_4096.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_5560.jpeg" alt="Residential windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4092.webp" type="image/webp"><img src="web/IMG_4092.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4096.webp" type="image/webp"><img src="web/IMG_4096.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_5560.webp" type="image/webp"><img src="web/IMG_5560.jpeg" alt="Residential windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
           <!-- Set 3 -->
-          <div class="glass-photo"><img src="web/IMG_0831.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_2845.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_4505.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_7328.jpeg" alt="Residential windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_0831.webp" type="image/webp"><img src="web/IMG_0831.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_2845.webp" type="image/webp"><img src="web/IMG_2845.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4505.webp" type="image/webp"><img src="web/IMG_4505.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_7328.webp" type="image/webp"><img src="web/IMG_7328.jpeg" alt="Residential windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot vslot-2" data-video="copy_BD26FF6F-FA5C-4194-8320-110E01CD1655.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
-          <div class="glass-photo"><img src="web/IMG_4092.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_4096.jpeg" alt="Residential windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_5560.jpeg" alt="Residential windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4092.webp" type="image/webp"><img src="web/IMG_4092.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4096.webp" type="image/webp"><img src="web/IMG_4096.jpeg" alt="Residential windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_5560.webp" type="image/webp"><img src="web/IMG_5560.jpeg" alt="Residential windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot" data-video="copy_1BF99EFE-839E-4AAE-BFAD-31B1AE82ED84.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
         </div>
       </div>
@@ -901,32 +907,32 @@ body.game-open .truck-band { position: relative; top: auto; }
       <a href="consult.html" class="glass-cta">Tap here to schedule a consultation or site visit to your property.</a>
       <div class="glass-scroll" id="commScroll">
         <div class="glass-track">
-          <div class="glass-photo"><img src="web/IMG_2513.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_3313.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_3598.jpeg" alt="Commercial windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_2513.webp" type="image/webp"><img src="web/IMG_2513.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_3313.webp" type="image/webp"><img src="web/IMG_3313.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_3598.webp" type="image/webp"><img src="web/IMG_3598.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot vslot-3" data-video="copy_0B629E35-0C73-43DE-BFB7-2F0C30728D68.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
-          <div class="glass-photo"><img src="web/IMG_4891.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_6740.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_6839.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_9876.jpeg" alt="Commercial windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4891.webp" type="image/webp"><img src="web/IMG_4891.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_6740.webp" type="image/webp"><img src="web/IMG_6740.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_6839.webp" type="image/webp"><img src="web/IMG_6839.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_9876.webp" type="image/webp"><img src="web/IMG_9876.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot vslot-4" data-video="copy_EFB3144D-1FBA-422D-B017-2555E52A024C.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
-          <div class="glass-photo"><img src="web/IMG_2513.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_3313.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_3598.jpeg" alt="Commercial windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_2513.webp" type="image/webp"><img src="web/IMG_2513.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_3313.webp" type="image/webp"><img src="web/IMG_3313.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_3598.webp" type="image/webp"><img src="web/IMG_3598.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot vslot-3" data-video="copy_0B629E35-0C73-43DE-BFB7-2F0C30728D68.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
-          <div class="glass-photo"><img src="web/IMG_4891.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_6740.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_6839.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_9876.jpeg" alt="Commercial windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4891.webp" type="image/webp"><img src="web/IMG_4891.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_6740.webp" type="image/webp"><img src="web/IMG_6740.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_6839.webp" type="image/webp"><img src="web/IMG_6839.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_9876.webp" type="image/webp"><img src="web/IMG_9876.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot vslot-4" data-video="copy_EFB3144D-1FBA-422D-B017-2555E52A024C.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
-          <div class="glass-photo"><img src="web/IMG_2513.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_3313.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_3598.jpeg" alt="Commercial windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_2513.webp" type="image/webp"><img src="web/IMG_2513.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_3313.webp" type="image/webp"><img src="web/IMG_3313.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_3598.webp" type="image/webp"><img src="web/IMG_3598.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot vslot-3" data-video="copy_0B629E35-0C73-43DE-BFB7-2F0C30728D68.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
-          <div class="glass-photo"><img src="web/IMG_4891.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_6740.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_6839.jpeg" alt="Commercial windows" loading="lazy"></div>
-          <div class="glass-photo"><img src="web/IMG_9876.jpeg" alt="Commercial windows" loading="lazy"></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_4891.webp" type="image/webp"><img src="web/IMG_4891.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_6740.webp" type="image/webp"><img src="web/IMG_6740.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_6839.webp" type="image/webp"><img src="web/IMG_6839.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
+          <div class="glass-photo"><picture><source srcset="web/IMG_9876.webp" type="image/webp"><img src="web/IMG_9876.jpeg" alt="Commercial windows" loading="lazy"></picture></div>
           <div class="glass-photo glass-video-thumb glass-video-slot vslot-4" data-video="copy_EFB3144D-1FBA-422D-B017-2555E52A024C.mov"><div class="vslot-overlay"><div class="vslot-icon"><svg viewBox="0 0 20 20"><polygon points="4,2 18,10 4,18"/></svg></div><div class="vslot-label">Watch</div></div></div>
         </div>
       </div>

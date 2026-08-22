@@ -37,7 +37,11 @@
      top padding. syncHero() measures the result at runtime, so the spacer and
      the content offset follow on their own. */
   .header { background: #111; height: 175px; padding: 0 20px; text-align: center; position: fixed; left: 0; right: 0; overflow: hidden; z-index: 100; display: flex; flex-direction: column; justify-content: center; }
-  .header-bg { position: absolute; inset: 0; background: url('web/img-res-tree.jpg') center 40%/cover no-repeat; display: none; }
+  .header-bg {
+    position: absolute; inset: 0; display: none;
+    background: url('web/img-res-tree.jpg') center 40%/cover no-repeat;
+    background: image-set(url('web/img-res-tree.webp') type('image/webp'), url('web/img-res-tree.jpg') type('image/jpeg')) center 40%/cover no-repeat;
+  }
   .header-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(166,56,46,0.28) 0%, rgba(80,20,15,0.38) 100%); z-index: 0; }
   .header > *:not(.header-bg):not(.header-overlay) { position: relative; z-index: 1; }
   /* Site header, matching index.html and consult.html */
