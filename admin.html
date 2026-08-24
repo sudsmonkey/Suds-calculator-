@@ -1481,17 +1481,41 @@
       </div>`;
   }
 
+  // Manually-blocked jobs (from the Block Slots tab's "What's the time for?"
+  // form) show up here too, same Upcoming/Completed bucket as real bookings
+  // -- since blocked_work has no completed flag of its own, its date is what
+  // decides the bucket. "No job" entries (days off, etc.) aren't customer
+  // work, so they're left out.
+  async function fetchManualBookings(filter) {
+    try {
+      const todayStr = adminToday.toISOString().split('T')[0];
+      let url = SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?select=*&kind=eq.job';
+      url += filter === 'upcoming' ? '&date=gte.' + todayStr : '&date=lt.' + todayStr;
+      const res = await fetch(url, { headers: sbHeaders() });
+      if (!res.ok) return [];
+      const rows = await res.json();
+      return rows.map(r => ({
+        id: r.id, _manual: true,
+        first_name: r.name, date_iso: r.date, date: prettyDate(r.date),
+        time: r.time || '', total: r.amount ? money(Number(r.amount)) : ''
+      }));
+    } catch(e) {
+      return [];
+    }
+  }
+
   async function loadBookings() {
     const list = document.getElementById('bookingsList');
     list.innerHTML = '<div class="spinner">Loading bookings…</div>';
 
     try {
       let url = SUPABASE_URL + '/rest/v1/bookings?select=*';
-      url += bookingFilter === 'upcoming'
-        ? '&completed=eq.false&order=date_iso.asc,time.asc'
-        : '&completed=eq.true&order=date_iso.desc,time.desc';
+      url += bookingFilter === 'upcoming' ? '&completed=eq.false' : '&completed=eq.true';
 
-      const res = await fetch(url, { headers: sbHeaders() });
+      const [res, manualRows] = await Promise.all([
+        fetch(url, { headers: sbHeaders() }),
+        fetchManualBookings(bookingFilter)
+      ]);
 
       if (!res.ok) {
         const bodyText = await res.text();
@@ -1505,7 +1529,11 @@
       }
 
       bookingsSchemaOk = true;
-      const rows = await res.json();
+      const rows = (await res.json()).concat(manualRows);
+      rows.sort((a, b) => {
+        const cmp = (a.date_iso || '').localeCompare(b.date_iso || '') || (a.time || '').localeCompare(b.time || '');
+        return bookingFilter === 'upcoming' ? cmp : -cmp;
+      });
       renderBookingCards(rows, list, 'No ' + (bookingFilter === 'upcoming' ? 'upcoming' : 'completed') + ' bookings.');
     } catch(e) {
       list.innerHTML = '<div class="empty-state">Network error loading bookings.</div>';
@@ -1537,6 +1565,24 @@
     rows.forEach(b => {
       const card = document.createElement('div');
       card.className = 'booking-card';
+
+      if (b._manual) {
+        card.innerHTML = `
+          <div class="booking-header">
+            <div class="booking-name">${esc(b.first_name || '—')}</div>
+            <div class="booking-date-badge" style="background:var(--mid);">${esc(b.date || '—')}</div>
+          </div>
+          ${b.time ? `<div class="booking-row">🕐 <strong>${esc(b.time)}</strong></div>` : ''}
+          ${b.total ? `<div class="booking-total">${esc(b.total)}</div>` : ''}
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
+            <span style="font-size:11px; color:var(--mid); font-weight:900; text-transform:uppercase; letter-spacing:0.04em;">Manual entry</span>
+            <button type="button" class="link-btn" onclick="deleteManualBooking('${esc(b.id)}', this)">Delete</button>
+          </div>
+        `;
+        list.appendChild(card);
+        return;
+      }
+
       const name = [b.first_name, b.last_name].filter(Boolean).join(' ') || '—';
       const dateLabel = b.date || b.date_iso || '—';
       const completeActionHtml = b.completed
@@ -1650,6 +1696,35 @@
     } catch(e) {
       alert('Network error.');
       btn.disabled = false;
+    }
+  }
+
+  // Deletes a manually-blocked job shown in the Bookings tab. Goes through
+  // the same blocked_work table the Block Slots tab uses, so workCache is
+  // kept in sync -- otherwise that tab's own list would still show a row
+  // that was just deleted from here.
+  async function deleteManualBooking(id, btn) {
+    if (!confirm('Delete this blocked job entry? This cannot be undone.')) return;
+    const card = btn.closest('.booking-card');
+    btn.disabled = true;
+    btn.textContent = 'Deleting…';
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?id=eq.' + encodeURIComponent(id), {
+        method: 'DELETE',
+        headers: sbHeaders()
+      });
+      if (res.ok) {
+        card.remove();
+        workCache = workCache.filter(w => w.id !== id);
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Delete';
+        alert('Could not delete — check the blocked_work RLS policies.');
+      }
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = 'Delete';
+      alert('Network error deleting entry.');
     }
   }
 
