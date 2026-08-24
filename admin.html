@@ -170,6 +170,10 @@
     margin-bottom: 10px;
     box-shadow: var(--shadow);
   }
+  .booking-card.completed {
+    background: #F1F9F5;
+    border-color: #D3ECE1;
+  }
   /* Manual/commercial job entries -- same taupe as the jobs ticker, roomier
      and rounded like the rest of the cards, so it reads as its own category
      without the harsh dark/square treatment that stood out too much. */
@@ -1680,7 +1684,7 @@
     list.innerHTML = '';
     rows.forEach(b => {
       const card = document.createElement('div');
-      card.className = 'booking-card';
+      card.className = 'booking-card' + (b.completed ? ' completed' : '');
 
       if (b._manual) {
         card.className = 'booking-card manual-card';
