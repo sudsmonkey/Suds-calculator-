@@ -1742,13 +1742,15 @@
         ${b.tentative ? `
         <div class="tentative-actions" style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--mid);">
           <span class="tentative-flag">Penciled in</span>
-          <div style="display:flex; gap:14px;">
-            <button type="button" class="link-btn" onclick="startMoveBooking('${esc(b.id)}', '${esc(b.date_iso || '')}', this)">Move</button>
-            <button type="button" class="link-btn link-btn-mint" onclick="confirmBooking('${esc(b.id)}', this)">Confirm</button>
-          </div>
+          <button type="button" class="link-btn link-btn-mint" onclick="confirmBooking('${esc(b.id)}', this)">Confirm</button>
         </div>` : ''}
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
-          ${completeActionHtml}
+          <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+            ${completeActionHtml}
+            <span class="move-actions" data-id="${esc(b.id)}" data-date="${esc(b.date_iso || '')}">
+              <button type="button" class="link-btn" onclick="startMoveBooking(this)">Move</button>
+            </span>
+          </div>
           <button type="button" class="link-btn" onclick="deleteBooking('${esc(b.id)}', this)">Delete</button>
         </div>
       `;
@@ -1857,28 +1859,28 @@
     }
   }
 
-  // Swaps the Move/Confirm row for an inline date picker, saving the old
-  // markup so Cancel can put it back exactly as it was.
-  function startMoveBooking(id, currentIso, btn) {
-    const wrap = btn.closest('.tentative-actions');
+  // Swaps the Move button for an inline date picker, saving the old markup
+  // so Cancel can put it back exactly as it was. Available on every real
+  // booking, not just tentative ones -- dates shift for confirmed jobs too.
+  function startMoveBooking(btn) {
+    const wrap = btn.closest('.move-actions');
     wrap.dataset.orig = wrap.innerHTML;
     wrap.innerHTML = `
-      <input type="date" class="move-date-input" value="${esc(currentIso)}"
+      <input type="date" class="move-date-input" value="${esc(wrap.dataset.date)}"
         style="border:1.5px solid var(--border); border-radius:8px; padding:6px 10px; font-family:'Nunito',sans-serif; font-size:13px; color:var(--ink);">
-      <div style="display:flex; gap:14px;">
-        <button type="button" class="link-btn" onclick="cancelMoveBooking(this)">Cancel</button>
-        <button type="button" class="link-btn link-btn-mint" onclick="finishMoveBooking('${esc(id)}', this)">Save</button>
-      </div>
+      <button type="button" class="link-btn" onclick="cancelMoveBooking(this)" style="margin-left:10px;">Cancel</button>
+      <button type="button" class="link-btn link-btn-mint" onclick="finishMoveBooking(this)" style="margin-left:10px;">Save</button>
     `;
   }
 
   function cancelMoveBooking(btn) {
-    const wrap = btn.closest('.tentative-actions');
+    const wrap = btn.closest('.move-actions');
     wrap.innerHTML = wrap.dataset.orig;
   }
 
-  async function finishMoveBooking(id, btn) {
-    const wrap = btn.closest('.tentative-actions');
+  async function finishMoveBooking(btn) {
+    const wrap = btn.closest('.move-actions');
+    const id = wrap.dataset.id;
     const input = wrap.querySelector('.move-date-input');
     const newIso = input.value;
     if (!newIso) { alert('Pick a date first.'); return; }
