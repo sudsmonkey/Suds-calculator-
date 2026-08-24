@@ -170,6 +170,23 @@
     margin-bottom: 10px;
     box-shadow: var(--shadow);
   }
+  /* Manual/commercial job entries -- darker, squarer, harder-edged than the
+     soft residential-booking cards, so they read as a distinct category at
+     a glance rather than needing to be read to tell apart. */
+  .booking-card.manual-card {
+    background: #4A453F;
+    border: 1.5px solid #33302B;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+  .manual-card .booking-name { color: #fff; }
+  .manual-card .booking-row { color: rgba(255,255,255,0.65); }
+  .manual-card .booking-row strong { color: #fff; }
+  .manual-card .booking-total { color: #E8DDD0; }
+  .manual-card .link-btn { color: rgba(255,255,255,0.55); }
+  .manual-card .link-btn:hover { color: #fff; }
+  .manual-card .manual-actions { border-top-color: rgba(255,255,255,0.15); }
+  .manual-card .manual-label { color: rgba(255,255,255,0.55); }
   .booking-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
   .booking-name { font-size: 16px; font-weight: 900; color: var(--dark); }
   .booking-date-badge {
@@ -1567,15 +1584,16 @@
       card.className = 'booking-card';
 
       if (b._manual) {
+        card.className = 'booking-card manual-card';
         card.innerHTML = `
           <div class="booking-header">
             <div class="booking-name">${esc(b.first_name || '—')}</div>
-            <div class="booking-date-badge" style="background:var(--mid);">${esc(b.date || '—')}</div>
+            <div class="booking-date-badge" style="background:#33302B;">${esc(b.date || '—')}</div>
           </div>
           ${b.time ? `<div class="booking-row">🕐 <strong>${esc(b.time)}</strong></div>` : ''}
           ${b.total ? `<div class="booking-total">${esc(b.total)}</div>` : ''}
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">
-            <span style="font-size:11px; color:var(--mid); font-weight:900; text-transform:uppercase; letter-spacing:0.04em;">Manual entry</span>
+          <div class="manual-actions" style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid;">
+            <span class="manual-label" style="font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em;">Manual entry</span>
             <button type="button" class="link-btn" onclick="deleteManualBooking('${esc(b.id)}', this)">Delete</button>
           </div>
         `;
