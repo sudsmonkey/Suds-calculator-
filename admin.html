@@ -715,7 +715,7 @@
     const hint = document.getElementById('workDateHint');
     if (!hint) return;
     hint.textContent = workRangeAnchor
-      ? 'Tap the day this job ends, or the same day again for just one day.'
+      ? 'Tap the day it ends (fills in "Through" here and "To" above), or the same day again for just one day.'
       : '';
   }
 
@@ -806,16 +806,22 @@
 
     const workDateEl = document.getElementById('workDate');
     const workEndDateEl = document.getElementById('workEndDate');
+    const rangeStartEl = document.getElementById('rangeStart');
+    const rangeEndEl = document.getElementById('rangeEnd');
     if (workDateEl) {
       if (!workRangeAnchor) {
         workRangeAnchor = dateStr;
         workDateEl.value = dateStr;
         if (workEndDateEl) workEndDateEl.value = '';
+        if (rangeStartEl) rangeStartEl.value = dateStr;
+        if (rangeEndEl) rangeEndEl.value = dateStr;
       } else {
         const start = workRangeAnchor < dateStr ? workRangeAnchor : dateStr;
         const end   = workRangeAnchor < dateStr ? dateStr : workRangeAnchor;
         workDateEl.value = start;
         if (workEndDateEl) workEndDateEl.value = (end !== start) ? end : '';
+        if (rangeStartEl) rangeStartEl.value = start;
+        if (rangeEndEl) rangeEndEl.value = end;
         workRangeAnchor = null;
       }
       updateWorkDateHint();
