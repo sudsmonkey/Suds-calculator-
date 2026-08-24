@@ -22,6 +22,13 @@ meta) parked until the design passes are done. Read it before touching `<head>`
 on any page, or before re-adding the city-name list that used to sit above the
 footer on `index.html`.
 
+`STRIPE-INVOICING.md` documents the "Send Invoice" feature on `admin.html`'s
+booking cards: the Supabase Edge Function it depends on (`send-invoice`,
+holds the live Stripe secret key server-side, deployed separately from this
+repo), the one-time setup steps, and the full function code. Read it before
+touching invoicing-related code in `admin.html` (the `sendInvoice()`
+function, `.invoice-actions`, `invoice_url`/`stripe_invoice_id` columns).
+
 ## Architecture
 
 Four standalone HTML files — all CSS and JS are inlined. No framework, no bundler, no shared modules.
