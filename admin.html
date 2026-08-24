@@ -1753,6 +1753,14 @@
         : `<div class="complete-actions" data-id="${esc(b.id)}" data-date="${esc(b.date_iso || '')}">
              <button type="button" class="link-btn link-btn-mint" onclick="startMarkComplete(this)">Mark Complete</button>
            </div>`;
+      const invoiceAmount = parseAmount(b.total);
+      const invoiceHtml = b.invoice_url
+        ? `<div class="booking-row" style="margin-top:6px;">📄 <a href="${esc(b.invoice_url)}" target="_blank" rel="noopener">View Invoice</a></div>`
+        : `<div class="invoice-actions" style="margin-top:6px;"
+             data-id="${esc(b.id)}" data-email="${esc(b.email || '')}" data-name="${esc(name)}"
+             data-amount="${esc(String(invoiceAmount))}" data-description="${esc((b.package || 'Service') + ' — ' + dateLabel)}">
+             <button type="button" class="link-btn" onclick="sendInvoice(this)">Send Invoice</button>
+           </div>`;
       card.innerHTML = `
         <div class="booking-header">
           <div class="booking-name">${esc(name)}</div>
@@ -1768,6 +1776,7 @@
         ${b.monkey_bonus ? `<div class="booking-row" style="color:var(--dark-mint);">🐒 ${esc(b.monkey_bonus)}</div>` : ''}
         ${b.photo_urls ? `<div class="booking-row" style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">${b.photo_urls.split(',').map(u => `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" style="width:56px;height:56px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border);"></a>`).join('')}</div>` : ''}
         <div class="booking-total">${esc(b.total || '')}</div>
+        ${invoiceHtml}
         ${b.tentative ? `
         <div class="tentative-actions" style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--mid);">
           <span class="tentative-flag">Penciled in</span>
@@ -2013,6 +2022,57 @@
     } catch(e) {
       alert('Network error confirming.');
       btn.disabled = false;
+    }
+  }
+
+  // Sends a real, live Stripe invoice -- goes through the send-invoice Edge
+  // Function so the Stripe secret key never touches the browser. This is
+  // manual, one booking at a time, always behind a confirm() -- it emails a
+  // real customer a real payment request the moment it runs.
+  async function sendInvoice(btn) {
+    const wrap = btn.closest('.invoice-actions');
+    const id = wrap.dataset.id;
+    const email = wrap.dataset.email;
+    const name = wrap.dataset.name;
+    const amount = wrap.dataset.amount;
+    const description = wrap.dataset.description;
+
+    if (!email) { alert('This booking has no email on file — cannot send an invoice.'); return; }
+    if (!amount || Number(amount) <= 0) { alert('No valid amount to invoice.'); return; }
+    if (!confirm('Send a $' + amount + ' invoice to ' + email + '?\n\nStripe will email them a payment link right away — this is live and real.')) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    try {
+      const res = await fetch(SUPABASE_URL + '/functions/v1/send-invoice', {
+        method: 'POST',
+        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ email, name, amount, description })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert('Could not send invoice: ' + (data.error || ('HTTP ' + res.status)));
+        btn.disabled = false;
+        btn.textContent = 'Send Invoice';
+        return;
+      }
+      // The invoice is already sent at this point -- this PATCH is just
+      // bookkeeping so the card shows "View Invoice" next time. If it fails
+      // (e.g. the migration hasn't been run yet), the invoice itself still
+      // went out, so this only warns rather than treating it as a failure.
+      const patchRes = await fetch(SUPABASE_URL + '/rest/v1/bookings?id=eq.' + encodeURIComponent(id), {
+        method: 'PATCH',
+        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ invoice_url: data.invoice_url, stripe_invoice_id: data.invoice_id })
+      });
+      if (!patchRes.ok) {
+        alert('Invoice sent! (Could not save the link on this booking — run the invoice_url setup SQL if you haven\'t yet.)');
+      }
+      loadBookings();
+    } catch(e) {
+      alert('Network error sending invoice.');
+      btn.disabled = false;
+      btn.textContent = 'Send Invoice';
     }
   }
 
