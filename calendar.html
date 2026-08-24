@@ -565,7 +565,8 @@
     document.querySelectorAll('#timeGrid .time-slot').forEach(el => el.classList.remove('selected'));
     const el = document.querySelector('#timeGrid [data-slot="' + slot + '"]');
     if (el) { el.classList.add('selected'); void el.offsetWidth; }
-    document.getElementById('summaryDate').textContent = MONTHS[currentMonth] + ' ' + parseInt(selectedDate.split('-')[2]) + ', ' + currentYear;
+    const selParts = selectedDate.split('-');
+    document.getElementById('summaryDate').textContent = MONTHS[parseInt(selParts[1], 10) - 1] + ' ' + parseInt(selParts[2], 10) + ', ' + selParts[0];
     document.getElementById('summaryTime').textContent = slot;
     updateBtn();
     if (firstPick) setTimeout(function() {
