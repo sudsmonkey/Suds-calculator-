@@ -786,6 +786,9 @@
     adminSelectedDate = dateStr;
     renderAdminCal();
 
+    const workDateEl = document.getElementById('workDate');
+    if (workDateEl) workDateEl.value = dateStr;
+
     const slotSec = document.getElementById('slotSection');
     slotSec.style.display = 'block';
     const parts = dateStr.split('-');
