@@ -1068,22 +1068,29 @@
     setRangeBusy(false);
   }
 
+  // Mirrors blockDaysSlots -- shared by "Unblock several days" and rebasing
+  // a manual job's slots when its date range is moved.
+  async function unblockDaysSlots(days) {
+    let removed = 0, failed = 0;
+    for (const day of days) {
+      const state = await fetchDayState(day);
+      adminTakenSlots[day] = state;
+      for (const slot of Object.keys(state.admin)) {
+        const ok = await deleteBlock(state.admin[slot]);
+        if (ok) { delete state.admin[slot]; removed++; } else failed++;
+      }
+    }
+    return { removed, failed };
+  }
+
   async function unblockRange() {
     const r = readRange();
     if (!r) return;
     setRangeBusy(true);
     r.status.className = 'status-msg';
     r.status.textContent = 'Unblocking…';
-    let removed = 0, failed = 0;
     try {
-      for (const day of r.days) {
-        const state = await fetchDayState(day);
-        adminTakenSlots[day] = state;
-        for (const slot of Object.keys(state.admin)) {
-          const ok = await deleteBlock(state.admin[slot]);
-          if (ok) { delete state.admin[slot]; removed++; } else failed++;
-        }
-      }
+      const { removed, failed } = await unblockDaysSlots(r.days);
       r.status.className = failed ? 'status-msg err' : 'status-msg ok';
       r.status.textContent = 'Unblocked ' + removed + ' slot' + (removed === 1 ? '' : 's') +
         (failed ? ' · ' + failed + ' failed' : '') + '.';
@@ -1629,7 +1636,7 @@
         })
         .map(r => ({
           id: r.id, _manual: true,
-          first_name: r.name, date_iso: r.date, date: prettyDateRange(r.date, r.end_date),
+          first_name: r.name, date_iso: r.date, endDate: r.end_date || '', date: prettyDateRange(r.date, r.end_date),
           time: r.time || '', total: r.amount ? money(Number(r.amount)) : ''
         }));
     } catch(e) {
@@ -1704,12 +1711,17 @@
         card.innerHTML = `
           <div class="booking-header">
             <div class="booking-name">${esc(b.first_name || '—')}</div>
-            <div class="booking-date-badge" style="background:#33302B;">${esc(b.date || '—')}</div>
+            <div class="booking-date-badge" style="background:#33302B; cursor:pointer;" onclick="jumpToMove(this)">${esc(b.date || '—')}</div>
           </div>
           ${b.time ? `<div class="booking-row">🕐 <strong>${esc(b.time)}</strong></div>` : ''}
           ${b.total ? `<div class="booking-total">${esc(b.total)}</div>` : ''}
           <div class="manual-actions" style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid;">
-            <span class="manual-label" style="font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em;">Manual entry</span>
+            <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+              <span class="manual-label" style="font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em;">Manual entry</span>
+              <span class="move-actions" data-id="${esc(b.id)}" data-date="${esc(b.date_iso || '')}" data-end-date="${esc(b.endDate || '')}">
+                <button type="button" class="link-btn" onclick="startMoveManual(this)">Move</button>
+              </span>
+            </div>
             <button type="button" class="link-btn" onclick="deleteManualBooking('${esc(b.id)}', this)">Delete</button>
           </div>
         `;
@@ -1727,7 +1739,7 @@
       card.innerHTML = `
         <div class="booking-header">
           <div class="booking-name">${esc(name)}</div>
-          <div class="booking-date-badge">${esc(dateLabel)}</div>
+          <div class="booking-date-badge" style="cursor:pointer;" onclick="jumpToMove(this)">${esc(dateLabel)}</div>
         </div>
         <div class="booking-row">🕐 <strong>${esc(b.time || '—')}</strong></div>
         ${b.phone ? `<div class="booking-row">📞 ${telLink(b.phone)}</div>` : ''}
@@ -1859,6 +1871,14 @@
     }
   }
 
+  // Tapping the date badge at the top of a card jumps straight to its Move
+  // control at the bottom, so the badge itself feels like the "change this
+  // date" control without duplicating the editor up there too.
+  function jumpToMove(badgeEl) {
+    const btn = badgeEl.closest('.booking-card').querySelector('.move-actions button');
+    if (btn) btn.click();
+  }
+
   // Swaps the Move button for an inline date picker, saving the old markup
   // so Cancel can put it back exactly as it was. Available on every real
   // booking, not just tentative ones -- dates shift for confirmed jobs too.
@@ -1871,6 +1891,7 @@
       <button type="button" class="link-btn" onclick="cancelMoveBooking(this)" style="margin-left:10px;">Cancel</button>
       <button type="button" class="link-btn link-btn-mint" onclick="finishMoveBooking(this)" style="margin-left:10px;">Save</button>
     `;
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   function cancelMoveBooking(btn) {
@@ -1900,6 +1921,63 @@
     } catch(e) {
       alert('Network error moving booking.');
       wrap.querySelectorAll('button').forEach(b => b.disabled = false);
+    }
+  }
+
+  // Same idea as startMoveBooking, but for blocked_work entries -- these can
+  // span a range, so there's a second optional "through" input, and moving
+  // one also rebases its slot blocks: free whatever the old dates held,
+  // claim the new ones, so availability stays accurate instead of leaving
+  // stale blocks behind or leaving the new dates unprotected.
+  function startMoveManual(btn) {
+    const wrap = btn.closest('.move-actions');
+    wrap.dataset.orig = wrap.innerHTML;
+    wrap.innerHTML = `
+      <input type="date" class="move-date-input" value="${esc(wrap.dataset.date)}"
+        style="border:1.5px solid var(--border); border-radius:8px; padding:6px 10px; font-family:'Nunito',sans-serif; font-size:13px; color:var(--ink);">
+      <input type="date" class="move-end-date-input" value="${esc(wrap.dataset.endDate || '')}"
+        style="border:1.5px solid var(--border); border-radius:8px; padding:6px 10px; font-family:'Nunito',sans-serif; font-size:13px; color:var(--ink); margin-left:6px;">
+      <button type="button" class="link-btn" onclick="cancelMoveManual(this)" style="margin-left:10px;">Cancel</button>
+      <button type="button" class="link-btn link-btn-mint" onclick="finishMoveManual(this)" style="margin-left:10px;">Save</button>
+    `;
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function cancelMoveManual(btn) {
+    const wrap = btn.closest('.move-actions');
+    wrap.innerHTML = wrap.dataset.orig;
+  }
+
+  async function finishMoveManual(btn) {
+    const wrap = btn.closest('.move-actions');
+    const id = wrap.dataset.id;
+    const oldStart = wrap.dataset.date;
+    const oldEnd = wrap.dataset.endDate || oldStart;
+    const newStart = wrap.querySelector('.move-date-input').value;
+    const newEndRaw = wrap.querySelector('.move-end-date-input').value;
+    if (!newStart) { alert('Pick a date first.'); return; }
+    if (newEndRaw && newEndRaw < newStart) { alert('The "through" date is before the start date.'); return; }
+    wrap.querySelectorAll('button,input').forEach(el => el.disabled = true);
+    try {
+      const row = { date: newStart, end_date: newEndRaw || null };
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?id=eq.' + encodeURIComponent(id), {
+        method: 'PATCH',
+        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(row)
+      });
+      if (!res.ok) {
+        alert('Could not move — check the blocked_work RLS policies.');
+        wrap.querySelectorAll('button,input').forEach(el => el.disabled = false);
+        return;
+      }
+      await unblockDaysSlots(rangeDays(oldStart, oldEnd || oldStart));
+      await blockDaysSlots(rangeDays(newStart, newEndRaw || newStart));
+      renderAdminCal();
+      if (adminSelectedDate) renderSlots(adminSelectedDate);
+      loadBookings();
+    } catch(e) {
+      alert('Network error moving job.');
+      wrap.querySelectorAll('button,input').forEach(el => el.disabled = false);
     }
   }
 
