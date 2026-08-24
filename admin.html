@@ -499,9 +499,14 @@
           <input type="date" id="workDate">
         </div>
         <div class="field-row" style="flex:1;">
-          <label for="workTime">Time</label>
-          <input type="text" id="workTime" placeholder="8:00 AM">
+          <label for="workEndDate">Through (multi-day)</label>
+          <input type="date" id="workEndDate">
         </div>
+      </div>
+      <div id="workDateHint" style="font-size:11px; color:var(--mid); margin:-6px 0 12px;"></div>
+      <div class="field-row">
+        <label for="workTime">Time</label>
+        <input type="text" id="workTime" placeholder="8:00 AM">
       </div>
       <div class="field-row" id="workAmountRow">
         <label for="workAmount">Dollar amount</label>
@@ -700,6 +705,19 @@
   let adminSelectedDate = null;
   let adminTakenSlots = {};
   let adminMonthAvailability = {};
+  // First tap on the calendar sets the job form's start date; a second tap
+  // sets the end date (either order), then the cycle resets so the next tap
+  // starts a fresh single day or range. addWorkEntry() also resets this once
+  // a job is actually added.
+  let workRangeAnchor = null;
+
+  function updateWorkDateHint() {
+    const hint = document.getElementById('workDateHint');
+    if (!hint) return;
+    hint.textContent = workRangeAnchor
+      ? 'Tap the day this job ends, or the same day again for just one day.'
+      : '';
+  }
 
   // Same shape as the customer calendar's fetchMonthAvailability -- merges
   // real bookings and admin-blocked_slots into one taken-count per date, so
@@ -787,7 +805,21 @@
     renderAdminCal();
 
     const workDateEl = document.getElementById('workDate');
-    if (workDateEl) workDateEl.value = dateStr;
+    const workEndDateEl = document.getElementById('workEndDate');
+    if (workDateEl) {
+      if (!workRangeAnchor) {
+        workRangeAnchor = dateStr;
+        workDateEl.value = dateStr;
+        if (workEndDateEl) workEndDateEl.value = '';
+      } else {
+        const start = workRangeAnchor < dateStr ? workRangeAnchor : dateStr;
+        const end   = workRangeAnchor < dateStr ? dateStr : workRangeAnchor;
+        workDateEl.value = start;
+        if (workEndDateEl) workEndDateEl.value = (end !== start) ? end : '';
+        workRangeAnchor = null;
+      }
+      updateWorkDateHint();
+    }
 
     const slotSec = document.getElementById('slotSection');
     slotSec.style.display = 'block';
@@ -985,24 +1017,32 @@
     document.getElementById('rangeUnblockBtn').disabled = busy;
   }
 
+  // Shared by the "Block several days" tool and multi-day job entries --
+  // both need every slot on every day in a range blocked, leaving customer
+  // bookings untouched.
+  async function blockDaysSlots(days) {
+    let blocked = 0, skipped = 0, failed = 0;
+    for (const day of days) {
+      const state = await fetchDayState(day);
+      adminTakenSlots[day] = state;
+      for (const slot of SLOTS) {
+        if (state.customer.has(slot)) { skipped++; continue; }
+        if (slot in state.admin) continue;
+        const ok = await postBlock(day, slot);
+        ok ? blocked++ : failed++;
+      }
+    }
+    return { blocked, skipped, failed };
+  }
+
   async function blockRange() {
     const r = readRange();
     if (!r) return;
     setRangeBusy(true);
     r.status.className = 'status-msg';
     r.status.textContent = 'Blocking ' + r.days.length + ' day' + (r.days.length === 1 ? '' : 's') + '…';
-    let blocked = 0, skipped = 0, failed = 0;
     try {
-      for (const day of r.days) {
-        const state = await fetchDayState(day);
-        adminTakenSlots[day] = state;
-        for (const slot of SLOTS) {
-          if (state.customer.has(slot)) { skipped++; continue; }
-          if (slot in state.admin) continue;
-          const ok = await postBlock(day, slot);
-          ok ? blocked++ : failed++;
-        }
-      }
+      const { blocked, skipped, failed } = await blockDaysSlots(r.days);
       r.status.className = failed ? 'status-msg err' : 'status-msg ok';
       r.status.textContent = 'Blocked ' + blocked + ' slot' + (blocked === 1 ? '' : 's') +
         (skipped ? ' · left ' + skipped + ' customer booking' + (skipped === 1 ? '' : 's') + ' alone' : '') +
@@ -1073,11 +1113,16 @@
   function rowToEntry(r) {
     return { id: String(r.id), type: r.kind === 'none' ? 'none' : 'job',
              name: r.name || '', date: r.date || '', time: r.time || '',
-             amount: Number(r.amount) || 0 };
+             amount: Number(r.amount) || 0, endDate: r.end_date || '' };
   }
+  // end_date is only included when a range was actually entered, so a plain
+  // single-day entry never touches that column -- keeps this working on
+  // installs that haven't run the end_date migration yet.
   function entryToRow(e) {
-    return { date: e.date, time: e.time || null, name: e.name,
-             kind: e.type, amount: e.type === 'job' ? (e.amount || 0) : 0 };
+    const row = { date: e.date, time: e.time || null, name: e.name,
+                  kind: e.type, amount: e.type === 'job' ? (e.amount || 0) : 0 };
+    if (e.endDate) row.end_date = e.endDate;
+    return row;
   }
 
   async function refreshWork() {
@@ -1132,6 +1177,7 @@
       'create table if not exists public.blocked_work (',
       '  id uuid primary key default gen_random_uuid(),',
       '  date date not null,',
+      '  end_date date,',
       '  time text,',
       '  name text not null,',
       "  kind text not null default 'job',",
@@ -1143,6 +1189,20 @@
       'create policy "anon insert blocked_work" on public.blocked_work for insert to anon with check (true);',
       'create policy "anon delete blocked_work" on public.blocked_work for delete to anon using (true);'
     ].join('\n');
+  }
+
+  function endDateSetupSql() {
+    return 'alter table public.blocked_work add column if not exists end_date date;';
+  }
+
+  function copyEndDateSql(btn) {
+    const sql = endDateSetupSql();
+    const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy the SQL to add it'; }, 1800); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(sql).then(done).catch(() => window.prompt('Copy this SQL:', sql));
+    } else {
+      window.prompt('Copy this SQL:', sql);
+    }
   }
 
   function renderWorkSync() {
@@ -1186,17 +1246,19 @@
   }
 
   async function addWorkEntry() {
-    const status = document.getElementById('workStatus');
-    const isJob  = document.getElementById('workTypeJob').checked;
-    const name   = document.getElementById('workName').value.trim();
-    const date   = document.getElementById('workDate').value;
-    const time   = document.getElementById('workTime').value.trim();
-    const amount = parseAmount(document.getElementById('workAmount').value);
+    const status  = document.getElementById('workStatus');
+    const isJob   = document.getElementById('workTypeJob').checked;
+    const name    = document.getElementById('workName').value.trim();
+    const date    = document.getElementById('workDate').value;
+    const endDate = document.getElementById('workEndDate').value;
+    const time    = document.getElementById('workTime').value.trim();
+    const amount  = parseAmount(document.getElementById('workAmount').value);
 
     if (!name) { status.className = 'status-msg err'; status.textContent = isJob ? 'Add a name first.' : 'Say what the time is for.'; return; }
     if (!date) { status.className = 'status-msg err'; status.textContent = 'Pick a date first.'; return; }
+    if (endDate && endDate < date) { status.className = 'status-msg err'; status.textContent = 'The "through" date is before the start date.'; return; }
 
-    const entry = { type: isJob ? 'job' : 'none', name, date, time, amount: isJob ? amount : 0 };
+    const entry = { type: isJob ? 'job' : 'none', name, date, endDate: endDate || '', time, amount: isJob ? amount : 0 };
 
     if (workMode === 'remote') {
       try {
@@ -1206,6 +1268,14 @@
           body: JSON.stringify(entryToRow(entry))
         });
         if (!(res.ok || res.status === 201)) {
+          const bodyText = await res.text();
+          if (endDate && res.status === 400 && /end_date/i.test(bodyText)) {
+            status.className = 'status-msg err';
+            status.innerHTML = 'Multi-day jobs need one extra column first. ' +
+              '<button type="button" class="btn btn-secondary" style="margin-top:8px;" onclick="copyEndDateSql(this)">Copy the SQL to add it</button>' +
+              '<div style="font-size:11px; color:var(--mid); margin-top:6px;">Run it in Supabase → SQL Editor, then try again.</div>';
+            return;
+          }
           status.className = 'status-msg err';
           status.textContent = 'Could not save — check the blocked_work RLS policies.';
           return;
@@ -1224,11 +1294,24 @@
     }
 
     document.getElementById('workName').value = '';
+    document.getElementById('workEndDate').value = '';
     document.getElementById('workTime').value = '';
     document.getElementById('workAmount').value = '';
+    workRangeAnchor = null;
+    updateWorkDateHint();
     status.className = 'status-msg ok';
     status.textContent = 'Added.';
     renderWorkList();
+
+    if (endDate && endDate !== date) {
+      status.textContent = 'Added. Blocking ' + rangeDays(date, endDate).length + ' days…';
+      const { blocked, failed } = await blockDaysSlots(rangeDays(date, endDate));
+      status.className = failed ? 'status-msg err' : 'status-msg ok';
+      status.textContent = 'Added and blocked ' + blocked + ' slot' + (blocked === 1 ? '' : 's') +
+        ' across the range' + (failed ? ' · ' + failed + ' failed' : '') + '.';
+      renderAdminCal();
+      if (adminSelectedDate) renderSlots(adminSelectedDate);
+    }
   }
 
   async function removeWorkEntry(id) {
@@ -1262,6 +1345,13 @@
     return MONTHS[parseInt(m,10)-1] + ' ' + parseInt(d,10) + ', ' + y;
   }
 
+  function prettyDateRange(startIso, endIso) {
+    if (!endIso || endIso === startIso) return prettyDate(startIso);
+    const [sy, sm, sd] = startIso.split('-');
+    const startLabel = MONTHS[parseInt(sm,10)-1] + ' ' + parseInt(sd,10) + (sy !== endIso.split('-')[0] ? ', ' + sy : '');
+    return startLabel + ' – ' + prettyDate(endIso);
+  }
+
   function renderWorkList() {
     renderWorkSync();
     const list = workCache.slice().sort((a, b) => (a.date + (a.time||'')).localeCompare(b.date + (b.time||'')));
@@ -1285,7 +1375,7 @@
     list.forEach(w => {
       const card = document.createElement('div');
       card.className = 'work-card' + (w.type === 'none' ? ' no-job' : '');
-      const when = prettyDate(w.date) + (w.time ? ' · ' + esc(w.time) : '');
+      const when = prettyDateRange(w.date, w.endDate) + (w.time ? ' · ' + esc(w.time) : '');
       card.innerHTML = `
         <div class="work-top">
           <div style="min-width:0;">
@@ -1509,16 +1599,23 @@
   async function fetchManualBookings(filter) {
     try {
       const todayStr = adminToday.toISOString().split('T')[0];
-      let url = SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?select=*&kind=eq.job';
-      url += filter === 'upcoming' ? '&date=gte.' + todayStr : '&date=lt.' + todayStr;
+      const url = SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?select=*&kind=eq.job';
       const res = await fetch(url, { headers: sbHeaders() });
       if (!res.ok) return [];
       const rows = await res.json();
-      return rows.map(r => ({
-        id: r.id, _manual: true,
-        first_name: r.name, date_iso: r.date, date: prettyDate(r.date),
-        time: r.time || '', total: r.amount ? money(Number(r.amount)) : ''
-      }));
+      // A multi-day job's own end (or its date, if it's just one day) is what
+      // decides upcoming vs. completed -- a job running through today or
+      // later is still upcoming even if it started in the past.
+      return rows
+        .filter(r => {
+          const effectiveEnd = r.end_date || r.date;
+          return filter === 'upcoming' ? effectiveEnd >= todayStr : effectiveEnd < todayStr;
+        })
+        .map(r => ({
+          id: r.id, _manual: true,
+          first_name: r.name, date_iso: r.date, date: prettyDateRange(r.date, r.end_date),
+          time: r.time || '', total: r.amount ? money(Number(r.amount)) : ''
+        }));
     } catch(e) {
       return [];
     }
