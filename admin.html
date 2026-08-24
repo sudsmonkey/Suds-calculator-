@@ -1567,6 +1567,7 @@
   let bookingFilter = 'upcoming';
   let bookingSearchTimer = null;
   let bookingsSchemaOk = true; // false once we learn `completed` doesn't exist yet
+  const RECENT_COMPLETED_COUNT = 5;
 
   function setFilter(f, btn) {
     bookingFilter = f;
@@ -1650,10 +1651,17 @@
 
     try {
       let url = SUPABASE_URL + '/rest/v1/bookings?select=*';
-      url += bookingFilter === 'upcoming' ? '&completed=eq.false' : '&completed=eq.true';
+      url += bookingFilter === 'upcoming' ? '&completed=eq.false' : '&completed=eq.true&order=date_iso.desc,time.desc';
 
-      const [res, manualRows] = await Promise.all([
+      // The 5 most-recently-completed jobs stay visible in Upcoming too (tinted
+      // mint, via the same .completed styling) so there's a bit of trailing
+      // history in the one scroll instead of them vanishing the moment
+      // they're marked done. They drop out of Upcoming -- and only then show
+      // up in Completed -- once a 6th job displaces them.
+      const recentUrl = SUPABASE_URL + '/rest/v1/bookings?select=*&completed=eq.true&order=date_iso.desc,time.desc&limit=' + RECENT_COMPLETED_COUNT;
+      const [res, recentRes, manualRows] = await Promise.all([
         fetch(url, { headers: sbHeaders() }),
+        bookingFilter === 'upcoming' ? fetch(recentUrl, { headers: sbHeaders() }) : Promise.resolve(null),
         fetchManualBookings(bookingFilter)
       ]);
 
@@ -1669,7 +1677,16 @@
       }
 
       bookingsSchemaOk = true;
-      const rows = (await res.json()).concat(manualRows);
+      let rows = await res.json();
+      if (bookingFilter === 'upcoming') {
+        const recent = recentRes && recentRes.ok ? await recentRes.json() : [];
+        rows = rows.concat(recent);
+      } else {
+        // These already showed as the recent-history block in Upcoming, so
+        // skip them here rather than showing them in both places.
+        rows = rows.slice(RECENT_COMPLETED_COUNT);
+      }
+      rows = rows.concat(manualRows);
       rows.sort((a, b) => {
         const cmp = (a.date_iso || '').localeCompare(b.date_iso || '') || (a.time || '').localeCompare(b.time || '');
         return bookingFilter === 'upcoming' ? cmp : -cmp;
@@ -1799,7 +1816,6 @@
   async function finishMarkComplete(btn, cadence) {
     const wrap = btn.closest('.complete-actions');
     const id = wrap.dataset.id;
-    const card = btn.closest('.booking-card');
     wrap.querySelectorAll('button').forEach(b => b.disabled = true);
 
     try {
@@ -1847,7 +1863,10 @@
         }
       }
 
-      if (bookingFilter === 'upcoming') card.remove(); else loadBookings();
+      // Newly-completed jobs don't just vanish from Upcoming -- they're the
+      // recent-history tail now, so a full reload (rather than card.remove())
+      // is what re-renders it in place with the completed tint.
+      loadBookings();
     } catch(e) {
       alert('Network error marking complete.');
       wrap.querySelectorAll('button').forEach(b => b.disabled = false);
