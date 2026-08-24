@@ -1715,7 +1715,7 @@
         <div class="booking-row">🕐 <strong>${esc(b.time || '—')}</strong></div>
         ${b.phone ? `<div class="booking-row">📞 ${telLink(b.phone)}</div>` : ''}
         ${b.email ? `<div class="booking-row">✉️ ${mailLink(b.email)}</div>` : ''}
-        ${b.address ? `<div class="booking-row">📍 ${esc(b.address)}</div>` : ''}
+        ${b.address ? `<div class="booking-row">📍 ${mapLink(b.address)}</div>` : ''}
         ${b.notes ? `<div class="booking-row">💬 ${esc(b.notes)}</div>` : ''}
         <div class="booking-package">${esc(b.package || '—')}</div>
         ${b.add_ons ? `<div class="booking-row" style="margin-top:6px;">Add-ons: ${esc(b.add_ons)}</div>` : ''}
@@ -1889,6 +1889,13 @@
     const clean = String(email).trim();
     if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(clean)) return esc(email);
     return '<a href="mailto:' + clean + '">' + esc(clean) + '</a>';
+  }
+
+  function mapLink(address) {
+    const clean = String(address).trim();
+    if (!clean) return esc(address);
+    const url = 'https://maps.google.com/?q=' + encodeURIComponent(clean);
+    return '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(clean) + '</a>';
   }
 
   // ── Reviews tool ──────────────────────────
