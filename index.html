@@ -299,18 +299,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 }
 #gameClose:active { transform: translateY(1px); box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
 
-/* The game box carries the ending while it's open. Our Barrel drops its
-   pin so it can't sit over the game (see body.game-open .barrel-pin below),
+/* The game box carries the ending while it's open. The truck band drops its
+   pin so it can't sit over the game (see body.game-open .truck-band below),
    which would otherwise leave nothing pinned and kill the fold at the end of
    the scroll — so the game box takes the pin instead, and the thank-you band
-   and footer ride up over it exactly as they do over Our Barrel.
+   and footer ride up over it exactly as they do over the truck photo.
 
    It pins on the control band — the ANGLE/MOVE pad at the foot of the game —
    rather than on the top of the box. --gamePinTop is the header height less
    the distance down to that band, so the game rides up until the band rests
    against the header and everything above it tucks away behind. What's left
-   is a shallow strip. Measured in JS because the distance is on the far side
-   of an iframe.
+   is a shallow strip, close to the truck band's own height. Measured in JS
+   because the distance is on the far side of an iframe.
 
    .game-pinned is set from JS and only while the game actually fits the space
    under the header. Pinning something taller than that would clip its bottom
@@ -359,16 +359,32 @@ body.game-pinned .footer { position: relative; z-index: 60; }
 
 /* Photo band between the maintenance copy and the game teaser — the hero
    again, minus the copy: same truck shot, same overlay gradient, and the
-   hero's height as a fixed 216px. Plain block in normal flow -- Our Barrel
-   holds the pin now (see .barrel-pin below), so this just needs `relative`
-   as the containing block for the absolutely-positioned photo/overlay
-   inside it. */
+   hero's height as a fixed 216px. Pinned same as before -- but now it takes
+   over the pin from Our Barrel (z-index 40, see .barrel-pin) rather than
+   being the first thing pinned, so this sits at z-index 50, above Our
+   Barrel and below the thank-you band that folds over this in turn. */
 .truck-band {
-  position: relative;
+  position: sticky;
+  top: var(--navH, 76px);
+  z-index: 50;
   height: 216px;
   background: var(--dark);
   overflow: hidden;
 }
+/* The game takes over the page when it's open — drop the pin so the band can't
+   sit on top of the game canvas. Must be `relative`, not `static`: the photo and
+   overlay inside are `position:absolute; inset:0`, so a static band stops being
+   their containing block and they anchor somewhere else entirely, leaving the
+   band as a slab of its own background colour. `top` has to be reset too —
+   relative positioning still honours it, which would drop the band 76px down
+   over the game title.
+
+   This holds for as long as the game is open, not just for the opening scroll.
+   Sticky has no "released" state to return to: once the band's flow position is
+   above the pin point — true the moment you scroll to the game — re-pinning
+   snaps it back to 76..292, over the title and the top 48px of the game frame.
+   The pin comes back when the game closes. */
+body.game-open .truck-band { position: relative; top: auto; }
 .truck-band-photo {
   position: absolute; inset: 0;
   background-image: url('web/img-truck.jpg');
@@ -505,17 +521,18 @@ body.game-pinned .footer { position: relative; z-index: 60; }
 .glass-em { font-weight: 700; color: var(--dark); }
 
 /* ── Our Barrel (meet the crew) ────── */
-/* Pins under the header where the truck band used to, so it's what the game
-   teaser and thank-you band scroll/fold over instead of the truck photo.
-   Same mechanic as the old .truck-band pin: sticky, released while the game
-   is open so it can't sit over the game canvas (no absolutely-positioned
-   children here, so `relative` isn't required the way it was for the photo
-   band -- static is fine once the pin drops). */
+/* Pins under the header first, one step ahead of the truck band -- z-index
+   40 keeps it under the truck band's 50, so as the truck band (and
+   everything after it) scrolls up, it rides over this and covers it, same
+   fold as the thank-you band does to the truck band later. No zone/height
+   trick needed here: this only has to stay stuck long enough for the truck
+   band to scroll up and over it, which is shorter than this section's own
+   natural height, so a plain sticky block releases at the right time on its
+   own once its own box scrolls past the pin point. */
 .barrel-pin {
-  position: sticky; top: var(--navH, 76px); z-index: 50;
+  position: sticky; top: var(--navH, 76px); z-index: 40;
   background: var(--cream); padding: 36px 0;
 }
-body.game-open .barrel-pin { position: static; }
 .barrel-row {
   display: flex; gap: 16px; overflow-x: auto; padding: 4px 4px 10px;
   scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
@@ -696,9 +713,9 @@ body.game-open .barrel-pin { position: static; }
 
 
 /* ── Thank-you band ──────────────── */
-/* The payoff at the end of the scroll. Rides OVER the pinned Our Barrel
-   section (z-index 50) rather than under it, so it folds up over it instead
-   of sliding beneath it — that fold is the whole point of the section.
+/* The payoff at the end of the scroll. Rides OVER the pinned truck band
+   (z-index 50) rather than under it, so it folds up over the photo instead of
+   sliding beneath it — that fold is the whole point of the section.
    Deliberately asks for nothing: no CTAs, no links. The footer below carries
    the quote/commercial/phone paths. */
 .thanks-band {
@@ -1001,20 +1018,10 @@ body.game-open .barrel-pin { position: static; }
   </div>
 </div>
 
-<!-- Photo band separating the service sections from the game teaser. Plain,
-     un-pinned block now -- Our Barrel (right below) holds the pin instead, so
-     this just scrolls by normally on the way to it. -->
-<div class="truck-zone">
-<section class="truck-band" aria-hidden="true">
-  <div class="truck-band-photo"></div>
-  <div class="truck-band-overlay"></div>
-</section>
-
-<!-- Our Barrel, pinned under the header from here to the end of the scroll.
-     The zone runs to the end of the document on purpose: it would otherwise
-     release with ~136px of scroll left, which reads as a glitch rather than
-     a transition. While the game is open the pin drops (body.game-open) so
-     it can't sit over the game. -->
+<!-- Our Barrel, pinned under the header a beat before the truck band takes
+     over. Plain sticky block, no zone/height trick -- it only needs to stay
+     stuck long enough for the truck band to scroll up and cover it, which
+     its own natural height comfortably covers (see .barrel-pin for why). -->
 <div class="barrel-pin">
   <div class="wrap">
     <div class="glass-section" style="margin-bottom: 0;">
@@ -1058,6 +1065,18 @@ body.game-open .barrel-pin { position: static; }
   </div>
 </div>
 
+<!-- Photo band separating the service sections from the game teaser. Pins
+     under the header and stays pinned to the bottom of the page — everything
+     below it scrolls underneath. The zone runs to the end of the document on
+     purpose: it would otherwise release with ~136px of scroll left, which
+     reads as a glitch rather than a transition. While the game is open the
+     band un-sticks (body.game-open) so it never hangs over the game. -->
+<div class="truck-zone">
+<section class="truck-band" aria-hidden="true">
+  <div class="truck-band-photo"></div>
+  <div class="truck-band-overlay"></div>
+</section>
+
 <!-- Mini game teaser -->
 <div class="wrap">
   <div class="section" style="text-align: center; padding: 40px 0 36px;">
@@ -1074,10 +1093,9 @@ body.game-open .barrel-pin { position: static; }
   <iframe id="gameFrame" src="" style="width:100%; border:none; display:block;" scrolling="no"></iframe>
 </div>
 
-<!-- Thank-you band — folds up over the pinned Our Barrel section at the end
-     of the scroll. Used to be CTA-free on purpose; overridden to give one
-     last path in/out right before the footer, reusing the hero's glass
-     pills. -->
+<!-- Thank-you band — folds up over the pinned truck photo at the end of the
+     scroll. Used to be CTA-free on purpose; overridden to give one last
+     path in/out right before the footer, reusing the hero's glass pills. -->
 <section class="thanks-band">
   <div class="thanks-mark" aria-hidden="true">&ldquo;</div>
   <blockquote class="thanks-quote">
