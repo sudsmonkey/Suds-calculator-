@@ -521,25 +521,27 @@ body.game-open .truck-band { position: relative; top: auto; }
 .glass-em { font-weight: 700; color: var(--dark); }
 
 /* ── Our Barrel (meet the crew) ────── */
-/* Pins under the header first, one step ahead of the truck band -- z-index
-   40 keeps it under the truck band's 50, so as the truck band scrolls up it
-   rides over this and covers it, same fold as the thank-you band does to
-   the truck band later.
+/* Pins under the header a step ahead of the truck band -- z-index 40 keeps
+   it under the truck band's 50.
 
    A sticky element's stuck range is bounded by its PARENT's box, not by its
-   own height -- .barrel-zone's padding-bottom is that parent, sized to
-   release the pin right around when the truck band's own pin engages
-   (~216px, the truck band's height). Without that buffer this stays stuck
-   indefinitely once triggered: it's taller than the truck band, so the
-   truck band (216px) only ever covers its top portion, leaving the rest
-   showing beneath for the whole remaining scroll -- including over the game
-   title later, since nothing there was left to cover it.
+   own height. .barrel-zone wraps just this, with no added height, so the
+   range is ~0: the pin engages and releases at essentially the same scroll
+   position, handing off straight to the truck band with no gap and no
+   lingering overlap. A deliberate trade-off -- this section is taller than
+   the truck band (216px), so any real "stuck, then covered" dwell time
+   leaves either a period where the truck band only covers its top portion
+   (the rest showing underneath, including over the game title later since
+   nothing there ever covers it) or, if that dwell time is padded in
+   directly, a blank gap once this scrolls away before the truck band
+   arrives to fill it (both shipped and got reported before this landed on
+   zero). If a real pinned dwell is wanted later, this needs to be
+   shortened to roughly the truck band's own height first.
 
-   The game still drops this pin too (body.game-open below): the zone buffer
-   only fixes the normal scroll case, not a mid-scroll jump straight into an
-   open game, which could land inside the stuck window with nothing else
-   covering it. */
-.barrel-zone { padding-bottom: 220px; }
+   The game still drops this pin too (body.game-open below) -- belt and
+   suspenders now that the zone itself no longer leaves a stuck window for
+   a mid-scroll jump into an open game to land inside. */
+.barrel-zone { padding-bottom: 0; }
 .barrel-pin {
   position: sticky; top: var(--navH, 76px); z-index: 40;
   background: var(--cream); padding: 36px 0;
