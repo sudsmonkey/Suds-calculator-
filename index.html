@@ -519,9 +519,13 @@ body.game-open .truck-band { position: relative; top: auto; }
 .glass-em { font-weight: 700; color: var(--dark); }
 
 /* ── Our Barrel (meet the crew) ────── */
+.barrel-row {
+  display: flex; gap: 16px; overflow-x: auto; padding: 4px 4px 10px;
+  scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
+}
 .barrel-card {
   background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: var(--shadow); max-width: 340px; margin: 0 auto;
+  box-shadow: var(--shadow); flex: 0 0 260px; scroll-snap-align: start;
   padding: 28px 24px 26px; display: flex; flex-direction: column; align-items: center; text-align: center;
 }
 .barrel-photo {
@@ -536,6 +540,17 @@ body.game-open .truck-band { position: relative; top: auto; }
   letter-spacing: 0.06em; margin-bottom: 12px;
 }
 .barrel-bio { font-size: 14px; color: var(--mid); line-height: 1.6; }
+/* Open crew slots -- greyed out on purpose so Levi's card stays the one
+   that reads as "real" at a glance. */
+.barrel-placeholder { opacity: 0.6; }
+.barrel-placeholder .barrel-photo,
+.barrel-photo-placeholder {
+  border: 3px dashed var(--mid); background: var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 44px;
+  box-shadow: none;
+}
+.barrel-placeholder .barrel-name,
+.barrel-placeholder .barrel-role { color: var(--mid); }
 .glass-scroll {
   overflow: hidden;
   margin: 0 -20px;
@@ -987,16 +1002,30 @@ body.game-open .truck-band { position: relative; top: auto; }
 
     <div class="glass-section">
       <div class="glass-type">Our Barrel</div>
-      <div class="barrel-card">
-        <div class="barrel-photo">
-          <picture>
-            <source srcset="web/img-levi.webp" type="image/webp">
-            <img src="web/img-levi.jpg" alt="Levi, owner of Suds Monkey">
-          </picture>
+      <div class="barrel-row">
+        <div class="barrel-card">
+          <div class="barrel-photo">
+            <picture>
+              <source srcset="web/img-levi.webp" type="image/webp">
+              <img src="web/img-levi.jpg" alt="Levi, owner of Suds Monkey">
+            </picture>
+          </div>
+          <div class="barrel-name">Levi</div>
+          <div class="barrel-role">Chief Primate</div>
+          <p class="barrel-bio">Born and raised in Moore, OK. When he's not up a ladder, he's home with his two dogs, Dory and JR.</p>
         </div>
-        <div class="barrel-name">Levi</div>
-        <div class="barrel-role">Chief Primate</div>
-        <p class="barrel-bio">Born and raised in Moore, OK. When he's not up a ladder, he's home with his two dogs, Dory and JR.</p>
+        <div class="barrel-card barrel-placeholder">
+          <div class="barrel-photo barrel-photo-placeholder">🐒</div>
+          <div class="barrel-name">?</div>
+          <div class="barrel-role">We're Growing</div>
+          <p class="barrel-bio">The crew's got room to grow — check back soon.</p>
+        </div>
+        <div class="barrel-card barrel-placeholder">
+          <div class="barrel-photo barrel-photo-placeholder">🐒</div>
+          <div class="barrel-name">?</div>
+          <div class="barrel-role">We're Growing</div>
+          <p class="barrel-bio">The crew's got room to grow — check back soon.</p>
+        </div>
       </div>
     </div>
   </div>
