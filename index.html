@@ -524,31 +524,32 @@ body.game-open .truck-band { position: relative; top: auto; }
   scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
 }
 .barrel-card {
-  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: var(--shadow); flex: 0 0 260px; scroll-snap-align: start;
-  padding: 28px 24px 26px; display: flex; flex-direction: column; align-items: center; text-align: center;
+  background: var(--white); border: 1px solid var(--border); border-radius: 18px;
+  box-shadow: 0 2px 14px rgba(166,56,46,0.09); flex: 0 0 140px; scroll-snap-align: start;
+  padding: 18px 10px 16px; display: flex; flex-direction: column; align-items: center; text-align: center;
 }
 .barrel-photo {
-  width: 140px; height: 140px; border-radius: 50%; overflow: hidden;
-  border: 3px solid var(--dark); margin-bottom: 16px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.14), 0 2px 8px rgba(166,56,46,0.18);
+  width: 64px; height: 64px; border-radius: 50%; overflow: hidden;
+  border: 2px solid var(--dark); margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12), 0 2px 6px rgba(166,56,46,0.16);
 }
 .barrel-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.barrel-name { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 20px; color: var(--dark); }
+.barrel-name { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 13px; color: var(--dark); line-height: 1.2; }
 .barrel-role {
-  font-size: 12px; font-weight: 700; color: var(--orange); text-transform: uppercase;
-  letter-spacing: 0.06em; margin-bottom: 12px;
+  font-size: 10px; font-weight: 700; color: var(--orange); text-transform: uppercase;
+  letter-spacing: 0.05em; margin: 2px 0 6px;
 }
-.barrel-bio { font-size: 14px; color: var(--mid); line-height: 1.6; }
+.barrel-bio { font-size: 11px; color: var(--mid); line-height: 1.4; }
 /* Open crew slots -- greyed out on purpose so Levi's card stays the one
    that reads as "real" at a glance. */
 .barrel-placeholder { opacity: 0.6; }
 .barrel-placeholder .barrel-photo,
 .barrel-photo-placeholder {
-  border: 3px dashed var(--mid); background: var(--border);
-  display: flex; align-items: center; justify-content: center; font-size: 44px;
+  border: 2px dashed var(--mid); background: var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
   box-shadow: none;
 }
+.barrel-photo-placeholder img { width: 70%; height: 70%; object-fit: contain; opacity: 0.85; }
 .barrel-placeholder .barrel-name,
 .barrel-placeholder .barrel-role { color: var(--mid); }
 .glass-scroll {
@@ -1015,13 +1016,23 @@ body.game-open .truck-band { position: relative; top: auto; }
           <p class="barrel-bio">Born and raised in Moore, OK. When he's not up a ladder, he's home with his two dogs, Dory and JR.</p>
         </div>
         <div class="barrel-card barrel-placeholder">
-          <div class="barrel-photo barrel-photo-placeholder">🐒</div>
+          <div class="barrel-photo barrel-photo-placeholder">
+            <picture>
+              <source srcset="web/monkey-mascot.webp" type="image/webp">
+              <img src="web/monkey-mascot.png" alt="">
+            </picture>
+          </div>
           <div class="barrel-name">?</div>
           <div class="barrel-role">We're Growing</div>
           <p class="barrel-bio">The crew's got room to grow — check back soon.</p>
         </div>
         <div class="barrel-card barrel-placeholder">
-          <div class="barrel-photo barrel-photo-placeholder">🐒</div>
+          <div class="barrel-photo barrel-photo-placeholder">
+            <picture>
+              <source srcset="web/monkey-mascot.webp" type="image/webp">
+              <img src="web/monkey-mascot.png" alt="">
+            </picture>
+          </div>
           <div class="barrel-name">?</div>
           <div class="barrel-role">We're Growing</div>
           <p class="barrel-bio">The crew's got room to grow — check back soon.</p>
