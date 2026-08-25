@@ -524,15 +524,21 @@ body.game-open .truck-band { position: relative; top: auto; }
 /* Pins under the header first, one step ahead of the truck band -- z-index
    40 keeps it under the truck band's 50, so as the truck band (and
    everything after it) scrolls up, it rides over this and covers it, same
-   fold as the thank-you band does to the truck band later. No zone/height
-   trick needed here: this only has to stay stuck long enough for the truck
-   band to scroll up and over it, which is shorter than this section's own
-   natural height, so a plain sticky block releases at the right time on its
-   own once its own box scrolls past the pin point. */
+   fold as the thank-you band does to the truck band later.
+
+   It stays stuck for the rest of the scroll, not just until the truck band
+   passes -- sticky's range is bounded by the parent, not by this element's
+   own height, and nothing wraps this in a shorter zone. That's fine while
+   the truck band (or later, the thank-you band) is covering it, but the
+   game drops the truck band's pin so it doesn't sit over the game canvas
+   (body.game-open .truck-band below) -- without the same drop here, this
+   would still be stuck at the same spot with nothing left covering it,
+   popping up over the game title. Same fix, same trigger. */
 .barrel-pin {
   position: sticky; top: var(--navH, 76px); z-index: 40;
   background: var(--cream); padding: 36px 0;
 }
+body.game-open .barrel-pin { position: static; }
 .barrel-row {
   display: flex; gap: 16px; overflow-x: auto; padding: 4px 4px 10px;
   scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
