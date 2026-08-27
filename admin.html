@@ -196,6 +196,7 @@
   .manual-card .booking-name { color: #33302B; }
   .manual-card .manual-actions { border-top-color: rgba(51,48,43,0.15); }
   .manual-card.completed { background: #F1F9F5; border-color: #D3ECE1; }
+  .manual-card.tentative { background: #F2F1EE; border-color: #DEDAD2; }
   .manual-card .manual-label { color: var(--mid); }
   .booking-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
   .booking-name { font-size: 16px; font-weight: 900; color: var(--dark); }
@@ -1618,7 +1619,7 @@
 
   function rowToManualBooking(r) {
     return {
-      id: r.id, _manual: true, completed: !!r.completed, priceAdjusted: !!r.price_adjusted,
+      id: r.id, _manual: true, completed: !!r.completed, priceAdjusted: !!r.price_adjusted, tentative: !!r.tentative,
       first_name: r.name, date_iso: r.date, endDate: r.end_date || '', date: prettyDateRange(r.date, r.end_date),
       time: r.time || '', rawAmount: Number(r.amount) || 0, total: r.amount ? money(Number(r.amount)) : ''
     };
@@ -1706,11 +1707,29 @@
         nextRow.date = addMonthsIso(original.date, months);
         if (original.end_date) nextRow.end_date = addMonthsIso(original.end_date, months);
         nextRow.completed = false;
-        const nextRes = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE, {
+        // Auto-scheduled dates are a guess this far out -- flagged tentative
+        // until confirmed, same as recurring real bookings. Falls back to a
+        // plain row on installs that haven't added the column yet.
+        nextRow.tentative = true;
+        let nextRes = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE, {
           method: 'POST',
           headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
           body: JSON.stringify(nextRow)
         });
+        if (!nextRes.ok) {
+          const nextBodyText = await nextRes.text();
+          if (nextRes.status === 400 && /tentative/i.test(nextBodyText)) {
+            delete nextRow.tentative;
+            nextRes = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE, {
+              method: 'POST',
+              headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+              body: JSON.stringify(nextRow)
+            });
+            if (nextRes.ok) {
+              alert('Next job scheduled. To show it as "penciled in" until confirmed, run this once in Supabase → SQL Editor:\n\nalter table public.blocked_work add column if not exists tentative boolean not null default false;');
+            }
+          }
+        }
         // Block the new occurrence's slots too, same as creating it by hand
         // through "What's the time for?" would.
         if (nextRes.ok) {
@@ -1826,7 +1845,7 @@
       card.className = 'booking-card' + (b.completed ? ' completed' : '') + (b.tentative ? ' tentative' : '');
 
       if (b._manual) {
-        card.className = 'booking-card manual-card' + (b.completed ? ' completed' : '');
+        card.className = 'booking-card manual-card' + (b.completed ? ' completed' : '') + (b.tentative ? ' tentative' : '');
         card.innerHTML = `
           <div class="booking-header">
             <div class="booking-name">${esc(b.first_name || '—')}</div>
@@ -1836,6 +1855,11 @@
           <span class="total-actions" data-id="${esc(b.id)}" data-amount="${esc(String(b.rawAmount || 0))}">
             <div class="booking-total" style="cursor:pointer;" onclick="startEditTotalManual(this)">${esc(b.total || money(0))}${b.priceAdjusted ? ' *' : ''}</div>
           </span>
+          ${b.tentative ? `
+          <div class="tentative-actions" style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--mid);">
+            <span class="tentative-flag">Penciled in</span>
+            <button type="button" class="link-btn link-btn-mint" onclick="confirmManualBooking('${esc(b.id)}', this)">Confirm</button>
+          </div>` : ''}
           <div class="manual-actions" style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid;">
             <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
               <span class="manual-label" style="font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em;">Manual entry</span>
@@ -2129,6 +2153,22 @@
         body: JSON.stringify({ tentative: false })
       });
       if (!res.ok) { alert('Could not confirm — check the bookings UPDATE RLS policy.'); btn.disabled = false; return; }
+      loadBookings();
+    } catch(e) {
+      alert('Network error confirming.');
+      btn.disabled = false;
+    }
+  }
+
+  async function confirmManualBooking(id, btn) {
+    btn.disabled = true;
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?id=eq.' + encodeURIComponent(id), {
+        method: 'PATCH',
+        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ tentative: false })
+      });
+      if (!res.ok) { alert('Could not confirm — check the blocked_work UPDATE RLS policy.'); btn.disabled = false; return; }
       loadBookings();
     } catch(e) {
       alert('Network error confirming.');
