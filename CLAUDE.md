@@ -29,6 +29,10 @@ repo), the one-time setup steps, and the full function code. Read it before
 touching invoicing-related code in `admin.html` (the `sendInvoice()`
 function, `.invoice-actions`, `invoice_url`/`stripe_invoice_id` columns).
 
+`SECURITY-NOTES.md` holds a parked security audit (client-side keys, the
+hardcoded admin password) to revisit before Stripe invoicing goes live.
+Read it before changing `ADMIN_PASSWORD` or the Google Maps API key.
+
 ## Architecture
 
 Four standalone HTML files — all CSS and JS are inlined. No framework, no bundler, no shared modules.
