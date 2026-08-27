@@ -1618,9 +1618,9 @@
 
   function rowToManualBooking(r) {
     return {
-      id: r.id, _manual: true, completed: !!r.completed,
+      id: r.id, _manual: true, completed: !!r.completed, priceAdjusted: !!r.price_adjusted,
       first_name: r.name, date_iso: r.date, endDate: r.end_date || '', date: prettyDateRange(r.date, r.end_date),
-      time: r.time || '', total: r.amount ? money(Number(r.amount)) : ''
+      time: r.time || '', rawAmount: Number(r.amount) || 0, total: r.amount ? money(Number(r.amount)) : ''
     };
   }
 
@@ -1655,29 +1655,73 @@
     }
   }
 
-  async function markManualComplete(id, btn) {
-    btn.disabled = true;
+  function startMarkCompleteManual(btn) {
+    const wrap = btn.closest('.complete-actions');
+    wrap.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <button type="button" class="link-btn" onclick="finishMarkCompleteManual(this,'none')">Just this one</button>
+        <button type="button" class="link-btn link-btn-mint" onclick="finishMarkCompleteManual(this,'quarterly')">+ Quarterly</button>
+        <button type="button" class="link-btn link-btn-mint" onclick="finishMarkCompleteManual(this,'semiannual')">+ Semi-annual</button>
+        <button type="button" class="link-btn" onclick="cancelMarkCompleteManual(this)" title="Cancel">✕</button>
+      </div>
+    `;
+  }
+
+  function cancelMarkCompleteManual(btn) {
+    const wrap = btn.closest('.complete-actions');
+    wrap.innerHTML = '<button type="button" class="link-btn link-btn-mint" onclick="startMarkCompleteManual(this)">Mark Complete</button>';
+  }
+
+  async function finishMarkCompleteManual(btn, cadence) {
+    const wrap = btn.closest('.complete-actions');
+    const id = wrap.dataset.id;
+    wrap.querySelectorAll('button').forEach(b => b.disabled = true);
     try {
       const res = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?id=eq.' + encodeURIComponent(id), {
         method: 'PATCH',
-        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
         body: JSON.stringify({ completed: true })
       });
       if (!res.ok) {
         const bodyText = await res.text();
         if (res.status === 400 && /completed/i.test(bodyText)) {
           alert('Marking manual jobs complete needs one more column. Run this once in Supabase → SQL Editor:\n\nalter table public.blocked_work add column if not exists completed boolean not null default false;');
-          btn.disabled = false;
+          wrap.querySelectorAll('button').forEach(b => b.disabled = false);
           return;
         }
         alert('Could not mark complete — check the blocked_work UPDATE RLS policy.');
-        btn.disabled = false;
+        wrap.querySelectorAll('button').forEach(b => b.disabled = false);
         return;
       }
+      const rows = await res.json();
+      const original = Array.isArray(rows) ? rows[0] : rows;
+
+      if (cadence !== 'none' && original) {
+        const months = cadence === 'quarterly' ? 3 : 6;
+        const nextRow = Object.assign({}, original);
+        delete nextRow.id;
+        delete nextRow.created_at;
+        nextRow.date = addMonthsIso(original.date, months);
+        if (original.end_date) nextRow.end_date = addMonthsIso(original.end_date, months);
+        nextRow.completed = false;
+        const nextRes = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE, {
+          method: 'POST',
+          headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+          body: JSON.stringify(nextRow)
+        });
+        // Block the new occurrence's slots too, same as creating it by hand
+        // through "What's the time for?" would.
+        if (nextRes.ok) {
+          await blockDaysSlots(rangeDays(nextRow.date, nextRow.end_date || nextRow.date));
+          renderAdminCal();
+          if (adminSelectedDate) renderSlots(adminSelectedDate);
+        }
+      }
+
       loadBookings();
     } catch(e) {
       alert('Network error marking complete.');
-      btn.disabled = false;
+      wrap.querySelectorAll('button').forEach(b => b.disabled = false);
     }
   }
 
@@ -1783,7 +1827,9 @@
             <div class="booking-date-badge" style="background:#33302B; cursor:pointer;" onclick="jumpToMove(this)">${esc(b.date || '—')}</div>
           </div>
           ${b.time ? `<div class="booking-row">🕐 <strong>${esc(b.time)}</strong></div>` : ''}
-          ${b.total ? `<div class="booking-total">${esc(b.total)}</div>` : ''}
+          <span class="total-actions" data-id="${esc(b.id)}" data-amount="${esc(String(b.rawAmount || 0))}">
+            <div class="booking-total" style="cursor:pointer;" onclick="startEditTotalManual(this)">${esc(b.total || money(0))}${b.priceAdjusted ? ' *' : ''}</div>
+          </span>
           <div class="manual-actions" style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid;">
             <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
               <span class="manual-label" style="font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.04em;">Manual entry</span>
@@ -1792,7 +1838,9 @@
               </span>
               ${b.completed
                 ? `<button type="button" class="link-btn link-btn-mint" onclick="reopenManualBooking('${esc(b.id)}', this)">Move to Upcoming</button>`
-                : `<button type="button" class="link-btn link-btn-mint" onclick="markManualComplete('${esc(b.id)}', this)">Mark Complete</button>`}
+                : `<div class="complete-actions" data-id="${esc(b.id)}">
+                     <button type="button" class="link-btn link-btn-mint" onclick="startMarkCompleteManual(this)">Mark Complete</button>
+                   </div>`}
             </div>
             <button type="button" class="link-btn" onclick="deleteManualBooking('${esc(b.id)}', this)">Delete</button>
           </div>
@@ -2185,6 +2233,64 @@
           }
         }
         alert('Could not update the price — check the bookings UPDATE RLS policy.');
+        wrap.querySelectorAll('button,input').forEach(el => el.disabled = false);
+        return;
+      }
+      loadBookings();
+    } catch(e) {
+      alert('Network error updating the price.');
+      wrap.querySelectorAll('button,input').forEach(el => el.disabled = false);
+    }
+  }
+
+  // Same as startEditTotal/finishEditTotal, but for blocked_work rows --
+  // amount is stored as a plain numeric column there rather than a
+  // pre-formatted string, so the input works off data-amount (the raw
+  // number) instead of parsing the displayed total back out.
+  function startEditTotalManual(el) {
+    const wrap = el.closest('.total-actions');
+    wrap.dataset.orig = wrap.innerHTML;
+    wrap.innerHTML = `
+      <input type="text" inputmode="decimal" class="edit-total-input" value="${esc(wrap.dataset.amount)}"
+        style="width:80px; border:1.5px solid var(--border); border-radius:8px; padding:6px 10px; font-family:'Nunito',sans-serif; font-size:14px; font-weight:900; color:var(--ink);">
+      <button type="button" class="link-btn" onclick="cancelEditTotalManual(this)" style="margin-left:10px;">Cancel</button>
+      <button type="button" class="link-btn link-btn-mint" onclick="finishEditTotalManual(this)" style="margin-left:10px;">Save</button>
+    `;
+  }
+
+  function cancelEditTotalManual(btn) {
+    const wrap = btn.closest('.total-actions');
+    wrap.innerHTML = wrap.dataset.orig;
+  }
+
+  async function finishEditTotalManual(btn) {
+    const wrap = btn.closest('.total-actions');
+    const id = wrap.dataset.id;
+    const input = wrap.querySelector('.edit-total-input');
+    const amount = parseAmount(input.value);
+    if (!input.value.trim() || isNaN(amount) || amount < 0) { alert('Enter a valid dollar amount.'); return; }
+    wrap.querySelectorAll('button,input').forEach(el => el.disabled = true);
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?id=eq.' + encodeURIComponent(id), {
+        method: 'PATCH',
+        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ amount, price_adjusted: true })
+      });
+      if (!res.ok) {
+        const bodyText = await res.text();
+        if (res.status === 400 && /price_adjusted/i.test(bodyText)) {
+          const retryRes = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?id=eq.' + encodeURIComponent(id), {
+            method: 'PATCH',
+            headers: sbHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ amount })
+          });
+          if (retryRes.ok) {
+            alert('Price updated. To also show the * marker, run this once in Supabase → SQL Editor:\n\nalter table public.blocked_work add column if not exists price_adjusted boolean not null default false;');
+            loadBookings();
+            return;
+          }
+        }
+        alert('Could not update the price — check the blocked_work UPDATE RLS policy.');
         wrap.querySelectorAll('button,input').forEach(el => el.disabled = false);
         return;
       }
