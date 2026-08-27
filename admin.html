@@ -1628,10 +1628,12 @@
   // form) show up here too, same Upcoming/Completed bucket as real bookings
   // -- an explicit completed flag now, same as bookings, rather than going
   // off the date. "No job" entries (days off, etc.) aren't customer work, so
-  // they're left out.
-  async function fetchManualBookings(filter) {
+  // they're left out. Takes a plain true/false rather than 'upcoming'/
+  // 'completed' -- loadBookings needs both statuses from this table now to
+  // build the combined recent-completed pool below.
+  async function fetchManualBookingsByStatus(completed) {
     try {
-      const url = SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?select=*&kind=eq.job&completed=eq.' + (filter === 'upcoming' ? 'false' : 'true');
+      const url = SUPABASE_URL + '/rest/v1/' + WORK_TABLE + '?select=*&kind=eq.job&completed=eq.' + completed;
       const res = await fetch(url, { headers: sbHeaders() });
       if (res.ok) return (await res.json()).map(rowToManualBooking);
 
@@ -1645,7 +1647,7 @@
         return rows
           .filter(r => {
             const effectiveEnd = r.end_date || r.date;
-            return filter === 'upcoming' ? effectiveEnd >= todayStr : effectiveEnd < todayStr;
+            return completed ? effectiveEnd < todayStr : effectiveEnd >= todayStr;
           })
           .map(rowToManualBooking);
       }
@@ -1746,24 +1748,16 @@
     list.innerHTML = '<div class="spinner">Loading bookings…</div>';
 
     try {
-      let url = SUPABASE_URL + '/rest/v1/bookings?select=*';
-      url += bookingFilter === 'upcoming' ? '&completed=eq.false' : '&completed=eq.true&order=date_iso.desc,time.desc';
-
-      // The 5 most-recently-completed jobs stay visible in Upcoming too (tinted
-      // mint, via the same .completed styling) so there's a bit of trailing
-      // history in the one scroll instead of them vanishing the moment
-      // they're marked done. They drop out of Upcoming -- and only then show
-      // up in Completed -- once a 6th job displaces them.
-      const recentUrl = SUPABASE_URL + '/rest/v1/bookings?select=*&completed=eq.true&order=date_iso.desc,time.desc&limit=' + RECENT_COMPLETED_COUNT;
-      const [res, recentRes, manualRows] = await Promise.all([
-        fetch(url, { headers: sbHeaders() }),
-        bookingFilter === 'upcoming' ? fetch(recentUrl, { headers: sbHeaders() }) : Promise.resolve(null),
-        fetchManualBookings(bookingFilter)
+      const [notDoneRes, doneRes, manualNotDone, manualDone] = await Promise.all([
+        fetch(SUPABASE_URL + '/rest/v1/bookings?select=*&completed=eq.false', { headers: sbHeaders() }),
+        fetch(SUPABASE_URL + '/rest/v1/bookings?select=*&completed=eq.true', { headers: sbHeaders() }),
+        fetchManualBookingsByStatus(false),
+        fetchManualBookingsByStatus(true)
       ]);
 
-      if (!res.ok) {
-        const bodyText = await res.text();
-        if (res.status === 400 && /completed/i.test(bodyText)) {
+      if (!notDoneRes.ok) {
+        const bodyText = await notDoneRes.text();
+        if (notDoneRes.status === 400 && /completed/i.test(bodyText)) {
           bookingsSchemaOk = false;
           bookingsSetupNotice(list);
           return;
@@ -1773,20 +1767,32 @@
       }
 
       bookingsSchemaOk = true;
-      let rows = await res.json();
-      if (bookingFilter === 'upcoming') {
-        const recent = recentRes && recentRes.ok ? await recentRes.json() : [];
-        rows = rows.concat(recent);
-      } else {
-        // These already showed as the recent-history block in Upcoming, so
-        // skip them here rather than showing them in both places.
-        rows = rows.slice(RECENT_COMPLETED_COUNT);
-      }
-      rows = rows.concat(manualRows);
-      rows.sort((a, b) => {
+      const realNotDone = await notDoneRes.json();
+      const realDone = doneRes.ok ? await doneRes.json() : [];
+
+      // The 5 most-recently-completed jobs stay visible in Upcoming too
+      // (tinted, via the same .completed styling) so there's a bit of
+      // trailing history in the one scroll instead of them vanishing the
+      // moment they're marked done. The pool is combined across real
+      // bookings AND manual jobs -- 5 total, not 5 of each -- so it always
+      // reflects whatever actually happened most recently either way. They
+      // drop out of Upcoming -- and only then show up in Completed -- once
+      // a 6th completion (of either kind) displaces them.
+      const allDone = realDone.concat(manualDone);
+      allDone.sort((a, b) => {
         const cmp = (a.date_iso || '').localeCompare(b.date_iso || '') || (a.time || '').localeCompare(b.time || '');
-        return bookingFilter === 'upcoming' ? cmp : -cmp;
+        return -cmp;
       });
+      const recentDone = allDone.slice(0, RECENT_COMPLETED_COUNT);
+      const trailingDone = allDone.slice(RECENT_COMPLETED_COUNT);
+
+      let rows;
+      if (bookingFilter === 'upcoming') {
+        rows = realNotDone.concat(manualNotDone).concat(recentDone);
+        rows.sort((a, b) => (a.date_iso || '').localeCompare(b.date_iso || '') || (a.time || '').localeCompare(b.time || ''));
+      } else {
+        rows = trailingDone; // already sorted most-recent-first
+      }
       renderBookingCards(rows, list, 'No ' + (bookingFilter === 'upcoming' ? 'upcoming' : 'completed') + ' bookings.');
     } catch(e) {
       list.innerHTML = '<div class="empty-state">Network error loading bookings.</div>';
