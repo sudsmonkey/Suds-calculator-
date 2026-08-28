@@ -712,6 +712,7 @@
 
   function init() {
     applyDarkMode(localStorage.getItem('suds_dark_mode') === '1');
+    ensureWeatherLoaded();
     if (localStorage.getItem('suds_admin') === '1') {
       document.getElementById('loginGate').classList.add('hidden');
       showDash();
@@ -1845,7 +1846,8 @@
         fetch(SUPABASE_URL + '/rest/v1/bookings?select=*&completed=eq.false', { headers: sbHeaders() }),
         fetch(SUPABASE_URL + '/rest/v1/bookings?select=*&completed=eq.true', { headers: sbHeaders() }),
         fetchManualBookingsByStatus(false),
-        fetchManualBookingsByStatus(true)
+        fetchManualBookingsByStatus(true),
+        ensureWeatherLoaded()
       ]);
 
       if (!notDoneRes.ok) {
@@ -1901,7 +1903,7 @@
       const like = encodeURIComponent('%' + q + '%');
       const url = SUPABASE_URL + '/rest/v1/bookings?select=*&order=date_iso.desc' +
         '&or=(first_name.ilike.' + like + ',last_name.ilike.' + like + ',phone.ilike.' + like + ',email.ilike.' + like + ')';
-      const res = await fetch(url, { headers: sbHeaders() });
+      const [res] = await Promise.all([fetch(url, { headers: sbHeaders() }), ensureWeatherLoaded()]);
       if (!res.ok) { list.innerHTML = '<div class="empty-state">Search failed.</div>'; return; }
       const rows = await res.json();
       renderBookingCards(rows, list, 'No bookings match "' + q + '".', true);
@@ -1922,6 +1924,7 @@
             <div class="booking-date-badge" style="background:#33302B; cursor:pointer;" onclick="jumpToMove(this)">${esc(b.date || '—')}</div>
           </div>
           ${b.time ? `<div class="booking-row">🕐 <strong>${esc(b.time)}</strong></div>` : ''}
+          ${weatherRowHtml(b.date_iso)}
           <span class="total-actions" data-id="${esc(b.id)}" data-amount="${esc(String(b.rawAmount || 0))}">
             <div class="booking-total" style="cursor:pointer;" onclick="startEditTotalManual(this)">${esc(b.total || money(0))}${b.priceAdjusted ? ' *' : ''}</div>
           </span>
@@ -1969,6 +1972,7 @@
           <div class="booking-date-badge" style="cursor:pointer;" onclick="jumpToMove(this)">${esc(dateLabel)}</div>
         </div>
         <div class="booking-row">🕐 <strong>${esc(b.time || '—')}</strong></div>
+        ${weatherRowHtml(b.date_iso)}
         ${b.phone ? `<div class="booking-row">📞 ${telLink(b.phone)}${smsLink(b.phone)}</div>` : ''}
         ${b.email ? `<div class="booking-row">✉️ ${mailLink(b.email)}</div>` : ''}
         ${b.address ? `<div class="booking-row">📍 ${mapLink(b.address)}</div>` : ''}
@@ -2571,6 +2575,69 @@
     if (!clean) return esc(address);
     const url = 'https://maps.google.com/?q=' + encodeURIComponent(clean);
     return '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(clean) + '</a>';
+  }
+
+  // Per-day forecast for booking cards -- same OKC-fixed, no-key Open-Meteo
+  // approach as the header weather badge on index.html/calculator.html.
+  // Open-Meteo's daily endpoint only covers ~16 days out, so jobs further
+  // out than that just show no weather row -- no fallback needed, there's
+  // nothing meaningful to show that far ahead anyway.
+  const WEATHER_ICONS = {
+    0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+    45: '🌫️', 48: '🌫️',
+    51: '🌦️', 53: '🌦️', 55: '🌦️', 56: '🌦️', 57: '🌦️',
+    61: '🌧️', 63: '🌧️', 65: '🌧️', 66: '🌧️', 67: '🌧️',
+    71: '❄️', 73: '❄️', 75: '❄️', 77: '❄️', 85: '❄️', 86: '❄️',
+    80: '🌧️', 81: '🌧️', 82: '🌧️',
+    95: '⛈️', 96: '⛈️', 99: '⛈️'
+  };
+  const WEATHER_LABELS = {
+    0: 'Clear', 1: 'Mostly clear', 2: 'Partly cloudy', 3: 'Overcast',
+    45: 'Fog', 48: 'Fog',
+    51: 'Drizzle', 53: 'Drizzle', 55: 'Drizzle', 56: 'Freezing drizzle', 57: 'Freezing drizzle',
+    61: 'Rain', 63: 'Rain', 65: 'Heavy rain', 66: 'Freezing rain', 67: 'Freezing rain',
+    71: 'Snow', 73: 'Snow', 75: 'Heavy snow', 77: 'Snow grains', 85: 'Snow showers', 86: 'Snow showers',
+    80: 'Rain showers', 81: 'Rain showers', 82: 'Heavy showers',
+    95: 'Thunderstorms', 96: 'Thunderstorms', 99: 'Thunderstorms'
+  };
+  const WEATHER_CACHE_KEY = 'suds_admin_weather_v1';
+  const WEATHER_CACHE_MS = 30 * 60 * 1000;
+  let weatherByDate = {};
+  let weatherLoadPromise = null;
+
+  function ensureWeatherLoaded() {
+    if (weatherLoadPromise) return weatherLoadPromise;
+    weatherLoadPromise = (async () => {
+      try {
+        const cached = JSON.parse(sessionStorage.getItem(WEATHER_CACHE_KEY) || 'null');
+        if (cached && (Date.now() - cached.t) < WEATHER_CACHE_MS) {
+          weatherByDate = cached.data;
+          return;
+        }
+      } catch(e) {}
+      try {
+        const OKC_LAT = 35.4676, OKC_LON = -97.5164;
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + OKC_LAT + '&longitude=' + OKC_LON +
+          '&daily=weather_code,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=America%2FChicago&forecast_days=16');
+        if (!res.ok) return;
+        const data = await res.json();
+        const map = {};
+        data.daily.time.forEach((dateIso, i) => {
+          map[dateIso] = { code: data.daily.weather_code[i], hi: data.daily.temperature_2m_max[i], lo: data.daily.temperature_2m_min[i] };
+        });
+        weatherByDate = map;
+        try { sessionStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ t: Date.now(), data: map })); } catch(e) {}
+      } catch(e) {}
+    })();
+    return weatherLoadPromise;
+  }
+
+  function weatherRowHtml(dateIso) {
+    const w = weatherByDate[dateIso];
+    if (!w) return '';
+    const icon = WEATHER_ICONS[w.code] || '🌡️';
+    const label = WEATHER_LABELS[w.code] || '';
+    return `<div class="booking-row">${icon} <strong>${Math.round(w.hi)}°/${Math.round(w.lo)}°</strong>${label ? ' ' + esc(label) : ''}</div>`;
   }
 
   // ── Reviews tool ──────────────────────────
