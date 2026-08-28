@@ -20,6 +20,40 @@
     --radius: 16px;
     --shadow: 0 2px 16px rgba(0,0,0,0.07);
   }
+  /* Dark mode -- most of the UI is already built on these variables, so
+     redefining them here covers the vast majority of it for free. The
+     handful of components below that use their own hardcoded colors
+     (status tints, calendar states) need their own explicit overrides
+     since they don't derive from the palette. Brand accents (orange, mint)
+     stay close to their light-mode values -- lightened slightly where they
+     doubled as body text (--dark, --dark-mint), since those read muddy
+     against a dark background otherwise. */
+  body.dark-mode {
+    --orange: #F56E64;
+    --dark:   #F0938A;
+    --mint:   #9ED9C0;
+    --dark-mint: #7DCDA8;
+    --cream:  #1E1B18;
+    --light:  #33291F;
+    --ink:    #F1EBE4;
+    --mid:    #B3A99E;
+    --border: #3D362F;
+    --white:  #2A2521;
+    --shadow: 0 2px 16px rgba(0,0,0,0.35);
+  }
+  body.dark-mode { color-scheme: dark; }
+  body.dark-mode .booking-card.completed,
+  body.dark-mode .manual-card.completed { background: #1C2822; border-color: #2E4438; }
+  body.dark-mode .booking-card.tentative,
+  body.dark-mode .manual-card.tentative { background: #2A2721; border-color: #3D3830; }
+  body.dark-mode .manual-card { border-color: #4A4038; }
+  body.dark-mode .manual-card .booking-name { color: var(--ink); }
+  body.dark-mode .manual-card .manual-label { color: var(--mid); }
+  body.dark-mode .month-nav button:hover { background: #33291F; }
+  body.dark-mode .cal-day:hover:not(.disabled):not(.empty) { background: #33291F; }
+  body.dark-mode .cal-day.disabled { color: #55493D; }
+  body.dark-mode .cal-day.full-booked { color: #6B5D4E; }
+  body.dark-mode .slot-btn.booked-customer { border-color: #4A4038; background: #2A2521; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Nunito', sans-serif; background: var(--cream); min-height: 100vh; color: var(--ink); }
 
@@ -60,6 +94,12 @@
   }
   .top-bar-title { color: #fff; font-size: 17px; font-weight: 900; }
   .top-bar-sub { color: rgba(255,255,255,0.8); font-size: 12px; }
+  .dark-toggle {
+    background: rgba(255,255,255,0.2); border: none; border-radius: 50%;
+    width: 36px; height: 36px; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dark-toggle:active { background: rgba(255,255,255,0.32); }
 
   /* ── Tabs ── */
   .tabs {
@@ -430,6 +470,7 @@
       <div class="top-bar-title">Suds Monkey Admin</div>
       <div class="top-bar-sub" id="todayLabel"></div>
     </div>
+    <button type="button" class="dark-toggle" id="darkToggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
   </div>
 
   <div class="tabs">
@@ -637,7 +678,20 @@
   // visitors out.
   const ADMIN_PASSWORD = 'Lux13lux31';
 
+  function applyDarkMode(on) {
+    document.body.classList.toggle('dark-mode', on);
+    const btn = document.getElementById('darkToggle');
+    if (btn) btn.textContent = on ? '☀️' : '🌙';
+  }
+
+  function toggleDarkMode() {
+    const on = !document.body.classList.contains('dark-mode');
+    localStorage.setItem('suds_dark_mode', on ? '1' : '0');
+    applyDarkMode(on);
+  }
+
   function init() {
+    applyDarkMode(localStorage.getItem('suds_dark_mode') === '1');
     if (localStorage.getItem('suds_admin') === '1') {
       document.getElementById('loginGate').classList.add('hidden');
       showDash();
