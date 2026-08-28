@@ -300,6 +300,7 @@
     display: flex;
     gap: 8px;
     margin-bottom: 10px;
+    flex-wrap: wrap;
   }
   .filter-btn {
     border: 1.5px solid var(--border);
@@ -576,6 +577,7 @@
     <div class="pin-filter-bar">
       <div class="filter-bar">
         <button class="filter-btn active" onclick="setFilter('upcoming', this)">Upcoming</button>
+        <button class="filter-btn" onclick="setFilter('week', this)">7 Day</button>
         <button class="filter-btn" onclick="setFilter('completed', this)">Completed</button>
       </div>
       <input type="text" class="search-input" id="bookingSearchInput" placeholder="Search name, phone, or email…" oninput="onBookingSearch(this.value)">
@@ -1859,14 +1861,27 @@
       const recentDone = allDone.slice(0, RECENT_COMPLETED_COUNT);
       const trailingDone = allDone.slice(RECENT_COMPLETED_COUNT);
 
-      let rows;
+      let rows, emptyMessage;
       if (bookingFilter === 'upcoming') {
         rows = realNotDone.concat(manualNotDone).concat(recentDone);
         rows.sort((a, b) => (a.date_iso || '').localeCompare(b.date_iso || '') || (a.time || '').localeCompare(b.time || ''));
+        emptyMessage = 'No upcoming bookings.';
+      } else if (bookingFilter === 'week') {
+        // Today through 6 days out -- "what's my week look like," not the
+        // whole open-ended Upcoming list. No recent-completed carryover
+        // here; that's specifically a trailing-history feature for the
+        // Upcoming view, not relevant to a forward-looking window.
+        const todayStr = adminToday.toISOString().split('T')[0];
+        const weekEnd = isoAddDays(todayStr, 6);
+        rows = realNotDone.concat(manualNotDone)
+          .filter(b => (b.date_iso || '') >= todayStr && (b.date_iso || '') <= weekEnd);
+        rows.sort((a, b) => (a.date_iso || '').localeCompare(b.date_iso || '') || (a.time || '').localeCompare(b.time || ''));
+        emptyMessage = 'Nothing in the next 7 days.';
       } else {
         rows = trailingDone; // already sorted most-recent-first
+        emptyMessage = 'No completed bookings.';
       }
-      renderBookingCards(rows, list, 'No ' + (bookingFilter === 'upcoming' ? 'upcoming' : 'completed') + ' bookings.');
+      renderBookingCards(rows, list, emptyMessage);
     } catch(e) {
       list.innerHTML = '<div class="empty-state">Network error loading bookings.</div>';
     }
