@@ -1954,7 +1954,7 @@
           <div class="booking-date-badge" style="cursor:pointer;" onclick="jumpToMove(this)">${esc(dateLabel)}</div>
         </div>
         <div class="booking-row">🕐 <strong>${esc(b.time || '—')}</strong></div>
-        ${b.phone ? `<div class="booking-row">📞 ${telLink(b.phone)}</div>` : ''}
+        ${b.phone ? `<div class="booking-row">📞 ${telLink(b.phone)}${smsLink(b.phone)}</div>` : ''}
         ${b.email ? `<div class="booking-row">✉️ ${mailLink(b.email)}</div>` : ''}
         ${b.address ? `<div class="booking-row">📍 ${mapLink(b.address)}</div>` : ''}
         ${b.notes ? `<div class="booking-row">💬 ${esc(b.notes)}</div>` : ''}
@@ -2468,6 +2468,12 @@
     const digits = String(phone).replace(/[^\d+]/g, '');
     if (!/^\+?\d{3,}$/.test(digits)) return esc(phone);
     return '<a href="tel:' + digits + '">' + esc(phone) + '</a>';
+  }
+
+  function smsLink(phone) {
+    const digits = String(phone).replace(/[^\d+]/g, '');
+    if (!/^\+?\d{3,}$/.test(digits)) return '';
+    return '<a href="sms:' + digits + '" style="margin-left:10px;">💬 Text</a>';
   }
 
   function mailLink(email) {
