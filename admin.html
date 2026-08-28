@@ -313,6 +313,7 @@
   }
   .forecast-day-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--mid); }
   .forecast-day-date { font-size: 13px; font-weight: 900; color: var(--ink); margin: 2px 0 4px; }
+  .forecast-day-weather { font-size: 12px; font-weight: 700; color: var(--mid); margin-bottom: 4px; }
   .forecast-day-count { font-size: 10px; font-weight: 700; color: var(--border); }
   .forecast-day-count.has-jobs { color: var(--orange); }
   .filter-bar {
@@ -2062,9 +2063,14 @@
       const [y, m, d] = dIso.split('-').map(Number);
       const count = notDone.filter(b => b.date_iso === dIso).length;
       const label = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : dayNames[new Date(y, m - 1, d).getDay()];
+      const w = weatherByDate[dIso];
+      const weatherHtml = w
+        ? `<div class="forecast-day-weather">${WEATHER_ICONS[w.code] || '🌡️'} ${Math.round(w.hi)}°</div>`
+        : '';
       html += `<div class="forecast-day">
         <div class="forecast-day-label">${esc(label)}</div>
         <div class="forecast-day-date">${esc(MONTHS[m-1].slice(0,3))} ${d}</div>
+        ${weatherHtml}
         <div class="forecast-day-count${count ? ' has-jobs' : ''}">${count ? count + (count === 1 ? ' job' : ' jobs') : '—'}</div>
       </div>`;
     }
