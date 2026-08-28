@@ -495,14 +495,14 @@
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('block')">Block Slots</div>
-    <div class="tab" onclick="switchTab('bookings')">Bookings</div>
+    <div class="tab" onclick="switchTab('block')">Block Slots</div>
+    <div class="tab active" onclick="switchTab('bookings')">Bookings</div>
     <div class="tab" onclick="switchTab('reviews')">Reviews</div>
     <div class="tab" onclick="switchTab('ticker')">Ticker</div>
   </div>
 
   <!-- Block Slots panel -->
-  <div class="panel active" id="panelBlock">
+  <div class="panel" id="panelBlock">
     <div class="section-label">Pick a date</div>
     <div class="cal-card">
       <div class="month-nav">
@@ -593,7 +593,7 @@
   </div>
 
   <!-- Bookings panel -->
-  <div class="panel" id="panelBookings">
+  <div class="panel active" id="panelBookings">
     <div class="pin-filter-bar">
       <div class="filter-bar">
         <button class="filter-btn active" onclick="setFilter('upcoming', this)">Upcoming</button>
