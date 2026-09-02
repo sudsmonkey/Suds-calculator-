@@ -33,6 +33,12 @@ function, `.invoice-actions`, `invoice_url`/`stripe_invoice_id` columns).
 hardcoded admin password) to revisit before Stripe invoicing goes live.
 Read it before changing `ADMIN_PASSWORD` or the Google Maps API key.
 
+`STORM-FLOW-NOTES.md` holds a parked, not-yet-reproduced report about the
+storm-windows question in `calculator.html`'s residential wizard (jumping
+straight to the Storm Package skips the sq-ft slider) — what's verified so
+far and the open ambiguity in what's actually wrong. Read it before
+touching `selectStormQ`, `selectHistoric`, or `enterStormMode`.
+
 ## Architecture
 
 Four standalone HTML files — all CSS and JS are inlined. No framework, no bundler, no shared modules.
