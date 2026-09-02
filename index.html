@@ -362,15 +362,7 @@ body.game-pinned .footer { position: relative; z-index: 60; }
    hero's height as a fixed 216px. Pinned same as before -- but now it takes
    over the pin from Our Barrel (z-index 40, see .barrel-pin) rather than
    being the first thing pinned, so this sits at z-index 50, above Our
-   Barrel and below the thank-you band that folds over this in turn.
-
-   The game teaser (tag/title/Play button) lives inside this band now,
-   overlaid on the photo the same way the hero overlays its own headline and
-   path-grid on its slides -- rather than as a separate block that scrolled
-   past underneath. That way the one pinned band carries both the truck
-   photo and the game preview together, and the thank-you fold at the end of
-   the scroll closes over the whole thing in one motion instead of the photo
-   alone. */
+   Barrel and below the thank-you band that folds over this in turn. */
 .truck-band {
   position: sticky;
   top: var(--navH, 76px);
@@ -378,25 +370,7 @@ body.game-pinned .footer { position: relative; z-index: 60; }
   height: 216px;
   background: var(--dark);
   overflow: hidden;
-  padding: 32px 20px 24px;
-  text-align: center;
 }
-.truck-band-eyebrow {
-  position: relative; z-index: 1;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-style: italic; font-weight: 800; font-size: 14px;
-  letter-spacing: 0.12em; color: var(--mint);
-  text-transform: uppercase; margin-bottom: 10px;
-}
-.truck-band-title {
-  position: relative; z-index: 1;
-  font-family: 'Anton', sans-serif; font-style: italic;
-  font-size: clamp(22px, 6vw, 30px); line-height: 1.05;
-  color: #fff; margin-bottom: 14px; text-wrap: balance; text-transform: uppercase;
-}
-.truck-band-title sup { font-size: 0.4em; margin-left: 2px; }
-.truck-band .path-grid { position: relative; z-index: 1; }
-button.path-card { appearance: none; -webkit-appearance: none; cursor: pointer; }
 /* The game takes over the page when it's open — drop the pin so the band can't
    sit on top of the game canvas. Must be `relative`, not `static`: the photo and
    overlay inside are `position:absolute; inset:0`, so a static band stops being
@@ -1106,25 +1080,27 @@ body.game-open .barrel-pin { position: static; }
 </div>
 </div><!-- /.barrel-zone -->
 
-<!-- Photo band separating the service sections from the game, carrying the
-     game's own teaser (tag/title/Play button) overlaid on the photo. Pins
+<!-- Photo band separating the service sections from the game teaser. Pins
      under the header and stays pinned to the bottom of the page — everything
      below it scrolls underneath. The zone runs to the end of the document on
      purpose: it would otherwise release with ~136px of scroll left, which
      reads as a glitch rather than a transition. While the game is open the
      band un-sticks (body.game-open) so it never hangs over the game. -->
 <div class="truck-zone">
-<section class="truck-band">
+<section class="truck-band" aria-hidden="true">
   <div class="truck-band-photo"></div>
   <div class="truck-band-overlay"></div>
-  <div class="truck-band-eyebrow">Just for fun</div>
-  <h2 class="truck-band-title">Squeege Master 3000<sup>&trade;</sup></h2>
-  <div class="path-grid">
-    <button type="button" class="path-card" id="gameBtn" onclick="launchGame()">
-      <span class="path-label">Play Now →</span>
-    </button>
-  </div>
 </section>
+
+<!-- Mini game teaser -->
+<div class="wrap">
+  <div class="section" style="text-align: center; padding: 40px 0 36px;">
+    <div class="section-tag">Just for fun</div>
+    <h2 style="font-family:'Anton',sans-serif; font-size:clamp(32px,7vw,52px); color:var(--orange); font-style:italic; text-transform:uppercase; letter-spacing:1px; line-height:1; margin-bottom:8px;">Squeege Master 3000<span style="font-size:0.35em; vertical-align:super; margin-left:3px;">&trade;</span></h2>
+    <p class="section-sub" id="gameSub">Think you can run a window cleaning empire? Take a break and find out.</p>
+    <button id="gameBtn" onclick="launchGame()" style="display:inline-block; background: var(--mint); color: var(--dark); font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 900; border-radius: 50px; padding: 12px 28px; border: none; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.18);">Play Now</button>
+  </div>
+</div>
 
 <!-- Game embed -->
 <div id="gameEmbed" style="display:none;">
@@ -1319,8 +1295,9 @@ function launchGame() {
     frame.src = 'game.html';
     embed.style.display = 'block';
     document.body.classList.add('game-open');
-    // Collapse the Play button so the game sits directly under the title.
-    // The corner × in the embed is the way back out.
+    // Collapse the teaser copy and the Play button so the game sits directly
+    // under the title. The corner × in the embed is the way back out.
+    document.getElementById('gameSub').style.display = 'none';
     btn.style.display = 'none';
     updateGamePin();
     // Size the iframe to the game's real content height. The game sizes its
@@ -1362,11 +1339,13 @@ function launchGame() {
       window.addEventListener('resize', measure);
       window.addEventListener('orientationchange', function(){ setTimeout(measure, 250); });
     };
-    // Land with the truck band (now carrying the title) flush under the
-    // fixed header, so it stays in view with the game right below it.
+    // Land with the divider above the teaser flush under the fixed header, so
+    // the "Squeege Master 3000" title stays in view above the game.
     setTimeout(() => {
       const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--navH')) || 0;
-      const anchor = document.querySelector('.truck-band') || embed;
+      const teaser = btn.closest('.wrap');
+      const prev = teaser && teaser.previousElementSibling;
+      const anchor = (prev && prev.classList.contains('divider')) ? prev : (teaser || embed);
       const top = anchor.getBoundingClientRect().top + window.scrollY - navH;
       window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     }, 60);
@@ -1377,9 +1356,11 @@ function launchGame() {
     updateGamePin();
     frame.src = '';
     frame.style.height = '';
-    // Restore the Play button before scrolling to it — a hidden element has
-    // no box to scroll into view.
+    // Restore the teaser before scrolling to it — a hidden element has no box
+    // to scroll into view.
+    document.getElementById('gameSub').style.display = '';
     btn.style.display = '';
+    btn.textContent = 'Play Now';
     btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 }
