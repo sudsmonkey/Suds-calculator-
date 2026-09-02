@@ -359,32 +359,37 @@ body.game-pinned .footer { position: relative; z-index: 60; }
 
 /* Photo band between the maintenance copy and the game teaser — the hero
    again, minus the copy: same truck shot, same overlay gradient, and the
-   hero's height as a fixed 216px. Pinned same as before -- but now it takes
-   over the pin from Our Barrel (z-index 40, see .barrel-pin) rather than
-   being the first thing pinned, so this sits at z-index 50, above Our
-   Barrel and below the thank-you band that folds over this in turn. */
+   hero's height as a fixed 216px. No longer pinned itself: the game teaser
+   band right after it (.game-teaser-band, below) takes the pin instead, so
+   the truck photo just scrolls through normally on its way past. Still
+   needs `position: relative` (not the default static) so its photo/overlay
+   children -- `position: absolute; inset: 0` -- stay contained here rather
+   than anchoring to some ancestor further up the page. */
 .truck-band {
-  position: sticky;
-  top: var(--navH, 76px);
-  z-index: 50;
+  position: relative;
   height: 216px;
   background: var(--dark);
   overflow: hidden;
 }
+/* The game teaser (tag/title/Play button) takes over the pin the truck band
+   used to hold -- same z-index 50, above Our Barrel and below the thank-you
+   band that folds over this in turn. Needs an opaque background since the
+   truck band now scrolls up underneath it while it's stuck. */
+.game-teaser-band {
+  position: sticky;
+  top: var(--navH, 76px);
+  z-index: 50;
+  background: var(--cream);
+}
 /* The game takes over the page when it's open — drop the pin so the band can't
-   sit on top of the game canvas. Must be `relative`, not `static`: the photo and
-   overlay inside are `position:absolute; inset:0`, so a static band stops being
-   their containing block and they anchor somewhere else entirely, leaving the
-   band as a slab of its own background colour. `top` has to be reset too —
-   relative positioning still honours it, which would drop the band 76px down
-   over the game title.
+   sit on top of the game canvas.
 
    This holds for as long as the game is open, not just for the opening scroll.
    Sticky has no "released" state to return to: once the band's flow position is
    above the pin point — true the moment you scroll to the game — re-pinning
-   snaps it back to 76..292, over the title and the top 48px of the game frame.
-   The pin comes back when the game closes. */
-body.game-open .truck-band { position: relative; top: auto; }
+   snaps it back over the top of the game frame. The pin comes back when the
+   game closes. */
+body.game-open .game-teaser-band { position: relative; top: auto; }
 .truck-band-photo {
   position: absolute; inset: 0;
   background-image: url('web/img-truck.jpg');
@@ -1080,12 +1085,14 @@ body.game-open .barrel-pin { position: static; }
 </div>
 </div><!-- /.barrel-zone -->
 
-<!-- Photo band separating the service sections from the game teaser. Pins
-     under the header and stays pinned to the bottom of the page — everything
-     below it scrolls underneath. The zone runs to the end of the document on
-     purpose: it would otherwise release with ~136px of scroll left, which
-     reads as a glitch rather than a transition. While the game is open the
-     band un-sticks (body.game-open) so it never hangs over the game. -->
+<!-- Photo band separating the service sections from the game teaser. The
+     photo itself just scrolls through now; the game teaser right after it
+     (.game-teaser-band) is what pins under the header and stays pinned to
+     the bottom of the page — everything below it scrolls underneath. The
+     zone runs to the end of the document on purpose: it would otherwise
+     release with ~136px of scroll left, which reads as a glitch rather than
+     a transition. While the game is open the band un-sticks (body.game-open)
+     so it never hangs over the game. -->
 <div class="truck-zone">
 <section class="truck-band" aria-hidden="true">
   <div class="truck-band-photo"></div>
@@ -1093,7 +1100,7 @@ body.game-open .barrel-pin { position: static; }
 </section>
 
 <!-- Mini game teaser -->
-<div class="wrap">
+<div class="wrap game-teaser-band">
   <div class="section" style="text-align: center; padding: 40px 0 36px;">
     <div class="section-tag">Just for fun</div>
     <h2 style="font-family:'Anton',sans-serif; font-size:clamp(32px,7vw,52px); color:var(--orange); font-style:italic; text-transform:uppercase; letter-spacing:1px; line-height:1; margin-bottom:8px;">Squeege Master 3000<span style="font-size:0.35em; vertical-align:super; margin-left:3px;">&trade;</span></h2>
