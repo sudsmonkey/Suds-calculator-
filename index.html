@@ -732,34 +732,44 @@ body.game-open .barrel-pin { position: static; }
 
 
 /* ── Thank-you band ──────────────── */
-/* The payoff at the end of the scroll. Rides OVER the pinned truck band
-   (z-index 50) rather than under it, so it folds up over the photo instead of
+/* The payoff at the end of the scroll. Rides OVER the pinned game band
+   (z-index 50) rather than under it, so it folds up over it instead of
    sliding beneath it — that fold is the whole point of the section.
-   Deliberately asks for nothing: no CTAs, no links. The footer below carries
-   the quote/commercial/phone paths. */
+
+   This band's height plus the footer's is tuned so the fold finishes right
+   as the page runs out of room to scroll -- "nothing left" once the thank-you
+   message reaches the header. That's a fixed pixel total competing against a
+   viewport height that varies by device, so it can't be exact everywhere:
+   shorter phones will have a little slack left after the fold, and on unusually
+   tall viewports (~850px+) the fold may not quite finish before the page ends.
+   Tuned here for a typical modern phone (~780-800px effective height with
+   Safari's chrome collapsed, which is what's in effect during this exact
+   scroll gesture) rather than the extremes. If it still looks loose, or the
+   fold cuts off before completing on a specific device, adjust this band's
+   and .footer's bottom padding — that's the whole lever. */
 .thanks-band {
-  background: var(--dark); padding: 52px 24px 56px; text-align: center;
+  background: var(--dark); padding: 40px 24px 85px; text-align: center;
   position: relative; z-index: 60;
 }
 .thanks-mark {
   font-family: 'Barlow Condensed', sans-serif; font-style: italic; font-weight: 800;
-  font-size: 36px; line-height: 0.6; color: rgba(255,255,255,0.22);
-  margin-bottom: 10px; user-select: none;
+  font-size: 32px; line-height: 0.6; color: rgba(255,255,255,0.22);
+  margin-bottom: 8px; user-select: none;
 }
 .thanks-quote {
-  max-width: 480px; margin: 0 auto 26px;
+  max-width: 480px; margin: 0 auto 22px;
   font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 400;
-  line-height: 1.7; color: rgba(255,255,255,0.9);
+  line-height: 1.65; color: rgba(255,255,255,0.9);
 }
-.thanks-quote p { margin: 0 0 14px; }
+.thanks-quote p { margin: 0 0 12px; }
 .thanks-quote p:last-child { margin-bottom: 0; }
 .thanks-rule {
   width: 40px; height: 2px; background: var(--mint);
-  margin: 0 auto 18px; border-radius: 2px; opacity: 0.8;
+  margin: 0 auto 16px; border-radius: 2px; opacity: 0.8;
 }
 .thanks-sign {
-  font-family: 'Anton', sans-serif; font-size: 24px; letter-spacing: 0.5px;
-  color: #fff; line-height: 1; margin-bottom: 7px;
+  font-family: 'Anton', sans-serif; font-size: 22px; letter-spacing: 0.5px;
+  color: #fff; line-height: 1; margin-bottom: 6px;
 }
 .thanks-role {
   font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800;
@@ -768,12 +778,12 @@ body.game-open .barrel-pin { position: static; }
 }
 
 /* ── Footer ──────────────────────── */
-/* Deeper at the bottom than the top — the extra 15px keeps the copyright line
-   off the very edge of the page. */
-.footer { background: var(--ink); padding: 28px 20px 43px; text-align: center; }
+/* Deeper at the bottom than the top — the extra padding keeps the copyright
+   line off the very edge of the page. */
+.footer { background: var(--ink); padding: 22px 20px 39px; text-align: center; }
 .footer-brand { font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 900; color: rgba(255,255,255,0.85); margin-bottom: 4px; }
-.footer-meta { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
-.footer-nav { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+.footer-meta { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
+.footer-nav { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
 .footer-nav a { font-size: 12px; color: rgba(255,255,255,0.45); text-decoration: none; font-weight: 600; transition: color 0.15s; }
 .footer-nav a:hover { color: rgba(255,255,255,0.85); }
 .footer-copy { font-size: 11px; color: rgba(255,255,255,0.25); }
@@ -1129,7 +1139,7 @@ body.game-open .barrel-pin { position: static; }
   <div class="thanks-rule" aria-hidden="true"></div>
   <div class="thanks-sign">Suds Monkey Window Cleaning</div>
   <div class="thanks-role">Levi &middot; Owner</div>
-  <div class="path-grid" style="margin-top:24px;">
+  <div class="path-grid" style="margin-top:20px;">
     <a href="calculator.html" class="path-card">
       <span class="path-label">Residential</span>
       <span class="path-cta">Get My Price →</span>
