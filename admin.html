@@ -2552,6 +2552,15 @@
     return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  // First name only for anything that goes public (testi-cards, the schema.org
+  // review author) -- the admin review list itself still shows the full name
+  // so Levi can tell reviewers apart. A bare first name is a perfectly valid
+  // schema.org Person.name; it doesn't affect whether Google counts the
+  // review toward aggregateRating/reviewCount, which are separate fields.
+  function firstName(fullName) {
+    return String(fullName || '').trim().split(/\s+/)[0] || fullName;
+  }
+
   // Tap-to-call and tap-to-email on the cards. The visible text stays as it
   // was typed; only the href is normalised — tel: wants bare digits, keeping a
   // leading + for international. Both hrefs are built from a strict character
@@ -2806,7 +2815,7 @@
 `        <div class="testi-card">
           <div class="testi-stars">${'★'.repeat(r.rating)}</div>
           <div class="testi-quote">"${esc(r.text)}"</div>
-          <div class="testi-name">${esc(r.author)}</div>
+          <div class="testi-name">${esc(firstName(r.author))}</div>
         </div>`).join('\n');
 
     const agg = loadAgg();
@@ -2834,7 +2843,7 @@
       ],
       review: list.map(r => ({
         '@type': 'Review',
-        author: { '@type': 'Person', name: r.author },
+        author: { '@type': 'Person', name: firstName(r.author) },
         reviewRating: { '@type': 'Rating', ratingValue: String(r.rating), bestRating: '5' },
         reviewBody: r.text
       }))
