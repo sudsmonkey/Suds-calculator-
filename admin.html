@@ -813,8 +813,15 @@
     const last = new Date(year, month+1, 0).getDate();
     const to   = year + '-' + pad(month+1) + '-' + pad(last);
     try {
+      // Completed jobs are excluded from the taken count. Usually a job is
+      // only marked complete after its date has passed anyway, so this
+      // doesn't change anything -- past days already render as disabled
+      // regardless of taken count. It matters for the one real case: a job
+      // finished and marked complete ahead of its scheduled slot (same day,
+      // or a recurring job closed out early) should free that slot back up
+      // rather than keep reading as booked.
       const [bRes, blRes] = await Promise.all([
-        fetch(SUPABASE_URL + '/rest/v1/bookings?select=date_iso&date_iso=gte.' + from + '&date_iso=lte.' + to, { headers: sbHeaders() }),
+        fetch(SUPABASE_URL + '/rest/v1/bookings?select=date_iso&completed=eq.false&date_iso=gte.' + from + '&date_iso=lte.' + to, { headers: sbHeaders() }),
         fetch(SUPABASE_URL + '/rest/v1/blocked_slots?select=date&date=gte.' + from + '&date=lte.' + to, { headers: sbHeaders() })
       ]);
       const booked  = bRes.ok  ? await bRes.json() : [];
