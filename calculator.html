@@ -646,9 +646,35 @@
      rest of the row empty. Centering the content in a flex column here
      leaves the full-bleed background alone and only re-centers what's
      inside it, same way body's own flex centering handles everything that
-     doesn't opt out of it. */
-  .q-section { display: flex; flex-direction: column; align-items: center; }
-  .q-section > h2 { max-width: 440px; width: 100%; }
+     doesn't opt out of it.
+
+     Centering alone still left a tiny card of text floating in a sea of
+     white -- the photo above it is full width, the question below it was
+     440px. Widened it and gave the actual answer control (.quick-q) an
+     open-bordered card, the same visual language calendar.html's
+     .calendar-card already uses for "here's the thing you interact with" --
+     the heading/intro stay as plain (larger) text above it, same as
+     calendar.html's "Pick a Date" label sits above its own card. */
+  .q-section { display: flex; flex-direction: column; align-items: center; padding: 56px 20px 64px; }
+  .q-section > h2 { max-width: 640px; width: 100%; font-size: 28px; }
+  .q-section > p { max-width: 640px; width: 100%; font-size: 15px; }
+  .q-section .quick-q {
+    max-width: 640px; width: 100%;
+    background: var(--white);
+    border: 1.5px solid var(--orangeborder);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    padding: 26px 30px;
+  }
+  .sub-q { max-width: 640px; width: 100%; }
+  .story-btn { font-size: 15px; padding: 13px 0; }
+  /* The hero's pin-while-scrolling is a mobile scroll-storytelling effect --
+     on a desktop viewport there's enough room to just let it scroll by
+     normally like the rest of the page. Still needs `position: relative`,
+     not the default static, so .hero-bg/.hero-overlay (position:absolute)
+     stay contained here. advanceTo() reads the hero's real position/height
+     at scroll time, so it adapts on its own with no JS changes. */
+  .hero { position: relative; top: auto; }
 }
 @media (min-width: 900px) {
   .wiz-bubble {

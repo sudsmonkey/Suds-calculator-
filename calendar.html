@@ -190,7 +190,15 @@
        zoom the photo in hard to fill that width, so most of the shot gets
        cropped away. syncHero() reads .header's real rendered height for the
        spacer, so it adapts on its own. */
-    .header { height: 300px; }
+    /* The fixed pin-under-the-header effect is a mobile scroll-storytelling
+       trick; desktop has enough room to just let this band scroll by
+       normally like the rest of the page. #heroSpacer existed purely to
+       reserve flow space for the fixed band, so it's dead weight once the
+       band is back in flow -- the margin-top here (matching --navH's 76px
+       fallback used site-wide) does that job instead, clearing the fixed
+       nav bar directly. */
+    .header { height: 300px; position: relative; top: 0; margin-top: 76px; }
+    #heroSpacer { display: none; }
     .content { max-width: 1200px; padding: 28px 32px 60px; }
     .month-nav { padding: 20px 24px 14px; }
     .month-name { font-size: 20px; }
@@ -768,6 +776,11 @@
     var hdr = document.querySelector('.header');
     var spacer = document.getElementById('heroSpacer');
     if (!nav || !hdr || !spacer) return;
+    // At desktop widths .header is unpinned (position:relative, pushed down
+    // by a plain margin-top instead) -- see the >=900px media query. Setting
+    // an inline `top` here would still offset a position:relative element on
+    // top of that margin, so skip entirely rather than fight the CSS.
+    if (window.innerWidth >= 900) { hdr.style.top = ''; return; }
     // getBoundingClientRect() returns already-zoomed screen pixels, but the
     // values this writes back (hdr's `top`, spacer's `height`) live inside
     // the same zoomed body and get scaled by it again on render. Divide out

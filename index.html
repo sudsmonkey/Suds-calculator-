@@ -325,6 +325,10 @@ body.game-pinned #gameEmbed {
 /* The footer is static, so it would paint underneath a z-indexed sticky game.
    Lift it to the thank-you band's layer so it folds up over the game too. */
 body.game-pinned .footer { position: relative; z-index: 60; }
+@media (min-width: 900px) {
+  body.game-pinned #gameEmbed { position: relative; top: auto; }
+  body.game-pinned .footer { position: static; }
+}
 
 /* The hero pins under the header while "How it works" slides beneath it,
    then scrolls away when the next section arrives. This is `sticky` rather
@@ -354,6 +358,15 @@ body.game-pinned .footer { position: relative; z-index: 60; }
 @media (min-width: 900px) {
   .hero { height: 420px; display: flex; flex-direction: column; justify-content: center; }
   .truck-band { height: 380px; }
+  /* The sticky pin-and-fold choreography (hero pins while the next section
+     slides under it, Our Barrel hands off to the truck photo, packages/
+     commercial pin over their reviews, the thank-you band folds over the
+     game) is a mobile scroll-storytelling effect built for a screen where
+     you can only see one section at a time. On desktop there's enough room
+     to see far more of the page at once, and the pins mostly just produced
+     empty space or (per the calendar.html zoom bug) subtle layout bugs.
+     Letting everything scroll by normally instead. */
+  .hero { position: relative; top: auto; }
 }
 .hero-slide {
   position: absolute; inset: 0;
@@ -389,6 +402,9 @@ body.game-pinned .footer { position: relative; z-index: 60; }
   top: var(--navH, 76px);
   z-index: 50;
   background: var(--cream);
+}
+@media (min-width: 900px) {
+  .game-teaser-band { position: static; }
 }
 /* The game takes over the page when it's open — drop the pin so the band can't
    sit on top of the game canvas.
@@ -561,6 +577,9 @@ body.game-open .game-teaser-band { position: relative; top: auto; }
   background: var(--cream); padding: 0 0 28px;
 }
 body.game-open .barrel-pin { position: static; }
+@media (min-width: 900px) {
+  .barrel-pin { position: static; }
+}
 .barrel-row {
   display: flex; gap: 16px; overflow-x: auto; padding: 4px 4px 10px;
   scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
@@ -645,6 +664,9 @@ body.game-open .barrel-pin { position: static; }
   z-index: 40;
   background: var(--cream);
   padding: 14px 20px 18px;
+}
+@media (min-width: 900px) {
+  .pkg-pin, .comm-pin { position: static; }
 }
 @keyframes pkgMiniBounce {
   0%   { transform: scale(1); }
@@ -797,13 +819,16 @@ body.game-open .barrel-pin { position: static; }
 .footer-nav a:hover { color: rgba(255,255,255,0.85); }
 .footer-copy { font-size: 11px; color: rgba(255,255,255,0.25); }
 
-/* On a tall viewport (most laptops/desktops) the thank-you band and footer's
-   mobile-tuned height run out before the fold over .game-teaser-band
-   finishes, leaving a sliver of it peeking out at the very bottom. Padding
-   can't track viewport height 1:1 without becoming absurd, so this just adds
-   enough fixed slack back for the common laptop range instead of chasing
-   every possible screen size. */
-@media (min-height: 850px) {
+/* On a tall-but-still-narrow viewport (a tablet in portrait, say) the
+   thank-you band and footer's mobile-tuned height run out before the fold
+   over .game-teaser-band finishes, leaving a sliver of it peeking out at the
+   very bottom. Padding can't track viewport height 1:1 without becoming
+   absurd, so this just adds enough fixed slack back for that range instead
+   of chasing every possible screen size. Capped at max-width:899px because
+   >=900px is desktop, where .game-teaser-band isn't pinned at all any more
+   (see the unpin media query above) -- there's no fold left to complete,
+   and this padding would just be a big dead gap before the footer. */
+@media (min-height: 850px) and (max-width: 899px) {
   .thanks-band { padding-bottom: 340px; }
   .footer { padding-bottom: 150px; }
 }

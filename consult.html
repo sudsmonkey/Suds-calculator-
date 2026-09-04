@@ -341,6 +341,36 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); -webkit-fon
 .book-btn { display: block; width: 100%; padding: 16px; border-radius: 50px; border: none; background: var(--orange); color: #fff; font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 900; cursor: pointer; margin-top: 20px; transition: opacity 0.15s; }
 .book-btn:hover { opacity: 0.88; }
 .book-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* .q-section breaks out to full viewport width so its background/divider run
+   edge to edge, same as the hero photo band -- but on a wide desktop screen
+   the actual content (already a 440px bordered card, same language as
+   calendar.html's .calendar-card) just sat centered as a small island in a
+   sea of white. Widened the cards and bumped the heading up to match the
+   proportions of the full-width photo above them. */
+@media (min-width: 900px) {
+  .q-section { display: flex; flex-direction: column; align-items: center; padding: 56px 20px 64px; }
+  .q-head { font-size: 28px; }
+  .q-head, .q-sub { max-width: 640px; width: 100%; }
+  .mc-card, .photo-drop, .photo-thumbs, .cal-wrap, .cal-lock-note {
+    max-width: 640px; width: 100%;
+  }
+  /* .cal-wrap sits outside .q-section (it's its own #cal-embed section), so
+     it never picked up the flex-centering above -- it was only ever
+     narrow enough on mobile that its left-alignment didn't read as a bug. */
+  .cal-wrap { margin: 0 auto; }
+  .mc-label { font-size: 16px; }
+  .mc-option { padding: 18px 22px; }
+  /* The hero's pin-while-scrolling is a mobile scroll-storytelling effect --
+     desktop has enough room to just let it scroll by normally. Still needs
+     `position: relative`, not the default static, so .hero-bg/.hero-overlay
+     (position:absolute) stay contained here. Height bumped for the same
+     reason as calculator.html/calendar.html: a fixed height tuned for a
+     narrow, tall mobile screen turns into a razor-thin letterbox on a wide
+     one, since background-size:cover has to zoom in hard to fill that
+     width. */
+  .hero { position: relative; top: auto; height: 340px; }
+}
 </style>
 </head>
 <body>
