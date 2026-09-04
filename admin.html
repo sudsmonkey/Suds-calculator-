@@ -51,7 +51,7 @@
   body.dark-mode .manual-card .manual-label { color: var(--mid); }
   body.dark-mode .month-nav button:hover { background: #33291F; }
   body.dark-mode .cal-day:hover:not(.disabled):not(.empty) { background: #33291F; }
-  body.dark-mode .cal-day.disabled { color: #55493D; }
+  body.dark-mode .cal-day.past { color: #55493D; }
   body.dark-mode .cal-day.full-booked { color: #6B5D4E; }
   body.dark-mode .slot-btn.booked-customer { border-color: #4A4038; background: #2A2521; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -161,9 +161,12 @@
     border-radius: 50%; font-size: 13px; font-weight: 700;
     cursor: pointer; transition: all 0.15s; color: var(--dark); position: relative;
   }
-  .cal-day:hover:not(.disabled):not(.empty) { background: #FDF0EF; }
-  .cal-day.empty, .cal-day.disabled { cursor: default; }
-  .cal-day.disabled { color: #DDD3C4; }
+  .cal-day:hover:not(.empty) { background: #FDF0EF; }
+  .cal-day.empty { cursor: default; }
+  /* Past days are still clickable -- backdating a job that already happened
+     is the one thing you'd want a past date for here -- just faded so
+     they read as "before today" against the open/full/partial dots. */
+  .cal-day.past { color: #C4B6A4; }
   .cal-day.selected { background: var(--orange) !important; color: #fff; }
   .cal-day.today { border: 2px solid var(--mint); }
   .cal-day.has-block::after {
@@ -861,7 +864,9 @@
       const taken = adminMonthAvailability[dateStr] || 0;
 
       if (isPast) {
-        el.className = 'cal-day disabled';
+        el.className = 'cal-day past';
+        el.title = 'Log a job that already happened on this date';
+        el.onclick = () => adminSelectDate(dateStr);
       } else if (taken >= SLOTS.length) {
         el.className = 'cal-day full-booked';
         el.onclick = () => adminSelectDate(dateStr);
@@ -1226,6 +1231,7 @@
     const row = { date: e.date, time: e.time || null, name: e.name,
                   kind: e.type, amount: e.type === 'job' ? (e.amount || 0) : 0 };
     if (e.endDate) row.end_date = e.endDate;
+    if (e.completed) row.completed = true;
     return row;
   }
 
@@ -1362,7 +1368,15 @@
     if (!date) { status.className = 'status-msg err'; status.textContent = 'Pick a date first.'; return; }
     if (endDate && endDate < date) { status.className = 'status-msg err'; status.textContent = 'The "through" date is before the start date.'; return; }
 
+    // Backdating a job (the calendar allows picking a past date for exactly
+    // this) logs it as already done rather than adding it to Upcoming --
+    // there's nothing to look forward to about a job that already happened.
+    const todayIso = adminToday.toISOString().split('T')[0];
+    const isBackdatedJob = isJob && date < todayIso;
+
     const entry = { type: isJob ? 'job' : 'none', name, date, endDate: endDate || '', time, amount: isJob ? amount : 0 };
+    if (isBackdatedJob) entry.completed = true;
+    let savedRow = null;
 
     if (workMode === 'remote') {
       try {
@@ -1380,12 +1394,19 @@
               '<div style="font-size:11px; color:var(--mid); margin-top:6px;">Run it in Supabase → SQL Editor, then try again.</div>';
             return;
           }
+          if (isBackdatedJob && res.status === 400 && /completed/i.test(bodyText)) {
+            alert('Backdating a job needs one more column. Run this once in Supabase → SQL Editor:\n\nalter table public.blocked_work add column if not exists completed boolean not null default false;');
+            status.className = 'status-msg err';
+            status.textContent = 'Could not save — see the alert above.';
+            return;
+          }
           status.className = 'status-msg err';
           status.textContent = 'Could not save — check the blocked_work RLS policies.';
           return;
         }
         const rows = await res.json();
-        workCache.push(rowToEntry(Array.isArray(rows) ? rows[0] : rows));
+        savedRow = Array.isArray(rows) ? rows[0] : rows;
+        workCache.push(rowToEntry(savedRow));
       } catch(e) {
         status.className = 'status-msg err';
         status.textContent = 'Network error: ' + e.message;
@@ -1407,7 +1428,12 @@
     status.textContent = 'Added.';
     renderWorkList();
 
-    if (endDate && endDate !== date) {
+    if (isBackdatedJob && savedRow && savedRow.completed) {
+      promptBackdatedCadence(savedRow, status);
+      return;
+    }
+
+    if (!isBackdatedJob && endDate && endDate !== date) {
       status.textContent = 'Added. Blocking ' + rangeDays(date, endDate).length + ' days…';
       const { blocked, failed } = await blockDaysSlots(rangeDays(date, endDate));
       status.className = failed ? 'status-msg err' : 'status-msg ok';
@@ -1415,6 +1441,91 @@
         ' across the range' + (failed ? ' · ' + failed + ' failed' : '') + '.';
       renderAdminCal();
       if (adminSelectedDate) renderSlots(adminSelectedDate);
+    }
+  }
+
+  // Shown in place of the plain "Added." status once a backdated job saves.
+  // Built with real closures (not inline onclick strings) since the row has
+  // several fields to carry forward -- easier and safer than serializing an
+  // object into HTML attributes.
+  function promptBackdatedCadence(row, statusEl) {
+    statusEl.className = 'status-msg ok';
+    statusEl.innerHTML = '';
+    const msg = document.createElement('div');
+    msg.textContent = 'Logged as completed since it’s already past. Set up the next occurrence?';
+    const btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;';
+    const makeBtn = (label, cadence) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn btn-secondary'; b.textContent = label;
+      b.onclick = () => scheduleNextManualOccurrence(row, cadence, statusEl);
+      return b;
+    };
+    btnRow.appendChild(makeBtn('Just this one', null));
+    btnRow.appendChild(makeBtn('Quarterly', 'quarterly'));
+    btnRow.appendChild(makeBtn('Semi-annual', 'semiannual'));
+    btnRow.appendChild(makeBtn('Yearly', 'yearly'));
+    statusEl.appendChild(msg);
+    statusEl.appendChild(btnRow);
+  }
+
+  // A backdated job can be arbitrarily old (this is for logging jobs you
+  // forgot to enter, not just yesterday's), so a single +N-months step
+  // (fine for the normal same-day Mark Complete flow) isn't enough -- this
+  // keeps stepping until the date actually lands in the future, and steps
+  // end_date the same number of times so a multi-day span keeps its length.
+  async function scheduleNextManualOccurrence(row, cadence, statusEl) {
+    if (!cadence) { statusEl.textContent = 'Added.'; return; }
+    statusEl.textContent = 'Scheduling next occurrence…';
+    const months = CADENCE_MONTHS[cadence] || 6;
+    const todayIso = adminToday.toISOString().split('T')[0];
+    let nextDate = row.date, steps = 0;
+    while (nextDate <= todayIso) { nextDate = addMonthsIso(nextDate, months); steps++; }
+    let nextEndDate = row.end_date || '';
+    for (let i = 0; i < steps; i++) { if (nextEndDate) nextEndDate = addMonthsIso(nextEndDate, months); }
+
+    const nextRow = { date: nextDate, time: row.time || null, name: row.name, kind: row.kind,
+                       amount: row.amount || 0, completed: false, tentative: true };
+    if (nextEndDate) nextRow.end_date = nextEndDate;
+
+    try {
+      let res = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE, {
+        method: 'POST',
+        headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+        body: JSON.stringify(nextRow)
+      });
+      if (!res.ok) {
+        const bodyText = await res.text();
+        if (res.status === 400 && /tentative/i.test(bodyText)) {
+          delete nextRow.tentative;
+          res = await fetch(SUPABASE_URL + '/rest/v1/' + WORK_TABLE, {
+            method: 'POST',
+            headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+            body: JSON.stringify(nextRow)
+          });
+          if (res.ok) {
+            const rows = await res.json();
+            workCache.push(rowToEntry(Array.isArray(rows) ? rows[0] : rows));
+            renderWorkList();
+            renderAdminCal();
+            statusEl.className = 'status-msg ok';
+            statusEl.textContent = 'Next job scheduled for ' + nextDate + '. To show it as "penciled in" until confirmed, run this once in Supabase → SQL Editor:\n\nalter table public.blocked_work add column if not exists tentative boolean not null default false;';
+            return;
+          }
+        }
+        statusEl.className = 'status-msg err';
+        statusEl.textContent = 'Could not schedule the next occurrence — check the blocked_work RLS policies.';
+        return;
+      }
+      const rows = await res.json();
+      workCache.push(rowToEntry(Array.isArray(rows) ? rows[0] : rows));
+      renderWorkList();
+      renderAdminCal();
+      statusEl.className = 'status-msg ok';
+      statusEl.textContent = 'Added, and scheduled the next one for ' + nextDate + '.';
+    } catch(e) {
+      statusEl.className = 'status-msg err';
+      statusEl.textContent = 'Network error scheduling the next occurrence.';
     }
   }
 
