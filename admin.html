@@ -1748,6 +1748,7 @@
         <button type="button" class="link-btn" onclick="finishMarkCompleteManual(this,'none')">Just this one</button>
         <button type="button" class="link-btn link-btn-mint" onclick="finishMarkCompleteManual(this,'quarterly')">+ Quarterly</button>
         <button type="button" class="link-btn link-btn-mint" onclick="finishMarkCompleteManual(this,'semiannual')">+ Semi-annual</button>
+        <button type="button" class="link-btn link-btn-mint" onclick="finishMarkCompleteManual(this,'yearly')">+ Yearly</button>
         <button type="button" class="link-btn" onclick="cancelMarkCompleteManual(this)" title="Cancel">✕</button>
       </div>
     `;
@@ -1783,7 +1784,7 @@
       const original = Array.isArray(rows) ? rows[0] : rows;
 
       if (cadence !== 'none' && original) {
-        const months = cadence === 'quarterly' ? 3 : 6;
+        const months = CADENCE_MONTHS[cadence] || 6;
         const nextRow = Object.assign({}, original);
         delete nextRow.id;
         delete nextRow.created_at;
@@ -2086,6 +2087,11 @@
     return wrap;
   }
 
+  // Shared by finishMarkComplete/finishMarkCompleteManual's recurring-cadence
+  // buttons. Semi-annual is the fallback for any unrecognized cadence string
+  // (there isn't one today, but matches the ternary this replaced).
+  const CADENCE_MONTHS = { quarterly: 3, semiannual: 6, yearly: 12 };
+
   // Same date-of-month, same time, N months out. JS Date() normalises month
   // overflow on its own (month 13 -> January next year), so no manual
   // year-rollover math is needed.
@@ -2102,6 +2108,7 @@
         <button type="button" class="link-btn" onclick="finishMarkComplete(this,'none')">Just this one</button>
         <button type="button" class="link-btn link-btn-mint" onclick="finishMarkComplete(this,'quarterly')">+ Quarterly</button>
         <button type="button" class="link-btn link-btn-mint" onclick="finishMarkComplete(this,'semiannual')">+ Semi-annual</button>
+        <button type="button" class="link-btn link-btn-mint" onclick="finishMarkComplete(this,'yearly')">+ Yearly</button>
         <button type="button" class="link-btn" onclick="cancelMarkComplete(this)" title="Cancel">✕</button>
       </div>
     `;
@@ -2132,7 +2139,7 @@
       const original = Array.isArray(rows) ? rows[0] : rows;
 
       if (cadence !== 'none' && original) {
-        const months = cadence === 'quarterly' ? 3 : 6;
+        const months = CADENCE_MONTHS[cadence] || 6;
         const nextRow = Object.assign({}, original);
         delete nextRow.id;
         delete nextRow.created_at;
