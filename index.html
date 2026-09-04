@@ -346,6 +346,15 @@ body.game-pinned .footer { position: relative; z-index: 60; }
   -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0);
   will-change: transform;
 }
+/* A fixed height that reads fine on a narrow, tall mobile viewport turns into
+   a razor-thin letterbox on a wide desktop one -- `cover` has to zoom the
+   photo in hard to fill that width, so most of the shot gets cropped away.
+   Taller bands on wider screens keep the aspect ratio close enough to what
+   the photos were actually shot at. */
+@media (min-width: 900px) {
+  .hero { height: 420px; display: flex; flex-direction: column; justify-content: center; }
+  .truck-band { height: 380px; }
+}
 .hero-slide {
   position: absolute; inset: 0;
   background-size: cover;

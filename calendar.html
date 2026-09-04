@@ -185,6 +185,12 @@
 
   @media (min-width: 900px) {
     body { zoom: 0.95; }
+    /* A fixed height that reads fine on a narrow, tall mobile viewport turns
+       into a razor-thin letterbox on a wide desktop one -- `cover` has to
+       zoom the photo in hard to fill that width, so most of the shot gets
+       cropped away. syncHero() reads .header's real rendered height for the
+       spacer, so it adapts on its own. */
+    .header { height: 300px; }
     .content { max-width: 1200px; padding: 28px 32px 60px; }
     .month-nav { padding: 20px 24px 14px; }
     .month-name { font-size: 20px; }
@@ -762,9 +768,17 @@
     var hdr = document.querySelector('.header');
     var spacer = document.getElementById('heroSpacer');
     if (!nav || !hdr || !spacer) return;
-    var navH = nav.getBoundingClientRect().height;
+    // getBoundingClientRect() returns already-zoomed screen pixels, but the
+    // values this writes back (hdr's `top`, spacer's `height`) live inside
+    // the same zoomed body and get scaled by it again on render. Divide out
+    // the zoom factor first so the values land where they were actually
+    // measured instead of compounding -- this only bites once .header is
+    // tall enough (or the zoom notable enough) for a few percent to become a
+    // visible gap between the header and the content below it.
+    var zoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
+    var navH = nav.getBoundingClientRect().height / zoom;
     hdr.style.top = navH + 'px';
-    spacer.style.height = (navH + hdr.getBoundingClientRect().height) + 'px';
+    spacer.style.height = (navH + hdr.getBoundingClientRect().height / zoom) + 'px';
   }
   document.fonts.ready.then(syncHero);
   window.addEventListener('load', syncHero);

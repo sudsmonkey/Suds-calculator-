@@ -152,6 +152,15 @@
     justify-content: center;
     text-align: center;
   }
+  /* A fixed height that reads fine on a narrow, tall mobile viewport turns
+     into a razor-thin letterbox on a wide desktop one -- `cover` has to zoom
+     the photo in hard to fill that width, so most of the shot gets cropped
+     away. A taller band on wider screens keeps the aspect ratio close to
+     what the photo was actually shot at. advanceTo() reads .hero's real
+     rendered height at scroll time, so it adapts on its own. */
+  @media (min-width: 900px) {
+    .hero { height: 340px; }
+  }
   .hero-bg {
     position: absolute; inset: 0;
     background: url('web/img-res-tree.jpg') center 45%/cover no-repeat;
