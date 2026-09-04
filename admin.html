@@ -813,12 +813,8 @@
     const last = new Date(year, month+1, 0).getDate();
     const to   = year + '-' + pad(month+1) + '-' + pad(last);
     try {
-      // Completed jobs are excluded from the taken count -- once a job is
-      // marked done it should free that slot back up on this calendar, not
-      // keep reading as booked forever. The row itself is untouched; this
-      // only changes what counts toward "taken" here.
       const [bRes, blRes] = await Promise.all([
-        fetch(SUPABASE_URL + '/rest/v1/bookings?select=date_iso&completed=eq.false&date_iso=gte.' + from + '&date_iso=lte.' + to, { headers: sbHeaders() }),
+        fetch(SUPABASE_URL + '/rest/v1/bookings?select=date_iso&date_iso=gte.' + from + '&date_iso=lte.' + to, { headers: sbHeaders() }),
         fetch(SUPABASE_URL + '/rest/v1/blocked_slots?select=date&date=gte.' + from + '&date=lte.' + to, { headers: sbHeaders() })
       ]);
       const booked  = bRes.ok  ? await bRes.json() : [];
