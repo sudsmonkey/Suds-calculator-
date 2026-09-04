@@ -788,8 +788,22 @@ body.game-open .barrel-pin { position: static; }
 .footer-nav a:hover { color: rgba(255,255,255,0.85); }
 .footer-copy { font-size: 11px; color: rgba(255,255,255,0.25); }
 
+/* On a tall viewport (most laptops/desktops) the thank-you band and footer's
+   mobile-tuned height run out before the fold over .game-teaser-band
+   finishes, leaving a sliver of it peeking out at the very bottom. Padding
+   can't track viewport height 1:1 without becoming absurd, so this just adds
+   enough fixed slack back for the common laptop range instead of chasing
+   every possible screen size. */
+@media (min-height: 850px) {
+  .thanks-band { padding-bottom: 340px; }
+  .footer { padding-bottom: 150px; }
+}
+
 @media (min-width: 480px) {
   .services-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 900px) {
+  .testi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; align-items: start; }
 }
 </style>
 </head>

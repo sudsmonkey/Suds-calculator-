@@ -630,6 +630,18 @@
     animation: wizSlideInLeft 0.65s cubic-bezier(0.45,0,0.1,1) both;
   }
 @media (min-width: 900px) {
+  /* .q-section breaks out to full viewport width on purpose (so its
+     background/divider run edge to edge, same as the hero photo bands), but
+     its actual content never got a matching desktop treatment -- on a wide
+     screen it just sat pinned to the left edge behind 20px of padding, the
+     rest of the row empty. Centering the content in a flex column here
+     leaves the full-bleed background alone and only re-centers what's
+     inside it, same way body's own flex centering handles everything that
+     doesn't opt out of it. */
+  .q-section { display: flex; flex-direction: column; align-items: center; }
+  .q-section > h2 { max-width: 440px; width: 100%; }
+}
+@media (min-width: 900px) {
   .wiz-bubble {
     position: fixed;
     border-radius: 50%;
