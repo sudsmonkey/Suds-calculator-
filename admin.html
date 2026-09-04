@@ -1462,6 +1462,7 @@
       return b;
     };
     btnRow.appendChild(makeBtn('Just this one', null));
+    btnRow.appendChild(makeBtn('Monthly', 'monthly'));
     btnRow.appendChild(makeBtn('Quarterly', 'quarterly'));
     btnRow.appendChild(makeBtn('Semi-annual', 'semiannual'));
     btnRow.appendChild(makeBtn('Yearly', 'yearly'));
@@ -1857,6 +1858,7 @@
     wrap.innerHTML = `
       <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
         <button type="button" class="link-btn" onclick="finishMarkCompleteManual(this,'none')">Just this one</button>
+        <button type="button" class="link-btn link-btn-mint" onclick="finishMarkCompleteManual(this,'monthly')">+ Monthly</button>
         <button type="button" class="link-btn link-btn-mint" onclick="finishMarkCompleteManual(this,'quarterly')">+ Quarterly</button>
         <button type="button" class="link-btn link-btn-mint" onclick="finishMarkCompleteManual(this,'semiannual')">+ Semi-annual</button>
         <button type="button" class="link-btn link-btn-mint" onclick="finishMarkCompleteManual(this,'yearly')">+ Yearly</button>
@@ -2201,7 +2203,7 @@
   // Shared by finishMarkComplete/finishMarkCompleteManual's recurring-cadence
   // buttons. Semi-annual is the fallback for any unrecognized cadence string
   // (there isn't one today, but matches the ternary this replaced).
-  const CADENCE_MONTHS = { quarterly: 3, semiannual: 6, yearly: 12 };
+  const CADENCE_MONTHS = { monthly: 1, quarterly: 3, semiannual: 6, yearly: 12 };
 
   // Same date-of-month, same time, N months out. JS Date() normalises month
   // overflow on its own (month 13 -> January next year), so no manual
@@ -2217,6 +2219,7 @@
     wrap.innerHTML = `
       <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
         <button type="button" class="link-btn" onclick="finishMarkComplete(this,'none')">Just this one</button>
+        <button type="button" class="link-btn link-btn-mint" onclick="finishMarkComplete(this,'monthly')">+ Monthly</button>
         <button type="button" class="link-btn link-btn-mint" onclick="finishMarkComplete(this,'quarterly')">+ Quarterly</button>
         <button type="button" class="link-btn link-btn-mint" onclick="finishMarkComplete(this,'semiannual')">+ Semi-annual</button>
         <button type="button" class="link-btn link-btn-mint" onclick="finishMarkComplete(this,'yearly')">+ Yearly</button>
