@@ -839,6 +839,82 @@ body.game-open .barrel-pin { position: static; }
 @media (min-width: 900px) {
   .testi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; align-items: start; }
 }
+
+/* ── Desktop layout: two columns instead of one long centered strip ──
+   Centering and widening the single mobile column (the earlier proportion
+   pass) still left a page that reads as "a phone layout stretched wide."
+   A real desktop layout puts genuinely different content side by side
+   instead of one column with more margin around it. This uses CSS Grid on
+   the sections that have two naturally different things to pair (a pitch
+   and its photo strip, two same-shape blurbs, a heading and its 3 steps)
+   rather than reflowing everything, so full-bleed bands (hero, truck photo,
+   thank-you) keep doing what they already do well as rhythm breaks between
+   these wider blocks. Two small non-content wrapper divs
+   (.glass-pair-photo, .glass-pair-text) were added purely as layout hooks
+   for this -- they don't change what's inside them. */
+@media (min-width: 1024px) {
+  :root { --max: 1040px; }
+  .section-heading { font-size: 32px; max-width: 700px; }
+  .section-sub { font-size: 16px; max-width: 640px; }
+  .glass-type { font-size: 42px; text-align: left; }
+  .glass-body { font-size: 16px; line-height: 1.75; }
+  .glass-lead { font-size: 21px; }
+
+  /* How it works: heading/intro stay full width above, the 3 steps become
+     a row instead of a stack -- each one reads as a small card of its own. */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 8px; }
+  .step-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .step-num { width: 44px; height: 44px; min-width: 44px; font-size: 17px; }
+  .step-title { font-size: 17px; }
+  .step-text { font-size: 14px; }
+
+  /* Residential: its own pitch (type+body) and photo strip side by side --
+     this one already has both in the same .glass-section, so it gets its
+     own internal grid rather than needing a wrapper. Matched only by
+     :has(.glass-scroll) so this doesn't touch Commercial/One Time
+     Cleans/Regular Maintenance, whose .glass-section has no gallery. */
+  .glass-section:has(.glass-scroll) {
+    display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; align-items: center;
+  }
+  .glass-section:has(.glass-scroll) .glass-type,
+  .glass-section:has(.glass-scroll) .glass-body { grid-column: 1; }
+  .glass-section:has(.glass-scroll) .glass-scroll { grid-column: 2; grid-row: 1 / -1; margin: 0; min-width: 0; }
+
+  /* Commercial: pitch text and its CTA+photo-strip+reviews zone side by
+     side (.glass-pair-photo, wrapping .glass-section + .comm-zone). The
+     zone's reviews ride along in that same right column, so they drop to
+     one column instead of two -- two cards at half this width would be
+     cramped rather than roomy. */
+  .glass-pair-photo { display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; align-items: start; }
+  /* Without min-width:0, a grid track sizes to fit its content's intrinsic
+     width -- and .comm-zone contains the photo strip's full, un-wrapped
+     row of tiles (thousands of px wide by design, since it's a horizontal
+     scroll/marquee). That was blowing this column out to fit the whole
+     strip instead of the 1fr share it's supposed to get, stretching the
+     entire page horizontally. */
+  .glass-pair-photo > * { min-width: 0; }
+  .glass-pair-photo .glass-scroll { margin: 0; }
+  .glass-pair-photo .testi-grid { grid-template-columns: 1fr; }
+
+  /* One Time Cleans / Regular Maintenance: same shape, no gallery -- just
+     sit them side by side (.glass-pair-text). */
+  .glass-pair-text { display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; }
+
+  /* Our Barrel: a real grid instead of a horizontal scroll strip -- there's
+     room to just show the whole crew at once. */
+  .barrel-row { display: grid; grid-template-columns: repeat(3, 1fr); overflow: visible; gap: 20px; }
+  .barrel-card { flex: none; padding: 26px 16px 22px; }
+  .barrel-photo { width: 80px; height: 80px; }
+  .barrel-name { font-size: 15px; }
+  .barrel-bio { font-size: 12px; }
+
+  /* Package preview row and testimonials get a bit more presence now that
+     they're not squeezed into a 640px column. */
+  .pkg-mini-card { max-width: 190px !important; padding: 26px 18px 22px !important; }
+  .testi-card { padding: 26px; }
+  .testi-quote { font-size: 15px; -webkit-line-clamp: 4; line-clamp: 4; }
+  .testi-name { font-size: 15px; }
+}
 </style>
 </head>
 <body>
@@ -1021,6 +1097,11 @@ body.game-open .barrel-pin { position: static; }
     </div>
     </div><!-- /.pkg-zone -->
 
+    <!-- Wrapping div, desktop-only layout hook: pairs the pitch with its own
+         CTA+gallery side by side at >=1024px (.glass-pair-photo). Doesn't
+         change either child, so nothing that already targets .glass-section
+         or .comm-zone directly needs to know this wrapper exists. -->
+    <div class="glass-pair-photo">
     <div class="glass-section">
       <div class="glass-type">Commercial</div>
       <p class="glass-body"><span class="glass-lead">From small boutiques to large medical facilities,</span> Suds Monkey delivers <span class="glass-em">reliable, consistent service</span> to OKC business owners and managers across the metro and surrounding states. Our trained technicians are skilled at <span class="glass-em">working at height</span> on larger projects and are always mindful of keeping disruption to a minimum for facilities and retail customers alike.</p>
@@ -1082,7 +1163,12 @@ body.game-open .barrel-pin { position: static; }
       </div>
     </div>
     </div><!-- /.comm-zone -->
+    </div><!-- /.glass-pair-photo -->
 
+    <!-- Wrapping div, desktop-only layout hook: these two are the same
+         length/shape and have no gallery of their own, so >=1024px sits
+         them side by side (.glass-pair-text) instead of stacked. -->
+    <div class="glass-pair-text">
     <div class="glass-section">
       <div class="glass-type">One Time Cleans</div>
       <p class="glass-body"><span class="glass-lead">Post-construction, tenant improvements, special occasions -</span> when the glass needs to be right for a moment that matters, Suds Monkey can swing in at just the right time.</p>
@@ -1092,6 +1178,7 @@ body.game-open .barrel-pin { position: static; }
       <div class="glass-type">Regular Maintenance</div>
       <p class="glass-body"><span class="glass-lead">From bi-weekly to annual,</span> we build maintenance programs around how your property is used - and make sure your windows always put your home or business in its best light.</p>
     </div>
+    </div><!-- /.glass-pair-text -->
   </div>
 </div>
 
