@@ -164,12 +164,13 @@
 html { scroll-behavior: smooth; overscroll-behavior-y: none; }
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); -webkit-font-smoothing: antialiased; overscroll-behavior-y: none; }
 
-/* Page opens desaturated and settles into color once JS adds .is-color
-   (after a 1s hold), then does the same thing in reverse once the
-   thank-you band has scrolled up to fully overlay the page, and back
-   again if you scroll back up past it -- see the scroll listener near the
-   bottom of the script. A transition (not a keyframe animation) so JS can
-   toggle it back and forth freely. The header gets the class applied
+/* Page opens desaturated and holds there -- no timer -- until the first
+   scroll, when JS adds .is-color and it settles into color. Same thing in
+   reverse once the thank-you band has scrolled up to fully overlay the
+   page, and back again if you scroll back up past it -- see the scroll
+   listener near the bottom of the script. A transition (not a keyframe
+   animation) so JS can toggle it back and forth freely. The header gets
+   the class applied
    directly (safe -- it has no fixed/absolute descendants of its own)
    rather than being wrapped, because `filter` on an ancestor becomes the
    containing block for `position: fixed` descendants and would unstick
@@ -1858,11 +1859,12 @@ document.addEventListener('click', function(e){
 })();
 
 (function(){
-  // Grayscale-to-color reveal on load, then reversed once the thank-you
-  // band has scrolled up far enough to fully cover the page (its top has
-  // passed under the header), and reversed again if you scroll back up
-  // past that point. One class drives both directions since the CSS side
-  // is a transition, not a one-shot keyframe animation.
+  // Page stays grayscale until the visitor actually scrolls -- no timer --
+  // then fades to color. Reversed once the thank-you band has scrolled up
+  // far enough to fully cover the page (its top has passed under the
+  // header), and reversed again if you scroll back up past that point.
+  // One class drives all of it since the CSS side is a transition, not a
+  // one-shot keyframe animation.
   const reveal = document.getElementById('grayscale-reveal');
   const header = document.querySelector('.site-header');
   if (!reveal || !header || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
@@ -1872,19 +1874,23 @@ document.addEventListener('click', function(e){
     header.classList.toggle('is-color', on);
   }
 
-  setTimeout(function(){ setColor(true); }, 1000);
-
   const thanksBand = document.querySelector('.thanks-band');
-  if (!thanksBand) return;
   let overlaid = false;
   function checkThanksOverlay(){
+    if (!thanksBand) return;
     const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--navH')) || 76;
     const isOverlaid = thanksBand.getBoundingClientRect().top <= navH;
     if (isOverlaid === overlaid) return;
     overlaid = isOverlaid;
     setColor(!overlaid);
   }
-  window.addEventListener('scroll', checkThanksOverlay, { passive: true });
+
+  let started = false;
+  function onScroll(){
+    if (!started) { started = true; setColor(true); }
+    checkThanksOverlay();
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
 })();
 
 // ── Jobs-in-progress / Sports ticker ──────
