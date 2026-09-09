@@ -164,6 +164,18 @@
 html { scroll-behavior: smooth; overscroll-behavior-y: none; }
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); -webkit-font-smoothing: antialiased; overscroll-behavior-y: none; }
 
+/* Page opens desaturated and settles into color. The header gets the same
+   animation applied directly (safe -- it has no fixed/absolute descendants
+   of its own) rather than being wrapped, because `filter` on an ancestor
+   becomes the containing block for `position: fixed` descendants and would
+   unstick the fixed header/ticker/video-modal mid-scroll if they were
+   wrapped inside #grayscale-reveal along with everything else. */
+#grayscale-reveal, .site-header { filter: grayscale(1); animation: colorReveal 3s ease-out 0.3s forwards; }
+@keyframes colorReveal { to { filter: grayscale(0); } }
+@media (prefers-reduced-motion: reduce) {
+  #grayscale-reveal, .site-header { animation: none; filter: none; }
+}
+
 /* ── Header ─────────────────────── */
 .site-header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
@@ -943,6 +955,7 @@ body.game-open .barrel-pin { position: static; }
   </div>
 </header>
 
+<div id="grayscale-reveal">
 <!-- Hero — sticks until the end of .hero-zone (the divider before Residential) -->
 <div class="hero-zone">
 <section class="hero">
@@ -1299,6 +1312,7 @@ body.game-open .barrel-pin { position: static; }
   <div class="footer-copy">© 2025 Suds Monkey. All rights reserved.</div>
 </footer>
 </div><!-- /.truck-zone -->
+</div><!-- /#grayscale-reveal -->
 
 
 <div id="vid-backdrop"></div>
