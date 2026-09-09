@@ -164,16 +164,21 @@
 html { scroll-behavior: smooth; overscroll-behavior-y: none; }
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); -webkit-font-smoothing: antialiased; overscroll-behavior-y: none; }
 
-/* Page opens desaturated and settles into color. The header gets the same
-   animation applied directly (safe -- it has no fixed/absolute descendants
-   of its own) rather than being wrapped, because `filter` on an ancestor
-   becomes the containing block for `position: fixed` descendants and would
-   unstick the fixed header/ticker/video-modal mid-scroll if they were
-   wrapped inside #grayscale-reveal along with everything else. */
-#grayscale-reveal, .site-header { filter: grayscale(1); animation: colorReveal 5s ease-out 1s forwards; }
-@keyframes colorReveal { to { filter: grayscale(0); } }
+/* Page opens desaturated and settles into color once JS adds .is-color
+   (after a 1s hold), then does the same thing in reverse once the
+   thank-you band has scrolled up to fully overlay the page, and back
+   again if you scroll back up past it -- see the scroll listener near the
+   bottom of the script. A transition (not a keyframe animation) so JS can
+   toggle it back and forth freely. The header gets the class applied
+   directly (safe -- it has no fixed/absolute descendants of its own)
+   rather than being wrapped, because `filter` on an ancestor becomes the
+   containing block for `position: fixed` descendants and would unstick
+   the fixed header/ticker/video-modal mid-scroll if they were wrapped
+   inside #grayscale-reveal along with everything else. */
+#grayscale-reveal, .site-header { filter: grayscale(1); transition: filter 5s ease-out; }
+#grayscale-reveal.is-color, .site-header.is-color { filter: grayscale(0); }
 @media (prefers-reduced-motion: reduce) {
-  #grayscale-reveal, .site-header { animation: none; filter: none; }
+  #grayscale-reveal, .site-header { transition: none; filter: none; }
 }
 
 /* ── Header ─────────────────────── */
@@ -1850,6 +1855,36 @@ document.addEventListener('click', function(e){
   window.addEventListener('resize', syncNavHeight);
   window.addEventListener('orientationchange', function(){ setTimeout(syncNavHeight, 200); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncNavHeight);
+})();
+
+(function(){
+  // Grayscale-to-color reveal on load, then reversed once the thank-you
+  // band has scrolled up far enough to fully cover the page (its top has
+  // passed under the header), and reversed again if you scroll back up
+  // past that point. One class drives both directions since the CSS side
+  // is a transition, not a one-shot keyframe animation.
+  const reveal = document.getElementById('grayscale-reveal');
+  const header = document.querySelector('.site-header');
+  if (!reveal || !header || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+
+  function setColor(on){
+    reveal.classList.toggle('is-color', on);
+    header.classList.toggle('is-color', on);
+  }
+
+  setTimeout(function(){ setColor(true); }, 1000);
+
+  const thanksBand = document.querySelector('.thanks-band');
+  if (!thanksBand) return;
+  let overlaid = false;
+  function checkThanksOverlay(){
+    const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--navH')) || 76;
+    const isOverlaid = thanksBand.getBoundingClientRect().top <= navH;
+    if (isOverlaid === overlaid) return;
+    overlaid = isOverlaid;
+    setColor(!overlaid);
+  }
+  window.addEventListener('scroll', checkThanksOverlay, { passive: true });
 })();
 
 // ── Jobs-in-progress / Sports ticker ──────
