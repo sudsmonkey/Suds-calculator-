@@ -170,7 +170,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
    becomes the containing block for `position: fixed` descendants and would
    unstick the fixed header/ticker/video-modal mid-scroll if they were
    wrapped inside #grayscale-reveal along with everything else. */
-#grayscale-reveal, .site-header { filter: grayscale(1); animation: colorReveal 5s ease-out 0.3s forwards; }
+#grayscale-reveal, .site-header { filter: grayscale(1); animation: colorReveal 5s ease-out 1s forwards; }
 @keyframes colorReveal { to { filter: grayscale(0); } }
 @media (prefers-reduced-motion: reduce) {
   #grayscale-reveal, .site-header { animation: none; filter: none; }
