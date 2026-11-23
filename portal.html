@@ -359,8 +359,18 @@
     document.querySelectorAll('[data-expires]').forEach(el => {
       const left = new Date(el.dataset.expires).getTime() - now;
       if (left <= 0) { el.querySelector('b').textContent = '0:00:00'; expired = true; return; }
+      // Offers made after hours pause overnight (8 AM-7 PM clock), so a long
+      // wait reads as "Answer by 9:30 AM" instead of a 14-hour countdown.
+      if (left > 2 * 3600000) {
+        const due = new Date(el.dataset.expires);
+        el.querySelector('b').textContent = due.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' });
+        el.querySelector('span').textContent = 'answer by' + (due.toDateString() === new Date().toDateString() ? '' : ' tomorrow');
+        el.classList.remove('urgent');
+        return;
+      }
       const h = Math.floor(left / 3600000), m = Math.floor(left / 60000) % 60, s = Math.floor(left / 1000) % 60;
       el.querySelector('b').textContent = h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+      el.querySelector('span').textContent = 'left to accept';
       el.classList.toggle('urgent', left < 1800000);   // last 30 min
     });
     if (expired && !tick._reloading) { tick._reloading = true; load().finally(() => { tick._reloading = false; }); }

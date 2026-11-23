@@ -427,7 +427,7 @@
       <h2>We're finding your pro</h2>
       <p>We've sent your three times to our local pros.</p>
       <div class="finding-times" id="findingTimes"></div>
-      <p>You'll hear back within <b>2 hours</b> with who's coming and which time they took.</p>
+      <p>You'll hear back by <b id="findingBy">within 2 hours</b> with who's coming and which time they took.</p>
     </div>
   </div>
 
@@ -694,6 +694,40 @@
   const SAVE_PCT = 0.05;        // discount for days SAVE_DAYS+ out
   const SAVE_DAYS = 10;
   const PICK_LABELS = ['Preferred', 'Alt 1', 'Alt 2'];
+  // Platform hours (Oklahoma time). The pro's 2-hour confirm window only
+  // counts down inside them -- must match _sm_hours_open/_sm_hours_close and
+  // _sm_offer_window in supabase/vendor-portal.sql.
+  const PLATFORM_TZ = 'America/Chicago';
+  const PLATFORM_OPEN = 8 * 60, PLATFORM_CLOSE = 19 * 60, CONFIRM_MINS = 120;
+
+  // Oklahoma wall-clock "now" as minutes since midnight.
+  function platformNowMins() {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: PLATFORM_TZ, hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date());
+    const get = t => Number((parts.find(p => p.type === t) || {}).value || 0);
+    return get('hour') * 60 + get('minute');
+  }
+  // When a booking made now is due, as { day: 0 today / 1 tomorrow..., mins }.
+  function confirmDeadline() {
+    let day = 0, t = platformNowMins(), left = CONFIRM_MINS;
+    for (;;) {
+      if (t < PLATFORM_OPEN) t = PLATFORM_OPEN;
+      if (t >= PLATFORM_CLOSE) { day++; t = PLATFORM_OPEN; continue; }
+      if (t + left <= PLATFORM_CLOSE) return { day: day, mins: t + left };
+      left -= PLATFORM_CLOSE - t; day++; t = PLATFORM_OPEN;
+    }
+  }
+  // A slot is bookable only if the pro's deadline lands before it starts
+  // (e.g. after 5 PM, tomorrow 8 AM is gone).
+  function slotTooSoon(daysOut, slot) {
+    const dl = confirmDeadline();
+    return daysOut < dl.day || (daysOut === dl.day && slotMins(slot) <= dl.mins);
+  }
+  function deadlineText() {
+    const dl = confirmDeadline();
+    const h = Math.floor(dl.mins / 60), m = dl.mins % 60;
+    const clock = ((h + 11) % 12 + 1) + ':' + String(m).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM');
+    return clock + (dl.day === 0 ? ' today' : dl.day === 1 ? ' tomorrow' : '');
+  }
   const DOW_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   let picks = [null, null, null];
@@ -745,7 +779,7 @@
       if (dow === 0 || dow === 6) continue;
       const dateStr = isoOf(d);
       const daysOut = Math.round((d - today) / 86400000);
-      const slots = SLOTS.map(t => ({ time: t, open: !taken.has(dateStr + '|' + t) }));
+      const slots = SLOTS.map(t => ({ time: t, open: !taken.has(dateStr + '|' + t) && (isAdmin || !slotTooSoon(daysOut, t)) }));
       openSlotCount += slots.filter(s => s.open).length;
       pickDays.push(Object.assign({
         dateStr: dateStr,
@@ -982,6 +1016,7 @@
         document.getElementById('findingTimes').innerHTML = chosen.map(function(p, i) {
           return '<div><b>' + PICK_LABELS[i] + '</b><span>' + p.short + ' · ' + shortTime(p.time) + (p.price != null ? ' · $' + p.price : '') + '</span></div>';
         }).join('');
+        document.getElementById('findingBy').textContent = deadlineText();
         const f = document.getElementById('findingPro');
         f.style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -36,7 +36,8 @@ booking's notes.
 
 | Rule | Where |
 |------|-------|
-| 2-hour confirm window | `_sm_offer_window()` in the SQL |
+| 2-hour confirm window, starting when the customer books | `_sm_offer_window()` in the SQL, `CONFIRM_MINS` in `calendar.html` |
+| Platform hours 8 AM to 7 PM Oklahoma time (the window only counts down inside them) | `_sm_hours_open()` / `_sm_hours_close()` / `_sm_tz()` in the SQL, `PLATFORM_OPEN` / `PLATFORM_CLOSE` in `calendar.html`. Keep the two in sync. |
 | 3-day payout hold | `_sm_payout_hold()` in the SQL |
 | Pro keeps 90% of the rush fee | `_sm_rush_pro_share()` in the SQL |
 | Pro's share of the job price | `contractors.payout_rate`, one per pro |
@@ -50,11 +51,17 @@ booking's notes.
 - Only the preferred time blocks availability until a pro accepts. With one
   pro, a backup time can be taken by someone else in the meantime; accepting it
   then fails with "That time was just taken".
-- If no pro accepts within 2 hours, or every pro declines, the booking's
+- Each offer's deadline (`job_offers.expires_at`) is set when the customer
+  books: 2 hours, counting only 8 AM to 7 PM. For example, a 3 PM booking is
+  due at 5 PM, a 6:30 PM booking at 9:30 AM, and an 11 PM booking at 10 AM. The
+  customer's screen and email give the exact time. Overnight, the portal shows
+  "Answer by 9:30 AM" instead of a long countdown.
+- If no pro accepts by the deadline, or every pro declines, the booking's
   `status` becomes `no_pro` so you can follow up. `admin.html` doesn't show this
   yet.
-- Same-day bookings are gone from the residential flow; the list starts
-  tomorrow. With the 2-hour window, same-day 1 PM could work if wanted.
+- No same-day jobs: the list starts tomorrow, and tomorrow is the Rush day.
+  A slot is hidden if the pro's deadline would land after it starts, so after
+  5 PM tomorrow's 8 AM disappears and tomorrow's 1 PM stays.
 - Pros see the customer's phone and last name only after they accept.
 
 ## Not built yet

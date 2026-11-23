@@ -83,7 +83,21 @@ function pickRows(b: Record<string, unknown>) {
 // New residential bookings from calendar.html's pick-three flow are offered
 // to the pros first (supabase/vendor-portal.sql), so the customer hears
 // "we're finding your pro", not "you're booked".
+// "9:30 AM tomorrow" style text for an offer deadline, in Oklahoma time.
+function deadlineText(iso: unknown) {
+  const d = new Date(String(iso ?? ""));
+  if (isNaN(d.getTime())) return "";
+  const tz = "America/Chicago";
+  const clock = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: tz });
+  const day = (x: Date) => x.toLocaleDateString("en-CA", { timeZone: tz });
+  const tomorrow = new Date(Date.now() + 86400000);
+  if (day(d) === day(new Date())) return `${clock} today`;
+  if (day(d) === day(tomorrow)) return `${clock} tomorrow`;
+  return `${clock} ${d.toLocaleDateString("en-US", { weekday: "long", timeZone: tz })}`;
+}
+
 function pendingCustomerEmail(b: Record<string, unknown>) {
+  const by = deadlineText(b._deadline);
   const table = `<table style="border-collapse:collapse;width:100%;">
     ${pickRows(b)}
     ${row("Package", b.package)}
@@ -94,7 +108,7 @@ function pendingCustomerEmail(b: Record<string, unknown>) {
     subject: "We're finding your Suds Monkey pro",
     html: wrapEmail(
       "We're finding your pro",
-      `<p style="font-size:14px;color:#3d3530;">Thanks for booking! We've sent your three times to our local pros. You'll hear back within 2 hours with who's coming and which time they took.</p>${table}<p style="font-size:14px;color:#3d3530;">Questions? Call or text us at ${PHONE_DISPLAY}.</p>`,
+      `<p style="font-size:14px;color:#3d3530;">Thanks for booking! We've sent your three times to our local pros. You'll hear back ${by ? `by ${escapeHtml(by)}` : "within 2 hours (our pros confirm between 8 AM and 7 PM)"} with who's coming and which time they took.</p>${table}<p style="font-size:14px;color:#3d3530;">Questions? Call or text us at ${PHONE_DISPLAY}.</p>`,
     ),
   };
 }
@@ -255,6 +269,18 @@ Deno.serve(async (req) => {
   }
 
   const booking = matches[0];
+  if (booking.status === "pending") {
+    // The offer deadline counts only platform hours (8 AM-7 PM), so tell the
+    // customer the actual time rather than "2 hours".
+    const { data: offer } = await supabase
+      .from("job_offers")
+      .select("expires_at")
+      .eq("booking_id", booking.id)
+      .order("expires_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    booking._deadline = offer?.expires_at ?? null;
+  }
   const cust = customerEmail(booking);
   const co = companyEmail(booking);
 

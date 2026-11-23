@@ -77,7 +77,7 @@ begin
       contractor_id    uuid not null references public.contractors(id) on delete cascade,
       status           text not null default 'offered'
                        check (status in ('offered','accepted','declined','expired','taken')),
-      offered_at       timestamptz not null default now(),   -- drives the 2-hour confirm window
+      offered_at       timestamptz not null default now(),   -- when the customer booked; see expires_at below
       responded_at     timestamptz,
       accepted_option  int,                                  -- 0 = preferred, 1 = alt 1, 2 = alt 2
       payout           numeric,                              -- set when accepted
@@ -110,6 +110,48 @@ create or replace function public._sm_payout_hold() returns interval
 -- RUSH_PRO_SHARE: share of the rush surcharge the pro gets.
 create or replace function public._sm_rush_pro_share() returns numeric
   language sql immutable as $$ select 0.90::numeric $$;
+-- Platform hours: the confirm window only counts down between these times
+-- (every day, Oklahoma time). A booking at 6:30 PM gets 30 min tonight +
+-- 90 min from 8 AM = due 9:30 AM. calendar.html mirrors these values
+-- (PLATFORM_OPEN / PLATFORM_CLOSE) to hide slots a pro couldn't confirm in time.
+create or replace function public._sm_tz() returns text
+  language sql immutable as $$ select 'America/Chicago'::text $$;
+create or replace function public._sm_hours_open() returns time
+  language sql immutable as $$ select time '08:00' $$;
+create or replace function public._sm_hours_close() returns time
+  language sql immutable as $$ select time '19:00' $$;
+
+-- When an offer made at p_start is due: p_start + the offer window, counting
+-- only platform hours.
+create or replace function public._sm_business_deadline(p_start timestamptz) returns timestamptz
+  language plpgsql stable as $$
+declare
+  t         timestamp := p_start at time zone _sm_tz();   -- local wall-clock
+  remaining interval  := _sm_offer_window();
+  day_open  timestamp;
+  day_close timestamp;
+begin
+  loop
+    day_open  := date_trunc('day', t) + _sm_hours_open();
+    day_close := date_trunc('day', t) + _sm_hours_close();
+    if t < day_open then
+      t := day_open;
+    elsif t >= day_close then
+      t := date_trunc('day', t) + interval '1 day' + _sm_hours_open();
+      continue;
+    end if;
+    if t + remaining <= day_close then
+      return (t + remaining) at time zone _sm_tz();
+    end if;
+    remaining := remaining - (day_close - t);
+    t := date_trunc('day', t) + interval '1 day' + _sm_hours_open();
+  end loop;
+end $$;
+
+-- Each offer's deadline is fixed when it is made (when the customer books).
+alter table public.job_offers add column if not exists expires_at timestamptz;
+alter table public.job_offers alter column expires_at set default public._sm_business_deadline(now());
+update public.job_offers set expires_at = public._sm_business_deadline(offered_at) where expires_at is null;
 
 
 -- ---------------------------------------------------------------------------
@@ -154,7 +196,7 @@ create or replace function public._sm_expire_offers() returns void
 begin
   update job_offers
      set status = 'expired', responded_at = now()
-   where status = 'offered' and offered_at + _sm_offer_window() < now();
+   where status = 'offered' and expires_at < now();
 
   update bookings b
      set status = 'no_pro'
@@ -202,7 +244,7 @@ begin
       o.booking_id,
       o.status,
       o.offered_at,
-      o.offered_at + _sm_offer_window()                    as expires_at,
+      o.expires_at,
       o.accepted_option,
       o.payout,
       o.completed_at,
