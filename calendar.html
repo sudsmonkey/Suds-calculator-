@@ -426,10 +426,10 @@
     </div>
     <div id="findingPro" class="finding" style="display:none;">
       <div class="finding-dots" aria-hidden="true"><i></i><i></i><i></i></div>
-      <h2>We're finding your pro</h2>
-      <p>We've sent your three times to our local pros.</p>
+      <h2>Got it! We're confirming your time</h2>
+      <p>Here are the times you picked:</p>
       <div class="finding-times" id="findingTimes"></div>
-      <p>You'll hear back by <b id="findingBy">within 2 hours</b> with who's coming and which time they took.</p>
+      <p>You'll hear back <b id="findingBy">within 2 hours</b> with your confirmed time.</p>
     </div>
   </div>
 
@@ -733,7 +733,8 @@
     const h = Math.floor(dl.mins / 60), m = dl.mins % 60;
     const clock = ((h + 11) % 12 + 1) + ':' + String(m).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM');
     const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    return clock + (dl.day === 0 ? ' today' : dl.day === 1 ? ' tomorrow' : ' ' + DAYS[dl.dow]);
+    if (dl.day === 0 && dl.mins - platformNow().mins <= CONFIRM_MINS) return 'within 2 hours';
+    return 'by ' + clock + (dl.day === 0 ? ' today' : dl.day === 1 ? ' tomorrow' : ' ' + DAYS[dl.dow]);
   }
   const DOW_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];

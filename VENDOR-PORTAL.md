@@ -9,10 +9,10 @@ Payouts and Stripe come later.
 | File | What it does |
 |------|--------------|
 | `supabase/vendor-portal.sql` | Creates `contractors`, `job_offers` and `network_settings` (the admin key), adds new columns to `bookings`, and sets up the trigger that sends each new booking to approved pros, the `portal_*` and `admin_*` functions, and the `job-photos` and `contractor-docs` buckets. Safe to run more than once. |
-| `calendar.html` | Residential bookings use a scrolling list of days with 8 AM / 1 PM buttons, a pinned "preferred + two backups" header, Rush +$50 for tomorrow, Save 5% for 10+ days out, a price on each day, and a "We're finding your pro" screen. Consult links still use the month grid. |
+| `calendar.html` | Residential bookings use a scrolling list of days with 8 AM / 1 PM buttons, a pinned "preferred + two backups" header, Rush +$50 for the next business day, Save 5% for 10+ days out, a price on each day, and a "Got it! We're confirming your time" screen. Consult links still use the month grid. |
 | `admin.html` → **Pros** tab | Invite a pro (name, phone, email, pay rate) to get their link, with buttons to copy, text or email it. Review each pro's profile, insurance, W-9, workers' comp and signed terms, then Approve or Send back. Pause or reactivate pros, and change a pro's pay rate. The tab shows a badge when someone needs review. |
 | `portal.html` | The pro's phone page. Until a pro is approved it shows onboarding: business info, service area, insurance upload, W-9 upload, workers' comp (certificate, or signed exemption if they have no employees), and the network terms with a checkbox and typed-name signature, then "We're reviewing your info". After approval: Jobs tab: New offers (payout, countdown, address with a map link, the three times; tap one, then Accept) and Upcoming jobs (customer name and phone, Mark complete with after photos). Payouts tab: amounts on the 3-day hold and amounts released. |
-| `supabase/functions/bright-endpoint/index.ts` | New bookings get a "We're finding your pro" email. After a pro accepts, `portal.html` triggers a one-time "Jerry with Clearview took your Tuesday 8 AM" email. |
+| `supabase/functions/bright-endpoint/index.ts` | New bookings get a "Got it! We're confirming your time" email. After a pro accepts, `portal.html` triggers a one-time "Your Suds Monkey pro is set for Tuesday 8 AM" email (set `SHOW_PRO_NAME` to name the pro), and you get a copy saying which pro took it. |
 
 ## Setup (needs a laptop or the Supabase dashboard)
 
@@ -28,8 +28,8 @@ Payouts and Stripe come later.
    the SQL together.
 4. **Invite your first pro** from admin → Pros, and text them the link. They
    finish onboarding on their phone, then you approve them.
-5. **Redeploy the email function** so customers get the "finding your pro" and
-   "pro took your time" emails instead of "You're booked!": Supabase → Edge
+5. **Redeploy the email function** so customers get the "confirming your time" and
+   "your pro is set" emails instead of "You're booked!": Supabase → Edge
    Functions → `bright-endpoint` → paste the new `index.ts` → Deploy.
 
 Until step 1 is done, `calendar.html` still saves bookings. The new columns
@@ -49,6 +49,11 @@ booking's notes.
 | Rush +$50 (next business day), Save 5% at 10+ days | `RUSH_FEE`, `SAVE_PCT`, `SAVE_DAYS` in `calendar.html` |
 
 ## How it behaves
+
+- Customer-facing copy stays neutral about who does the job, per "Network
+  language" in the Vendor Portal Notes doc: say "your Suds Monkey pro", never
+  "our crew", "I", "independent contractor" or "marketplace". Pro-facing
+  pages (`portal.html`, its terms) can be direct.
 
 - The booking's `date_iso` / `time` / `total` start as the customer's preferred
   pick. If the pro accepts a backup time, they switch to that pick. This keeps

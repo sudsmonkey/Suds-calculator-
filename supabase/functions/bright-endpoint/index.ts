@@ -80,22 +80,30 @@ function pickRows(b: Record<string, unknown>) {
     .join("");
 }
 
-// New residential bookings from calendar.html's pick-three flow are offered
-// to the pros first (supabase/vendor-portal.sql), so the customer hears
-// "we're finding your pro", not "you're booked".
-// "9:30 AM tomorrow" style text for an offer deadline, in Oklahoma time.
+// Customer-facing copy stays neutral about who does the job (in-house or a
+// network pro): "your Suds Monkey pro", never "our crew" or "contractor".
+// See "Network language" in the Vendor Portal Notes doc.
+//
+// Set true to name the pro (and their company) in the "you're set" email.
+const SHOW_PRO_NAME = false;
+
+// "within 2 hours" when the deadline really is 2 hours away; otherwise the
+// time (the clock pauses nights and weekends): "by 9:30 AM Monday".
 function deadlineText(iso: unknown) {
   const d = new Date(String(iso ?? ""));
-  if (isNaN(d.getTime())) return "";
+  if (isNaN(d.getTime())) return "within 2 hours";
+  if (d.getTime() - Date.now() <= 2 * 3600000 + 60000) return "within 2 hours";
   const tz = "America/Chicago";
   const clock = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: tz });
   const day = (x: Date) => x.toLocaleDateString("en-CA", { timeZone: tz });
   const tomorrow = new Date(Date.now() + 86400000);
-  if (day(d) === day(new Date())) return `${clock} today`;
-  if (day(d) === day(tomorrow)) return `${clock} tomorrow`;
-  return `${clock} ${d.toLocaleDateString("en-US", { weekday: "long", timeZone: tz })}`;
+  if (day(d) === day(new Date())) return `by ${clock} today`;
+  if (day(d) === day(tomorrow)) return `by ${clock} tomorrow`;
+  return `by ${clock} ${d.toLocaleDateString("en-US", { weekday: "long", timeZone: tz })}`;
 }
 
+// New residential bookings from calendar.html's pick-three flow aren't
+// confirmed until a pro accepts (supabase/vendor-portal.sql).
 function pendingCustomerEmail(b: Record<string, unknown>) {
   const by = deadlineText(b._deadline);
   const table = `<table style="border-collapse:collapse;width:100%;">
@@ -105,30 +113,29 @@ function pendingCustomerEmail(b: Record<string, unknown>) {
     ${row("Notes", b.notes)}
   </table>`;
   return {
-    subject: "We're finding your Suds Monkey pro",
+    subject: "Got it! We're confirming your Suds Monkey time",
     html: wrapEmail(
-      "We're finding your pro",
-      `<p style="font-size:14px;color:#3d3530;">Thanks for booking! We've sent your three times to our local pros. You'll hear back ${by ? `by ${escapeHtml(by)}` : "within 2 hours (our pros confirm between 8 AM and 7 PM)"} with who's coming and which time they took.</p>${table}<p style="font-size:14px;color:#3d3530;">Questions? Call or text us at ${PHONE_DISPLAY}.</p>`,
+      "Got it! We're confirming your time",
+      `<p style="font-size:14px;color:#3d3530;">Thanks for booking! You'll hear back ${escapeHtml(by)} with your confirmed time. Here's what you picked:</p>${table}<p style="font-size:14px;color:#3d3530;">Questions? Call or text us at ${PHONE_DISPLAY}.</p>`,
     ),
   };
 }
 
 function acceptedCustomerEmail(b: Record<string, unknown>, pro: { name?: string; company_name?: string }) {
-  const first = String(pro.name ?? "Your pro").split(" ")[0];
-  const who = pro.company_name ? `${first} with ${pro.company_name}` : first;
-  const when = `${longWeekday(b.date_iso)} ${b.time ?? ""}`.trim();
+  const when = `${longWeekday(b.date_iso)} ${String(b.time ?? "").replace(":00", "")}`.trim();
+  const headline = `Your Suds Monkey pro is set for ${when}`;
   const table = `<table style="border-collapse:collapse;width:100%;">
     ${row("Date", shortDay(b.date_iso))}
     ${row("Time", b.time)}
-    ${row("Pro", pro.company_name ? `${pro.name} (${pro.company_name})` : pro.name)}
+    ${SHOW_PRO_NAME ? row("Your pro", pro.company_name ? `${pro.name} (${pro.company_name})` : pro.name) : ""}
     ${row("Package", b.package)}
     ${row("Total", b.total)}
     ${row("Address", b.address)}
   </table>`;
   return {
-    subject: `${who} took your ${when}`,
+    subject: headline,
     html: wrapEmail(
-      `${who} took your ${when}`,
+      headline,
       `<p style="font-size:14px;color:#3d3530;">You're booked. Here's the summary:</p>${table}<p style="font-size:14px;color:#3d3530;">Questions before then? Call or text us at ${PHONE_DISPLAY}.</p>`,
     ),
   };
@@ -204,7 +211,7 @@ Deno.serve(async (req) => {
   }
 
   // portal.html calls this right after a pro accepts. Sends the customer
-  // "<pro> with <company> took your <day> <time>" -- only for a booking a pro
+  // "Your Suds Monkey pro is set for <day> <time>" -- only for a booking a pro
   // really accepted, and only once (accepted_notified), so a direct POST
   // can't be used to spam.
   if (payload.type === "accepted") {
@@ -238,7 +245,9 @@ Deno.serve(async (req) => {
     }
     const msg = acceptedCustomerEmail(b, pro);
     const ok = b.email ? await sendEmail(b.email, msg.subject, msg.html) : false;
-    await sendEmail(COMPANY_EMAIL, `Pro accepted: ${msg.subject}`, msg.html);
+    const proLabel = pro.company_name ? `${pro.name} (${pro.company_name})` : (pro.name ?? "a pro");
+    await sendEmail(COMPANY_EMAIL, `${proLabel} accepted: ${b.first_name ?? ""} ${b.last_name ?? ""}, ${shortDay(b.date_iso)} ${b.time ?? ""}`.trim(),
+      wrapEmail(`${proLabel} accepted`, `<p style="font-size:14px;color:#3d3530;">The customer was sent:</p>${msg.html}`));
     return new Response(JSON.stringify({ ok: true, customerSent: ok }), {
       status: 200,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
