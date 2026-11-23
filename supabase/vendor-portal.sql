@@ -51,6 +51,10 @@ create table if not exists public.contractors (
   w9_path        text,                   -- contractor-docs/<id>/...
   comp_type      text check (comp_type in ('policy','exempt')),  -- workers' comp: has a policy, or signed exemption (no employees)
   comp_path      text,                   -- contractor-docs/<id>/... certificate or signed exemption
+  -- This pro's share of the job price before any rush fee, 0 to 1 (0.70 = 70%).
+  -- Set when you invite them (they see it in the terms they sign); change it
+  -- from admin.html -> Pros.
+  payout_rate    numeric(4,3) not null default 0.70 check (payout_rate >= 0 and payout_rate <= 1),
   terms_version  text,
   terms_signature text,                  -- the full name they typed
   terms_accepted_at timestamptz,
@@ -61,6 +65,8 @@ create table if not exists public.contractors (
 
 alter table public.contractors add column if not exists comp_type text check (comp_type in ('policy','exempt'));
 alter table public.contractors add column if not exists comp_path text;
+alter table public.contractors add column if not exists payout_rate numeric(4,3) not null default 0.70
+  check (payout_rate >= 0 and payout_rate <= 1);
 
 -- One row. admin_key is what you enter once in admin.html's Pros tab.
 create table if not exists public.network_settings (
@@ -136,16 +142,14 @@ create or replace function public._sm_offer_window() returns interval
   language sql immutable as $$ select interval '2 hours' $$;
 create or replace function public._sm_payout_hold() returns interval
   language sql immutable as $$ select interval '3 days' $$;
--- One pay rate for the whole network: the pro's share of the job price
--- before any rush fee. 0.70 = 70%.  <-- set this to your rate
-create or replace function public._sm_payout_rate() returns numeric
-  language sql immutable as $$ select 0.70::numeric $$;
+drop function if exists public._sm_payout_rate();   -- replaced by contractors.payout_rate (one per pro)
 -- RUSH_PRO_SHARE: share of the rush surcharge the pro gets.
 create or replace function public._sm_rush_pro_share() returns numeric
   language sql immutable as $$ select 0.90::numeric $$;
--- Platform hours: the confirm window only counts down between these times
--- (every day, Oklahoma time). A booking at 6:30 PM gets 30 min tonight +
--- 90 min from 8 AM = due 9:30 AM. calendar.html mirrors these values
+-- Platform hours: the confirm window only counts down between these times,
+-- Monday to Friday, Oklahoma time. A booking at 6:30 PM gets 30 min tonight +
+-- 90 min from 8 AM = due 9:30 AM; a Friday 6:30 PM booking is due Monday
+-- 9:30 AM. calendar.html mirrors these values
 -- (PLATFORM_OPEN / PLATFORM_CLOSE) to hide slots a pro couldn't confirm in time.
 -- Version of the network terms pros agree to in the portal. Bump this when
 -- the wording in portal.html (TERMS_VERSION) changes.
@@ -159,7 +163,7 @@ create or replace function public._sm_hours_close() returns time
   language sql immutable as $$ select time '19:00' $$;
 
 -- When an offer made at p_start is due: p_start + the offer window, counting
--- only platform hours.
+-- only platform hours on weekdays (the clock stops nights and weekends).
 create or replace function public._sm_business_deadline(p_start timestamptz) returns timestamptz
   language plpgsql stable as $$
 declare
@@ -169,6 +173,10 @@ declare
   day_close timestamp;
 begin
   loop
+    if extract(isodow from t) >= 6 then             -- Saturday / Sunday
+      t := date_trunc('day', t) + interval '1 day' + _sm_hours_open();
+      continue;
+    end if;
     day_open  := date_trunc('day', t) + _sm_hours_open();
     day_close := date_trunc('day', t) + _sm_hours_close();
     if t < day_open then
@@ -264,10 +272,11 @@ begin
 end $$;
 
 -- What the pro earns for one of the customer's picks.
-create or replace function public._sm_payout(p_option jsonb) returns numeric
+drop function if exists public._sm_payout(jsonb);
+create or replace function public._sm_payout(p_option jsonb, p_rate numeric) returns numeric
   language sql immutable as $$
   select round(
-    (coalesce((p_option->>'price')::numeric, 0) - coalesce((p_option->>'rush')::numeric, 0)) * _sm_payout_rate()
+    (coalesce((p_option->>'price')::numeric, 0) - coalesce((p_option->>'rush')::numeric, 0)) * p_rate
     + coalesce((p_option->>'rush')::numeric, 0) * _sm_rush_pro_share()
   , 2)
 $$;
@@ -291,7 +300,7 @@ begin
     'has_w9', c.w9_path is not null,
     'comp_type', c.comp_type,
     'has_comp', c.comp_path is not null,
-    'payout_rate', _sm_payout_rate(),
+    'payout_rate', c.payout_rate,
     'rush_share', _sm_rush_pro_share(),
     'terms_version', _sm_terms_version());
 end $$;
@@ -388,7 +397,7 @@ begin
       -- Contact details only once the pro has the job.
       case when o.status = 'accepted' then b.last_name end as last_name,
       case when o.status = 'accepted' then b.phone end     as phone,
-      (select json_agg(opt || jsonb_build_object('payout', _sm_payout(opt)) order by ord)
+      (select json_agg(opt || jsonb_build_object('payout', _sm_payout(opt, c.payout_rate)) order by ord)
          from jsonb_array_elements(b.pick_options) with ordinality as e(opt, ord)) as options,
       coalesce(b.date_iso::text, '') || ' ' || o.offered_at::text as sort_key
     from job_offers o
@@ -432,7 +441,7 @@ begin
     raise exception 'That time was just taken. Pick another of the customer''s times.';
   end if;
 
-  pay := _sm_payout(opt);
+  pay := _sm_payout(opt, c.payout_rate);
 
   update job_offers
      set status = 'accepted', responded_at = now(), accepted_option = p_option, payout = pay
@@ -494,24 +503,38 @@ begin
   perform _sm_admin(p_key);
   return (select coalesce(json_agg(row_to_json(x) order by
              array_position(array['submitted','invited','approved','paused'], x.status), x.created_at desc), '[]'::json)
-          from (select id, name, company_name, phone, email, service_area, status, access_code,
+          from (select id, name, company_name, phone, email, service_area, status, access_code, payout_rate,
                        insurance_path, w9_path, comp_type, comp_path, terms_version, terms_signature, terms_accepted_at,
                        submitted_at, approved_at, created_at,
                        (select count(*) from job_offers o where o.contractor_id = c.id and o.status = 'accepted') as jobs_taken
                   from contractors c) x);
 end $$;
 
-create or replace function public.admin_invite_pro(p_key text, p_name text, p_phone text, p_email text) returns json
+drop function if exists public.admin_invite_pro(text, text, text, text);
+create or replace function public.admin_invite_pro(p_key text, p_name text, p_phone text, p_email text, p_rate numeric) returns json
   language plpgsql security definer set search_path = public as $$
 declare
   c contractors;
 begin
   perform _sm_admin(p_key);
   if coalesce(trim(p_name), '') = '' then raise exception 'Add their name.'; end if;
-  insert into contractors (name, phone, email)
-  values (trim(p_name), nullif(trim(p_phone), ''), nullif(trim(p_email), ''))
+  if p_rate is null or p_rate <= 0 or p_rate > 1 then raise exception 'Set their pay rate (1 to 100%%).'; end if;
+  insert into contractors (name, phone, email, payout_rate)
+  values (trim(p_name), nullif(trim(p_phone), ''), nullif(trim(p_email), ''), p_rate)
   returning * into c;
   return json_build_object('id', c.id, 'access_code', c.access_code);
+end $$;
+
+-- Change a pro's pay rate. Applies to offers they haven't accepted yet;
+-- accepted jobs keep the payout they were accepted at.
+create or replace function public.admin_set_pro_rate(p_key text, p_id uuid, p_rate numeric) returns json
+  language plpgsql security definer set search_path = public as $$
+begin
+  perform _sm_admin(p_key);
+  if p_rate is null or p_rate <= 0 or p_rate > 1 then raise exception 'Pay rate must be 1 to 100%%.'; end if;
+  update contractors set payout_rate = p_rate where id = p_id;
+  if not found then raise exception 'Pro not found.'; end if;
+  return json_build_object('ok', true);
 end $$;
 
 -- approve (from submitted or paused) / pause (from approved).
@@ -572,7 +595,8 @@ grant execute on function public.portal_decline(text, uuid)            to anon;
 grant execute on function public.portal_complete(text, uuid, text[])   to anon;
 grant execute on function public.portal_submit_profile(text, text, text, text, text, text, text, text, text, text, text) to anon;
 grant execute on function public.admin_pros(text)                      to anon;
-grant execute on function public.admin_invite_pro(text, text, text, text) to anon;
+grant execute on function public.admin_invite_pro(text, text, text, text, numeric) to anon;
+grant execute on function public.admin_set_pro_rate(text, uuid, numeric) to anon;
 grant execute on function public.admin_set_pro_status(text, uuid, text) to anon;
 grant execute on function public.admin_delete_pro(text, uuid)          to anon;
 grant execute on function public._sm_doc_upload_ok(text)               to anon;

@@ -737,6 +737,8 @@
         <div class="field-row"><label for="proName">Name</label><input type="text" id="proName" placeholder="Jerry Smith" autocomplete="off"></div>
         <div class="field-row"><label for="proPhone">Phone</label><input type="text" id="proPhone" inputmode="tel" placeholder="(405) 555-0100" autocomplete="off"></div>
         <div class="field-row"><label for="proEmail">Email (optional)</label><input type="text" id="proEmail" inputmode="email" placeholder="jerry@email.com" autocomplete="off"></div>
+        <div class="field-row"><label for="proRate">Pay rate (% of job price, before rush fee)</label><input type="text" id="proRate" inputmode="decimal" value="70" autocomplete="off"></div>
+        <div class="pros-help" style="margin-top:-6px;">They also get 90% of any rush fee. They'll see this rate in the terms they sign.</div>
         <button class="btn btn-primary" style="width:100%;" id="proInviteBtn" onclick="invitePro()">Create invite link</button>
         <div class="status-msg" id="proInviteStatus"></div>
         <div id="proInviteResult"></div>
@@ -922,12 +924,15 @@
     const btn = document.getElementById('proInviteBtn');
     const name = document.getElementById('proName').value.trim();
     if (!name) { st.className = 'status-msg err'; st.textContent = 'Add their name.'; return; }
+    const rate = parseRatePct(document.getElementById('proRate').value);
+    if (rate == null) { st.className = 'status-msg err'; st.textContent = 'Pay rate must be a number from 1 to 100.'; return; }
     btn.disabled = true; st.textContent = '';
     try {
       const r = await prosRpc('admin_invite_pro', {
         p_name: name,
         p_phone: document.getElementById('proPhone').value.trim(),
-        p_email: document.getElementById('proEmail').value.trim()
+        p_email: document.getElementById('proEmail').value.trim(),
+        p_rate: rate
       });
       const p = { id: r.id, access_code: r.access_code, name: name,
                   phone: document.getElementById('proPhone').value.trim(), email: document.getElementById('proEmail').value.trim() };
@@ -940,6 +945,25 @@
     } catch (e) {
       st.className = 'status-msg err'; st.textContent = e.message;
     } finally { btn.disabled = false; }
+  }
+
+  // "70" or "70%" -> 0.7; null if not 1-100.
+  function parseRatePct(v) {
+    const n = parseFloat(String(v || '').replace('%', ''));
+    return isNaN(n) || n < 1 || n > 100 ? null : Math.round(n * 10) / 1000;
+  }
+  const ratePct = r => (Math.round(Number(r) * 1000) / 10) + '%';
+
+  async function changeProRate(id) {
+    const p = prosCache.find(x => x.id === id);
+    if (!p) return;
+    const signed = p.terms_accepted_at ? '\n\nThey signed terms showing ' + ratePct(p.payout_rate) + ' -- let them know about the change.' : '';
+    const v = prompt('New pay rate for ' + p.name + ' (% of job price):' + signed, String(Math.round(Number(p.payout_rate) * 1000) / 10));
+    if (v == null) return;
+    const rate = parseRatePct(v);
+    if (rate == null) { alert('Pay rate must be a number from 1 to 100.'); return; }
+    try { await prosRpc('admin_set_pro_rate', { p_id: id, p_rate: rate }); await loadPros(); }
+    catch (e) { alert(e.message); }
   }
 
   async function copyProLink(id, btn) {
@@ -987,6 +1011,7 @@
       ['Phone', p.phone ? '<a href="tel:' + escHtml(String(p.phone).replace(/[^0-9+]/g, '')) + '">' + escHtml(p.phone) + '</a>' : ''],
       ['Email', p.email ? '<a href="mailto:' + escHtml(p.email) + '">' + escHtml(p.email) + '</a>' : ''],
       ['Area', escHtml(p.service_area || '')],
+      ['Pay rate', ratePct(p.payout_rate) + ' <span style="color:var(--mid);">+ 90% of rush</span> · <a href="#" onclick="changeProRate(\'' + p.id + '\'); return false;">Change</a>'],
       p.status !== 'invited' || p.insurance_path ? ['Insurance', docs(p.insurance_path)] : null,
       p.status !== 'invited' || p.w9_path ? ['W-9', docs(p.w9_path)] : null,
       p.status !== 'invited' || p.comp_path ? ['Workers\' comp',

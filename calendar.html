@@ -696,30 +696,34 @@
   const SAVE_PCT = 0.05;        // discount for days SAVE_DAYS+ out
   const SAVE_DAYS = 10;
   const PICK_LABELS = ['Preferred', 'Alt 1', 'Alt 2'];
-  // Platform hours (Oklahoma time). The pro's 2-hour confirm window only
-  // counts down inside them -- must match _sm_hours_open/_sm_hours_close and
+  // Platform hours (Oklahoma time, Monday-Friday). The pro's 2-hour confirm
+  // window only counts down inside them -- must match _sm_hours_open/_sm_hours_close and
   // _sm_offer_window in supabase/vendor-portal.sql.
   const PLATFORM_TZ = 'America/Chicago';
   const PLATFORM_OPEN = 8 * 60, PLATFORM_CLOSE = 19 * 60, CONFIRM_MINS = 120;
 
-  // Oklahoma wall-clock "now" as minutes since midnight.
-  function platformNowMins() {
-    const parts = new Intl.DateTimeFormat('en-US', { timeZone: PLATFORM_TZ, hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date());
-    const get = t => Number((parts.find(p => p.type === t) || {}).value || 0);
-    return get('hour') * 60 + get('minute');
+  // Oklahoma wall-clock "now": minutes since midnight + day of week (0 = Sun).
+  function platformNow() {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: PLATFORM_TZ, hour: 'numeric', minute: 'numeric', weekday: 'short', hourCycle: 'h23' }).formatToParts(new Date());
+    const get = t => (parts.find(p => p.type === t) || {}).value;
+    return { mins: Number(get('hour')) * 60 + Number(get('minute')), dow: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(get('weekday')) };
   }
-  // When a booking made now is due, as { day: 0 today / 1 tomorrow..., mins }.
+  // When a booking made now is due, as { day: 0 today / 1 tomorrow..., mins, dow }.
+  // The clock only runs 8 AM-7 PM, Monday to Friday.
   function confirmDeadline() {
-    let day = 0, t = platformNowMins(), left = CONFIRM_MINS;
+    const now = platformNow();
+    let day = 0, t = now.mins, left = CONFIRM_MINS;
+    const dow = () => (now.dow + day) % 7;
     for (;;) {
+      if (dow() === 0 || dow() === 6) { day++; t = PLATFORM_OPEN; continue; }
       if (t < PLATFORM_OPEN) t = PLATFORM_OPEN;
       if (t >= PLATFORM_CLOSE) { day++; t = PLATFORM_OPEN; continue; }
-      if (t + left <= PLATFORM_CLOSE) return { day: day, mins: t + left };
+      if (t + left <= PLATFORM_CLOSE) return { day: day, mins: t + left, dow: dow() };
       left -= PLATFORM_CLOSE - t; day++; t = PLATFORM_OPEN;
     }
   }
   // A slot is bookable only if the pro's deadline lands before it starts
-  // (e.g. after 5 PM, tomorrow 8 AM is gone).
+  // (e.g. after 5 PM, tomorrow 8 AM is gone; after Friday 5 PM, Monday 8 AM).
   function slotTooSoon(daysOut, slot) {
     const dl = confirmDeadline();
     return daysOut < dl.day || (daysOut === dl.day && slotMins(slot) <= dl.mins);
@@ -728,7 +732,8 @@
     const dl = confirmDeadline();
     const h = Math.floor(dl.mins / 60), m = dl.mins % 60;
     const clock = ((h + 11) % 12 + 1) + ':' + String(m).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM');
-    return clock + (dl.day === 0 ? ' today' : dl.day === 1 ? ' tomorrow' : '');
+    const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    return clock + (dl.day === 0 ? ' today' : dl.day === 1 ? ' tomorrow' : ' ' + DAYS[dl.dow]);
   }
   const DOW_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];

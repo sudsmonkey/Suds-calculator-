@@ -372,7 +372,7 @@
     return '<h3>Suds Monkey Network terms</h3><ol>' +
       '<li><b>Independent contractor.</b> You run your own business. You choose which jobs to accept, use your own equipment and vehicle, and handle your own taxes. Nothing here makes you an employee of Suds Monkey.</li>' +
       '<li><b>Pay.</b> You earn ' + pct(me.payout_rate) + ' of the job price, plus ' + pct(me.rush_share) + ' of any rush fee. Each offer shows your exact payout before you accept.</li>' +
-      '<li><b>Responding to offers.</b> Offers stay open for 2 hours, counted only between 8 AM and 7 PM. Accept or decline before the timer runs out. Unanswered offers expire.</li>' +
+      '<li><b>Responding to offers.</b> Offers stay open for 2 hours, counted only between 8 AM and 7 PM, Monday to Friday. Accept or decline before the timer runs out. Unanswered offers expire.</li>' +
       '<li><b>Showing up.</b> When you accept a job, you commit to that date and time. If something comes up, call Suds Monkey right away so the customer isn\'t left waiting.</li>' +
       '<li><b>Quality.</b> Work to Suds Monkey standards, treat the customer\'s home with care, and upload after photos when you mark a job complete.</li>' +
       '<li><b>Payment timing.</b> Pay for a job is held for 3 days after you mark it complete, so any customer issue can be resolved first. Then it is released to you.</li>' +
@@ -591,7 +591,11 @@
       if (left > 2 * 3600000) {
         const due = new Date(el.dataset.expires);
         el.querySelector('b').textContent = due.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' });
-        el.querySelector('span').textContent = 'answer by' + (due.toDateString() === new Date().toDateString() ? '' : ' tomorrow');
+        const dayKey = d => d.toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+        const when = dayKey(due) === dayKey(new Date()) ? '' :
+          dayKey(due) === dayKey(new Date(now + 86400000)) ? ' tomorrow' :
+          ' ' + due.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'America/Chicago' });
+        el.querySelector('span').textContent = 'answer by' + when;
         el.classList.remove('urgent');
         return;
       }
