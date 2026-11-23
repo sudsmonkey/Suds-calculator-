@@ -57,7 +57,71 @@ function wrapEmail(heading: string, bodyHtml: string) {
   </div>`;
 }
 
+type PickOption = { date_iso?: string; time?: string; date?: string; price?: number };
+
+// "Tue, Nov 24" from "2026-11-24", without timezone drift.
+function shortDay(iso: unknown) {
+  const [y, m, d] = String(iso ?? "").slice(0, 10).split("-").map(Number);
+  if (!y || !m || !d) return String(iso ?? "");
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+}
+function longWeekday(iso: unknown) {
+  const [y, m, d] = String(iso ?? "").slice(0, 10).split("-").map(Number);
+  if (!y || !m || !d) return "";
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" });
+}
+
+function pickRows(b: Record<string, unknown>) {
+  const opts = (Array.isArray(b.pick_options) ? b.pick_options : []) as PickOption[];
+  const labels = ["Preferred", "Backup 1", "Backup 2"];
+  return opts
+    .map((o, i) => row(labels[i] ?? `Option ${i + 1}`, `${shortDay(o.date_iso)} at ${o.time ?? ""}${o.price != null ? ` ($${o.price})` : ""}`))
+    .join("");
+}
+
+// New residential bookings from calendar.html's pick-three flow are offered
+// to the pros first (supabase/vendor-portal.sql), so the customer hears
+// "we're finding your pro", not "you're booked".
+function pendingCustomerEmail(b: Record<string, unknown>) {
+  const table = `<table style="border-collapse:collapse;width:100%;">
+    ${pickRows(b)}
+    ${row("Package", b.package)}
+    ${row("Address", b.address)}
+    ${row("Notes", b.notes)}
+  </table>`;
+  return {
+    subject: "We're finding your Suds Monkey pro",
+    html: wrapEmail(
+      "We're finding your pro",
+      `<p style="font-size:14px;color:#3d3530;">Thanks for booking! We've sent your three times to our local pros. You'll hear back within 12 hours with who's coming and which time they took.</p>${table}<p style="font-size:14px;color:#3d3530;">Questions? Call or text us at ${PHONE_DISPLAY}.</p>`,
+    ),
+  };
+}
+
+function acceptedCustomerEmail(b: Record<string, unknown>, pro: { name?: string; company_name?: string }) {
+  const first = String(pro.name ?? "Your pro").split(" ")[0];
+  const who = pro.company_name ? `${first} with ${pro.company_name}` : first;
+  const when = `${longWeekday(b.date_iso)} ${b.time ?? ""}`.trim();
+  const table = `<table style="border-collapse:collapse;width:100%;">
+    ${row("Date", shortDay(b.date_iso))}
+    ${row("Time", b.time)}
+    ${row("Pro", pro.company_name ? `${pro.name} (${pro.company_name})` : pro.name)}
+    ${row("Package", b.package)}
+    ${row("Total", b.total)}
+    ${row("Address", b.address)}
+  </table>`;
+  return {
+    subject: `${who} took your ${when}`,
+    html: wrapEmail(
+      `${who} took your ${when}`,
+      `<p style="font-size:14px;color:#3d3530;">You're booked. Here's the summary:</p>${table}<p style="font-size:14px;color:#3d3530;">Questions before then? Call or text us at ${PHONE_DISPLAY}.</p>`,
+    ),
+  };
+}
+
 function customerEmail(b: Record<string, unknown>) {
+  if (b.status === "pending") return pendingCustomerEmail(b);
   const commercial = isCommercial(b.package as string);
   const heading = commercial ? "Your consultation is confirmed" : "You're booked!";
   const intro = commercial
@@ -89,9 +153,10 @@ function companyEmail(b: Record<string, unknown>) {
     ${!commercial ? row("Total", b.total) : ""}
     ${row("Address", b.address)}
     ${row("Notes", b.notes)}
+    ${b.status === "pending" ? pickRows(b) : ""}
   </table>`;
   return {
-    subject: `New ${commercial ? "consult request" : "booking"}: ${b.first_name ?? ""} ${b.last_name ?? ""}`.trim(),
+    subject: `New ${commercial ? "consult request" : b.status === "pending" ? "booking (offered to pros)" : "booking"}: ${b.first_name ?? ""} ${b.last_name ?? ""}`.trim(),
     html: wrapEmail(`New ${commercial ? "consult request" : "booking"}`, table),
   };
 }
@@ -122,6 +187,48 @@ Deno.serve(async (req) => {
     payload = await req.json();
   } catch {
     return new Response(JSON.stringify({ error: "invalid JSON" }), { status: 400, headers: CORS_HEADERS });
+  }
+
+  // portal.html calls this right after a pro accepts. Sends the customer
+  // "<pro> with <company> took your <day> <time>" -- only for a booking a pro
+  // really accepted, and only once (accepted_notified), so a direct POST
+  // can't be used to spam.
+  if (payload.type === "accepted") {
+    const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const { data: b, error: bErr } = await sb
+      .from("bookings")
+      .select("*")
+      .eq("id", payload.booking_id as string)
+      .eq("status", "accepted")
+      .eq("accepted_notified", false)
+      .maybeSingle();
+    if (bErr || !b) {
+      return new Response(JSON.stringify({ error: "nothing to send" }), { status: 404, headers: CORS_HEADERS });
+    }
+    const { data: offer } = await sb
+      .from("job_offers")
+      .select("contractors(name, company_name)")
+      .eq("booking_id", b.id)
+      .eq("status", "accepted")
+      .maybeSingle();
+    const pro = ((offer as { contractors?: { name?: string; company_name?: string } } | null)?.contractors) ?? {};
+    // Claim the send first so two quick calls can't both email.
+    const { data: claimed } = await sb
+      .from("bookings")
+      .update({ accepted_notified: true })
+      .eq("id", b.id)
+      .eq("accepted_notified", false)
+      .select("id");
+    if (!claimed || claimed.length === 0) {
+      return new Response(JSON.stringify({ error: "already sent" }), { status: 409, headers: CORS_HEADERS });
+    }
+    const msg = acceptedCustomerEmail(b, pro);
+    const ok = b.email ? await sendEmail(b.email, msg.subject, msg.html) : false;
+    await sendEmail(COMPANY_EMAIL, `Pro accepted: ${msg.subject}`, msg.html);
+    return new Response(JSON.stringify({ ok: true, customerSent: ok }), {
+      status: 200,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
   }
 
   const { email, date_iso, time, package: pkg } = payload as Record<string, string>;

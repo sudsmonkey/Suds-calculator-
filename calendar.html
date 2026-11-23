@@ -166,6 +166,55 @@
   .book-btn:hover { opacity: 0.88; }
   .book-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+  /* Pick-three day list (residential). Consult links keep the month grid. */
+  #pickSection { display: none; }
+  body.pick-mode #pickSection { display: block; }
+  body.pick-mode #calSection, body.pick-mode #timeSection { display: none; }
+  .pick-head {
+    position: sticky; top: var(--navH, 76px); z-index: 5;
+    background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius);
+    box-shadow: 0 4px 18px rgba(166,56,46,0.12); padding: 12px 12px 10px; margin-bottom: 10px;
+  }
+  .pick-head-title { font-size: 14px; font-weight: 900; color: var(--dark); text-align: center; margin-bottom: 8px; }
+  .pick-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .pick-chip { border: 1.5px dashed #DDD3C4; border-radius: 12px; padding: 6px 4px; text-align: center; min-height: 48px; display: flex; flex-direction: column; justify-content: center; cursor: default; }
+  .pick-chip .pc-label { font-size: 10px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mid); }
+  .pick-chip .pc-val { font-size: 12px; font-weight: 800; color: #C8B8AA; margin-top: 2px; line-height: 1.2; }
+  .pick-chip.filled { border-style: solid; border-color: var(--orange); background: #FDF0EF; cursor: pointer; }
+  .pick-chip.filled .pc-val { color: var(--dark); }
+  .pick-chip.filled.pref { background: var(--orange); }
+  .pick-chip.filled.pref .pc-label, .pick-chip.filled.pref .pc-val { color: #fff; }
+  .pick-hint { font-size: 11px; color: var(--mid); text-align: center; margin-top: 6px; }
+  .day-list { display: flex; flex-direction: column; gap: 8px; }
+  .day-row { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: 16px; padding: 10px 12px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
+  .day-row.closed { opacity: 0.55; }
+  .dr-date { font-size: 15px; font-weight: 900; color: var(--dark); line-height: 1.15; }
+  .dr-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
+  .dr-price { font-size: 13px; font-weight: 800; color: var(--mid); }
+  .dr-tag { font-size: 10px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 50px; padding: 2px 8px; }
+  .dr-tag.rush { background: var(--orange); color: #fff; }
+  .dr-tag.save { background: var(--mint); color: #1F5C46; }
+  .dr-slots { display: flex; gap: 6px; }
+  .dr-slot { min-width: 64px; border: 1.5px solid var(--orangeborder); background: var(--white); border-radius: 12px; padding: 9px 6px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 900; color: var(--dark); cursor: pointer; line-height: 1.1; }
+  .dr-slot small { display: block; font-size: 9px; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; margin-top: 2px; }
+  .dr-slot:disabled { background: #F5EDE4; border-color: #E8DDD6; color: #C8B8AA; cursor: not-allowed; }
+  .dr-slot.picked { background: #FDF0EF; border-color: var(--orange); color: var(--orange); }
+  .dr-slot.picked.pref { background: var(--orange); color: #fff; }
+  .day-list-msg { text-align: center; color: var(--mid); font-size: 13px; padding: 18px 0; }
+  .finding { text-align: center; padding: 28px 20px; background: var(--white); border-radius: 20px; border: 1.5px solid var(--orangeborder); box-shadow: var(--shadow); }
+  .finding h2 { font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: var(--dark); margin-bottom: 6px; }
+  .finding p { font-size: 14px; color: var(--mid); line-height: 1.5; }
+  .finding-times { margin: 16px auto; max-width: 320px; text-align: left; }
+  .finding-times div { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F5EDE4; font-size: 14px; }
+  .finding-times div:last-child { border-bottom: none; }
+  .finding-times b { color: var(--dark); }
+  .finding-times span { color: var(--mid); font-weight: 700; }
+  .finding-dots { display: inline-flex; gap: 6px; margin: 4px 0 12px; }
+  .finding-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--mint); animation: fdot 1.2s infinite ease-in-out; }
+  .finding-dots i:nth-child(2) { animation-delay: 0.2s; } .finding-dots i:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes fdot { 0%,80%,100% { transform: scale(0.6); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .finding-dots i { animation: none; } }
+
   /* Bubble background */
   .bubble-particle {
     position: absolute;
@@ -262,6 +311,17 @@
 <div id="heroSpacer"></div>
 <div class="content">
 
+  <div id="pickSection">
+    <div class="section-label">Pick Your Times</div>
+    <div class="pick-head" id="pickHead">
+      <div class="pick-head-title">Pick your preferred time, plus two backups</div>
+      <div class="pick-chips" id="pickChips"></div>
+      <div class="pick-hint" id="pickHint">Tap a time below. Tap a pick again to remove it.</div>
+    </div>
+    <div class="day-list" id="dayList"><div class="day-list-msg">Loading open times…</div></div>
+  </div>
+
+  <div id="calSection">
   <div class="section-label">Pick a Date</div>
   <div class="calendar-card">
     <div class="month-nav">
@@ -284,6 +344,7 @@
       <div class="cal-legend-item"><div class="cal-legend-dot limited"></div> Limited</div>
       <div class="cal-legend-item"><div class="cal-legend-dot full"></div> Full</div>
     </div>
+  </div>
   </div>
 
   <div id="timeSection">
@@ -340,14 +401,15 @@
         <span class="label">Package</span>
         <span class="value" id="summaryPkgName">—</span>
       </div>
-      <div class="summary-row">
+      <div class="summary-row" id="summaryDateRow">
         <span class="label">Date</span>
         <span class="value" id="summaryDate">—</span>
       </div>
-      <div class="summary-row">
+      <div class="summary-row" id="summaryTimeRow">
         <span class="label">Time</span>
         <span class="value" id="summaryTime">—</span>
       </div>
+      <div id="summaryPicks"></div>
       <div id="summaryAddonsList"></div>
       <div class="summary-row total">
         <span class="label">Total</span>
@@ -359,6 +421,13 @@
     <div id="bookSuccess" style="display:none; text-align:center; padding:32px 24px; background:#E8F8F2; border-radius:20px; border:1.5px solid #9ED9C0;">
       <div style="font-size:22px; font-weight:900; color:#2A7A5A; margin-bottom:8px;">You're booked!</div>
       <div style="font-size:14px; color:#3A9A6E;">We'll send a confirmation to your email. See you soon!</div>
+    </div>
+    <div id="findingPro" class="finding" style="display:none;">
+      <div class="finding-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <h2>We're finding your pro</h2>
+      <p>We've sent your three times to our local pros.</p>
+      <div class="finding-times" id="findingTimes"></div>
+      <p>You'll hear back within <b>12 hours</b> with who's coming and which time they took.</p>
     </div>
   </div>
 
@@ -599,7 +668,8 @@
     const phone     = (document.getElementById('infoPhone').value     || '').trim();
     const email     = (document.getElementById('infoEmail').value     || '').trim();
     const address   = (document.getElementById('infoAddress').value   || '').trim();
-    const ready = selectedDate && selectedTime && firstName && lastName && phone && email && address;
+    const timesReady = (typeof pickMode !== 'undefined' && pickMode) ? picksDone() : (selectedDate && selectedTime);
+    const ready = timesReady && firstName && lastName && phone && email && address;
     document.getElementById('bookBtn').disabled = !ready;
   }
 
@@ -615,8 +685,183 @@
     await renderCalendar();
   }
 
-  renderCalendar();
-  renderTimeSlots();
+  // ── Pick-three day list (residential) ──────────────────────────────────
+  // The customer picks a preferred time plus two backups; the booking is
+  // offered to the pros, who accept one of the three (portal.html). Consult
+  // links keep the month grid + single time above.
+  const pickMode = !isConsult;
+  const RUSH_FEE = 50;          // next-day surcharge; 90% goes to the pro (see supabase/vendor-portal.sql)
+  const SAVE_PCT = 0.05;        // discount for days SAVE_DAYS+ out
+  const SAVE_DAYS = 10;
+  const PICK_LABELS = ['Preferred', 'Alt 1', 'Alt 2'];
+  const DOW_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let picks = [null, null, null];
+  let pickDays = [];            // [{dateStr, short, long, price, rush, tag, slots:[{time, open}]}]
+  let openSlotCount = 0;
+
+  function basePrice() {
+    const raw = _urlParamsEarly.get('total') || _urlParamsEarly.get('price') || '';
+    const n = parseFloat(String(raw).replace(/[^0-9.]/g, ''));
+    return isNaN(n) ? null : n;
+  }
+  const _urlParamsEarly = new URLSearchParams(window.location.search);
+  const pad2 = n => String(n).padStart(2, '0');
+  const isoOf = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  const shortTime = t => t.replace(':00', '');
+  function dayPricing(daysOut) {
+    const base = basePrice();
+    if (daysOut === 1) return { price: base == null ? null : base + RUSH_FEE, rush: RUSH_FEE, tag: 'rush' };
+    if (daysOut >= SAVE_DAYS) return { price: base == null ? null : Math.round(base * (1 - SAVE_PCT)), rush: 0, tag: 'save' };
+    return { price: base, rush: 0, tag: null };
+  }
+
+  async function initPickMode() {
+    document.body.classList.add('pick-mode');
+    const list = document.getElementById('dayList');
+    // Starts tomorrow: a pro needs up to 12 hours to confirm, so same-day
+    // can't work in this flow.
+    const start = new Date(today); start.setDate(start.getDate() + 1);
+    const end = isAdmin ? new Date(today.getFullYear(), today.getMonth(), today.getDate() + 60) : maxDate;
+    const taken = new Set();
+    try {
+      const h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+      const [bRes, blRes] = await Promise.all([
+        fetch(SUPABASE_URL + '/rest/v1/bookings?select=date_iso,time&date_iso=gte.' + isoOf(start) + '&date_iso=lte.' + isoOf(end), { headers: h }),
+        fetch(SUPABASE_URL + '/rest/v1/blocked_slots?select=date,time&date=gte.' + isoOf(start) + '&date=lte.' + isoOf(end), { headers: h })
+      ]);
+      if (!bRes.ok || !blRes.ok) throw new Error('availability ' + bRes.status + '/' + blRes.status);
+      (await bRes.json()).forEach(r => taken.add(r.date_iso + '|' + r.time));
+      (await blRes.json()).forEach(r => taken.add(r.date + '|' + r.time));
+    } catch (e) {
+      console.warn('Availability fetch failed:', e);
+      list.innerHTML = '<div class="day-list-msg">Couldn\'t load open times. Please refresh, or call <a href="tel:4058822277">(405) 882-2277</a>.</div>';
+      return;
+    }
+    pickDays = [];
+    openSlotCount = 0;
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const dow = d.getDay();
+      if (dow === 0 || dow === 6) continue;
+      const dateStr = isoOf(d);
+      const daysOut = Math.round((d - today) / 86400000);
+      const slots = SLOTS.map(t => ({ time: t, open: !taken.has(dateStr + '|' + t) }));
+      openSlotCount += slots.filter(s => s.open).length;
+      pickDays.push(Object.assign({
+        dateStr: dateStr,
+        short: DOW_SHORT[dow] + ', ' + MON_SHORT[d.getMonth()] + ' ' + d.getDate(),
+        long: MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear(),
+        slots: slots
+      }, dayPricing(daysOut)));
+    }
+    renderDayList();
+    renderPickChips();
+  }
+
+  function pickIndex(dateStr, time) {
+    return picks.findIndex(p => p && p.date_iso === dateStr && p.time === time);
+  }
+
+  function renderDayList() {
+    const list = document.getElementById('dayList');
+    if (!pickDays.length || !openSlotCount) {
+      list.innerHTML = '<div class="day-list-msg">We\'re fully booked right now. Call or text <a href="tel:4058822277">(405) 882-2277</a> and we\'ll fit you in.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    pickDays.forEach(day => {
+      const row = document.createElement('div');
+      const anyOpen = day.slots.some(s => s.open);
+      row.className = 'day-row' + (anyOpen ? '' : ' closed');
+      let tag = '';
+      if (day.tag === 'rush') tag = '<span class="dr-tag rush">Rush +$' + RUSH_FEE + '</span>';
+      if (day.tag === 'save') tag = '<span class="dr-tag save">Save ' + Math.round(SAVE_PCT * 100) + '%</span>';
+      const price = day.price != null ? '<span class="dr-price">$' + day.price + '</span>' : '';
+      row.innerHTML = '<div><div class="dr-date">' + day.short + '</div><div class="dr-meta">' + price + tag +
+        (anyOpen ? '' : '<span class="dr-price">Full</span>') + '</div></div>';
+      const slotsEl = document.createElement('div');
+      slotsEl.className = 'dr-slots';
+      day.slots.forEach(s => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'dr-slot';
+        const idx = pickIndex(day.dateStr, s.time);
+        if (idx >= 0) b.classList.add('picked'), idx === 0 && b.classList.add('pref');
+        b.disabled = !s.open;
+        b.innerHTML = shortTime(s.time) + (idx >= 0 ? '<small>' + PICK_LABELS[idx] + '</small>' : '');
+        b.setAttribute('aria-pressed', idx >= 0 ? 'true' : 'false');
+        b.setAttribute('aria-label', day.short + ' ' + s.time + (s.open ? '' : ', unavailable') + (idx >= 0 ? ', ' + PICK_LABELS[idx] : ''));
+        if (s.open) b.onclick = () => togglePick(day, s.time);
+        slotsEl.appendChild(b);
+      });
+      row.appendChild(slotsEl);
+      list.appendChild(row);
+    });
+  }
+
+  function picksNeeded() { return Math.min(3, openSlotCount); }
+  function picksDone() { return picks.filter(Boolean).length >= picksNeeded() && picksNeeded() > 0; }
+
+  function togglePick(day, time) {
+    const idx = pickIndex(day.dateStr, time);
+    const hint = document.getElementById('pickHint');
+    if (idx >= 0) {
+      picks[idx] = null;
+    } else {
+      const free = picks.indexOf(null);
+      if (free < 0) {
+        hint.textContent = 'You\'ve picked three. Tap one to remove it first.';
+        return;
+      }
+      picks[free] = { date_iso: day.dateStr, time: time, date: day.long, short: day.short, price: day.price, rush: day.rush };
+    }
+    renderDayList();
+    renderPickChips();
+    updateBtn();
+  }
+
+  function renderPickChips() {
+    const wrap = document.getElementById('pickChips');
+    wrap.innerHTML = '';
+    picks.forEach((p, i) => {
+      const c = document.createElement('div');
+      c.className = 'pick-chip' + (p ? ' filled' : '') + (p && i === 0 ? ' pref' : '');
+      c.innerHTML = '<div class="pc-label">' + PICK_LABELS[i] + '</div><div class="pc-val">' +
+        (p ? p.short + '<br>' + shortTime(p.time) : 'Tap a time') + '</div>';
+      if (p) { c.onclick = () => { picks[i] = null; renderDayList(); renderPickChips(); updateBtn(); }; c.title = 'Remove'; }
+      wrap.appendChild(c);
+    });
+    const n = picks.filter(Boolean).length;
+    const hint = document.getElementById('pickHint');
+    hint.textContent = picksDone() ? 'All set. Add your info below.' :
+      n === 0 ? 'Tap a time below. Tap a pick again to remove it.' :
+      'Pick ' + (picksNeeded() - n) + ' more.';
+    // Summary card
+    document.getElementById('summaryDateRow').style.display = 'none';
+    document.getElementById('summaryTimeRow').style.display = 'none';
+    const sp = document.getElementById('summaryPicks');
+    sp.innerHTML = '';
+    picks.forEach((p, i) => {
+      const r = document.createElement('div');
+      r.className = 'summary-row';
+      r.innerHTML = '<span class="label">' + PICK_LABELS[i] + '</span><span class="value">' +
+        (p ? p.short + ' · ' + shortTime(p.time) + (p.price != null ? ' · $' + p.price : '') : '—') + '</span>';
+      sp.appendChild(r);
+    });
+    const pref = picks[0];
+    if (pref && pref.price != null) {
+      document.getElementById('summaryPkgTotal').textContent = '$' + pref.price;
+    } else if (basePrice() != null) {
+      document.getElementById('summaryPkgTotal').textContent = '$' + basePrice();
+    }
+  }
+
+  if (pickMode) {
+    initPickMode();
+  } else {
+    renderCalendar();
+    renderTimeSlots();
+  }
 
   function initAutocomplete() {
     const input = document.getElementById('infoAddress');
@@ -714,7 +959,34 @@
       marketing_opt_in: optInMarketing
     };
 
+    // Pick-three: the booked slot starts as the preferred pick; the pro who
+    // accepts may move it to one of the backups (portal_accept in
+    // supabase/vendor-portal.sql).
+    const chosen = pickMode ? picks.filter(Boolean) : [];
+    if (pickMode) {
+      const pref = chosen[0];
+      booking.date     = pref.date;
+      booking.date_iso = pref.date_iso;
+      booking.time     = pref.time;
+      if (pref.price != null) booking.total = '$' + pref.price;
+      booking.status       = 'pending';
+      booking.pick_options = chosen.map(p => ({ date_iso: p.date_iso, time: p.time, date: p.date, price: p.price, rush: p.rush }));
+      booking.base_total   = basePrice();
+    }
+
     function showSuccess() {
+      if (pickMode) {
+        btn.style.display = 'none';
+        document.getElementById('infoSection').querySelectorAll('.info-card, .summary-card, .section-label').forEach(function(el) { el.style.display = 'none'; });
+        document.getElementById('pickSection').style.display = 'none';
+        document.getElementById('findingTimes').innerHTML = chosen.map(function(p, i) {
+          return '<div><b>' + PICK_LABELS[i] + '</b><span>' + p.short + ' · ' + shortTime(p.time) + (p.price != null ? ' · $' + p.price : '') + '</span></div>';
+        }).join('');
+        const f = document.getElementById('findingPro');
+        f.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
       btn.style.display = 'none';
       document.getElementById('infoSection').querySelectorAll('.info-card, .summary-card, .section-label').forEach(function(el) { el.style.display = 'none'; });
       const success = document.getElementById('bookSuccess');
@@ -735,8 +1007,8 @@
       }).catch(function(err) { console.error('Confirmation email request failed:', err); });
     }
 
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/bookings', {
+    function postBooking(b) {
+      return fetch(SUPABASE_URL + '/rest/v1/bookings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -744,8 +1016,25 @@
           'Authorization': 'Bearer ' + SUPABASE_KEY,
           'Prefer': 'return=minimal'
         },
-        body: JSON.stringify(booking)
+        body: JSON.stringify(b)
       });
+    }
+
+    try {
+      let res = await postBooking(booking);
+      // Until supabase/vendor-portal.sql has been run, bookings has no
+      // status / pick_options / base_total columns and PostgREST rejects the
+      // insert (PGRST204). Keep the booking rather than lose it: drop those
+      // fields and write the backup times into the notes instead.
+      if (pickMode && res.status === 400) {
+        const err = await res.clone().json().catch(() => ({}));
+        if (err && err.code === 'PGRST204') {
+          delete booking.status; delete booking.pick_options; delete booking.base_total;
+          const backups = chosen.slice(1).map(p => p.short + ' ' + p.time + (p.price != null ? ' ($' + p.price + ')' : '')).join('; ');
+          if (backups) booking.notes = (booking.notes ? booking.notes + '\n' : '') + 'Backup times: ' + backups;
+          res = await postBooking(booking);
+        }
+      }
       if (res.ok || res.status === 201) {
         showSuccess();
         sendConfirmationEmail(booking);
@@ -776,6 +1065,9 @@
     var hdr = document.querySelector('.header');
     var spacer = document.getElementById('heroSpacer');
     if (!nav || !hdr || !spacer) return;
+    // The pinned "pick your times" header sticks just under the nav bar.
+    document.documentElement.style.setProperty('--navH',
+      (nav.getBoundingClientRect().height / (parseFloat(getComputedStyle(document.body).zoom) || 1)) + 'px');
     // At desktop widths .header is unpinned (position:relative, pushed down
     // by a plain margin-top instead) -- see the >=900px media query. Setting
     // an inline `top` here would still offset a position:relative element on
