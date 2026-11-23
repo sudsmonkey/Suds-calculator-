@@ -692,7 +692,7 @@
   // offered to the pros, who accept one of the three (portal.html). Consult
   // links keep the month grid + single time above.
   const pickMode = !isConsult;
-  const RUSH_FEE = 50;          // next-day surcharge; 90% goes to the pro (see supabase/vendor-portal.sql)
+  const RUSH_FEE = 50;          // next-business-day surcharge; 90% goes to the pro (see supabase/vendor-portal.sql)
   const SAVE_PCT = 0.05;        // discount for days SAVE_DAYS+ out
   const SAVE_DAYS = 10;
   const PICK_LABELS = ['Preferred', 'Alt 1', 'Alt 2'];
@@ -750,9 +750,19 @@
   const pad2 = n => String(n).padStart(2, '0');
   const isoOf = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
   const shortTime = t => t.replace(':00', '');
+  // Rush = the next business day: tomorrow, or Monday when booked Friday or
+  // over the weekend.
+  function rushDaysOut() {
+    const d = new Date(today);
+    for (let n = 1; n <= 7; n++) {
+      d.setDate(d.getDate() + 1);
+      if (d.getDay() !== 0 && d.getDay() !== 6) return n;
+    }
+    return 1;
+  }
   function dayPricing(daysOut) {
     const base = basePrice();
-    if (daysOut === 1) return { price: base == null ? null : base + RUSH_FEE, rush: RUSH_FEE, tag: 'rush' };
+    if (daysOut === rushDaysOut()) return { price: base == null ? null : base + RUSH_FEE, rush: RUSH_FEE, tag: 'rush' };
     if (daysOut >= SAVE_DAYS) return { price: base == null ? null : Math.round(base * (1 - SAVE_PCT)), rush: 0, tag: 'save' };
     return { price: base, rush: 0, tag: null };
   }

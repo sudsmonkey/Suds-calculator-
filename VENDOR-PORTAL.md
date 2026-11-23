@@ -46,7 +46,7 @@ booking's notes.
 | Pro keeps 90% of the rush fee | `_sm_rush_pro_share()` in the SQL |
 | Pro's share of the job price | `contractors.payout_rate`, one per pro. Set it when you invite them; change it from admin → Pros. New pros default to 70%. |
 | Terms version pros sign | `TERMS_VERSION` in `portal.html` and `_sm_terms_version()` in the SQL |
-| Rush +$50, Save 5% at 10+ days | `RUSH_FEE`, `SAVE_PCT`, `SAVE_DAYS` in `calendar.html` |
+| Rush +$50 (next business day), Save 5% at 10+ days | `RUSH_FEE`, `SAVE_PCT`, `SAVE_DAYS` in `calendar.html` |
 
 ## How it behaves
 
@@ -66,7 +66,8 @@ booking's notes.
 - If no pro accepts by the deadline, or every pro declines, the booking's
   `status` becomes `no_pro` so you can follow up. `admin.html` doesn't show this
   yet.
-- No same-day jobs: the list starts tomorrow, and tomorrow is the Rush day.
+- No same-day jobs: the list starts tomorrow. Rush (+$50) is the next business
+  day: tomorrow, or Monday when booked Friday or over the weekend.
   A slot is hidden if the pro's deadline would land after it starts, so after
   5 PM tomorrow's 8 AM disappears and tomorrow's 1 PM stays. After 5 PM on
   Friday, and all weekend, Monday's 8 AM disappears.
