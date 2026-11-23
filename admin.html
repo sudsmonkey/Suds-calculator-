@@ -989,6 +989,9 @@
       ['Area', escHtml(p.service_area || '')],
       p.status !== 'invited' || p.insurance_path ? ['Insurance', docs(p.insurance_path)] : null,
       p.status !== 'invited' || p.w9_path ? ['W-9', docs(p.w9_path)] : null,
+      p.status !== 'invited' || p.comp_path ? ['Workers\' comp',
+        (p.comp_type === 'exempt' ? '<strong>Exempt (signed)</strong> · ' :
+         p.comp_type === 'policy' ? '<strong>Has policy</strong> · ' : '') + docs(p.comp_path)] : null,
       p.terms_accepted_at ? ['Terms', 'Signed "' + escHtml(p.terms_signature) + '" · ' + fmtDay(p.terms_accepted_at) + ' · ' + escHtml(p.terms_version)] : null,
       p.status === 'approved' || p.status === 'paused' ? ['Jobs', String(p.jobs_taken || 0) + ' taken'] : null,
       p.status === 'invited' ? ['Invited', fmtDay(p.created_at)] : null

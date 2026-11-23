@@ -138,6 +138,10 @@
   .ob-terms h3 { font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 900; color: var(--dark); margin: 0 0 6px; }
   .ob-terms ol { padding-left: 18px; }
   .ob-terms li { margin-bottom: 7px; }
+  .ob-choice { display: flex; gap: 10px; align-items: flex-start; padding: 11px 12px; border: 1.5px solid var(--border); border-radius: 12px; margin-bottom: 8px; cursor: pointer; font-size: 13px; color: var(--mid); line-height: 1.4; }
+  .ob-choice b { display: block; font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 900; color: var(--dark); }
+  .ob-choice input { width: 20px; height: 20px; min-width: 20px; accent-color: var(--orange); margin-top: 1px; }
+  .ob-choice:has(input:checked) { border-color: var(--orange); background: #FDF0EF; }
   .ob-agree { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; font-size: 14px; color: var(--dark); font-weight: 600; line-height: 1.4; }
   .ob-agree input { width: 20px; height: 20px; min-width: 20px; accent-color: var(--orange); margin-top: 0; }
 </style>
@@ -176,7 +180,7 @@
 
     <form id="obForm" hidden novalidate>
       <h1 class="ob-title">Welcome to the Suds Monkey Network<span id="obFirst"></span></h1>
-      <p class="ob-p">Five quick steps. Once you send this, we'll review it and turn on your job offers.</p>
+      <p class="ob-p">Six quick steps. Once you send this, we'll review it and turn on your job offers.</p>
 
       <div class="sec">1 · Your business</div>
       <div class="card">
@@ -214,7 +218,21 @@
         <div class="ob-have" id="obW9Have" hidden>✓ Already uploaded. Choose a file only to replace it.</div>
       </div>
 
-      <div class="sec">5 · Network terms</div>
+      <div class="sec">5 · Workers' comp</div>
+      <div class="card">
+        <p class="ob-p">Upload one of these:</p>
+        <label class="ob-choice"><input type="radio" name="obComp" value="policy">
+          <span><b>I have workers' comp</b>Upload your certificate of coverage.</span></label>
+        <label class="ob-choice"><input type="radio" name="obComp" value="exempt">
+          <span><b>I'm exempt (no employees)</b>Upload your signed workers' comp exemption.</span></label>
+        <label class="photo-pick ob-file" style="margin-top:10px;">
+          <span data-filelabel="comp">Choose file</span>
+          <input type="file" id="obComp" accept="image/*,application/pdf">
+        </label>
+        <div class="ob-have" id="obCompHave" hidden>✓ Already uploaded. Choose a file only to replace it.</div>
+      </div>
+
+      <div class="sec">6 · Network terms</div>
       <div class="card">
         <div class="ob-terms" id="obTerms" tabindex="0" aria-label="Suds Monkey Network terms"></div>
         <label class="ob-agree"><input type="checkbox" id="obAgree"> I've read and agree to the Suds Monkey Network terms.</label>
@@ -358,7 +376,7 @@
       '<li><b>Showing up.</b> When you accept a job, you commit to that date and time. If something comes up, call Suds Monkey right away so the customer isn\'t left waiting.</li>' +
       '<li><b>Quality.</b> Work to Suds Monkey standards, treat the customer\'s home with care, and upload after photos when you mark a job complete.</li>' +
       '<li><b>Payment timing.</b> Pay for a job is held for 3 days after you mark it complete, so any customer issue can be resolved first. Then it is released to you.</li>' +
-      '<li><b>Insurance.</b> Keep general liability insurance in force while you take network jobs, and send an updated certificate when it renews.</li>' +
+      '<li><b>Insurance.</b> Keep general liability insurance in force while you take network jobs, and send an updated certificate when it renews. Keep workers\' comp coverage, or a current signed exemption if you have no employees. If you hire anyone, get coverage before they work a network job.</li>' +
       '<li><b>Customers.</b> Customers you serve through the network are Suds Monkey customers. Don\'t solicit them for work outside the network.</li>' +
       '<li><b>Leaving or pausing.</b> Either side can pause or end this at any time. Jobs you\'ve already accepted should still be completed or handed back with notice.</li>' +
       '</ol>';
@@ -377,11 +395,13 @@
     $('obArea').value = me.service_area || '';
     $('obInsHave').hidden = !me.has_insurance;
     $('obW9Have').hidden = !me.has_w9;
+    $('obCompHave').hidden = !me.has_comp;
+    document.querySelectorAll('input[name="obComp"]').forEach(r => { r.checked = r.value === me.comp_type; });
     $('obTerms').innerHTML = termsHtml(me);
   }
   $('obEdit').addEventListener('click', () => { $('obSubmitted').hidden = true; $('obForm').hidden = false; window.scrollTo(0, 0); });
 
-  ['obIns', 'obW9'].forEach(id => $(id).addEventListener('change', e => {
+  ['obIns', 'obW9', 'obComp'].forEach(id => $(id).addEventListener('change', e => {
     const f = e.target.files && e.target.files[0];
     const lab = e.target.closest('.ob-file');
     lab.classList.toggle('chosen', !!f);
@@ -416,6 +436,11 @@
     if (!$('obArea').value.trim()) return fail('Add the areas you cover.');
     if (!ins && !obMe.has_insurance) return fail('Upload your insurance certificate.');
     if (!w9 && !obMe.has_w9) return fail('Upload your W-9.');
+    const compPick = document.querySelector('input[name="obComp"]:checked');
+    const comp = $('obComp').files[0];
+    if (!compPick) return fail('Choose your workers\' comp option.');
+    if (!comp && (!obMe.has_comp || obMe.comp_type !== compPick.value))
+      return fail(compPick.value === 'policy' ? 'Upload your workers\' comp certificate.' : 'Upload your signed workers\' comp exemption.');
     if (!$('obAgree').checked) return fail('Check the box to agree to the terms.');
     if ($('obSign').value.trim().length < 3) return fail('Type your full name to sign.');
     const btn = $('obSubmit'); btn.disabled = true;
@@ -424,10 +449,13 @@
       const insPath = ins ? await uploadDoc('insurance', ins) : null;
       if (w9) btn.textContent = 'Uploading W-9…';
       const w9Path = w9 ? await uploadDoc('w9', w9) : null;
+      if (comp) btn.textContent = 'Uploading workers\' comp…';
+      const compPath = comp ? await uploadDoc('comp-' + compPick.value, comp) : null;
       btn.textContent = 'Sending…';
       await rpc('portal_submit_profile', {
         p_company: $('obCompany').value, p_phone: $('obPhone').value, p_email: $('obEmail').value,
         p_service_area: $('obArea').value, p_insurance_path: insPath, p_w9_path: w9Path,
+        p_comp_type: compPick.value, p_comp_path: compPath,
         p_signature: $('obSign').value, p_terms_version: TERMS_VERSION
       });
       window.scrollTo(0, 0);

@@ -49,6 +49,8 @@ create table if not exists public.contractors (
   access_code   text not null unique default replace(gen_random_uuid()::text, '-', ''),
   insurance_path text,                   -- contractor-docs/<id>/...
   w9_path        text,                   -- contractor-docs/<id>/...
+  comp_type      text check (comp_type in ('policy','exempt')),  -- workers' comp: has a policy, or signed exemption (no employees)
+  comp_path      text,                   -- contractor-docs/<id>/... certificate or signed exemption
   terms_version  text,
   terms_signature text,                  -- the full name they typed
   terms_accepted_at timestamptz,
@@ -56,6 +58,9 @@ create table if not exists public.contractors (
   approved_at    timestamptz,
   created_at    timestamptz not null default now()
 );
+
+alter table public.contractors add column if not exists comp_type text check (comp_type in ('policy','exempt'));
+alter table public.contractors add column if not exists comp_path text;
 
 -- One row. admin_key is what you enter once in admin.html's Pros tab.
 create table if not exists public.network_settings (
@@ -284,6 +289,8 @@ begin
     'status', c.status,
     'has_insurance', c.insurance_path is not null,
     'has_w9', c.w9_path is not null,
+    'comp_type', c.comp_type,
+    'has_comp', c.comp_path is not null,
     'payout_rate', _sm_payout_rate(),
     'rush_share', _sm_rush_pro_share(),
     'terms_version', _sm_terms_version());
@@ -291,9 +298,11 @@ end $$;
 
 -- Onboarding: the pro's profile, documents and signed terms. Moves them to
 -- 'submitted' for you to review. They can resubmit until you approve.
+drop function if exists public.portal_submit_profile(text, text, text, text, text, text, text, text, text);
 create or replace function public.portal_submit_profile(
   p_code text, p_company text, p_phone text, p_email text, p_service_area text,
-  p_insurance_path text, p_w9_path text, p_signature text, p_terms_version text) returns json
+  p_insurance_path text, p_w9_path text, p_comp_type text, p_comp_path text,
+  p_signature text, p_terms_version text) returns json
   language plpgsql security definer set search_path = public as $$
 declare
   c contractors := _sm_contractor_login(p_code);
@@ -314,6 +323,13 @@ begin
   if coalesce(p_w9_path, c.w9_path) is null or coalesce(p_w9_path, c.w9_path) not like prefix || '%' then
     raise exception 'Upload your W-9.';
   end if;
+  if p_comp_type is null or p_comp_type not in ('policy', 'exempt') then
+    raise exception 'Choose your workers'' comp option.';
+  end if;
+  if coalesce(p_comp_path, c.comp_path) is null or coalesce(p_comp_path, c.comp_path) not like prefix || '%'
+     or (p_comp_path is null and c.comp_type is distinct from p_comp_type) then   -- switched option: needs the matching document
+    raise exception 'Upload your workers'' comp certificate or signed exemption.';
+  end if;
   if p_terms_version is distinct from _sm_terms_version() then
     raise exception 'The terms were updated. Refresh the page and review them again.';
   end if;
@@ -328,6 +344,8 @@ begin
     service_area      = trim(p_service_area),
     insurance_path    = coalesce(p_insurance_path, insurance_path),
     w9_path           = coalesce(p_w9_path, w9_path),
+    comp_type         = p_comp_type,
+    comp_path         = coalesce(p_comp_path, comp_path),
     terms_version     = p_terms_version,
     terms_signature   = trim(p_signature),
     terms_accepted_at = now(),
@@ -477,7 +495,7 @@ begin
   return (select coalesce(json_agg(row_to_json(x) order by
              array_position(array['submitted','invited','approved','paused'], x.status), x.created_at desc), '[]'::json)
           from (select id, name, company_name, phone, email, service_area, status, access_code,
-                       insurance_path, w9_path, terms_version, terms_signature, terms_accepted_at,
+                       insurance_path, w9_path, comp_type, comp_path, terms_version, terms_signature, terms_accepted_at,
                        submitted_at, approved_at, created_at,
                        (select count(*) from job_offers o where o.contractor_id = c.id and o.status = 'accepted') as jobs_taken
                   from contractors c) x);
@@ -552,7 +570,7 @@ grant execute on function public.portal_jobs(text)                     to anon;
 grant execute on function public.portal_accept(text, uuid, int)        to anon;
 grant execute on function public.portal_decline(text, uuid)            to anon;
 grant execute on function public.portal_complete(text, uuid, text[])   to anon;
-grant execute on function public.portal_submit_profile(text, text, text, text, text, text, text, text, text) to anon;
+grant execute on function public.portal_submit_profile(text, text, text, text, text, text, text, text, text, text, text) to anon;
 grant execute on function public.admin_pros(text)                      to anon;
 grant execute on function public.admin_invite_pro(text, text, text, text) to anon;
 grant execute on function public.admin_set_pro_status(text, uuid, text) to anon;

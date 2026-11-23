@@ -10,8 +10,8 @@ Payouts and Stripe come later.
 |------|--------------|
 | `supabase/vendor-portal.sql` | Creates `contractors`, `job_offers` and `network_settings` (the admin key), adds new columns to `bookings`, and sets up the trigger that sends each new booking to approved pros, the `portal_*` and `admin_*` functions, and the `job-photos` and `contractor-docs` buckets. Safe to run more than once. |
 | `calendar.html` | Residential bookings use a scrolling list of days with 8 AM / 1 PM buttons, a pinned "preferred + two backups" header, Rush +$50 for tomorrow, Save 5% for 10+ days out, a price on each day, and a "We're finding your pro" screen. Consult links still use the month grid. |
-| `admin.html` → **Pros** tab | Invite a pro (name, phone, email) to get their link, with buttons to copy, text or email it. Review each pro's profile, insurance, W-9 and signed terms, then Approve or Send back. Pause or reactivate pros. The tab shows a badge when someone needs review. |
-| `portal.html` | The pro's phone page. Until a pro is approved it shows onboarding: business info, service area, insurance upload, W-9 upload, and the network terms with a checkbox and typed-name signature, then "We're reviewing your info". After approval: Jobs tab: New offers (payout, countdown, address with a map link, the three times; tap one, then Accept) and Upcoming jobs (customer name and phone, Mark complete with after photos). Payouts tab: amounts on the 3-day hold and amounts released. |
+| `admin.html` → **Pros** tab | Invite a pro (name, phone, email) to get their link, with buttons to copy, text or email it. Review each pro's profile, insurance, W-9, workers' comp and signed terms, then Approve or Send back. Pause or reactivate pros. The tab shows a badge when someone needs review. |
+| `portal.html` | The pro's phone page. Until a pro is approved it shows onboarding: business info, service area, insurance upload, W-9 upload, workers' comp (certificate, or signed exemption if they have no employees), and the network terms with a checkbox and typed-name signature, then "We're reviewing your info". After approval: Jobs tab: New offers (payout, countdown, address with a map link, the three times; tap one, then Accept) and Upcoming jobs (customer name and phone, Mark complete with after photos). Payouts tab: amounts on the 3-day hold and amounts released. |
 | `supabase/functions/bright-endpoint/index.ts` | New bookings get a "We're finding your pro" email. After a pro accepts, `portal.html` triggers a one-time "Jerry with Clearview took your Tuesday 8 AM" email. |
 
 ## Setup (needs a laptop or the Supabase dashboard)
@@ -73,7 +73,7 @@ booking's notes.
   `approved` (gets offers) ⇄ `paused`. "Send back" returns a submitted pro to
   `invited` so they can fix something. Only approved pros get offers or see
   jobs. Pros who aren't approved can be removed; approved pros can only be paused.
-- Insurance certificates and W-9s go to the private `contractor-docs` bucket,
+- Insurance certificates, W-9s and workers' comp documents go to the private `contractor-docs` bucket,
   in a folder named after the pro's id. Nothing on the website can read them.
   View them in Supabase → Storage → contractor-docs. Uploads are only accepted
   into the folder of a pro who is still onboarding.
@@ -86,7 +86,9 @@ booking's notes.
 - Showing `status` / `no_pro` and the after photos in `admin.html`.
 - Editing a pro's details from `admin.html`, and an insurance expiry date or
   reminder.
-- Viewing a pro's insurance or W-9 from `admin.html`. Use the Supabase dashboard.
+- Which Oklahoma workers' comp exemption form to accept: check with your
+  insurance agent. The portal takes any signed exemption as a file.
+- Viewing a pro's insurance, W-9 or workers' comp from `admin.html`. Use the Supabase dashboard.
 - Stripe payouts and complaint handling before pay is released.
 - Multi-pro availability (a slot is still "taken" by one booking site-wide).
 - Security note: anyone with the site key can upload to `job-photos` (they can't
