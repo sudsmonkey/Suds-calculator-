@@ -92,7 +92,9 @@
   .header-logo img { width: 100%; height: 100%; object-fit: cover; }
   .header h1 { color: #fff; font-size: 22px; font-weight: 900; }
   .header p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }
-  .pkg-pill { background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 50px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; }
+  /* align-self: .header is a flex column, which stretches children to full
+     width by default -- keep the pill hugging its text, centred. */
+  .pkg-pill { align-self: center; background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 50px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; }
   .pkg-pill span { color: #fff; font-size: 13px; font-weight: 700; }
   .pkg-pill .pkg-price { background: #fff; color: var(--dark); border-radius: 50px; padding: 2px 10px; font-size: 12px; font-weight: 900; }
 
