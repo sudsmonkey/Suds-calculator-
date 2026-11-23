@@ -1,4 +1,4 @@
-# Vendor portal (Suds Monkey Network), step 1
+# Vendor portal (Suds Monkey Network)
 
 Built from the "Vendor Portal Notes" doc. A customer picks three times, every
 active pro gets the job as an offer, and the first pro to accept gets it.
@@ -8,23 +8,28 @@ Payouts and Stripe come later.
 
 | File | What it does |
 |------|--------------|
-| `supabase/vendor-portal.sql` | Creates `contractors` and `job_offers`, adds new columns to `bookings`, and sets up the trigger that sends each new booking to the pros, the `portal_*` functions, and the `job-photos` bucket. Safe to run more than once. |
+| `supabase/vendor-portal.sql` | Creates `contractors`, `job_offers` and `network_settings` (the admin key), adds new columns to `bookings`, and sets up the trigger that sends each new booking to approved pros, the `portal_*` and `admin_*` functions, and the `job-photos` and `contractor-docs` buckets. Safe to run more than once. |
 | `calendar.html` | Residential bookings use a scrolling list of days with 8 AM / 1 PM buttons, a pinned "preferred + two backups" header, Rush +$50 for tomorrow, Save 5% for 10+ days out, a price on each day, and a "We're finding your pro" screen. Consult links still use the month grid. |
-| `portal.html` | The pro's phone page. Jobs tab: New offers (payout, countdown, address with a map link, the three times; tap one, then Accept) and Upcoming jobs (customer name and phone, Mark complete with after photos). Payouts tab: amounts on the 3-day hold and amounts released. |
+| `admin.html` → **Pros** tab | Invite a pro (name, phone, email) to get their link, with buttons to copy, text or email it. Review each pro's profile, insurance, W-9 and signed terms, then Approve or Send back. Pause or reactivate pros. The tab shows a badge when someone needs review. |
+| `portal.html` | The pro's phone page. Until a pro is approved it shows onboarding: business info, service area, insurance upload, W-9 upload, and the network terms with a checkbox and typed-name signature, then "We're reviewing your info". After approval: Jobs tab: New offers (payout, countdown, address with a map link, the three times; tap one, then Accept) and Upcoming jobs (customer name and phone, Mark complete with after photos). Payouts tab: amounts on the 3-day hold and amounts released. |
 | `supabase/functions/bright-endpoint/index.ts` | New bookings get a "We're finding your pro" email. After a pro accepts, `portal.html` triggers a one-time "Jerry with Clearview took your Tuesday 8 AM" email. |
 
 ## Setup (needs a laptop or the Supabase dashboard)
 
 1. **Run the SQL.** Supabase dashboard → SQL Editor → New query → paste all of
    `supabase/vendor-portal.sql` → Run.
-2. **Add your first pro.** At the bottom of that file, uncomment the
-   `insert into public.contractors …` statement, edit the name, company and
-   `payout_rate` (0.70 = 70% of the job price), and run it. It returns the pro's
-   `access_code`.
-3. **Send the pro their link:**
-   `https://sudsmonkey.github.io/Suds-calculator-/portal.html?code=ACCESS_CODE`.
-   The portal remembers the code on their phone after the first visit.
-4. **Redeploy the email function** so customers get the "finding your pro" and
+   Before running it, set your pay rate in `_sm_payout_rate()` (0.70 = 70%).
+2. **Get your admin key.** In the SQL Editor, run
+   `select admin_key from network_settings;`. Open `admin.html` → Pros and paste
+   it once. Keep it private: anyone with it can add and approve pros.
+3. **Review the terms.** The network terms pros sign are a draft written for
+   this build (`termsHtml()` in `portal.html`). Have them checked, ideally by a
+   lawyer, before inviting anyone. If the wording changes after pros have
+   signed, change `TERMS_VERSION` in `portal.html` and `_sm_terms_version()` in
+   the SQL together.
+4. **Invite your first pro** from admin → Pros, and text them the link. They
+   finish onboarding on their phone, then you approve them.
+5. **Redeploy the email function** so customers get the "finding your pro" and
    "pro took your time" emails instead of "You're booked!": Supabase → Edge
    Functions → `bright-endpoint` → paste the new `index.ts` → Deploy.
 
@@ -40,7 +45,8 @@ booking's notes.
 | Platform hours 8 AM to 7 PM Oklahoma time (the window only counts down inside them) | `_sm_hours_open()` / `_sm_hours_close()` / `_sm_tz()` in the SQL, `PLATFORM_OPEN` / `PLATFORM_CLOSE` in `calendar.html`. Keep the two in sync. |
 | 3-day payout hold | `_sm_payout_hold()` in the SQL |
 | Pro keeps 90% of the rush fee | `_sm_rush_pro_share()` in the SQL |
-| Pro's share of the job price | `contractors.payout_rate`, one per pro |
+| Pro's share of the job price (one rate for everyone) | `_sm_payout_rate()` in the SQL |
+| Terms version pros sign | `TERMS_VERSION` in `portal.html` and `_sm_terms_version()` in the SQL |
 | Rush +$50, Save 5% at 10+ days | `RUSH_FEE`, `SAVE_PCT`, `SAVE_DAYS` in `calendar.html` |
 
 ## How it behaves
@@ -63,13 +69,24 @@ booking's notes.
   A slot is hidden if the pro's deadline would land after it starts, so after
   5 PM tomorrow's 8 AM disappears and tomorrow's 1 PM stays.
 - Pros see the customer's phone and last name only after they accept.
+- Pro statuses: `invited` (link sent) → `submitted` (waiting for you) →
+  `approved` (gets offers) ⇄ `paused`. "Send back" returns a submitted pro to
+  `invited` so they can fix something. Only approved pros get offers or see
+  jobs. Pros who aren't approved can be removed; approved pros can only be paused.
+- Insurance certificates and W-9s go to the private `contractor-docs` bucket,
+  in a folder named after the pro's id. Nothing on the website can read them.
+  View them in Supabase → Storage → contractor-docs. Uploads are only accepted
+  into the folder of a pro who is still onboarding.
+- The admin actions (`admin_*`) check the admin key, not `ADMIN_PASSWORD`,
+  because that password is visible in `admin.html`'s source.
 
 ## Not built yet
 
 - Text message (SMS) notice when a pro accepts. Email only for now.
 - Showing `status` / `no_pro` and the after photos in `admin.html`.
-- Adding and editing pros from `admin.html`. For now, use the SQL editor or the
-  Table Editor.
+- Editing a pro's details from `admin.html`, and an insurance expiry date or
+  reminder.
+- Viewing a pro's insurance or W-9 from `admin.html`. Use the Supabase dashboard.
 - Stripe payouts and complaint handling before pay is released.
 - Multi-pro availability (a slot is still "taken" by one booking site-wide).
 - Security note: anyone with the site key can upload to `job-photos` (they can't

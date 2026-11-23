@@ -456,6 +456,36 @@
   .btn-secondary { background: var(--light); color: var(--dark); border: 1.5px solid var(--border); }
   .find-place-link { display: inline-block; font-size: 12px; color: var(--orange); font-weight: 700; margin-top: 8px; text-decoration: none; }
   .find-place-link:hover { text-decoration: underline; }
+  /* ── Pros (network contractors) ── */
+  .pros-badge { display: inline-block; min-width: 17px; padding: 1px 5px; margin-left: 4px; border-radius: 50px; background: var(--orange); color: #fff; font-size: 10px; font-weight: 900; line-height: 1.4; vertical-align: 1px; }
+  .pros-badge[hidden] { display: none; }
+  .pros-help { font-size: 12px; color: var(--mid); line-height: 1.5; margin-bottom: 12px; }
+  .pros-help code { display: block; margin-top: 6px; padding: 6px 8px; border-radius: 8px; background: var(--light); color: var(--ink); font-size: 12px; word-break: break-all; }
+  .pros-empty { font-size: 13px; color: var(--mid); text-align: center; padding: 14px 0; }
+  .pro-card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px; margin-bottom: 10px; }
+  .pro-card.review { border-color: var(--orange); }
+  .pro-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .pro-name { font-size: 16px; font-weight: 900; color: var(--ink); }
+  .pro-co { font-size: 12px; color: var(--mid); font-weight: 700; margin-top: 1px; }
+  .pro-pill { font-size: 10px; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 50px; padding: 3px 8px; white-space: nowrap; }
+  .pro-pill.submitted { background: var(--orange); color: #fff; }
+  .pro-pill.invited { background: var(--light); color: var(--mid); }
+  .pro-pill.approved { background: var(--mint); color: #1F5C46; }
+  .pro-pill.paused { background: var(--border); color: var(--mid); }
+  .pro-rows { margin-top: 10px; font-size: 13px; color: var(--ink); }
+  .pro-rows div { display: flex; gap: 8px; padding: 4px 0; border-top: 1px solid var(--border); }
+  .pro-rows div:first-child { border-top: none; }
+  .pro-rows b { flex: 0 0 82px; color: var(--mid); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; padding-top: 2px; }
+  .pro-rows span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .pro-rows .ok { color: var(--dark-mint); font-weight: 800; }
+  .pro-rows .missing { color: var(--dark); font-weight: 800; }
+  .pro-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .pro-actions .btn { flex: 1 1 auto; margin: 0; padding: 10px 12px; font-size: 13px; }
+  .pro-actions a.btn { text-decoration: none; text-align: center; }
+  .pro-link { margin-top: 12px; padding: 10px; border-radius: 10px; background: var(--light); font-size: 12px; color: var(--ink); word-break: break-all; }
+  .pro-link b { display: block; font-size: 11px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+  .pros-forget { display: block; margin: 18px auto 0; background: none; border: none; color: var(--mid); font-size: 12px; font-weight: 700; text-decoration: underline; cursor: pointer; font-family: inherit; }
+
   .status-msg { font-size: 12px; font-weight: 700; margin-top: 8px; }
   .status-msg.ok { color: var(--dark-mint); }
   .status-msg.err { color: var(--dark); }
@@ -502,6 +532,7 @@
     <div class="tab active" onclick="switchTab('bookings')">Bookings</div>
     <div class="tab" onclick="switchTab('reviews')">Reviews</div>
     <div class="tab" onclick="switchTab('ticker')">Ticker</div>
+    <div class="tab" onclick="switchTab('pros')">Pros<span class="pros-badge" id="prosBadge" hidden></span></div>
   </div>
 
   <!-- Block Slots panel -->
@@ -683,6 +714,37 @@
     </div>
     <div id="tickerSync"></div>
   </div>
+
+  <!-- Pros panel (Suds Monkey Network contractors; see VENDOR-PORTAL.md) -->
+  <div class="panel" id="panelPros">
+    <div id="prosKeyCard" class="range-card" hidden>
+      <div class="section-label" style="margin-top:0;">Network admin key</div>
+      <div class="pros-help">
+        Adding and approving pros needs your network admin key. You only enter it
+        once on this device. Find it in Supabase → SQL Editor:
+        <code>select admin_key from network_settings;</code>
+      </div>
+      <div class="field-row">
+        <input type="text" id="prosKeyInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste admin key">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="saveProsKey()">Save key</button>
+      <div class="status-msg" id="prosKeyStatus"></div>
+    </div>
+
+    <div id="prosMain" hidden>
+      <div class="section-label" style="margin-top:0;">Invite a pro</div>
+      <div class="range-card">
+        <div class="field-row"><label for="proName">Name</label><input type="text" id="proName" placeholder="Jerry Smith" autocomplete="off"></div>
+        <div class="field-row"><label for="proPhone">Phone</label><input type="text" id="proPhone" inputmode="tel" placeholder="(405) 555-0100" autocomplete="off"></div>
+        <div class="field-row"><label for="proEmail">Email (optional)</label><input type="text" id="proEmail" inputmode="email" placeholder="jerry@email.com" autocomplete="off"></div>
+        <button class="btn btn-primary" style="width:100%;" id="proInviteBtn" onclick="invitePro()">Create invite link</button>
+        <div class="status-msg" id="proInviteStatus"></div>
+        <div id="proInviteResult"></div>
+      </div>
+      <div id="prosLists"><div class="pros-empty">Loading…</div></div>
+      <button type="button" class="pros-forget" onclick="forgetProsKey()">Forget admin key on this device</button>
+    </div>
+  </div>
 </div>
 
 <div id="placesDummy" style="display:none;"></div>
@@ -750,6 +812,8 @@
     window.addEventListener('resize', syncStickyOffsets);
     renderAdminCal();
     loadBookings();
+    // Quietly fetch pros so the tab badge shows how many need review.
+    if (prosKey()) loadPros().catch(() => {});
     // Both date pickers default to today, so a range is two taps rather than
     // two full date entries.
     const todayIso = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
@@ -772,16 +836,189 @@
   }
 
   // ── Tabs ────────────────────────────────
-  const PANEL_MAP = { block: 'panelBlock', bookings: 'panelBookings', reviews: 'panelReviews', ticker: 'panelTicker' };
+  const PANEL_MAP = { block: 'panelBlock', bookings: 'panelBookings', reviews: 'panelReviews', ticker: 'panelTicker', pros: 'panelPros' };
 
   function switchTab(name) {
-    const tabNames = ['block', 'bookings', 'reviews', 'ticker'];
+    const tabNames = ['block', 'bookings', 'reviews', 'ticker', 'pros'];
     document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', tabNames[i] === name));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById(PANEL_MAP[name]).classList.add('active');
     if (name === 'bookings') loadBookings();
     if (name === 'reviews') initReviewsPanel();
     if (name === 'ticker') loadTickerJobs();
+    if (name === 'pros') initProsPanel();
+  }
+
+  // ── Pros (Suds Monkey Network contractors) ──────────────────────────────
+  // Invite-only: create an invite link here, the pro finishes their profile,
+  // insurance, W-9 and terms in portal.html, then you approve them. Every call
+  // goes through the admin_* functions in supabase/vendor-portal.sql and needs
+  // the network admin key (ADMIN_PASSWORD above is visible in the page
+  // source, so it can't protect these).
+  const PROS_KEY_STORE = 'suds_network_admin_key';
+  const PORTAL_URL = 'https://sudsmonkey.github.io/Suds-calculator-/portal.html';
+  let prosCache = [];
+
+  function prosKey() { try { return localStorage.getItem(PROS_KEY_STORE); } catch (e) { return null; } }
+  function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  async function prosRpc(fn, args) {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: sbHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(Object.assign({ p_key: prosKey() }, args || {}))
+    });
+    const body = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((body && body.message) || ('Request failed (' + res.status + ')'));
+    return body;
+  }
+
+  function initProsPanel() {
+    const has = !!prosKey();
+    document.getElementById('prosKeyCard').hidden = has;
+    document.getElementById('prosMain').hidden = !has;
+    if (has) loadPros();
+  }
+
+  async function saveProsKey() {
+    const v = document.getElementById('prosKeyInput').value.trim();
+    const st = document.getElementById('prosKeyStatus');
+    if (!v) return;
+    try { localStorage.setItem(PROS_KEY_STORE, v); } catch (e) {}
+    try {
+      await prosRpc('admin_pros');
+      st.textContent = '';
+      initProsPanel();
+    } catch (e) {
+      try { localStorage.removeItem(PROS_KEY_STORE); } catch (x) {}
+      st.className = 'status-msg err';
+      st.textContent = /invalid admin key/i.test(e.message) ? 'That key didn\'t work.' :
+        /admin_pros|function/i.test(e.message) ? 'Run supabase/vendor-portal.sql in Supabase first.' : e.message;
+    }
+  }
+
+  function forgetProsKey() {
+    if (!confirm('Forget the admin key on this device?')) return;
+    try { localStorage.removeItem(PROS_KEY_STORE); } catch (e) {}
+    initProsPanel();
+  }
+
+  function inviteLink(p) { return PORTAL_URL + '?code=' + encodeURIComponent(p.access_code); }
+  function inviteText(p) {
+    return 'Hi ' + String(p.name || '').split(' ')[0] + ', here\'s your link to join the Suds Monkey Network. ' +
+      'Set up your profile, upload your insurance and W-9, and you\'ll start getting jobs once approved: ' + inviteLink(p);
+  }
+  function smsHref(p) { return 'sms:' + String(p.phone || '').replace(/[^0-9+]/g, '') + '?&body=' + encodeURIComponent(inviteText(p)); }
+  function mailHref(p) { return 'mailto:' + encodeURIComponent(p.email || '') + '?subject=' + encodeURIComponent('Join the Suds Monkey Network') + '&body=' + encodeURIComponent(inviteText(p)); }
+
+  function linkActions(p) {
+    return '<button class="btn btn-secondary" onclick="copyProLink(\'' + p.id + '\', this)">Copy link</button>' +
+      (p.phone ? '<a class="btn btn-secondary" href="' + escHtml(smsHref(p)) + '">Text it</a>' : '') +
+      (p.email ? '<a class="btn btn-secondary" href="' + escHtml(mailHref(p)) + '">Email it</a>' : '');
+  }
+
+  async function invitePro() {
+    const st = document.getElementById('proInviteStatus');
+    const btn = document.getElementById('proInviteBtn');
+    const name = document.getElementById('proName').value.trim();
+    if (!name) { st.className = 'status-msg err'; st.textContent = 'Add their name.'; return; }
+    btn.disabled = true; st.textContent = '';
+    try {
+      const r = await prosRpc('admin_invite_pro', {
+        p_name: name,
+        p_phone: document.getElementById('proPhone').value.trim(),
+        p_email: document.getElementById('proEmail').value.trim()
+      });
+      const p = { id: r.id, access_code: r.access_code, name: name,
+                  phone: document.getElementById('proPhone').value.trim(), email: document.getElementById('proEmail').value.trim() };
+      ['proName', 'proPhone', 'proEmail'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('proInviteResult').innerHTML =
+        '<div class="pro-link"><b>Invite link for ' + escHtml(name) + '</b>' + escHtml(inviteLink(p)) + '</div>' +
+        '<div class="pro-actions">' + linkActions(p) + '</div>';
+      await loadPros();
+      prosCache.push(p);   // so Copy link works for the result card before a reload
+    } catch (e) {
+      st.className = 'status-msg err'; st.textContent = e.message;
+    } finally { btn.disabled = false; }
+  }
+
+  async function copyProLink(id, btn) {
+    const p = prosCache.find(x => x.id === id);
+    if (!p) return;
+    try { await navigator.clipboard.writeText(inviteLink(p)); btn.textContent = 'Copied'; }
+    catch (e) { prompt('Copy this link:', inviteLink(p)); }
+    setTimeout(() => { btn.textContent = 'Copy link'; }, 1600);
+  }
+
+  async function setProStatus(id, status, confirmMsg) {
+    if (confirmMsg && !confirm(confirmMsg)) return;
+    try { await prosRpc('admin_set_pro_status', { p_id: id, p_status: status }); await loadPros(); }
+    catch (e) { alert(e.message); }
+  }
+  async function deletePro(id) {
+    if (!confirm('Remove this pro? Their invite link stops working.')) return;
+    try { await prosRpc('admin_delete_pro', { p_id: id }); await loadPros(); }
+    catch (e) { alert(e.message); }
+  }
+
+  function fmtDay(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    return MONTHS[d.getMonth()].slice(0, 3) + ' ' + d.getDate() + ', ' + d.getFullYear();
+  }
+
+  function proCard(p) {
+    const docs = (path) => path
+      ? '<span class="ok">✓ Uploaded</span> <span style="color:var(--mid);font-size:11px;">(Supabase → Storage → contractor-docs → ' + escHtml(p.id.slice(0, 8)) + '…)</span>'
+      : '<span class="missing">Not yet</span>';
+    const label = { submitted: 'Needs review', invited: 'Invited', approved: 'Active', paused: 'Paused' }[p.status] || p.status;
+    let actions = '';
+    if (p.status === 'submitted') {
+      actions = '<button class="btn btn-primary" onclick="setProStatus(\'' + p.id + '\', \'approved\', \'Approve ' + escHtml(p.name).replace(/'/g, '') + '? They\\\'ll start getting job offers.\')">Approve</button>' +
+                '<button class="btn btn-secondary" onclick="setProStatus(\'' + p.id + '\', \'invited\', \'Send back so they can fix their info? Text them what needs changing.\')">Send back</button>';
+    } else if (p.status === 'invited') {
+      actions = linkActions(p) + '<button class="btn btn-secondary" onclick="deletePro(\'' + p.id + '\')">Remove</button>';
+    } else if (p.status === 'approved') {
+      actions = '<button class="btn btn-secondary" onclick="setProStatus(\'' + p.id + '\', \'paused\', \'Pause this pro? They stop getting offers until you reactivate them.\')">Pause</button>' + linkActions(p);
+    } else if (p.status === 'paused') {
+      actions = '<button class="btn btn-primary" onclick="setProStatus(\'' + p.id + '\', \'approved\')">Reactivate</button>';
+    }
+    const rows = [
+      ['Phone', p.phone ? '<a href="tel:' + escHtml(String(p.phone).replace(/[^0-9+]/g, '')) + '">' + escHtml(p.phone) + '</a>' : ''],
+      ['Email', p.email ? '<a href="mailto:' + escHtml(p.email) + '">' + escHtml(p.email) + '</a>' : ''],
+      ['Area', escHtml(p.service_area || '')],
+      p.status !== 'invited' || p.insurance_path ? ['Insurance', docs(p.insurance_path)] : null,
+      p.status !== 'invited' || p.w9_path ? ['W-9', docs(p.w9_path)] : null,
+      p.terms_accepted_at ? ['Terms', 'Signed "' + escHtml(p.terms_signature) + '" · ' + fmtDay(p.terms_accepted_at) + ' · ' + escHtml(p.terms_version)] : null,
+      p.status === 'approved' || p.status === 'paused' ? ['Jobs', String(p.jobs_taken || 0) + ' taken'] : null,
+      p.status === 'invited' ? ['Invited', fmtDay(p.created_at)] : null
+    ].filter(r => r && r[1]);
+    return '<div class="pro-card' + (p.status === 'submitted' ? ' review' : '') + '">' +
+      '<div class="pro-top"><div><div class="pro-name">' + escHtml(p.name) + '</div>' +
+      (p.company_name ? '<div class="pro-co">' + escHtml(p.company_name) + '</div>' : '') + '</div>' +
+      '<span class="pro-pill ' + escHtml(p.status) + '">' + escHtml(label) + '</span></div>' +
+      '<div class="pro-rows">' + rows.map(r => '<div><b>' + r[0] + '</b><span>' + r[1] + '</span></div>').join('') + '</div>' +
+      '<div class="pro-actions">' + actions + '</div></div>';
+  }
+
+  async function loadPros() {
+    const wrap = document.getElementById('prosLists');
+    try {
+      prosCache = await prosRpc('admin_pros') || [];
+    } catch (e) {
+      if (/invalid admin key/i.test(e.message)) { try { localStorage.removeItem(PROS_KEY_STORE); } catch (x) {} initProsPanel(); return; }
+      wrap.innerHTML = '<div class="pros-empty">' + escHtml(/admin_pros|function/i.test(e.message) ? 'Run supabase/vendor-portal.sql in Supabase first.' : 'Couldn\'t load pros: ' + e.message) + '</div>';
+      return;
+    }
+    const groups = [['submitted', 'Needs your review'], ['invited', 'Invited, not finished'], ['approved', 'Active'], ['paused', 'Paused']];
+    const html = groups.map(([st, title]) => {
+      const list = prosCache.filter(p => p.status === st);
+      return list.length ? '<div class="section-label">' + title + ' (' + list.length + ')</div>' + list.map(proCard).join('') : '';
+    }).join('');
+    wrap.innerHTML = html || '<div class="pros-empty">No pros yet. Invite your first one above.</div>';
+    const n = prosCache.filter(p => p.status === 'submitted').length;
+    const badge = document.getElementById('prosBadge');
+    badge.hidden = !n; badge.textContent = n;
   }
 
   // ── Admin calendar ───────────────────────

@@ -1,12 +1,17 @@
 -- ============================================================================
--- Suds Monkey Network: vendor portal, step 1
+-- Suds Monkey Network: vendor portal
 -- ============================================================================
 -- Paste this whole file into Supabase: Dashboard -> SQL Editor -> New query ->
 -- Run. It is safe to run more than once.
 --
 -- What it sets up:
 --   * contractors   -- the pros. Each has a private access_code that logs
---                      them into portal.html.
+--                      them into portal.html. Invite-only: you add a pro in
+--                      admin.html, they finish their profile (service area,
+--                      insurance, W-9, terms) in the portal, you approve.
+--   * network_settings -- holds the admin key that admin.html's Pros tab
+--                      needs. (The admin password in admin.html is visible
+--                      in the page source, so it can't guard these.)
 --   * job_offers    -- one row per booking offered to a pro, with the
 --                      2-hour confirm window and the 3-day payout hold.
 --   * new columns on bookings -- the customer's three picked times.
@@ -16,9 +21,11 @@
 --                      anything. The tables themselves stay closed to the
 --                      public key, so nobody can list addresses or offers
 --                      without a valid access code.
---   * a job-photos storage bucket for the "Mark complete" after photos.
+--   * admin_* functions -- add / approve / pause pros. Need the admin key.
+--   * storage buckets: job-photos ("Mark complete" after photos) and
+--                      contractor-docs (insurance + W-9; private).
 --
--- After running it, add your first pro at the very bottom of this file.
+-- After running it, get your admin key with the query at the very bottom.
 -- ============================================================================
 
 
@@ -31,15 +38,31 @@ create table if not exists public.contractors (
   company_name  text,                    -- pros keep their own business names
   phone         text,
   email         text,
-  service_area  text,
-  active        boolean not null default true,
-  -- Share of the job price (before any rush fee) the pro is paid, 0 to 1.
-  -- 0.70 = 70%. The rush fee is paid separately at 90% (see RUSH_PRO_SHARE).
-  payout_rate   numeric(4,3) not null check (payout_rate >= 0 and payout_rate <= 1),
+  service_area  text,                    -- ZIP codes / areas they cover, as they typed it
+  -- invited   -> added by you, hasn't finished their profile
+  -- submitted -> profile, insurance, W-9 and terms in; waiting for you
+  -- approved  -> gets job offers
+  -- paused    -> no offers, can't use the portal's job screens
+  status        text not null default 'invited'
+                check (status in ('invited','submitted','approved','paused')),
   -- Private login code for portal.html. Generated automatically.
   access_code   text not null unique default replace(gen_random_uuid()::text, '-', ''),
+  insurance_path text,                   -- contractor-docs/<id>/...
+  w9_path        text,                   -- contractor-docs/<id>/...
+  terms_version  text,
+  terms_signature text,                  -- the full name they typed
+  terms_accepted_at timestamptz,
+  submitted_at   timestamptz,
+  approved_at    timestamptz,
   created_at    timestamptz not null default now()
 );
+
+-- One row. admin_key is what you enter once in admin.html's Pros tab.
+create table if not exists public.network_settings (
+  id        int primary key default 1 check (id = 1),
+  admin_key text not null default replace(gen_random_uuid()::text, '-', '')
+);
+insert into public.network_settings (id) values (1) on conflict do nothing;
 
 
 -- ---------------------------------------------------------------------------
@@ -96,8 +119,9 @@ create index if not exists job_offers_contractor_idx on public.job_offers (contr
 -- ---------------------------------------------------------------------------
 -- RLS on with no policies = the public (anon) key can't read or write them
 -- directly. portal.html goes through the functions below instead.
-alter table public.contractors enable row level security;
-alter table public.job_offers  enable row level security;
+alter table public.contractors      enable row level security;
+alter table public.job_offers       enable row level security;
+alter table public.network_settings enable row level security;
 
 
 -- ---------------------------------------------------------------------------
@@ -107,6 +131,10 @@ create or replace function public._sm_offer_window() returns interval
   language sql immutable as $$ select interval '2 hours' $$;
 create or replace function public._sm_payout_hold() returns interval
   language sql immutable as $$ select interval '3 days' $$;
+-- One pay rate for the whole network: the pro's share of the job price
+-- before any rush fee. 0.70 = 70%.  <-- set this to your rate
+create or replace function public._sm_payout_rate() returns numeric
+  language sql immutable as $$ select 0.70::numeric $$;
 -- RUSH_PRO_SHARE: share of the rush surcharge the pro gets.
 create or replace function public._sm_rush_pro_share() returns numeric
   language sql immutable as $$ select 0.90::numeric $$;
@@ -114,6 +142,10 @@ create or replace function public._sm_rush_pro_share() returns numeric
 -- (every day, Oklahoma time). A booking at 6:30 PM gets 30 min tonight +
 -- 90 min from 8 AM = due 9:30 AM. calendar.html mirrors these values
 -- (PLATFORM_OPEN / PLATFORM_CLOSE) to hide slots a pro couldn't confirm in time.
+-- Version of the network terms pros agree to in the portal. Bump this when
+-- the wording in portal.html (TERMS_VERSION) changes.
+create or replace function public._sm_terms_version() returns text
+  language sql immutable as $$ select 'v1-draft'::text $$;
 create or replace function public._sm_tz() returns text
   language sql immutable as $$ select 'America/Chicago'::text $$;
 create or replace function public._sm_hours_open() returns time
@@ -162,7 +194,7 @@ create or replace function public._sm_offer_new_booking() returns trigger
 begin
   if new.status = 'pending' then
     insert into job_offers (booking_id, contractor_id)
-    select new.id, c.id from contractors c where c.active
+    select new.id, c.id from contractors c where c.status = 'approved'
     on conflict do nothing;
   end if;
   return new;
@@ -177,16 +209,37 @@ create trigger sm_offer_new_booking
 -- ---------------------------------------------------------------------------
 -- 7. helpers
 -- ---------------------------------------------------------------------------
-create or replace function public._sm_contractor(p_code text) returns public.contractors
+-- Any pro with a valid code (used while onboarding).
+create or replace function public._sm_contractor_login(p_code text) returns public.contractors
   language plpgsql security definer set search_path = public as $$
 declare
   c contractors;
 begin
-  select * into c from contractors where access_code = p_code and active;
+  select * into c from contractors where access_code = p_code;
   if not found then
     raise exception 'invalid access code' using errcode = '28000';
   end if;
   return c;
+end $$;
+
+-- Only approved pros can see and work jobs.
+create or replace function public._sm_contractor(p_code text) returns public.contractors
+  language plpgsql security definer set search_path = public as $$
+declare
+  c contractors := _sm_contractor_login(p_code);
+begin
+  if c.status <> 'approved' then
+    raise exception 'not approved yet' using errcode = '28000';
+  end if;
+  return c;
+end $$;
+
+create or replace function public._sm_admin(p_key text) returns void
+  language plpgsql security definer set search_path = public as $$
+begin
+  if p_key is null or not exists (select 1 from network_settings where admin_key = p_key) then
+    raise exception 'invalid admin key' using errcode = '28000';
+  end if;
 end $$;
 
 -- Marks offers whose 2-hour window has run out, and flags bookings that no
@@ -206,10 +259,10 @@ begin
 end $$;
 
 -- What the pro earns for one of the customer's picks.
-create or replace function public._sm_payout(p_option jsonb, p_rate numeric) returns numeric
+create or replace function public._sm_payout(p_option jsonb) returns numeric
   language sql immutable as $$
   select round(
-    (coalesce((p_option->>'price')::numeric, 0) - coalesce((p_option->>'rush')::numeric, 0)) * p_rate
+    (coalesce((p_option->>'price')::numeric, 0) - coalesce((p_option->>'rush')::numeric, 0)) * _sm_payout_rate()
     + coalesce((p_option->>'rush')::numeric, 0) * _sm_rush_pro_share()
   , 2)
 $$;
@@ -219,13 +272,69 @@ $$;
 -- 8. portal functions (the only things the public key may call)
 -- ---------------------------------------------------------------------------
 
--- Who's logged in.
+-- Who's logged in, and where they are in onboarding.
 create or replace function public.portal_me(p_code text) returns json
   language plpgsql security definer set search_path = public as $$
 declare
-  c contractors := _sm_contractor(p_code);
+  c contractors := _sm_contractor_login(p_code);
 begin
-  return json_build_object('name', c.name, 'company_name', c.company_name);
+  return json_build_object(
+    'id', c.id, 'name', c.name, 'company_name', c.company_name,
+    'phone', c.phone, 'email', c.email, 'service_area', c.service_area,
+    'status', c.status,
+    'has_insurance', c.insurance_path is not null,
+    'has_w9', c.w9_path is not null,
+    'payout_rate', _sm_payout_rate(),
+    'rush_share', _sm_rush_pro_share(),
+    'terms_version', _sm_terms_version());
+end $$;
+
+-- Onboarding: the pro's profile, documents and signed terms. Moves them to
+-- 'submitted' for you to review. They can resubmit until you approve.
+create or replace function public.portal_submit_profile(
+  p_code text, p_company text, p_phone text, p_email text, p_service_area text,
+  p_insurance_path text, p_w9_path text, p_signature text, p_terms_version text) returns json
+  language plpgsql security definer set search_path = public as $$
+declare
+  c contractors := _sm_contractor_login(p_code);
+  prefix text := c.id::text || '/';
+begin
+  if c.status not in ('invited', 'submitted') then
+    raise exception 'Your profile is already approved. Call Suds Monkey to change it.';
+  end if;
+  if coalesce(trim(p_phone), '') = '' or coalesce(trim(p_email), '') = '' then
+    raise exception 'Add your phone and email.';
+  end if;
+  if coalesce(trim(p_service_area), '') = '' then
+    raise exception 'Add the areas you cover.';
+  end if;
+  if coalesce(p_insurance_path, c.insurance_path) is null or coalesce(p_insurance_path, c.insurance_path) not like prefix || '%' then
+    raise exception 'Upload your insurance certificate.';
+  end if;
+  if coalesce(p_w9_path, c.w9_path) is null or coalesce(p_w9_path, c.w9_path) not like prefix || '%' then
+    raise exception 'Upload your W-9.';
+  end if;
+  if p_terms_version is distinct from _sm_terms_version() then
+    raise exception 'The terms were updated. Refresh the page and review them again.';
+  end if;
+  if length(coalesce(trim(p_signature), '')) < 3 then
+    raise exception 'Type your full name to sign the terms.';
+  end if;
+
+  update contractors set
+    company_name      = nullif(trim(p_company), ''),
+    phone             = trim(p_phone),
+    email             = trim(p_email),
+    service_area      = trim(p_service_area),
+    insurance_path    = coalesce(p_insurance_path, insurance_path),
+    w9_path           = coalesce(p_w9_path, w9_path),
+    terms_version     = p_terms_version,
+    terms_signature   = trim(p_signature),
+    terms_accepted_at = now(),
+    submitted_at      = now(),
+    status            = 'submitted'
+  where id = c.id;
+  return json_build_object('ok', true);
 end $$;
 
 -- Everything portal.html shows: open offers, upcoming jobs, payouts.
@@ -261,7 +370,7 @@ begin
       -- Contact details only once the pro has the job.
       case when o.status = 'accepted' then b.last_name end as last_name,
       case when o.status = 'accepted' then b.phone end     as phone,
-      (select json_agg(opt || jsonb_build_object('payout', _sm_payout(opt, c.payout_rate)) order by ord)
+      (select json_agg(opt || jsonb_build_object('payout', _sm_payout(opt)) order by ord)
          from jsonb_array_elements(b.pick_options) with ordinality as e(opt, ord)) as options,
       coalesce(b.date_iso::text, '') || ' ' || o.offered_at::text as sort_key
     from job_offers o
@@ -305,7 +414,7 @@ begin
     raise exception 'That time was just taken. Pick another of the customer''s times.';
   end if;
 
-  pay := _sm_payout(opt, c.payout_rate);
+  pay := _sm_payout(opt);
 
   update job_offers
      set status = 'accepted', responded_at = now(), accepted_option = p_option, payout = pay
@@ -359,9 +468,82 @@ end $$;
 
 
 -- ---------------------------------------------------------------------------
--- 9. who may call what
+-- 9. admin functions (admin.html's Pros tab; need the admin key)
+-- ---------------------------------------------------------------------------
+create or replace function public.admin_pros(p_key text) returns json
+  language plpgsql security definer set search_path = public as $$
+begin
+  perform _sm_admin(p_key);
+  return (select coalesce(json_agg(row_to_json(x) order by
+             array_position(array['submitted','invited','approved','paused'], x.status), x.created_at desc), '[]'::json)
+          from (select id, name, company_name, phone, email, service_area, status, access_code,
+                       insurance_path, w9_path, terms_version, terms_signature, terms_accepted_at,
+                       submitted_at, approved_at, created_at,
+                       (select count(*) from job_offers o where o.contractor_id = c.id and o.status = 'accepted') as jobs_taken
+                  from contractors c) x);
+end $$;
+
+create or replace function public.admin_invite_pro(p_key text, p_name text, p_phone text, p_email text) returns json
+  language plpgsql security definer set search_path = public as $$
+declare
+  c contractors;
+begin
+  perform _sm_admin(p_key);
+  if coalesce(trim(p_name), '') = '' then raise exception 'Add their name.'; end if;
+  insert into contractors (name, phone, email)
+  values (trim(p_name), nullif(trim(p_phone), ''), nullif(trim(p_email), ''))
+  returning * into c;
+  return json_build_object('id', c.id, 'access_code', c.access_code);
+end $$;
+
+-- approve (from submitted or paused) / pause (from approved).
+create or replace function public.admin_set_pro_status(p_key text, p_id uuid, p_status text) returns json
+  language plpgsql security definer set search_path = public as $$
+declare
+  c contractors;
+begin
+  perform _sm_admin(p_key);
+  select * into c from contractors where id = p_id for update;
+  if not found then raise exception 'Pro not found.'; end if;
+  if p_status = 'approved' and c.status in ('submitted', 'paused') then
+    update contractors set status = 'approved', approved_at = coalesce(approved_at, now()) where id = p_id;
+  elsif p_status = 'paused' and c.status = 'approved' then
+    update contractors set status = 'paused' where id = p_id;
+  elsif p_status = 'invited' and c.status = 'submitted' then
+    -- send back for fixes (e.g. expired insurance); they resubmit in the portal
+    update contractors set status = 'invited' where id = p_id;
+  else
+    raise exception 'Can''t change % to %.', c.status, p_status;
+  end if;
+  return json_build_object('ok', true);
+end $$;
+
+-- Remove a pro who never got approved (typo, changed their mind).
+create or replace function public.admin_delete_pro(p_key text, p_id uuid) returns json
+  language plpgsql security definer set search_path = public as $$
+begin
+  perform _sm_admin(p_key);
+  delete from contractors where id = p_id and status in ('invited', 'submitted');
+  if not found then raise exception 'Only pros who aren''t approved yet can be removed. Pause them instead.'; end if;
+  return json_build_object('ok', true);
+end $$;
+
+-- Storage policy helper: uploads to contractor-docs must go in the folder of
+-- a pro who is still onboarding.
+create or replace function public._sm_doc_upload_ok(p_name text) returns boolean
+  language sql stable security definer set search_path = public as $$
+  select exists (select 1 from contractors
+                  where id::text = split_part(p_name, '/', 1)
+                    and status in ('invited', 'submitted'))
+$$;
+
+
+-- ---------------------------------------------------------------------------
+-- 10. who may call what
 -- ---------------------------------------------------------------------------
 revoke all on function public._sm_contractor(text)            from public, anon, authenticated;
+revoke all on function public._sm_contractor_login(text)      from public, anon, authenticated;
+revoke all on function public._sm_admin(text)                 from public, anon, authenticated;
 revoke all on function public._sm_expire_offers()             from public, anon, authenticated;
 revoke all on function public._sm_offer_new_booking()         from public, anon, authenticated;
 
@@ -370,10 +552,16 @@ grant execute on function public.portal_jobs(text)                     to anon;
 grant execute on function public.portal_accept(text, uuid, int)        to anon;
 grant execute on function public.portal_decline(text, uuid)            to anon;
 grant execute on function public.portal_complete(text, uuid, text[])   to anon;
+grant execute on function public.portal_submit_profile(text, text, text, text, text, text, text, text, text) to anon;
+grant execute on function public.admin_pros(text)                      to anon;
+grant execute on function public.admin_invite_pro(text, text, text, text) to anon;
+grant execute on function public.admin_set_pro_status(text, uuid, text) to anon;
+grant execute on function public.admin_delete_pro(text, uuid)          to anon;
+grant execute on function public._sm_doc_upload_ok(text)               to anon;
 
 
 -- ---------------------------------------------------------------------------
--- 10. after-photo storage
+-- 11. storage
 -- ---------------------------------------------------------------------------
 -- Private bucket: anyone with the site key can upload, nobody can list or
 -- download through it. You view photos in the Supabase dashboard (Storage).
@@ -386,15 +574,24 @@ create policy "job photos upload" on storage.objects
   for insert to anon
   with check (bucket_id = 'job-photos');
 
+-- Insurance certificates and W-9s (W-9s carry SSNs/EINs). Private: nothing
+-- on the website can read them. View them in Supabase -> Storage ->
+-- contractor-docs -> <pro id>.
+insert into storage.buckets (id, name, public)
+values ('contractor-docs', 'contractor-docs', false)
+on conflict (id) do nothing;
+
+drop policy if exists "contractor docs upload" on storage.objects;
+create policy "contractor docs upload" on storage.objects
+  for insert to anon
+  with check (bucket_id = 'contractor-docs' and public._sm_doc_upload_ok(name));
+
 
 -- ============================================================================
--- 11. ADD YOUR FIRST PRO
+-- 12. YOUR ADMIN KEY
 -- ============================================================================
--- Edit the values, then run just this statement (or leave it in and run the
--- whole file). payout_rate 0.70 = the pro keeps 70% of the job price; rush
--- fees are paid at 90% on top. The result shows their access_code: send them
--- https://sudsmonkey.github.io/Suds-calculator-/portal.html?code=THAT_CODE
+-- Run this on its own to see the key, then enter it once in admin.html ->
+-- Pros. Keep it private (it can add and approve pros). To change it:
+--   update public.network_settings set admin_key = replace(gen_random_uuid()::text, '-', '');
 --
--- insert into public.contractors (name, company_name, phone, email, service_area, payout_rate)
--- values ('Jerry Smith', 'Clearview', '(405) 555-0100', 'jerry@example.com', 'OKC metro', 0.70)
--- returning name, access_code;
+-- select admin_key from public.network_settings;
