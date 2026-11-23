@@ -8,7 +8,7 @@
 --   * contractors   -- the pros. Each has a private access_code that logs
 --                      them into portal.html.
 --   * job_offers    -- one row per booking offered to a pro, with the
---                      12-hour confirm window and the 3-day payout hold.
+--                      2-hour confirm window and the 3-day payout hold.
 --   * new columns on bookings -- the customer's three picked times.
 --   * a trigger     -- every new residential booking from calendar.html is
 --                      offered to every active pro automatically.
@@ -77,7 +77,7 @@ begin
       contractor_id    uuid not null references public.contractors(id) on delete cascade,
       status           text not null default 'offered'
                        check (status in ('offered','accepted','declined','expired','taken')),
-      offered_at       timestamptz not null default now(),   -- drives the 12-hour confirm window
+      offered_at       timestamptz not null default now(),   -- drives the 2-hour confirm window
       responded_at     timestamptz,
       accepted_option  int,                                  -- 0 = preferred, 1 = alt 1, 2 = alt 2
       payout           numeric,                              -- set when accepted
@@ -104,7 +104,7 @@ alter table public.job_offers  enable row level security;
 -- 5. settings
 -- ---------------------------------------------------------------------------
 create or replace function public._sm_offer_window() returns interval
-  language sql immutable as $$ select interval '12 hours' $$;
+  language sql immutable as $$ select interval '2 hours' $$;
 create or replace function public._sm_payout_hold() returns interval
   language sql immutable as $$ select interval '3 days' $$;
 -- RUSH_PRO_SHARE: share of the rush surcharge the pro gets.
@@ -147,7 +147,7 @@ begin
   return c;
 end $$;
 
--- Marks offers whose 12-hour window has run out, and flags bookings that no
+-- Marks offers whose 2-hour window has run out, and flags bookings that no
 -- pro took so admin can follow up.
 create or replace function public._sm_expire_offers() returns void
   language plpgsql security definer set search_path = public as $$

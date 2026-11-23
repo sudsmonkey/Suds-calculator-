@@ -94,7 +94,7 @@ function pendingCustomerEmail(b: Record<string, unknown>) {
     subject: "We're finding your Suds Monkey pro",
     html: wrapEmail(
       "We're finding your pro",
-      `<p style="font-size:14px;color:#3d3530;">Thanks for booking! We've sent your three times to our local pros. You'll hear back within 12 hours with who's coming and which time they took.</p>${table}<p style="font-size:14px;color:#3d3530;">Questions? Call or text us at ${PHONE_DISPLAY}.</p>`,
+      `<p style="font-size:14px;color:#3d3530;">Thanks for booking! We've sent your three times to our local pros. You'll hear back within 2 hours with who's coming and which time they took.</p>${table}<p style="font-size:14px;color:#3d3530;">Questions? Call or text us at ${PHONE_DISPLAY}.</p>`,
     ),
   };
 }

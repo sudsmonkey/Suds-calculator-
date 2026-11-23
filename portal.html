@@ -361,7 +361,7 @@
       if (left <= 0) { el.querySelector('b').textContent = '0:00:00'; expired = true; return; }
       const h = Math.floor(left / 3600000), m = Math.floor(left / 60000) % 60, s = Math.floor(left / 1000) % 60;
       el.querySelector('b').textContent = h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-      el.classList.toggle('urgent', left < 3600000);
+      el.classList.toggle('urgent', left < 1800000);   // last 30 min
     });
     if (expired && !tick._reloading) { tick._reloading = true; load().finally(() => { tick._reloading = false; }); }
   }

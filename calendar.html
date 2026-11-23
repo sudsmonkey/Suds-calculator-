@@ -427,7 +427,7 @@
       <h2>We're finding your pro</h2>
       <p>We've sent your three times to our local pros.</p>
       <div class="finding-times" id="findingTimes"></div>
-      <p>You'll hear back within <b>12 hours</b> with who's coming and which time they took.</p>
+      <p>You'll hear back within <b>2 hours</b> with who's coming and which time they took.</p>
     </div>
   </div>
 
@@ -719,8 +719,8 @@
   async function initPickMode() {
     document.body.classList.add('pick-mode');
     const list = document.getElementById('dayList');
-    // Starts tomorrow: a pro needs up to 12 hours to confirm, so same-day
-    // can't work in this flow.
+    // Starts tomorrow: no same-day jobs in this flow (the pro still needs
+    // up to 2 hours to confirm, plus drive time).
     const start = new Date(today); start.setDate(start.getDate() + 1);
     const end = isAdmin ? new Date(today.getFullYear(), today.getMonth(), today.getDate() + 60) : maxDate;
     const taken = new Set();

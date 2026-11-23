@@ -36,7 +36,7 @@ booking's notes.
 
 | Rule | Where |
 |------|-------|
-| 12-hour confirm window | `_sm_offer_window()` in the SQL |
+| 2-hour confirm window | `_sm_offer_window()` in the SQL |
 | 3-day payout hold | `_sm_payout_hold()` in the SQL |
 | Pro keeps 90% of the rush fee | `_sm_rush_pro_share()` in the SQL |
 | Pro's share of the job price | `contractors.payout_rate`, one per pro |
@@ -50,11 +50,11 @@ booking's notes.
 - Only the preferred time blocks availability until a pro accepts. With one
   pro, a backup time can be taken by someone else in the meantime; accepting it
   then fails with "That time was just taken".
-- If no pro accepts within 12 hours, or every pro declines, the booking's
+- If no pro accepts within 2 hours, or every pro declines, the booking's
   `status` becomes `no_pro` so you can follow up. `admin.html` doesn't show this
   yet.
-- Same-day bookings are gone from the residential flow, because a pro may take
-  up to 12 hours to confirm.
+- Same-day bookings are gone from the residential flow; the list starts
+  tomorrow. With the 2-hour window, same-day 1 PM could work if wanted.
 - Pros see the customer's phone and last name only after they accept.
 
 ## Not built yet
