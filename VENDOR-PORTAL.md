@@ -1,18 +1,20 @@
 # Vendor portal (Suds Monkey Network)
 
-Built from the "Vendor Portal Notes" doc. A customer picks three times, every
-active pro gets the job as an offer, and the first pro to accept gets it.
-Payouts and Stripe come later.
+Built from the "Vendor Portal Notes" doc. A customer picks three times; pros
+are offered the job one at a time in the rank order you set, with room for a
+small back-and-forth on times (see "The offer chain" below). Payouts and
+Stripe come later.
 
 ## What's in the repo
 
 | File | What it does |
 |------|--------------|
-| `supabase/vendor-portal.sql` | Creates `contractors`, `job_offers` and `network_settings` (the admin key), adds new columns to `bookings`, and sets up the trigger that sends each new booking to approved pros, the `portal_*` and `admin_*` functions, and the `job-photos` and `contractor-docs` buckets. Safe to run more than once. |
+| `supabase/vendor-portal.sql` | Creates `contractors`, `job_offers` and `network_settings` (the admin key), adds new columns to `bookings`, the offer engine (ranked chain, holds, counter times), the `portal_*`, `customer_*` and `admin_*` functions, the `job-photos` and `contractor-docs` buckets, and a once-a-minute background check plus alert emails (pg_cron + pg_net). Safe to run more than once. |
 | `calendar.html` | Residential bookings use a scrolling list of days with 8 AM / 1 PM buttons, a pinned "preferred + two backups" header, Rush +$50 for the next business day, Save 5% for 10+ days out, a price on each day, and a "Got it! We're confirming your time" screen. Consult links still use the month grid. |
-| `admin.html` → **Pros** tab | Invite a pro (name, phone, email, pay rate) to get their link, with buttons to copy, text or email it. Review each pro's profile, insurance, W-9, workers' comp and signed terms, then Approve or Send back. Pause or reactivate pros, and change a pro's pay rate. The tab shows a badge when someone needs review. |
-| `portal.html` | The pro's phone page. Until a pro is approved it shows onboarding: business info, service area, insurance upload, W-9 upload, workers' comp (certificate, or signed exemption if they have no employees), and the network terms with a checkbox and typed-name signature, then "We're reviewing your info". After approval: Jobs tab: New offers (payout, countdown, address with a map link, the three times; tap one, then Accept) and Upcoming jobs (customer name and phone, Mark complete with after photos). Payouts tab: amounts on the 3-day hold and amounts released. |
-| `supabase/functions/bright-endpoint/index.ts` | New bookings get a "Got it! We're confirming your time" email. After a pro accepts, `portal.html` triggers a one-time "Your Suds Monkey pro is set for Tuesday 8 AM" email (set `SHOW_PRO_NAME` to name the pro), and you get a copy saying which pro took it. |
+| `admin.html` → **Pros** tab | Invite a pro (name, phone, email, pay rate) to get their link, with buttons to copy, text or email it. Review each pro's profile, insurance, W-9, workers' comp and signed terms, then Approve or Send back. Pause or reactivate pros, change a pro's pay rate, and set the order pros are asked in (↑ ↓; new approvals go last). The tab shows a badge when someone needs review. |
+| `portal.html` | The pro's phone page. Until a pro is approved it shows onboarding: business info, service area, insurance upload, W-9 upload, workers' comp (certificate, or signed exemption if they have no employees), and the network terms with a checkbox and typed-name signature, then "We're reviewing your info". After approval: Jobs tab: New offers (payout, countdown, address with a map link, the customer's times; Accept, Hold an alternate, or "None of these work" to suggest up to 2 of their own times), Waiting to hear (holds, and counter times the customer is choosing between), and Upcoming jobs (customer name and phone, Mark complete with after photos). Payouts tab: amounts on the 3-day hold and amounts released. |
+| `respond.html` | The customer's page from the "please pick one" email (`?t=` a long random token): the pro's suggested times with prices, Book, or "Neither works". |
+| `supabase/functions/bright-endpoint/index.ts` | Alert emails the database sends: new offer to a pro (with portal link), "you got the job" to a pro, the customer's counter times (link to `respond.html`), and "no pro" to you. Each is sent once. New bookings get a "Got it! We're confirming your time" email. After a pro accepts, `portal.html` triggers a one-time "Your Suds Monkey pro is set for Tuesday 8 AM" email (set `SHOW_PRO_NAME` to name the pro), and you get a copy saying which pro took it. |
 
 ## Setup (needs a laptop or the Supabase dashboard)
 
@@ -29,8 +31,15 @@ Payouts and Stripe come later.
 4. **Invite your first pro** from admin → Pros, and text them the link. They
    finish onboarding on their phone, then you approve them.
 5. **Redeploy the email function** so customers get the "confirming your time" and
-   "your pro is set" emails instead of "You're booked!": Supabase → Edge
-   Functions → `bright-endpoint` → paste the new `index.ts` → Deploy.
+   "your pro is set" emails instead of "You're booked!", and pros get offer
+   alerts: Supabase → Edge Functions → `bright-endpoint` → paste the new
+   `index.ts` → Deploy.
+6. **Check the background extensions.** Running the SQL tries to turn on
+   `pg_cron` (moves bookings along every minute) and `pg_net` (lets the
+   database send alert emails). If the SQL output says either isn't enabled,
+   turn it on in Supabase → Database → Extensions and run the SQL again.
+   Without them, nothing moves until someone opens the portal, and pros get no
+   email when it's their turn.
 
 Until step 1 is done, `calendar.html` still saves bookings. The new columns
 don't exist yet, so it leaves them out and writes the two backup times into the
@@ -40,13 +49,39 @@ booking's notes.
 
 | Rule | Where |
 |------|-------|
-| 2-hour confirm window, starting when the customer books | `_sm_offer_window()` in the SQL, `CONFIRM_MINS` in `calendar.html` |
+| 2-hour confirm window for the pros, starting when the customer books | `_sm_offer_window()` in the SQL, `CONFIRM_MINS` in `calendar.html` |
+| The top pro's share of those 2 hours (the rest goes to the next pros) | `_sm_lead_window()` in the SQL (1 hour) |
+| Customer's time to pick a counter time | `_sm_counter_window()` in the SQL (2 hours, same clock) |
+| Save on counter times (no rush fee on them) | `_sm_save_pct()` / `_sm_save_days()` in the SQL; keep in sync with `SAVE_PCT` / `SAVE_DAYS` in `calendar.html` |
 | Platform hours 8 AM to 7 PM Oklahoma time, Monday to Friday (the window only counts down inside them) | `_sm_hours_open()` / `_sm_hours_close()` / `_sm_tz()` in the SQL, `PLATFORM_OPEN` / `PLATFORM_CLOSE` in `calendar.html`. Keep the two in sync. |
 | 3-day payout hold | `_sm_payout_hold()` in the SQL |
 | Pro keeps 90% of the rush fee | `_sm_rush_pro_share()` in the SQL |
 | Pro's share of the job price | `contractors.payout_rate`, one per pro. Set it when you invite them; change it from admin → Pros. New pros default to 70%. |
 | Terms version pros sign | `TERMS_VERSION` in `portal.html` and `_sm_terms_version()` in the SQL |
 | Rush +$50 (next business day), Save 5% at 10+ days | `RUSH_FEE`, `SAVE_PCT`, `SAVE_DAYS` in `calendar.html` |
+
+## The offer chain
+
+Pros are asked one at a time, in the order set in admin → Pros, inside one
+shared 2 hours (8 AM–7 PM weekdays):
+
+1. **Pro #1** gets about the first hour and sees all three customer times.
+   - Takes the preferred time → booked.
+   - Can only do an alternate → **holds** it. The next pro is offered only the
+     preferred time (alternates show as "Held"). If nobody takes it, #1 gets
+     the alternate automatically and an email.
+   - Can't do any → may suggest up to 2 of their own times. The next pros can
+     then take any of the customer's three times.
+2. **Pros #2, #3, …** get the rest of the 2 hours, one after another (the next
+   one is asked as soon as the previous passes). Only #1 can suggest times.
+3. **Nobody took a customer time:** #1's held alternate wins; otherwise the
+   customer is emailed #1's suggested times and has 2 hours (same clock) to
+   pick one on `respond.html`. No rush fee on them; Save applies at 10+ days.
+   Suggested times must start after the customer's deadline.
+4. **Still nothing** (no hold, no suggestions, customer said neither or ran out
+   of time) → `no_pro`, and you get an email to follow up.
+
+If #1 is the only approved pro, they can take any of the three times directly.
 
 ## How it behaves
 
@@ -68,9 +103,9 @@ booking's notes.
   is due Monday 10 AM. The
   customer's screen and email give the exact time. Overnight, the portal shows
   "Answer by 9:30 AM" instead of a long countdown.
-- If no pro accepts by the deadline, or every pro declines, the booking's
-  `status` becomes `no_pro` so you can follow up. `admin.html` doesn't show this
-  yet.
+- Booking `status`: `pending` (pros' turn) → `accepted`, or `countered`
+  (customer choosing) → `accepted` / `no_pro`. `admin.html` doesn't show the
+  status yet; the "no pro" email tells you.
 - No same-day jobs: the list starts tomorrow. Rush (+$50) is the next business
   day: tomorrow, or Monday when booked Friday or over the weekend.
   A slot is hidden if the pro's deadline would land after it starts, so after
@@ -93,7 +128,8 @@ booking's notes.
 
 ## Not built yet
 
-- Text message (SMS) notice when a pro accepts. Email only for now.
+- Text messages. Pros and customers get email only for now; a pro who
+  doesn't check email may miss their turn.
 - Showing `status` / `no_pro` and the after photos in `admin.html`.
 - Editing a pro's details from `admin.html`, and an insurance expiry date or
   reminder.

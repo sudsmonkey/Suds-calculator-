@@ -484,6 +484,10 @@
   .pro-actions a.btn { text-decoration: none; text-align: center; }
   .pro-link { margin-top: 12px; padding: 10px; border-radius: 10px; background: var(--light); font-size: 12px; color: var(--ink); word-break: break-all; }
   .pro-link b { display: block; font-size: 11px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+  .pro-rank { display: flex; align-items: center; gap: 6px; margin: -4px 0 8px; }
+  .pro-rank span { font-size: 13px; font-weight: 900; color: var(--orange); margin-right: auto; }
+  .pro-rank button { width: 34px; height: 30px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--white); color: var(--ink); font-size: 15px; font-weight: 900; cursor: pointer; }
+  .pro-rank button:disabled { opacity: 0.3; cursor: not-allowed; }
   .pros-forget { display: block; margin: 18px auto 0; background: none; border: none; color: var(--mid); font-size: 12px; font-weight: 700; text-decoration: underline; cursor: pointer; font-family: inherit; }
 
   .status-msg { font-size: 12px; font-weight: 700; margin-top: 8px; }
@@ -1021,12 +1025,30 @@
       p.status === 'approved' || p.status === 'paused' ? ['Jobs', String(p.jobs_taken || 0) + ' taken'] : null,
       p.status === 'invited' ? ['Invited', fmtDay(p.created_at)] : null
     ].filter(r => r && r[1]);
+    // Active pros are asked in this order: #1 first (see VENDOR-PORTAL.md).
+    const active = prosCache.filter(x => x.status === 'approved');
+    const pos = active.findIndex(x => x.id === p.id);
+    const rankUi = p.status === 'approved' && active.length > 1
+      ? '<div class="pro-rank"><span>#' + (pos + 1) + '</span>' +
+        '<button type="button" aria-label="Move up" onclick="moveProRank(\'' + p.id + '\', -1)"' + (pos === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button type="button" aria-label="Move down" onclick="moveProRank(\'' + p.id + '\', 1)"' + (pos === active.length - 1 ? ' disabled' : '') + '>↓</button></div>'
+      : '';
     return '<div class="pro-card' + (p.status === 'submitted' ? ' review' : '') + '">' +
+      rankUi +
       '<div class="pro-top"><div><div class="pro-name">' + escHtml(p.name) + '</div>' +
       (p.company_name ? '<div class="pro-co">' + escHtml(p.company_name) + '</div>' : '') + '</div>' +
       '<span class="pro-pill ' + escHtml(p.status) + '">' + escHtml(label) + '</span></div>' +
       '<div class="pro-rows">' + rows.map(r => '<div><b>' + r[0] + '</b><span>' + r[1] + '</span></div>').join('') + '</div>' +
       '<div class="pro-actions">' + actions + '</div></div>';
+  }
+
+  async function moveProRank(id, dir) {
+    const ids = prosCache.filter(x => x.status === 'approved').map(x => x.id);
+    const i = ids.indexOf(id), j = i + dir;
+    if (i < 0 || j < 0 || j >= ids.length) return;
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    try { await prosRpc('admin_set_pro_order', { p_ids: ids }); await loadPros(); }
+    catch (e) { alert(e.message); }
   }
 
   async function loadPros() {
@@ -1038,7 +1060,7 @@
       wrap.innerHTML = '<div class="pros-empty">' + escHtml(/admin_pros|function/i.test(e.message) ? 'Run supabase/vendor-portal.sql in Supabase first.' : 'Couldn\'t load pros: ' + e.message) + '</div>';
       return;
     }
-    const groups = [['submitted', 'Needs your review'], ['invited', 'Invited, not finished'], ['approved', 'Active'], ['paused', 'Paused']];
+    const groups = [['submitted', 'Needs your review'], ['invited', 'Invited, not finished'], ['approved', 'Active, asked in this order'], ['paused', 'Paused']];
     const html = groups.map(([st, title]) => {
       const list = prosCache.filter(p => p.status === st);
       return list.length ? '<div class="section-label">' + title + ' (' + list.length + ')</div>' + list.map(proCard).join('') : '';

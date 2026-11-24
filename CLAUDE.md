@@ -34,7 +34,7 @@ hardcoded admin password) to revisit before Stripe invoicing goes live.
 Read it before changing `ADMIN_PASSWORD` or the Google Maps API key.
 
 `VENDOR-PORTAL.md` documents the Suds Monkey Network vendor portal
-(`portal.html`, the pick-three flow in `calendar.html`,
+(`portal.html`, `respond.html`, the pick-three flow in `calendar.html`,
 `supabase/vendor-portal.sql`): setup steps, where the business rules live,
 and what's not built yet. Read it before touching bookings' `status` /
 `pick_options`, `job_offers`, `contractors`, or the `portal_*` functions.

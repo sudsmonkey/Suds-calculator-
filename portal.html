@@ -73,6 +73,23 @@
   .time-opt.sel .radio { border-color: var(--orange); background: radial-gradient(circle, var(--orange) 45%, transparent 50%); }
   .time-opt:disabled { opacity: 0.45; cursor: not-allowed; }
 
+  .time-opt.locked { opacity: 0.4; cursor: not-allowed; background: var(--cream); }
+  .time-opt.locked .tpay { font-size: 11px; font-weight: 800; }
+  .hint { font-size: 12px; color: var(--mid); line-height: 1.45; margin-top: 8px; }
+  .counter-step { margin-top: 12px; padding: 12px; border: 1.5px dashed var(--orangeborder); border-radius: 14px; background: #FFFBF9; }
+  .counter-step h4 { font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 900; color: var(--dark); margin-bottom: 4px; }
+  .counter-days { max-height: 300px; overflow-y: auto; margin: 10px 0; display: flex; flex-direction: column; gap: 6px; }
+  .cday { display: grid; grid-template-columns: 1fr auto auto; gap: 6px; align-items: center; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; color: var(--dark); }
+  .cslot { min-width: 58px; border: 1.5px solid var(--orangeborder); background: var(--white); border-radius: 10px; padding: 8px 4px; font-size: 13px; font-weight: 900; color: var(--dark); cursor: pointer; }
+  .cslot:disabled { background: #F5EDE4; border-color: var(--border); color: #C8B8AA; cursor: not-allowed; }
+  .cslot.on { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .counter-actions { display: flex; flex-direction: column; gap: 4px; }
+  .counter-actions .accept { margin-top: 4px; font-size: 16px; padding: 14px; }
+  .card.waiting { border-style: dashed; box-shadow: none; }
+  .wait-pill { display: inline-block; font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 50px; padding: 3px 9px; background: var(--mint); color: #1F5C46; }
+  .wait-pill.choosing { background: #FDF0EF; color: var(--dark); }
+  .wait-main { font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 900; color: var(--dark); margin-top: 8px; }
+  .wait-sub { font-size: 13px; color: var(--mid); margin-top: 4px; line-height: 1.45; }
   .accept { display: block; width: 100%; margin-top: 14px; padding: 17px; border: none; border-radius: 50px; background: var(--orange); color: #fff; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(245,110,100,0.35); }
   .accept:disabled { opacity: 0.5; cursor: wait; }
   .decline { display: block; margin: 10px auto 0; background: none; border: none; color: var(--mid); font-size: 14px; font-weight: 800; text-decoration: underline; cursor: pointer; padding: 6px 12px; }
@@ -261,6 +278,10 @@
     <div id="jobsTab">
       <div class="sec">New offers</div>
       <div id="offersList"><div class="loading">Loading…</div></div>
+      <div id="waitingWrap" hidden>
+        <div class="sec">Waiting to hear</div>
+        <div id="waitingList"></div>
+      </div>
       <div class="sec">Upcoming jobs</div>
       <div id="upcomingList"></div>
     </div>
@@ -488,6 +509,7 @@
 
   function render() {
     const offers = jobs.filter(j => j.status === 'offered');
+    const waiting = jobs.filter(j => j.status === 'held' || (j.status === 'declined' && j.booking_status === 'countered'));
     const upcoming = jobs.filter(j => j.status === 'accepted' && !j.completed_at);
     const done = jobs.filter(j => j.status === 'accepted' && j.completed_at);
 
@@ -496,22 +518,36 @@
 
     $('offersList').innerHTML = offers.length ? offers.map(offerCard).join('') :
       '<div class="empty">No new offers right now. New jobs show up here.</div>';
+    $('waitingWrap').hidden = !waiting.length;
+    $('waitingList').innerHTML = waiting.map(waitingCard).join('');
     $('upcomingList').innerHTML = upcoming.length ? upcoming.map(upcomingCard).join('') :
       '<div class="empty">Jobs you accept show up here.</div>';
     renderPayouts(done);
     tick();
   }
 
+  const allowedOf = j => (j.allowed_options && j.allowed_options.length ? j.allowed_options : [0, 1, 2]).map(Number);
   function selectedOption(j) {
     if (chosen[j.id] != null) return chosen[j.id];
-    return 0;
+    return allowedOf(j)[0];
   }
 
+  // Offer modes (from portal_jobs): 'lead' = you're asked first and other
+  // pros are behind you; 'solo' = you're the only pro; 'next' = you're
+  // further down the list.
   function offerCard(j) {
     const opts = j.options || [];
+    const allowed = allowedOf(j);
     const sel = selectedOption(j);
     const o = opts[sel] || {};
     const rush = Number(o.rush || 0) > 0;
+    const hold = j.mode === 'lead' && sel > 0;
+    const canCounter = j.mode === 'lead' || j.mode === 'solo';
+    const hint = j.mode === 'lead'
+      ? 'Can\'t do the preferred time? Pick an alternate and hold it. The next pro gets first shot at the preferred time; if they pass, the job is yours at your alternate.'
+      : j.mode === 'next' && allowed.length === 1
+        ? 'Only the preferred time is open. Another pro is holding the alternates.'
+        : '';
     return '<div class="card offer" data-id="' + esc(j.id) + '">' +
       '<div class="card-top">' +
         '<div><div class="payout" data-payout>' + money(o.payout) + '</div>' +
@@ -524,16 +560,121 @@
         (j.address ? '<a href="' + mapsUrl(j.address) + '" target="_blank" rel="noopener">Map</a>' : '') + '</div>' +
       (j.notes ? '<div class="notes"><b>Notes:</b> ' + esc(j.notes) + '</div>' : '') +
       '<div class="times-label">Customer\'s times: tap one</div>' +
-      '<div class="times">' + opts.map((t, i) =>
-        '<button type="button" class="time-opt' + (i === 0 ? ' pref' : '') + (i === sel ? ' sel' : '') + '" data-opt="' + i + '" aria-pressed="' + (i === sel) + '">' +
+      '<div class="times">' + opts.map((t, i) => {
+        const open = allowed.includes(i);
+        return '<button type="button" class="time-opt' + (i === 0 ? ' pref' : '') + (open && i === sel ? ' sel' : '') + (open ? '' : ' locked') + '"' +
+          (open ? ' data-opt="' + i + '"' : ' disabled') + ' aria-pressed="' + (open && i === sel) + '">' +
           '<span class="radio"></span>' +
           '<span><span class="tlabel">' + LABELS[i] + '</span>' + esc(dayLabel(t.date_iso)) + ' · ' + esc(shortTime(t.time)) + '</span>' +
-          '<span class="tpay">' + money(t.payout) + '</span>' +
-        '</button>').join('') + '</div>' +
-      '<button type="button" class="accept" data-accept>Accept ' + esc(dayLabel(o.date_iso)) + ' · ' + esc(shortTime(o.time)) + '</button>' +
+          '<span class="tpay">' + (open ? money(t.payout) : 'Held') + '</span>' +
+        '</button>';
+      }).join('') + '</div>' +
+      (hint ? '<div class="hint">' + esc(hint) + '</div>' : '') +
+      '<button type="button" class="accept" data-accept>' + (hold ? 'Hold ' : 'Accept ') + esc(dayLabel(o.date_iso)) + ' · ' + esc(shortTime(o.time)) + '</button>' +
       '<div class="err" data-err></div>' +
-      '<button type="button" class="decline" data-decline>Decline</button>' +
+      (counterOpen[j.id] ? counterStep(j) :
+        '<button type="button" class="decline" data-decline>' + (canCounter ? 'None of these work' : 'Can\'t do it') + '</button>') +
     '</div>';
+  }
+
+  // ── "None of these work": the lead suggests up to 2 of their own times ──
+  const counterOpen = {};     // offer id -> true while the picker is open
+  const counterPicks = {};    // offer id -> ['YYYY-MM-DD|8:00 AM', ...]
+  let takenSlots = null;      // Set of 'YYYY-MM-DD|time' (booked or blocked)
+  const PORTAL_SLOTS = ['8:00 AM', '1:00 PM'];
+  const isoDay = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  function counterDays() {
+    const out = [];
+    const d = new Date(); d.setHours(0, 0, 0, 0);
+    while (out.length < 20) {
+      d.setDate(d.getDate() + 1);
+      if (d.getDay() !== 0 && d.getDay() !== 6) out.push(isoDay(d));
+    }
+    return out;
+  }
+  async function loadTaken() {
+    const days = counterDays();
+    const h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+    const q = '&date_iso=gte.' + days[0] + '&date_iso=lte.' + days[days.length - 1];
+    const qb = '&date=gte.' + days[0] + '&date=lte.' + days[days.length - 1];
+    const [b, bl] = await Promise.all([
+      fetch(SUPABASE_URL + '/rest/v1/bookings?select=date_iso,time,status' + q, { headers: h }).then(r => r.ok ? r.json() : []),
+      fetch(SUPABASE_URL + '/rest/v1/blocked_slots?select=date,time' + qb, { headers: h }).then(r => r.ok ? r.json() : [])
+    ]);
+    takenSlots = new Set();
+    b.forEach(r => { if (r.status !== 'no_pro') takenSlots.add(r.date_iso + '|' + r.time); });
+    bl.forEach(r => takenSlots.add(r.date + '|' + r.time));
+  }
+  // Oklahoma wall-clock parts of a moment.
+  function okParts(date) {
+    const p = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', weekday: 'short', hourCycle: 'h23' }).formatToParts(date);
+    const g = t => (p.find(x => x.type === t) || {}).value;
+    return { iso: g('year') + '-' + g('month') + '-' + g('day'), mins: Number(g('hour')) * 60 + Number(g('minute')), dow: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(g('weekday')) };
+  }
+  // Earliest a suggested time may start: the pros' deadline + the
+  // customer's 2 hours, counted 8 AM-7 PM weekdays (mirrors portal_decline).
+  // Returns 'YYYY-MM-DD|minutes' for comparing with slots.
+  function counterEarliest(j) {
+    const start = new Date(Math.max(Date.now(), new Date(j.pro_deadline || Date.now()).getTime()));
+    const s = okParts(start);
+    const d = new Date(s.iso + 'T12:00:00');
+    let t = s.mins, left = 120;
+    for (;;) {
+      if (d.getDay() === 0 || d.getDay() === 6) { d.setDate(d.getDate() + 1); t = 480; continue; }
+      if (t < 480) t = 480;
+      if (t >= 1140) { d.setDate(d.getDate() + 1); t = 480; continue; }
+      if (t + left <= 1140) return { iso: isoDay(d), mins: t + left };
+      left -= 1140 - t; d.setDate(d.getDate() + 1); t = 480;
+    }
+  }
+  const slotMinutes = t => { const [hm, ap] = t.split(' '); let [h, m] = hm.split(':').map(Number); if (ap === 'PM' && h !== 12) h += 12; return h * 60 + m; };
+
+  function counterStep(j) {
+    const picks = counterPicks[j.id] || [];
+    const custTimes = new Set((j.options || []).map(t => t.date_iso + '|' + t.time));
+    const earliest = counterEarliest(j);
+    const tooSoon = (day, t) => day < earliest.iso || (day === earliest.iso && slotMinutes(t) <= earliest.mins);
+    const rows = takenSlots ? counterDays().map(day => {
+      const [y, m, d] = day.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      return '<div class="cday"><span>' + DOW[dt.getDay()] + ', ' + MONTHS[m - 1] + ' ' + d + '</span>' +
+        PORTAL_SLOTS.map(t => {
+          const key = day + '|' + t;
+          const off = takenSlots.has(key) || custTimes.has(key) || tooSoon(day, t);
+          return '<button type="button" class="cslot' + (picks.includes(key) ? ' on' : '') + '" data-cslot="' + key + '"' + (off ? ' disabled' : '') + '>' + shortTime(t) + '</button>';
+        }).join('') + '</div>';
+    }).join('') : '<div class="hint">Loading open times…</div>';
+    const canSuggest = j.mode === 'lead' || j.mode === 'solo';
+    return '<div class="counter-step">' +
+      (canSuggest
+        ? '<h4>Suggest up to 2 of your own times</h4><div class="hint" style="margin-top:0;">If no other pro can do the customer\'s times, we\'ll send them yours to pick from. Rush fee doesn\'t apply.</div>' +
+          '<div class="counter-days">' + rows + '</div>'
+        : '') +
+      '<div class="counter-actions">' +
+        (canSuggest ? '<button type="button" class="accept" data-send-counter' + (picks.length ? '' : ' disabled') + '>' +
+          (picks.length ? 'Send my ' + picks.length + ' time' + (picks.length > 1 ? 's' : '') : 'Pick a time above') + '</button>' : '') +
+        '<button type="button" class="decline" data-decline-plain>Decline without suggesting times</button>' +
+        '<button type="button" class="decline" data-counter-cancel>Back</button>' +
+      '</div></div>';
+  }
+
+  function waitingCard(j) {
+    const opts = j.options || [];
+    if (j.status === 'held') {
+      const h = opts[j.held_option] || {}, p = opts[0] || {};
+      return '<div class="card waiting"><span class="wait-pill">On hold</span>' +
+        '<div class="wait-main">' + esc(dayLabel(h.date_iso)) + ' · ' + esc(shortTime(h.time)) + ' · ' + money(h.payout) + '</div>' +
+        '<div class="wait-sub">' + esc(j.package || '') + ' · ' + esc(j.address || '') + '<br>Yours if the next pro can\'t take the preferred time (' +
+          esc(dayLabel(p.date_iso)) + ' ' + esc(shortTime(p.time)) + '). Decided by ' + esc(clockLabel(j.pro_deadline)) + '.</div></div>';
+    }
+    const c = j.counter_priced || [];
+    return '<div class="card waiting"><span class="wait-pill choosing">Customer is choosing</span>' +
+      '<div class="wait-main">' + c.map(t => esc(dayLabel(t.date_iso)) + ' · ' + esc(shortTime(t.time)) + ' · ' + money(t.payout)).join('<br>') + '</div>' +
+      '<div class="wait-sub">' + esc(j.package || '') + ' · ' + esc(j.address || '') + '<br>The customer is picking one of your times. Decided by ' + esc(clockLabel(j.counter_expires_at)) + '.</div></div>';
+  }
+  function clockLabel(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' });
   }
 
   function upcomingCard(j) {
@@ -626,23 +767,57 @@
       btn.disabled = true; btn.textContent = 'Accepting…';
       try {
         const r = await rpc('portal_accept', { p_offer_id: id, p_option: selectedOption(job) });
-        notifyCustomer(job.booking_id);
-        toast('Job accepted: ' + dayLabel((job.options[selectedOption(job)] || {}).date_iso) + ' · ' + shortTime(r.time) + ' · ' + money(r.payout));
+        const label = dayLabel((job.options[selectedOption(job)] || {}).date_iso) + ' · ' + shortTime(r.time);
+        if (r.held) {
+          toast('Holding ' + label + '. We\'ll let you know.');
+        } else {
+          notifyCustomer(job.booking_id);
+          toast('Job accepted: ' + label + ' · ' + money(r.payout));
+        }
         delete chosen[id];
         await load();
       } catch (err) {
         btn.disabled = false;
-        btn.textContent = 'Accept';
-        cardErr(card, err.message);
+        render();
+        cardErr(document.querySelector('.card[data-id="' + CSS.escape(id) + '"]') || card, err.message);
         if (/no longer open|already took|expired/i.test(err.message)) setTimeout(load, 1800);
       }
       return;
     }
 
     if (e.target.closest('[data-decline]')) {
-      if (!confirm('Decline this job?')) return;
-      try { await rpc('portal_decline', { p_offer_id: id }); toast('Declined'); await load(); }
-      catch (err) { cardErr(card, err.message); }
+      if (job.mode === 'next') {
+        if (!confirm('Pass on this job?')) return;
+        try { await rpc('portal_decline', { p_offer_id: id }); toast('Passed'); await load(); }
+        catch (err) { cardErr(card, err.message); }
+        return;
+      }
+      counterOpen[id] = true; counterPicks[id] = counterPicks[id] || [];
+      render();
+      if (!takenSlots) { try { await loadTaken(); } catch (x) { takenSlots = new Set(); } render(); }
+      return;
+    }
+    if (e.target.closest('[data-counter-cancel]')) { delete counterOpen[id]; render(); return; }
+    const cs = e.target.closest('[data-cslot]');
+    if (cs) {
+      const key = cs.dataset.cslot, list = counterPicks[id] || (counterPicks[id] = []);
+      const at = list.indexOf(key);
+      if (at >= 0) list.splice(at, 1);
+      else if (list.length < 2) list.push(key);
+      else { toast('Up to 2 times. Tap one to remove it.'); return; }
+      render();
+      return;
+    }
+    if (e.target.closest('[data-send-counter]') || e.target.closest('[data-decline-plain]')) {
+      const sending = !!e.target.closest('[data-send-counter]');
+      const counter = sending ? (counterPicks[id] || []).map(k => { const [d, t] = k.split('|'); return { date_iso: d, time: t }; }) : null;
+      if (!sending && !confirm('Decline without suggesting times?')) return;
+      try {
+        const r = await rpc('portal_decline', { p_offer_id: id, p_counter: counter });
+        delete counterOpen[id]; delete counterPicks[id];
+        toast(r.countered ? 'Sent. If no other pro can do the customer\'s times, they\'ll pick from yours.' : 'Declined');
+        await load();
+      } catch (err) { cardErr(card, err.message); }
       return;
     }
 

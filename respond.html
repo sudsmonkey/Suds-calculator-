@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suds Monkey — Pick Your Time</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Customer page for the network's counter times (see VENDOR-PORTAL.md).
+     Copy stays neutral about who does the job: "your Suds Monkey pro". */
+  :root {
+    --orange: #F56E64;
+    --orangeborder: #F0A9A5;
+    --dark: #A6382E;
+    --mint: #9ED9C0;
+    --mintdeep: #2A7A5A;
+    --cream: #FDF9F5;
+    --mid: #7C7268;
+    --white: #FFFFFF;
+    --border: #E8DDD6;
+    --radius: 20px;
+    --shadow: 0 2px 16px rgba(245,110,100,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--dark); min-height: 100vh; }
+  .top { background: var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.08); padding: 14px 16px; text-align: center; }
+  .brand { font-family: 'Anton', sans-serif; font-style: italic; text-transform: uppercase; color: var(--orange); font-size: 20px; letter-spacing: 0.04em; line-height: 1; }
+  .brand small { display: block; font-family: 'Nunito', sans-serif; font-style: normal; font-weight: 900; font-size: 8px; letter-spacing: 0.22em; margin-top: 3px; }
+  main { max-width: 460px; margin: 0 auto; padding: 22px 16px 48px; }
+  .card { background: var(--white); border: 1.5px solid var(--orangeborder); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 18px; }
+  h1 { font-family: 'Nunito', sans-serif; font-size: 23px; font-weight: 900; color: var(--dark); line-height: 1.2; margin-bottom: 8px; }
+  p { font-size: 14px; color: var(--mid); line-height: 1.55; }
+  .was { margin: 14px 0 4px; font-size: 13px; color: var(--mid); }
+  .was s { color: #B8ABA0; }
+  .label { font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin: 18px 0 8px; }
+  .opts { display: flex; flex-direction: column; gap: 8px; }
+  .opt { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; width: 100%; text-align: left; background: var(--white); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; font-family: 'Nunito', sans-serif; }
+  .opt .radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--orangeborder); }
+  .opt .when { font-size: 17px; font-weight: 900; color: var(--dark); }
+  .opt .price { font-size: 17px; font-weight: 900; color: var(--dark); }
+  .opt .tag { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 50px; padding: 2px 7px; background: var(--mint); color: #1F5C46; vertical-align: 2px; }
+  .opt.sel { border-color: var(--orange); background: #FDF0EF; }
+  .opt.sel .radio { border-color: var(--orange); background: radial-gradient(circle, var(--orange) 45%, transparent 50%); }
+  .btn { display: block; width: 100%; margin-top: 18px; padding: 16px; border: none; border-radius: 50px; background: var(--orange); color: #fff; font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 900; cursor: pointer; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .link { display: block; margin: 12px auto 0; background: none; border: none; color: var(--mid); font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; text-decoration: underline; cursor: pointer; padding: 6px; }
+  .deadline { margin-top: 14px; font-size: 13px; color: var(--mid); text-align: center; }
+  .err { display: none; margin-top: 12px; background: #FDF0EF; border-radius: 10px; padding: 9px 11px; font-size: 13px; color: var(--dark); }
+  .err.show { display: block; }
+  .center { text-align: center; }
+  .check { width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 50%; background: var(--mint); color: var(--mintdeep); font-size: 28px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+  .summary { margin: 16px auto 0; max-width: 300px; text-align: left; }
+  .summary div { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F5EDE4; font-size: 14px; }
+  .summary div:last-child { border-bottom: none; }
+  .summary span { color: var(--mid); }
+  .summary b { color: var(--dark); }
+  a { color: var(--orange); font-weight: 700; }
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">Suds Monkey<small>WINDOW CLEANING</small></div></header>
+<main>
+  <div class="card" id="loadingView"><p class="center">Loading your times…</p></div>
+
+  <div class="card" id="chooseView" hidden>
+    <h1>Your times are taken, but we can do these</h1>
+    <p id="chooseIntro">Your Suds Monkey pro can't make the times you picked. Pick whichever of these works for you.</p>
+    <div class="was" id="wasLine"></div>
+    <div class="label">Pick one</div>
+    <div class="opts" id="opts"></div>
+    <button class="btn" id="confirmPick" disabled>Pick a time above</button>
+    <div class="err" id="err"></div>
+    <button class="link" id="neither">Neither works for me</button>
+    <div class="deadline" id="deadline"></div>
+  </div>
+
+  <div class="card center" id="doneView" hidden>
+    <div class="check" aria-hidden="true">✓</div>
+    <h1>You're all set</h1>
+    <p>Your Suds Monkey pro is set for <b id="doneWhen"></b>. We'll send a confirmation to your email.</p>
+    <div class="summary" id="doneSummary"></div>
+  </div>
+
+  <div class="card center" id="callView" hidden>
+    <h1>We'll be in touch</h1>
+    <p>No problem. We'll call or text you to find a time that works. You can also reach us at <a href="tel:4058822277">(405) 882-2277</a>.</p>
+  </div>
+
+  <div class="card center" id="errView" hidden>
+    <h1 id="errTitle">This link isn't working</h1>
+    <p id="errText">Call or text us at <a href="tel:4058822277">(405) 882-2277</a> and we'll get you scheduled.</p>
+  </div>
+</main>
+
+<script>
+  const SUPABASE_URL = 'https://ykjkcegpwiqhpfcgkwro.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
+  const token = new URLSearchParams(location.search).get('t') || '';
+  const $ = id => document.getElementById(id);
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  let data = null, sel = null;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function dayLabel(iso) {
+    const [y, m, d] = String(iso || '').slice(0, 10).split('-').map(Number);
+    if (!y) return '';
+    const dt = new Date(y, m - 1, d);
+    return DOW[dt.getDay()] + ', ' + MONTHS[m - 1].slice(0, 3) + ' ' + d;
+  }
+  const shortTime = t => String(t || '').replace(':00', '');
+  function clockLabel(iso) {
+    return new Date(iso).toLocaleString('en-US', { weekday: 'long', hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' });
+  }
+  function show(id) { ['loadingView', 'chooseView', 'doneView', 'callView', 'errView'].forEach(v => { $(v).hidden = v !== id; }); }
+
+  async function rpc(fn, args) {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY },
+      body: JSON.stringify(Object.assign({ p_token: token }, args || {}))
+    });
+    const body = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((body && body.message) || 'Something went wrong.');
+    return body;
+  }
+
+  function showDone(date_iso, time, total) {
+    $('doneWhen').textContent = dayLabel(date_iso) + ' at ' + shortTime(time);
+    $('doneSummary').innerHTML =
+      '<div><span>Date</span><b>' + esc(dayLabel(date_iso)) + '</b></div>' +
+      '<div><span>Time</span><b>' + esc(time) + '</b></div>' +
+      (data && data.package ? '<div><span>Package</span><b>' + esc(data.package) + '</b></div>' : '') +
+      (total ? '<div><span>Total</span><b>' + esc(total) + '</b></div>' : '');
+    show('doneView');
+  }
+
+  function renderChoose() {
+    const opts = data.options || [];
+    const picked = data.picked || [];
+    $('chooseIntro').textContent = (data.first_name ? 'Hi ' + data.first_name + ', y' : 'Y') +
+      'our Suds Monkey pro can\'t make the times you picked. Pick whichever of these works for you.';
+    $('wasLine').innerHTML = picked.length ? 'You asked for: ' + picked.map(p => '<s>' + esc(dayLabel(p.date_iso)) + ' ' + esc(shortTime(p.time)) + '</s>').join(', ') : '';
+    $('opts').innerHTML = opts.map((o, i) =>
+      '<button type="button" class="opt' + (sel === i ? ' sel' : '') + '" data-pick="' + i + '" aria-pressed="' + (sel === i) + '">' +
+        '<span class="radio"></span>' +
+        '<span class="when">' + esc(dayLabel(o.date_iso)) + ' · ' + esc(shortTime(o.time)) + '</span>' +
+        '<span class="price">' + (o.price != null ? '$' + esc(o.price) : '') +
+          (o.price != null && data.base_price != null && o.price < data.base_price ? '<span class="tag">Save</span>' : '') + '</span>' +
+      '</button>').join('');
+    const s = opts[sel];
+    $('confirmPick').disabled = !s;
+    $('confirmPick').textContent = s ? 'Book ' + dayLabel(s.date_iso) + ' · ' + shortTime(s.time) : 'Pick a time above';
+    $('deadline').textContent = data.expires_at ? 'Please pick by ' + clockLabel(data.expires_at) + '.' : '';
+  }
+
+  async function load() {
+    if (token.length < 32) { show('errView'); return; }
+    try {
+      data = await rpc('customer_counter');
+    } catch (e) {
+      show('errView'); return;
+    }
+    // base_price = package + add-ons before Save; a lower option price is a Save day.
+    data.base_price = data.base_price == null ? null : Number(data.base_price);
+    if (data.status === 'countered') { renderChoose(); show('chooseView'); return; }
+    if (data.status === 'accepted' && data.booked) { showDone(data.booked.date_iso, data.booked.time, data.booked.total); return; }
+    $('errTitle').textContent = 'These times have expired';
+    $('errText').innerHTML = 'No worries. Call or text us at <a href="tel:4058822277">(405) 882-2277</a> and we\'ll find a time that works.';
+    show('errView');
+  }
+
+  document.addEventListener('click', async e => {
+    const opt = e.target.closest('[data-pick]');
+    if (opt) { sel = Number(opt.dataset.pick); renderChoose(); return; }
+    if (e.target.closest('#confirmPick')) {
+      const btn = $('confirmPick'); btn.disabled = true; btn.textContent = 'Booking…';
+      $('err').classList.remove('show');
+      try {
+        const r = await rpc('customer_pick', { p_option: sel });
+        const o = data.options[sel];
+        showDone(o.date_iso, o.time, r.total);
+      } catch (x) {
+        $('err').textContent = x.message; $('err').classList.add('show');
+        btn.disabled = false; renderChoose();
+      }
+      return;
+    }
+    if (e.target.closest('#neither')) {
+      if (!confirm('Neither time works? We\'ll call or text you to sort it out.')) return;
+      try { await rpc('customer_decline_counter'); show('callView'); }
+      catch (x) { $('err').textContent = x.message; $('err').classList.add('show'); }
+    }
+  });
+
+  load();
+</script>
+</body>
+</html>

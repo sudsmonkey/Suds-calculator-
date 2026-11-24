@@ -197,6 +197,126 @@ async function sendEmail(to: string, subject: string, html: string) {
   return res.ok;
 }
 
+
+// ── Network alerts (sent by the database through pg_net; see section 12 of
+// supabase/vendor-portal.sql). Each one re-checks the row and flips a
+// "sent" flag first, so a direct POST can't repeat or fake them.
+const SITE_URL = "https://sudsmonkey.github.io/Suds-calculator-";
+
+function clockText(iso: unknown) {
+  const d = new Date(String(iso ?? ""));
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit", timeZone: "America/Chicago" });
+}
+function cityOf(address: unknown) {
+  // "2100 NW 23rd St, Oklahoma City, OK 73107" -> "Oklahoma City"
+  const parts = String(address ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+  return parts.length >= 3 ? parts[parts.length - 2] : parts[parts.length - 1] ?? "";
+}
+function button(href: string, label: string) {
+  return `<p style="margin:18px 0;"><a href="${href}" style="background:#F56E64;color:#fff;text-decoration:none;font-weight:800;padding:12px 20px;border-radius:50px;display:inline-block;">${escapeHtml(label)}</a></p>`;
+}
+
+// To a pro: it's your turn on a job.
+function offerProEmail(b: Record<string, unknown>, o: Record<string, unknown>, pro: Record<string, unknown>) {
+  const allowed = (o.allowed_options as number[] | null) ?? [0, 1, 2];
+  const opts = (Array.isArray(b.pick_options) ? b.pick_options : []) as PickOption[];
+  const rate = Number(pro.payout_rate ?? 0);
+  const labels = ["Preferred", "Alt 1", "Alt 2"];
+  const timeRows = opts.map((x, i) => {
+    if (!allowed.includes(i)) return "";
+    const rush = Number((x as Record<string, unknown>).rush ?? 0);
+    const pay = Math.round(((Number(x.price ?? 0) - rush) * rate + rush * 0.9) * 100) / 100;
+    return row(labels[i], `${shortDay(x.date_iso)} ${String(x.time ?? "").replace(":00", "")} · you earn $${pay}`);
+  }).join("");
+  const table = `<table style="border-collapse:collapse;width:100%;">
+    ${row("Package", b.package)}
+    ${row("Area", cityOf(b.address))}
+    ${timeRows}
+    ${row("Answer by", clockText(o.expires_at))}
+  </table>`;
+  const link = `${SITE_URL}/portal.html?code=${encodeURIComponent(String(pro.access_code ?? ""))}`;
+  return {
+    subject: `New Suds Monkey job: answer by ${clockText(o.expires_at)}`,
+    html: wrapEmail("New job offer", `${table}${button(link, "Open the pro portal")}<p style="font-size:12px;color:#7C7268;">If you don't answer in time, the job goes to the next pro.</p>`),
+  };
+}
+
+// To a pro: their held alternate or counter time came through.
+function wonProEmail(b: Record<string, unknown>, pro: Record<string, unknown>) {
+  const when = `${longWeekday(b.date_iso)} ${String(b.time ?? "").replace(":00", "")}`.trim();
+  const link = `${SITE_URL}/portal.html?code=${encodeURIComponent(String(pro.access_code ?? ""))}`;
+  return {
+    subject: `You got the job: ${when}`,
+    html: wrapEmail(`You got the job: ${when}`, `<table style="border-collapse:collapse;width:100%;">
+      ${row("Date", shortDay(b.date_iso))}${row("Time", b.time)}${row("Package", b.package)}${row("Address", b.address)}
+    </table>${button(link, "See it in the pro portal")}`),
+  };
+}
+
+// To the customer: none of their times worked; pick one of these.
+function counterCustomerEmail(b: Record<string, unknown>) {
+  const opts = (Array.isArray(b.counter_options) ? b.counter_options : []) as PickOption[];
+  const link = `${SITE_URL}/respond.html?t=${encodeURIComponent(String(b.customer_token ?? ""))}`;
+  const table = `<table style="border-collapse:collapse;width:100%;">
+    ${opts.map((x, i) => row(`Option ${i + 1}`, `${shortDay(x.date_iso)} at ${x.time ?? ""}${x.price != null ? ` ($${x.price})` : ""}`)).join("")}
+  </table>`;
+  return {
+    subject: "Your Suds Monkey times: please pick one",
+    html: wrapEmail(
+      "Your times are taken, but we can do these",
+      `<p style="font-size:14px;color:#3d3530;">Hi ${escapeHtml(b.first_name ?? "")}, your Suds Monkey pro can't make the times you picked, but can come at one of these:</p>${table}${button(link, "Pick a time")}<p style="font-size:13px;color:#7C7268;">Please pick by ${escapeHtml(clockText(b.counter_expires_at))}. Neither works? Call or text us at ${PHONE_DISPLAY}.</p>`,
+    ),
+  };
+}
+
+async function networkAlert(type: string, payload: Record<string, unknown>) {
+  const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  const done = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), { status, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } });
+
+  if (type === "offer" || type === "won") {
+    const { data: o } = await sb.from("job_offers").select("*").eq("id", payload.offer_id as string).maybeSingle();
+    if (!o) return done({ error: "not found" }, 404);
+    if (type === "offer" && (o.status !== "offered" || o.notified_at)) return done({ error: "nothing to send" }, 409);
+    if (type === "won" && (o.status !== "accepted" || o.won_notified)) return done({ error: "nothing to send" }, 409);
+    const claim = type === "offer"
+      ? await sb.from("job_offers").update({ notified_at: new Date().toISOString() }).eq("id", o.id).is("notified_at", null).select("id")
+      : await sb.from("job_offers").update({ won_notified: true }).eq("id", o.id).eq("won_notified", false).select("id");
+    if (!claim.data || claim.data.length === 0) return done({ error: "already sent" }, 409);
+    const [{ data: b }, { data: pro }] = await Promise.all([
+      sb.from("bookings").select("*").eq("id", o.booking_id).maybeSingle(),
+      sb.from("contractors").select("*").eq("id", o.contractor_id).maybeSingle(),
+    ]);
+    if (!b || !pro?.email) return done({ ok: true, sent: false });
+    const msg = type === "offer" ? offerProEmail(b, o, pro) : wonProEmail(b, pro);
+    return done({ ok: true, sent: await sendEmail(pro.email, msg.subject, msg.html) });
+  }
+
+  if (type === "counter" || type === "no_pro") {
+    const flag = type === "counter" ? "counter_notified" : "no_pro_notified";
+    const want = type === "counter" ? "countered" : "no_pro";
+    const { data: claimed } = await sb.from("bookings").update({ [flag]: true })
+      .eq("id", payload.booking_id as string).eq("status", want).eq(flag, false).select("*");
+    const b = claimed?.[0];
+    if (!b) return done({ error: "nothing to send" }, 409);
+    if (type === "counter") {
+      const msg = counterCustomerEmail(b);
+      const ok = b.email ? await sendEmail(b.email, msg.subject, msg.html) : false;
+      await sendEmail(COMPANY_EMAIL, `Counter times sent to ${b.first_name ?? ""} ${b.last_name ?? ""}`.trim(), msg.html);
+      return done({ ok: true, customerSent: ok });
+    }
+    const table = `<table style="border-collapse:collapse;width:100%;">
+      ${row("Name", `${b.first_name ?? ""} ${b.last_name ?? ""}`.trim())}${row("Phone", b.phone)}${row("Email", b.email)}
+      ${row("Package", b.package)}${row("Address", b.address)}${pickRows(b)}
+    </table>`;
+    await sendEmail(COMPANY_EMAIL, `No pro for ${b.first_name ?? ""} ${b.last_name ?? ""}: follow up`.trim(),
+      wrapEmail("No pro took this job", `<p style="font-size:14px;color:#3d3530;">Nobody could take the customer's times, or the customer didn't pick a counter time. Please call them.</p>${table}`));
+    return done({ ok: true });
+  }
+  return done({ error: "unknown type" }, 400);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
   if (req.method !== "POST") {
@@ -214,6 +334,10 @@ Deno.serve(async (req) => {
   // "Your Suds Monkey pro is set for <day> <time>" -- only for a booking a pro
   // really accepted, and only once (accepted_notified), so a direct POST
   // can't be used to spam.
+  if (["offer", "won", "counter", "no_pro"].includes(String(payload.type))) {
+    return networkAlert(String(payload.type), payload);
+  }
+
   if (payload.type === "accepted") {
     const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { data: b, error: bErr } = await sb
