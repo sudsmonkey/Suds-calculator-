@@ -107,10 +107,15 @@
     border-bottom: 1.5px solid var(--border);
     background: var(--white);
     position: sticky; top: var(--topBarH, 62px); z-index: 205;
+    /* Six tabs don't fit a phone's width: scroll sideways instead of
+       wrapping labels onto two lines. */
+    overflow-x: auto; scrollbar-width: none;
   }
+  .tabs::-webkit-scrollbar { display: none; }
   .tab {
-    flex: 1;
-    padding: 14px 12px;
+    flex: 1 0 auto;
+    white-space: nowrap;
+    padding: 14px 14px;
     text-align: center;
     font-size: 13px;
     font-weight: 900;
@@ -488,6 +493,29 @@
   .pro-rank span { font-size: 13px; font-weight: 900; color: var(--orange); margin-right: auto; }
   .pro-rank button { width: 34px; height: 30px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--white); color: var(--ink); font-size: 15px; font-weight: 900; cursor: pointer; }
   .pro-rank button:disabled { opacity: 0.3; cursor: not-allowed; }
+  /* ── Funnel ── */
+  .funnel-filters { display: flex; gap: 8px; margin-bottom: 14px; }
+  .funnel-filters select { flex: 1; min-width: 0; border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 10px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; color: var(--ink); background: var(--white); }
+  .funnel-head { font-size: 15px; color: var(--ink); margin-bottom: 8px; }
+  .funnel-head b { font-weight: 900; }
+  .funnel-callout { font-size: 13px; color: var(--ink); background: var(--light); border-radius: 12px; padding: 10px 12px; margin-bottom: 14px; line-height: 1.45; }
+  .funnel { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 6px 14px; }
+  .funnel-row { padding: 10px 0; border-top: 1px solid var(--border); }
+  .funnel-row:first-child { border-top: none; }
+  .funnel-label { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+  .funnel-label b { font-weight: 900; font-variant-numeric: tabular-nums; }
+  .funnel-track { height: 10px; }
+  .funnel-bar { height: 10px; border-radius: 0 4px 4px 0; background: var(--orange); }
+  .funnel-sub { font-size: 11px; color: var(--mid); margin-top: 4px; min-height: 13px; font-variant-numeric: tabular-nums; }
+  .funnel-flag { display: inline-block; font-size: 10px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink); border: 1.5px solid var(--ink); border-radius: 50px; padding: 0 6px; margin-right: 4px; }
+  .funnel-row.worst .funnel-label span { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .funnel-qs { margin: 8px 0 0 10px; padding-left: 10px; border-left: 2px solid var(--border); }
+  .funnel-qs div { display: flex; justify-content: space-between; font-size: 12px; color: var(--mid); padding: 2px 0; text-transform: capitalize; }
+  .funnel-qs b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .game-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .game-tile { background: var(--white); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px; }
+  .game-tile b { display: block; font-size: 22px; font-weight: 900; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .game-tile span { font-size: 12px; color: var(--mid); font-weight: 700; }
   .pros-forget { display: block; margin: 18px auto 0; background: none; border: none; color: var(--mid); font-size: 12px; font-weight: 700; text-decoration: underline; cursor: pointer; font-family: inherit; }
 
   .status-msg { font-size: 12px; font-weight: 700; margin-top: 8px; }
@@ -537,6 +565,7 @@
     <div class="tab" onclick="switchTab('reviews')">Reviews</div>
     <div class="tab" onclick="switchTab('ticker')">Ticker</div>
     <div class="tab" onclick="switchTab('pros')">Pros<span class="pros-badge" id="prosBadge" hidden></span></div>
+    <div class="tab" onclick="switchTab('funnel')">Funnel</div>
   </div>
 
   <!-- Block Slots panel -->
@@ -719,6 +748,25 @@
     <div id="tickerSync"></div>
   </div>
 
+  <!-- Funnel panel (supabase/funnel.sql; see FUNNEL.md) -->
+  <div class="panel" id="panelFunnel">
+    <div class="funnel-filters">
+      <select id="funnelDays" onchange="loadFunnel()" aria-label="Date range">
+        <option value="7">Last 7 days</option>
+        <option value="30" selected>Last 30 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="365">Last year</option>
+      </select>
+      <select id="funnelSegment" onchange="loadFunnel()" aria-label="Flow">
+        <option value="residential" selected>Residential</option>
+        <option value="commercial">Commercial</option>
+        <option value="all">All visits</option>
+      </select>
+    </div>
+    <div id="funnelBody"></div>
+    <div class="pros-help" style="margin-top:14px;">Counts are visits (anonymous, one per browser tab session). Devices signed in to admin aren't counted.</div>
+  </div>
+
   <!-- Pros panel (Suds Monkey Network contractors; see VENDOR-PORTAL.md) -->
   <div class="panel" id="panelPros">
     <div id="prosKeyCard" class="range-card" hidden>
@@ -842,10 +890,10 @@
   }
 
   // ── Tabs ────────────────────────────────
-  const PANEL_MAP = { block: 'panelBlock', bookings: 'panelBookings', reviews: 'panelReviews', ticker: 'panelTicker', pros: 'panelPros' };
+  const PANEL_MAP = { block: 'panelBlock', bookings: 'panelBookings', reviews: 'panelReviews', ticker: 'panelTicker', pros: 'panelPros', funnel: 'panelFunnel' };
 
   function switchTab(name) {
-    const tabNames = ['block', 'bookings', 'reviews', 'ticker', 'pros'];
+    const tabNames = ['block', 'bookings', 'reviews', 'ticker', 'pros', 'funnel'];
     document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', tabNames[i] === name));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.getElementById(PANEL_MAP[name]).classList.add('active');
@@ -853,6 +901,88 @@
     if (name === 'reviews') initReviewsPanel();
     if (name === 'ticker') loadTickerJobs();
     if (name === 'pros') initProsPanel();
+    if (name === 'funnel') loadFunnel();
+  }
+
+  // ── Funnel (supabase/funnel.sql; see FUNNEL.md) ─────────────────────────
+  // Sessions that reached each step of the booking flow, the step with the
+  // biggest drop-off, and Squeege Master 3000 stats. Reading the events
+  // needs the network admin key (entered once in the Pros tab).
+  async function loadFunnel() {
+    const wrap = document.getElementById('funnelBody');
+    if (!prosKey()) {
+      wrap.innerHTML = '<div class="pros-empty">Enter your network admin key in the Pros tab first.</div>';
+      return;
+    }
+    wrap.innerHTML = '<div class="pros-empty">Loading…</div>';
+    let r;
+    try {
+      r = await prosRpc('admin_funnel', {
+        p_days: Number(document.getElementById('funnelDays').value),
+        p_segment: document.getElementById('funnelSegment').value
+      });
+    } catch (e) {
+      wrap.innerHTML = '<div class="pros-empty">' + escHtml(/admin_funnel|function/i.test(e.message)
+        ? 'Run supabase/funnel.sql in Supabase first.' : 'Couldn\'t load the funnel: ' + e.message) + '</div>';
+      return;
+    }
+    const steps = r.steps || [];
+    const top = steps.length ? Number(steps[0].sessions) : 0;
+    if (!top) {
+      wrap.innerHTML = '<div class="pros-empty">No visits in this range yet.</div>' + gameCard(r.game);
+      return;
+    }
+    // Biggest drop-off: the step that loses the largest share of the
+    // sessions that reached the step before it.
+    let worst = -1, worstLoss = 0;
+    steps.forEach((st, i) => {
+      if (!i) return;
+      const prev = Number(steps[i - 1].sessions), cur = Number(st.sessions);
+      const loss = prev > 0 ? (prev - cur) / prev : 0;
+      if (prev > 0 && loss > worstLoss) { worstLoss = loss; worst = i; }
+    });
+    const last = steps[steps.length - 1];
+    const pct = (a, b) => b > 0 ? Math.round(a / b * 100) : 0;
+    let html = '<div class="funnel-head"><b>' + top.toLocaleString() + '</b> visit' + (top === 1 ? '' : 's') +
+      ' · <b>' + Number(last.sessions).toLocaleString() + '</b> booked (' + pct(Number(last.sessions), top) + '%)</div>';
+    if (worst > 0) {
+      html += '<div class="funnel-callout">Biggest drop-off: <b>' + escHtml(steps[worst - 1].label) + '</b> → <b>' +
+        escHtml(steps[worst].label) + '</b>. ' + Math.round(worstLoss * 100) + '% of visits stop here.</div>';
+    }
+    html += '<div class="funnel">' + steps.map((st, i) => {
+      const n = Number(st.sessions);
+      const prev = i ? Number(steps[i - 1].sessions) : n;
+      const kept = i ? pct(n, prev) + '% of previous' : '';
+      const w = Math.max(n > 0 ? 1.5 : 0, n / top * 100);
+      const isWorst = i === worst;
+      const title = st.label + ': ' + n + ' session' + (n === 1 ? '' : 's') + (i ? ' (' + pct(n, prev) + '% of previous, ' + pct(n, top) + '% of all)' : '');
+      let row = '<div class="funnel-row' + (isWorst ? ' worst' : '') + '" title="' + escHtml(title) + '">' +
+        '<div class="funnel-label"><span>' + escHtml(st.label) + '</span><b>' + n.toLocaleString() + '</b></div>' +
+        '<div class="funnel-track"><div class="funnel-bar" style="width:' + w.toFixed(1) + '%"></div></div>' +
+        '<div class="funnel-sub">' + (isWorst ? '<span class="funnel-flag">Biggest drop</span> ' : '') + escHtml(kept) + '</div>';
+      if (st.event === 'wizard_answer' && (r.questions || []).length) {
+        row += '<div class="funnel-qs">' + r.questions.map(q =>
+          '<div><span>' + escHtml(String(q.question).replace(/_/g, ' ')) + '</span><b>' + Number(q.sessions).toLocaleString() + '</b></div>').join('') + '</div>';
+      }
+      return row + '</div>';
+    }).join('') + '</div>';
+    wrap.innerHTML = html + gameCard(r.game);
+  }
+
+  function gameCard(g) {
+    if (!g || !Number(g.games)) return '<div class="section-label">Squeege Master 3000</div><div class="pros-empty">No games played in this range.</div>';
+    const n = Number(g.games);
+    const share = x => Math.round(Number(x || 0) / n * 100) + '%';
+    const secs = Number(g.avg_seconds || 0);
+    const playTime = g.avg_seconds == null ? '—' : secs >= 60 ? Math.floor(secs / 60) + 'm ' + (secs % 60) + 's' : secs + 's';
+    const tile = (v, l) => '<div class="game-tile"><b>' + v + '</b><span>' + l + '</span></div>';
+    return '<div class="section-label">Squeege Master 3000</div><div class="game-tiles">' +
+      tile(n.toLocaleString(), 'games started') +
+      tile(playTime, 'average play time') +
+      tile(share(g.finished_window), 'finished a window') +
+      tile(share(g.started_booking), 'went on to a quote') +
+      tile(share(g.booked), 'went on to book') +
+      '</div>';
   }
 
   // ── Pros (Suds Monkey Network contractors) ──────────────────────────────

@@ -39,6 +39,11 @@ Read it before changing `ADMIN_PASSWORD` or the Google Maps API key.
 and what's not built yet. Read it before touching bookings' `status` /
 `pick_options`, `job_offers`, `contractors`, or the `portal_*` functions.
 
+`FUNNEL.md` documents the in-house funnel tracking (`supabase/funnel.sql`,
+the inline `smTrack` snippet before `</head>` on index, calculator, consult,
+calendar and game, and admin's Funnel tab). Read it before adding or renaming
+a tracked step; event names are checked by the table.
+
 `STORM-FLOW-NOTES.md` holds a parked, not-yet-reproduced report about the
 storm-windows question in `calculator.html`'s residential wizard (jumping
 straight to the Storm Package skips the sq-ft slider) — what's verified so

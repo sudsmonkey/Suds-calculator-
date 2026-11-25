@@ -708,6 +708,49 @@
   }
 }
 </style>
+<script>
+  // Funnel tracking (see FUNNEL.md). One row per step in Supabase
+  // funnel_events: an anonymous per-visit id (this tab's sessionStorage), the
+  // step, a short detail, and a timestamp. No personal info. Skipped on
+  // devices signed in to admin.html so testing doesn't skew the numbers.
+  (function () {
+    var URL = 'https://ykjkcegpwiqhpfcgkwro.supabase.co/rest/v1/funnel_events';
+    var KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
+    var off = false, sid = null;
+    try { off = localStorage.getItem('suds_admin') === '1' || sessionStorage.getItem('suds_admin') === '1'; } catch (e) {}
+    function newId() {
+      return (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+    }
+    try {
+      sid = sessionStorage.getItem('sm_sid');
+      if (!sid) { sid = newId(); sessionStorage.setItem('sm_sid', sid); }
+    } catch (e) { sid = newId(); }
+    var page = (location.pathname.split('/').pop() || 'index.html').slice(0, 40);
+    window.smTrack = function (event, detail, value) {
+      if (off) return;
+      try {
+        fetch(URL, {
+          method: 'POST', keepalive: true,
+          headers: { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ session_id: sid, event: event, page: page,
+            detail: detail == null ? null : String(detail).slice(0, 80),
+            value: typeof value === 'number' && isFinite(value) ? value : null })
+        }).catch(function () {});
+      } catch (e) {}
+    };
+    // Once per visit (per event + detail).
+    window.smTrackOnce = function (event, detail, value) {
+      var k = 'sm_once_' + event + (detail == null ? '' : ':' + detail);
+      try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1'); } catch (e) {}
+      window.smTrack(event, detail, value);
+    };
+    // First page of the visit only (the game also loads inside the homepage).
+    try {
+      if (!sessionStorage.getItem('sm_landed')) { sessionStorage.setItem('sm_landed', '1'); window.smTrack('landing', page); }
+    } catch (e) { window.smTrack('landing', page); }
+  })();
+</script>
 </head>
 <body>
 
@@ -1993,6 +2036,50 @@ let currentPkg = null;
     loadAvailability();
   })();
 
+
+  // ── Funnel tracking hooks (see FUNNEL.md) ─────────────────────────────
+  // Wraps the existing handlers instead of editing them: each answer is
+  // logged, then the original runs unchanged. The sq-ft slider gets a
+  // listener only; its card's markup is untouched.
+  (function () {
+    if (!window.smTrack) return;
+    smTrackOnce('segment', 'residential');
+    const QUESTIONS = {
+      selectStories: 'stories', selectScreens: 'screens', selectScreensLoc: 'screens_where',
+      selectFrenchPane: 'french_pane', selectFrenchPaneOther: 'french_pane_most',
+      selectStormQ: 'storm_windows_q', selectFreq: 'last_cleaned', selectHistoric: 'historic',
+      selectStormWindows: 'storm_windows', selectUncommonFeatures: 'unusual_windows'
+    };
+    Object.keys(QUESTIONS).forEach(function (fn) {
+      const orig = window[fn];
+      if (typeof orig !== 'function') return;
+      window[fn] = function (value) {
+        smTrack('wizard_answer', QUESTIONS[fn] + ':' + value);
+        return orig.apply(this, arguments);
+      };
+    });
+    const slider = document.getElementById('sqftSlider');
+    if (slider) slider.addEventListener('change', function () {
+      smTrack('wizard_answer', 'sqft:' + Math.round(Number(slider.value) / 500) * 500);
+    });
+    const origComplete = window.completeCalibration;
+    if (typeof origComplete === 'function') window.completeCalibration = function () {
+      smTrackOnce('price_shown', 'quote');
+      return origComplete.apply(this, arguments);
+    };
+    const origStorm = window.enterStormMode;
+    if (typeof origStorm === 'function') window.enterStormMode = function () {
+      smTrackOnce('price_shown', 'storm');
+      return origStorm.apply(this, arguments);
+    };
+    const origPkg = window.selectPkg;
+    if (typeof origPkg === 'function') window.selectPkg = function (pkg) {
+      const card = document.getElementById('pkg-' + pkg);
+      const btn = card && card.querySelector('.pkg-btn');
+      if (btn && !btn.classList.contains('selected')) smTrack('package_picked', pkg);
+      return origPkg.apply(this, arguments);
+    };
+  })();
 </script>
 
 

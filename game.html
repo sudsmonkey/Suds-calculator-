@@ -135,6 +135,49 @@ html, body {
     100% { transform: translateY(-460px) translateX(-6px); opacity: 0; }
   }
 </style>
+<script>
+  // Funnel tracking (see FUNNEL.md). One row per step in Supabase
+  // funnel_events: an anonymous per-visit id (this tab's sessionStorage), the
+  // step, a short detail, and a timestamp. No personal info. Skipped on
+  // devices signed in to admin.html so testing doesn't skew the numbers.
+  (function () {
+    var URL = 'https://ykjkcegpwiqhpfcgkwro.supabase.co/rest/v1/funnel_events';
+    var KEY = 'sb_publishable_wVwjixnqqbFjjJqH7f9nhA_qHGpE4md';
+    var off = false, sid = null;
+    try { off = localStorage.getItem('suds_admin') === '1' || sessionStorage.getItem('suds_admin') === '1'; } catch (e) {}
+    function newId() {
+      return (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+    }
+    try {
+      sid = sessionStorage.getItem('sm_sid');
+      if (!sid) { sid = newId(); sessionStorage.setItem('sm_sid', sid); }
+    } catch (e) { sid = newId(); }
+    var page = (location.pathname.split('/').pop() || 'index.html').slice(0, 40);
+    window.smTrack = function (event, detail, value) {
+      if (off) return;
+      try {
+        fetch(URL, {
+          method: 'POST', keepalive: true,
+          headers: { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ session_id: sid, event: event, page: page,
+            detail: detail == null ? null : String(detail).slice(0, 80),
+            value: typeof value === 'number' && isFinite(value) ? value : null })
+        }).catch(function () {});
+      } catch (e) {}
+    };
+    // Once per visit (per event + detail).
+    window.smTrackOnce = function (event, detail, value) {
+      var k = 'sm_once_' + event + (detail == null ? '' : ':' + detail);
+      try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1'); } catch (e) {}
+      window.smTrack(event, detail, value);
+    };
+    // First page of the visit only (the game also loads inside the homepage).
+    try {
+      if (!sessionStorage.getItem('sm_landed')) { sessionStorage.setItem('sm_landed', '1'); window.smTrack('landing', page); }
+    } catch (e) { window.smTrack('landing', page); }
+  })();
+</script>
 </head>
 <body>
   <section id="sq3000Section" style="display:block; width:100%; padding:0 0 12px;">
@@ -595,6 +638,7 @@ html, body {
       sy = GH;
       playChime();
       bananaCount += 3;
+      gameTrack.windowDone();
       document.getElementById('bananaCount').textContent = bananaCount;
 
       const totalStrokes = usefulStrokes + wastedStrokes;
@@ -1103,6 +1147,25 @@ html, body {
     toggleSound();
   });
 
+  // ── Funnel tracking (see FUNNEL.md) ─────────────────────────────────
+  // game_start: first tool picked. game_window_done: each finished window.
+  // game_end: seconds from start to the last touch, sent when the page is
+  // hidden or left (the admin report keeps the longest per visit).
+  const gameTrack = (function(){
+    let startedAt = null, lastActive = null, windows = 0;
+    const t = (e, d, v) => { if (window.smTrack) window.smTrack(e, d, v); };
+    function active(){ if (startedAt !== null) lastActive = performance.now(); }
+    function start(){ if (startedAt === null) { startedAt = lastActive = performance.now(); t('game_start'); } }
+    function end(){
+      if (startedAt === null) return;
+      t('game_end', null, Math.round((lastActive - startedAt) / 1000));
+    }
+    ['pointerdown', 'pointermove'].forEach(ev => document.addEventListener(ev, active, { passive: true }));
+    document.addEventListener('visibilitychange', () => { if (document.hidden) end(); });
+    window.addEventListener('pagehide', end);
+    return { start, windowDone(){ windows++; active(); t('game_window_done', null, windows); } };
+  })();
+
   function enableGameTouch(){
     glassCanvas.style.touchAction = 'none';
     toggleCanvas.style.touchAction = 'none';
@@ -1110,6 +1173,7 @@ html, body {
 
   document.getElementById('applicatorBtn').addEventListener('click', ()=>{
     if(windowComplete) return;
+    gameTrack.start();
     ensureAudio();
     currentTool = 'applicator';
     enableGameTouch();
@@ -1120,6 +1184,7 @@ html, body {
 
   document.getElementById('squeegeeBtn').addEventListener('click', ()=>{
     if(windowComplete) return;
+    gameTrack.start();
     ensureAudio();
     const firstSqueegeePick = currentTool !== 'squeegee';
     currentTool = 'squeegee';
